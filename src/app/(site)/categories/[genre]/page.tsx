@@ -1,0 +1,17 @@
+import BookCard from '@/components/BookCard'
+import { safeFetch, GENRE_BOOKS_QUERY } from '@/lib/queries'
+export const dynamic = 'force-dynamic'
+export default async function GenrePage({ params }: { params: Promise<{ genre: string }> }) {
+  const { genre } = await params
+  const g = decodeURIComponent(genre)
+  const books = await safeFetch<any[]>(GENRE_BOOKS_QUERY, { genre: g }, [])
+  return (
+    <div>
+      <h1 className="text-3xl font-black uppercase tracking-tight">{g}</h1>
+      <div className="mt-6 grid grid-cols-2 gap-5 sm:grid-cols-4 md:grid-cols-5">
+        {books.map((b) => <BookCard key={b._id} book={b} />)}
+        {!books.length && <p className="text-sm text-neutral-500">No books in this genre yet.</p>}
+      </div>
+    </div>
+  )
+}
