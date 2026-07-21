@@ -92,6 +92,47 @@ Probably never for most creators, and it needs the ownership model
 
 ---
 
+## Keeping dropdowns current
+
+The dropdowns above only stay cheap if their options stay current. How that
+happens depends on where the form lives, and the difference is large enough to
+influence which stage is worth building.
+
+**Google Forms cannot fetch their own options.** There is no API for a form to
+look up choices when someone opens it. Options are baked in until something
+rewrites them. So the pattern is a **scheduled Apps Script** that:
+
+1. queries Sanity for the current creators, organizations and genres,
+2. rewrites the relevant dropdown item's choices in place,
+3. leaves an "Other — tell us" option so a same-day addition is never a
+   dead end.
+
+Nightly is the right cadence. Not for load — the dataset is tiny and Sanity's
+API is quick — but because a sync that runs daily is one whose failure gets
+noticed daily. Options are then stale by at most a day, which the "Other"
+escape hatch already covers.
+
+**A form on ndriot.com does not need any of this.** It queries Sanity when the
+page renders, so options are always current and there is no sync to maintain or
+monitor. This is a real argument for reaching Stage 3 sooner rather than
+investing much in Stage 1 tooling.
+
+### Direction is the thing to get right
+
+The sync runs **Sanity → form, one way, always.** Sanity is canonical; the form
+is a mirror of it. The moment anything flows the other way — form edits writing
+back to Sanity records — there are two sources of truth and the principle at the
+top of this document is broken. Submissions are new drafts for review, never
+direct edits to existing documents.
+
+### What it does not solve
+
+A dropdown constrains *choice*, not *identity*. It stops someone inventing
+"Nash Illustrators Inc.", but the import still has to turn the selected label
+back into a document reference. Syncing the option list alongside its document
+ID — rather than the label alone — is what closes that gap, and is worth doing
+from the first sync rather than retrofitting.
+
 ## Separate forms per entity
 
 Yes — the cadences differ.
