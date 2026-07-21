@@ -19,8 +19,6 @@ export default async function CreatorsPage() {
       headingSize="lg"
       cards={creators.map(creatorToCard)}
       columns={4}
-      padding="none"
-      maxWidth="full"
       emptyMessage={settings.empty.creators}
     />
   )

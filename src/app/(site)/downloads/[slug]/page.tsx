@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation'
 
+import { Section } from '@/components/ui/section'
+
 import { Button } from '@/components/ui/button'
 import { safeFetch, DOWNLOAD_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
@@ -17,7 +19,7 @@ export default async function DownloadPage({ params }: { params: Promise<{ slug:
   if (!download) notFound()
 
   return (
-    <article className="space-y-5">
+    <Section as="article" padding="md" maxWidth="3xl" innerClassName="space-y-5">
       <h1 className="text-3xl font-black tracking-tighter uppercase">{download.title}</h1>
       {download.creatorName && (
         <p className="text-primary text-xs tracking-wide uppercase">{download.creatorName}</p>
@@ -32,6 +34,6 @@ export default async function DownloadPage({ params }: { params: Promise<{ slug:
           </a>
         </Button>
       )}
-    </article>
+    </Section>
   )
 }

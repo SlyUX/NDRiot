@@ -28,7 +28,7 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
 
   return (
     <div>
-      <Section as="header" padding="none" maxWidth="full">
+      <Section as="header" padding="md">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end">
           {creator.photo && (
             <div className="relative h-40 w-40 shrink-0 overflow-hidden">
@@ -78,7 +78,7 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
       </Section>
 
       {creator.bio && (
-        <Section padding="md" maxWidth="full">
+        <Section padding="md">
           <PortableTextBody value={creator.bio} />
         </Section>
       )}
@@ -90,13 +90,12 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
           cards={creator.books.map(bookToCard)}
           columns={4}
           padding="md"
-          maxWidth="full"
           emptyMessage={settings.empty.books}
         />
       )}
 
       {!!creator.organizations?.length && (
-        <Section padding="md" maxWidth="full">
+        <Section padding="md">
           <SectionHeading size="sm">{settings.sections.creatorOrganizationsHeading}</SectionHeading>
           <ul className="flex flex-wrap gap-3 text-sm">
             {creator.organizations.map((org) => (
@@ -120,7 +119,7 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
       )}
 
       {!!creator.favoriteCreators?.length && (
-        <Section padding="md" maxWidth="full">
+        <Section padding="md">
           <SectionHeading size="sm">{settings.sections.creatorFavoritesHeading}</SectionHeading>
           <ul className="flex flex-wrap gap-3 text-sm">
             {creator.favoriteCreators.map((favorite, index) => (

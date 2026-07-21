@@ -108,7 +108,15 @@ export function Hero({ hero, features }: HeroProps) {
   ]
 
   return (
-    <section className="relative isolate -mx-6 overflow-hidden px-6 py-12 sm:py-16">
+    // Hand-rolled rather than <Section>, and deliberately: the background
+    // layers must be siblings of the contained inner div, not inside it, so
+    // they can span the full bleed while the slides stay at max-w-6xl.
+    // Section puts every child inside its inner container. Same two-layer
+    // shape, same padding scale — just assembled here.
+    <section
+      data-slot="section"
+      className="relative isolate overflow-hidden px-6 py-12 sm:py-16"
+    >
       <Image
         src={hero.background ? urlFor(hero.background).width(2400).url() : BACKGROUND_FALLBACK}
         alt=""

@@ -1,9 +1,21 @@
 import Link from 'next/link'
 
 import { Logo } from '@/components/logo'
-
 import { getSiteSettings } from '@/lib/site-settings'
 
+/**
+ * Site chrome.
+ *
+ * `main` is full width and unpadded on purpose. Every landmark here follows
+ * the same two-layer shape the Section component uses — a full-bleed outer
+ * element carrying background, border and padding, wrapping a centred inner
+ * container that holds the width. That is what lets a section paint edge to
+ * edge while its contents stay aligned with everything else.
+ *
+ * Constraining `main` would undo that: pages would have to opt out of a
+ * container to draw a full-bleed background, which is what they were doing
+ * with negative margins before.
+ */
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const settings = await getSiteSettings()
 
@@ -33,9 +45,13 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
           </div>
         </nav>
       </header>
-      <main className="mx-auto max-w-6xl px-6 py-10">{children}</main>
-      <footer className="border-primary/40 text-muted-foreground border-t py-8 text-center text-xs tracking-widest uppercase">
-        {settings.footer}
+
+      <main>{children}</main>
+
+      <footer className="border-primary/40 border-t">
+        <div className="text-muted-foreground mx-auto max-w-6xl px-6 py-8 text-center text-xs tracking-widest uppercase">
+          {settings.footer}
+        </div>
       </footer>
     </>
   )

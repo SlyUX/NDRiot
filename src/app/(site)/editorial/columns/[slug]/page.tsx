@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation'
 
+import { Section } from '@/components/ui/section'
+
 import PortableTextBody from '@/components/PortableTextBody'
 import { formatDate } from '@/lib/card-mappers'
 import { safeFetch, COLUMN_QUERY } from '@/lib/queries'
@@ -16,7 +18,7 @@ export default async function ColumnPage({ params }: { params: Promise<{ slug: s
   const published = formatDate(column.publishedAt)
 
   return (
-    <article className="space-y-6">
+    <Section as="article" padding="md" maxWidth="3xl" innerClassName="space-y-6">
       <header>
         <h1 className="text-3xl font-black tracking-tighter uppercase">{column.title}</h1>
         {column.authorName && (
@@ -29,6 +31,6 @@ export default async function ColumnPage({ params }: { params: Promise<{ slug: s
         )}
       </header>
       <PortableTextBody value={column.body} />
-    </article>
+    </Section>
   )
 }

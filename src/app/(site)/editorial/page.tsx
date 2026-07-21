@@ -16,7 +16,7 @@ export default async function EditorialPage() {
 
   return (
     <div>
-      <Section as="header" padding="none" maxWidth="full">
+      <Section as="header" padding="md">
         <h1 className="text-3xl font-black tracking-tighter uppercase md:text-4xl">
           {settings.sections.editorialHeading}
         </h1>
@@ -30,7 +30,6 @@ export default async function EditorialPage() {
         aspectRatio="video"
         columns={2}
         padding="md"
-        maxWidth="full"
         emptyMessage={settings.empty.columns}
       />
 
@@ -42,7 +41,6 @@ export default async function EditorialPage() {
         aspectRatio="video"
         columns={2}
         padding="md"
-        maxWidth="full"
         emptyMessage={settings.empty.interviews}
       />
     </div>

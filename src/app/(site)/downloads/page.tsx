@@ -20,8 +20,6 @@ export default async function DownloadsPage() {
       cards={downloads.map(downloadToCard)}
       layout="horizontal"
       columns={2}
-      padding="none"
-      maxWidth="full"
       emptyMessage={settings.empty.downloads}
     />
   )

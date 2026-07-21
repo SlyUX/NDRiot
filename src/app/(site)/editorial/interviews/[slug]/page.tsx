@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation'
 
+import { Section } from '@/components/ui/section'
+
 import PortableTextBody from '@/components/PortableTextBody'
 import { formatDate } from '@/lib/card-mappers'
 import { safeFetch, INTERVIEW_QUERY } from '@/lib/queries'
@@ -16,7 +18,7 @@ export default async function InterviewPage({ params }: { params: Promise<{ slug
   const published = formatDate(interview.publishedAt)
 
   return (
-    <article className="space-y-6">
+    <Section as="article" padding="md" maxWidth="3xl" innerClassName="space-y-6">
       <header>
         <h1 className="text-3xl font-black tracking-tighter uppercase">{interview.title}</h1>
         {interview.interviewerName && interview.subjectName && (
@@ -31,6 +33,6 @@ export default async function InterviewPage({ params }: { params: Promise<{ slug
         )}
       </header>
       <PortableTextBody value={interview.body} />
-    </article>
+    </Section>
   )
 }

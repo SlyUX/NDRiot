@@ -19,8 +19,6 @@ export default async function BooksPage() {
       headingSize="lg"
       cards={books.map(bookToCard)}
       columns={4}
-      padding="none"
-      maxWidth="full"
       emptyMessage={settings.empty.books}
     />
   )

@@ -21,8 +21,6 @@ export default async function GenrePage({ params }: { params: Promise<{ genre: s
       headingSize="lg"
       cards={books.map(bookToCard)}
       columns={4}
-      padding="none"
-      maxWidth="full"
       emptyMessage={settings.empty.genreBooks}
     />
   )

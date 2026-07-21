@@ -62,7 +62,7 @@ export interface SectionProps
     VariantProps<typeof innerVariants> {
   children: ReactNode
   /** Render as a different element. Use `div` when already inside a <section>. */
-  as?: 'section' | 'div' | 'aside' | 'header' | 'footer'
+  as?: 'section' | 'div' | 'aside' | 'header' | 'footer' | 'article'
   /** Anchor target for in-page links. */
   id?: string
   /** Classes for the outer, full-bleed element. */

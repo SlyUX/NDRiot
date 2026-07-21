@@ -26,7 +26,7 @@ export default async function Home() {
       <Hero hero={settings.hero} features={features} />
 
       {genres.length > 0 && (
-        <Section padding="md" maxWidth="full">
+        <Section padding="md">
           <SectionHeading size="sm">{settings.home.genresHeading}</SectionHeading>
           <div className="flex flex-wrap gap-2">
             {genres.map((genre) => (
@@ -41,7 +41,6 @@ export default async function Home() {
         cards={books.slice(0, 8).map(bookToCard)}
         columns={4}
         padding="md"
-        maxWidth="full"
         viewAllHref="/books"
         viewAllLabel={settings.home.viewAllLabel}
         emptyMessage={settings.empty.books}
@@ -52,7 +51,6 @@ export default async function Home() {
         cards={creators.slice(0, 8).map(creatorToCard)}
         columns={4}
         padding="md"
-        maxWidth="full"
         viewAllHref="/creators"
         viewAllLabel={settings.home.viewAllLabel}
         emptyMessage={settings.empty.creators}

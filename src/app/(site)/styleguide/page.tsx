@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 
+import { Section } from '@/components/ui/section'
+
 import { Foundations } from './foundations'
 import { PreviewPanel } from './preview-panel'
 import { previews } from './previews'
@@ -20,7 +22,7 @@ const ORDER: ComponentCategory[] = ['primitives', 'composed']
 
 export default function StyleguidePage() {
   return (
-    <div className="space-y-12">
+    <Section padding="md" innerClassName="space-y-12">
       <header>
         <h1 className="text-4xl font-black tracking-tighter uppercase">Styleguide</h1>
         <p className="text-muted-foreground mt-2 max-w-2xl text-sm">
@@ -62,6 +64,6 @@ export default function StyleguidePage() {
           </div>
         )
       })}
-    </div>
+    </Section>
   )
 }

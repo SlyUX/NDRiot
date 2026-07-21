@@ -7,6 +7,7 @@ import PortableTextBody from '@/components/PortableTextBody'
 import { GenreBadge } from '@/components/genre-badge'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Section } from '@/components/ui/section'
 import { safeFetch, BOOK_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
 import { RESTRICTED_RATING } from '@/lib/taxonomy'
@@ -25,7 +26,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
   if (!book) notFound()
 
   return (
-    <div className="grid gap-8 sm:grid-cols-[300px_1fr]">
+    <Section padding="md" innerClassName="grid gap-8 sm:grid-cols-[300px_1fr]">
       <div className="bg-muted relative aspect-[2/3] overflow-hidden">
         {book.cover && (
           <Image
@@ -91,6 +92,6 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
           </Button>
         )}
       </div>
-    </div>
+    </Section>
   )
 }
