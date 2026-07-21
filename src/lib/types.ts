@@ -49,10 +49,22 @@ export interface BookSummary extends SanityDoc {
   creatorName?: string
 }
 
+/**
+ * A collective or guild. A document rather than a string because it's shared
+ * across creators — see `schemaTypes/organization.ts`.
+ */
+export interface Organization extends SanityDoc {
+  name: string
+  slug: string
+  website?: string
+}
+
 export interface CreatorSummary extends SanityDoc {
   name: string
   slug: string
   location?: string
+  /** Trading name, e.g. "Fox Storytelling". One per creator. */
+  studioName?: string
   photo?: SanityImage
 }
 
@@ -115,6 +127,9 @@ export interface CreatorDetail extends SanityDoc {
   name: string
   location?: string
   website?: string
+  studioName?: string
+  /** Max 3, enforced in the Studio. */
+  organizations?: Organization[]
   bio?: RichText
   photo?: SanityImage
   socials?: SocialLink[]

@@ -37,6 +37,7 @@ export const siteCopy = {
   creator: {
     booksHeading: 'Books',
     favoritesHeading: 'Favorite creators',
+    organizationsHeading: 'Member of',
   },
   empty: {
     books: 'No books yet — add creators and books in the Studio.',

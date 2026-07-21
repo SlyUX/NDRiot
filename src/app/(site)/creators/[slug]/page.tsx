@@ -40,6 +40,9 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
           )}
           <div>
             <h1 className="text-4xl font-black tracking-tighter uppercase">{creator.name}</h1>
+            {creator.studioName && (
+              <p className="text-primary text-sm tracking-wide uppercase">{creator.studioName}</p>
+            )}
             {creator.location && <p className="text-muted-foreground">{creator.location}</p>}
             <div className="mt-3">
               <SocialLinks socials={creator.socials} />
@@ -74,6 +77,30 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
           maxWidth="full"
           emptyMessage={siteCopy.empty.books}
         />
+      )}
+
+      {!!creator.organizations?.length && (
+        <Section padding="md" maxWidth="full">
+          <SectionHeading size="sm">{siteCopy.creator.organizationsHeading}</SectionHeading>
+          <ul className="flex flex-wrap gap-3 text-sm">
+            {creator.organizations.map((org) => (
+              <li key={org._id}>
+                {org.website ? (
+                  <a
+                    href={org.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    {org.name}
+                  </a>
+                ) : (
+                  <span>{org.name}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </Section>
       )}
 
       {!!creator.favoriteCreators?.length && (

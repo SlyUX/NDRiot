@@ -8,8 +8,9 @@ import buyLink from './buyLink'
 import socialLink from './socialLink'
 import favoriteCreator from './favoriteCreator'
 import imageWithAlt from './imageWithAlt'
+import organization from './organization'
 
 export const schemaTypes = [
-  creator, book, column, interview, freeDownload, homepageFeature,
+  creator, book, column, interview, freeDownload, homepageFeature, organization,
   buyLink, socialLink, favoriteCreator, imageWithAlt,
 ]

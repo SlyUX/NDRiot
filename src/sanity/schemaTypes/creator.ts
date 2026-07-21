@@ -21,6 +21,22 @@ export default defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
+      name: 'studioName',
+      title: 'Studio name',
+      type: 'string',
+      description:
+        'Their studio or trading name, if they work under one — e.g. "Fox Storytelling". One per creator. Leave blank if they publish under their own name.',
+    }),
+    defineField({
+      name: 'organizations',
+      title: 'Organizations',
+      type: 'array',
+      of: [{ type: 'reference', to: [{ type: 'organization' }] }],
+      description:
+        'Collectives or guilds they belong to. Up to three. Pick from the list — create the Organization first if it is not there yet.',
+      validation: (rule) => rule.max(3).unique(),
+    }),
+    defineField({
       name: 'photo',
       title: 'Photo',
       type: 'imageWithAlt',
@@ -61,5 +77,14 @@ export default defineType({
         'Who they want to shout out. This is how the directory grows — link to an ND Riot profile where one already exists.',
     }),
   ],
-  preview: { select: { title: 'name', subtitle: 'location', media: 'photo' } },
+  preview: {
+    select: { title: 'name', studioName: 'studioName', location: 'location', media: 'photo' },
+    // Studio name is the more useful disambiguator when two creators share a
+    // location; fall back to location when there is no studio.
+    prepare: ({ title, studioName, location, media }) => ({
+      title,
+      subtitle: studioName || location,
+      media,
+    }),
+  },
 })
