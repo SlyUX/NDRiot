@@ -27,6 +27,24 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
   // monitoring both read the status code, not the copy.
   if (!creator) notFound()
 
+  /**
+   * Whether the studio's logo is literally the creator's portrait.
+   *
+   * Sanity asset IDs are content-addressed — `image-<sha1>-<dims>-<format>` —
+   * so the same file uploaded twice produces the same ID. Comparing refs is
+   * an identity check, not a guess.
+   *
+   * It misses a re-exported or resized copy, which hashes differently, and
+   * the dimensions and format sit in the ID too, so the same picture saved as
+   * PNG and JPG will not match. That is the acceptable miss: the common case
+   * is one solo creator using one file for both, and the failure mode is
+   * merely showing a logo we could have suppressed.
+   */
+  const studioLogoIsPortrait =
+    creator.photo !== undefined &&
+    creator.studio?.logo !== undefined &&
+    creator.photo.asset._ref === creator.studio.logo.asset._ref
+
   return (
     <div>
       <Section as="header" padding="md">
@@ -46,12 +64,16 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
             <h1 className="text-4xl font-black tracking-tighter uppercase">{creator.name}</h1>
             {creator.studio && (
               <div className="mt-1">
-                {/* Text, not the logo. The studio sits immediately under the
-                    creator's portrait, and for a solo creator the studio mark
-                    often IS that portrait — showing it twice in the space of a
-                    few pixels reads as a duplication bug. Logos are fine
-                    elsewhere, where nothing competes with them. */}
-                <OrganizationLink organization={creator.studio} size="md" display="text" />
+                {/* The studio sits immediately under the creator's portrait.
+                    Fall back to text only when the logo IS that portrait —
+                    otherwise the same image appears twice within a few pixels
+                    and reads as a duplication bug. A multi-member studio with
+                    a distinct mark still gets its logo. */}
+                <OrganizationLink
+                  organization={creator.studio}
+                  size="md"
+                  display={studioLogoIsPortrait ? 'text' : 'auto'}
+                />
               </div>
             )}
             {creator.location && <p className="text-muted-foreground">{creator.location}</p>}
