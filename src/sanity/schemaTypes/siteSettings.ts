@@ -188,6 +188,12 @@ export default defineType({
           description: 'e.g. "Member of".',
         }),
         defineField({
+          name: 'openToCollaborationLabel',
+          title: 'Creator page — collaboration badge',
+          type: 'string',
+          description: 'Shown on creators who are open to collaboration, e.g. "Open to collaboration".',
+        }),
+        defineField({
           name: 'creatorFavoritesHeading',
           title: 'Creator page — favorite creators heading',
           type: 'string',

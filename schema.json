@@ -1738,6 +1738,13 @@
         },
         "optional": true
       },
+      "openToCollaboration": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "boolean"
+        },
+        "optional": true
+      },
       "photo": {
         "type": "objectAttribute",
         "value": {
@@ -2401,6 +2408,13 @@
               "optional": true
             },
             "creatorOrganizationsHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "openToCollaborationLabel": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

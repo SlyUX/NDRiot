@@ -7,6 +7,7 @@ import { OrganizationLink } from '@/components/organization-link'
 import PortableTextBody from '@/components/PortableTextBody'
 import SocialLinks from '@/components/SocialLinks'
 import { SectionHeading } from '@/components/section-heading'
+import { Badge } from '@/components/ui/badge'
 import { Section } from '@/components/ui/section'
 import { bookToCard } from '@/lib/card-mappers'
 import { safeFetch, CREATOR_QUERY } from '@/lib/queries'
@@ -81,6 +82,18 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
               </div>
             )}
             {creator.location && <p className="text-muted-foreground">{creator.location}</p>}
+
+            {/* Only for an explicit yes. `false` and "never answered" both mean
+                no badge — claiming someone is available when they have not said
+                so is worse than staying quiet. */}
+            {creator.openToCollaboration && (
+              <Badge
+                variant="outline"
+                className="border-primary/60 text-primary mt-3 px-2.5 py-0.5 text-[10px] tracking-widest uppercase"
+              >
+                {settings.sections.openToCollaborationLabel}
+              </Badge>
+            )}
             <div className="mt-3">
               <SocialLinks socials={creator.socials} />
             </div>

@@ -50,6 +50,14 @@ export default defineType({
           }),
     }),
     defineField({
+      name: 'openToCollaboration',
+      title: 'Open to collaboration',
+      type: 'boolean',
+      description:
+        'Shows a badge on their profile saying they are looking for collaborators. Leave off unless they have said yes — this is a claim about them, not a default.',
+      initialValue: false,
+    }),
+    defineField({
       name: 'photo',
       title: 'Photo',
       type: 'imageWithAlt',
