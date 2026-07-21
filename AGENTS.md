@@ -37,7 +37,8 @@ Indie-comics directory + editorial platform — the recruitment/marketing MVP fo
 
 ## Local dev, git, deploy
 - Node via **nvm** (`lts/*`). `npm run dev` → http://localhost:3000, Studio at `/studio`.
-- Git remote is HTTPS with a **GitHub PAT** via `credential.helper osxkeychain`; run git in **Terminal.app**, not the VS Code git panel.
+- Git remote is HTTPS with a **GitHub PAT** via `credential.helper osxkeychain`. The **VS Code git panel** is the thing that fails to pick up the credential — Terminal.app and the Claude Code shell both authenticate fine, so Claude may run `git push` directly (verified 2026-07-20).
+- **`git push` to `main` deploys to production** (ndriot.com) via Vercel. It is a release, not a backup. Committing is always safe; pushing is the step to think about.
 - Vercel env-var changes need a **manual redeploy**.
 
 ## Infrastructure / DNS (context; edit with care)
