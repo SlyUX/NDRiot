@@ -61,7 +61,7 @@ export function OrganizationLink({
   const { name, website, logo } = organization
   // Narrowed to the image itself rather than a boolean flag, so the branch
   // below type-checks without non-null assertions.
-  const shownLogo = display === 'auto' ? logo : undefined
+  const shownLogo = display === 'auto' ? logo : null
 
   const content = shownLogo ? (
     <Image

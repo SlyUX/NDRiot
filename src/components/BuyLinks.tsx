@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import type { BuyLink } from '@/lib/types'
 
-export default function BuyLinks({ links }: { links?: BuyLink[] }) {
+export default function BuyLinks({ links }: { links?: BuyLink[] | null }) {
   if (!links?.length) return null
 
   return (

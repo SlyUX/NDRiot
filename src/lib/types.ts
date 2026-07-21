@@ -1,213 +1,38 @@
-import type { PortableTextBlock } from '@portabletext/types'
+import type {
+  BOOKS_QUERY_RESULT,
+  BOOK_QUERY_RESULT,
+  COLUMNS_QUERY_RESULT,
+  COLUMN_QUERY_RESULT,
+  CREATORS_QUERY_RESULT,
+  CREATOR_QUERY_RESULT,
+  DOWNLOADS_QUERY_RESULT,
+  DOWNLOAD_QUERY_RESULT,
+  FEATURES_QUERY_RESULT,
+  INTERVIEWS_QUERY_RESULT,
+  INTERVIEW_QUERY_RESULT,
+  ImageWithAlt,
+} from '../../sanity.types'
 
-import type { BookFormat, Genre, MaturityRating } from '@/lib/taxonomy'
+export type { BookFormat, Genre, MaturityRating } from '@/lib/taxonomy'
 
-/**
- * Shapes returned by the GROQ projections in `queries.ts`.
- *
- * These mirror what the projection actually selects — not the full document
- * schema. If you change a projection, change the type in the same commit.
- * Fields the Studio doesn't require are optional here, because partially
- * filled documents are the normal case, not an edge case.
- */
+export type SanityImage = ImageWithAlt
+export type RichText = NonNullable<COLUMN_QUERY_RESULT>['body']
 
-export interface SanityDoc {
-  _id: string
-}
+export type BookSummary = BOOKS_QUERY_RESULT[number]
+export type CreatorSummary = CREATORS_QUERY_RESULT[number]
+export type ColumnSummary = COLUMNS_QUERY_RESULT[number]
+export type InterviewSummary = INTERVIEWS_QUERY_RESULT[number]
+export type DownloadSummary = DOWNLOADS_QUERY_RESULT[number]
+export type FeatureItem = NonNullable<FEATURES_QUERY_RESULT>[number]
 
-/**
- * An `imageWithAlt` document field. `alt` rides along on the image object, so
- * projections that select `cover` or `photo` get it for free — no extra GROQ.
- *
- * `alt` is optional because the Studio only warns, never blocks (see
- * `schemaTypes/imageWithAlt.ts`). Callers must decide a fallback rather than
- * assume it is present.
- */
-export interface SanityImage {
-  _type?: 'imageWithAlt'
-  /** Present whenever the image object itself is — an image without an asset
-   *  is not a state the Studio can produce. */
-  asset: { _ref: string; _type: string }
-  hotspot?: { x: number; y: number; height: number; width: number }
-  crop?: { top: number; bottom: number; left: number; right: number }
-  alt?: string
-}
+export type CreatorDetail = NonNullable<CREATOR_QUERY_RESULT>
+export type BookDetail = NonNullable<BOOK_QUERY_RESULT>
+export type ColumnDetail = NonNullable<COLUMN_QUERY_RESULT>
+export type InterviewDetail = NonNullable<INTERVIEW_QUERY_RESULT>
+export type DownloadDetail = NonNullable<DOWNLOAD_QUERY_RESULT>
 
-/** `book.status` — the Studio offers exactly these three. */
-export type BookStatus = 'Ongoing' | 'Complete' | 'Upcoming'
-
-/* Genre, format and maturity are three separate axes — see lib/taxonomy.ts.
-   Imported for use below, re-exported so consumers have one place to import
-   content types from. */
-export type { BookFormat, Genre, MaturityRating }
-
-/**
- * What kind of thing a card is pointing at. Drives FormatBadge and the
- * `/editorial/...` vs `/books/...` href split.
- */
-export type ContentFormat = 'book' | 'creator' | 'column' | 'interview' | 'download'
-
-export interface BookSummary extends SanityDoc {
-  title: string
-  slug: string
-  status?: BookStatus
-  genres?: Genre[]
-  format?: BookFormat
-  maturity?: MaturityRating
-  cover?: SanityImage
-  creatorName?: string
-}
-
-/**
- * A collective or guild. A document rather than a string because it's shared
- * across creators — see `schemaTypes/organization.ts`.
- */
-export interface Organization extends SanityDoc {
-  name: string
-  slug: string
-  website?: string
-  logo?: SanityImage
-}
-
-export interface CreatorSummary extends SanityDoc {
-  name: string
-  slug: string
-  location?: string
-  /** Their own studio. An organization, so it can have several members. */
-  studio?: Organization
-  photo?: SanityImage
-}
-
-export interface ColumnSummary extends SanityDoc {
-  title: string
-  slug: string
-  excerpt?: string
-  cover?: SanityImage
-  publishedAt?: string
-  authorName?: string
-}
-
-export interface InterviewSummary extends SanityDoc {
-  title: string
-  slug: string
-  excerpt?: string
-  cover?: SanityImage
-  publishedAt?: string
-  interviewerName?: string
-  subjectName?: string
-}
-
-export interface DownloadSummary extends SanityDoc {
-  title: string
-  slug: string
-  description?: string
-  cover?: SanityImage
-  publishedAt?: string
-  creatorName?: string
-}
-
-/** Portable Text body content. Optional — drafts often have none yet. */
-export type RichText = PortableTextBlock[]
-
-export interface BuyLink {
-  store: string
-  url: string
-}
-
-export interface SocialLink {
-  platform: string
-  url: string
-}
-
-/**
- * `favoriteCreator` is a union in practice: either a reference to a creator
- * on this site (`onSiteName`/`onSiteSlug` populated) or a free-text name with
- * an optional external URL. Check `onSiteSlug` first.
- */
-export interface FavoriteCreator {
-  name?: string
-  url?: string
-  onSiteName?: string
-  onSiteSlug?: string
-}
-
-/* ---- Detail projections (single documents) ---- */
-
-export interface CreatorDetail extends SanityDoc {
-  name: string
-  location?: string
-  website?: string
-  /** Their own studio. Distinct from `organizations` — rendered separately. */
-  studio?: Organization
-  /** Affiliations beyond the studio. Max 3, enforced in the Studio. */
-  organizations?: Organization[]
-  bio?: RichText
-  photo?: SanityImage
-  socials?: SocialLink[]
-  favoriteCreators?: FavoriteCreator[]
-  books?: BookSummary[]
-}
-
-export interface BookDetail extends SanityDoc {
-  title: string
-  status?: BookStatus
-  genres?: Genre[]
-  format?: BookFormat
-  maturity?: MaturityRating
-  description?: RichText
-  buyLinks?: BuyLink[]
-  kickstarterUrl?: string
-  cover?: SanityImage
-  creatorName?: string
-  creatorSlug?: string
-}
-
-export interface ColumnDetail extends SanityDoc {
-  title: string
-  body?: RichText
-  publishedAt?: string
-  cover?: SanityImage
-  authorName?: string
-}
-
-export interface InterviewDetail extends SanityDoc {
-  title: string
-  body?: RichText
-  publishedAt?: string
-  cover?: SanityImage
-  interviewerName?: string
-  subjectName?: string
-}
-
-export interface DownloadDetail extends SanityDoc {
-  title: string
-  description?: string
-  cover?: SanityImage
-  creatorName?: string
-  fileUrl?: string
-}
-
-/**
- * FEATURES_QUERY dereferences a mixed array, so `_type` is the discriminant
- * and every other field is conditionally present. Narrow on `_type` before
- * reading `title` vs `name`.
- */
-export interface FeatureItem extends SanityDoc {
-  _type: 'book' | 'creator' | 'column' | 'interview'
-  title?: string
-  name?: string
-  slug: string
-  cover?: SanityImage
-  photo?: SanityImage
-  /* Books only — undefined on the other three types. */
-  genres?: Genre[]
-  format?: BookFormat
-  maturity?: MaturityRating
-  shortDescription?: string
-  creatorName?: string
-  /* Editorial only. */
-  excerpt?: string
-  /* Creators only. */
-  location?: string
-  studioName?: string
-}
+export type Organization = NonNullable<CreatorDetail['studio']>
+export type SocialLink = NonNullable<CreatorDetail['socials']>[number]
+export type FavoriteCreator = NonNullable<CreatorDetail['favoriteCreators']>[number]
+export type BuyLink = NonNullable<NonNullable<BOOK_QUERY_RESULT>['buyLinks']>[number]
+export type BookStatus = NonNullable<BOOK_QUERY_RESULT>['status']

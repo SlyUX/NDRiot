@@ -45,8 +45,8 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
    * is one solo creator using one file for both, and the failure mode is
    * merely showing a logo we could have suppressed.
    */
-  const portraitRef = creator.photo?.asset._ref
-  const studioLogoRef = creator.studio?.logo?.asset._ref
+  const portraitRef = creator.photo?.asset?._ref
+  const studioLogoRef = creator.studio?.logo?.asset?._ref
   const studioLogoIsPortrait = Boolean(portraitRef) && portraitRef === studioLogoRef
 
   return (

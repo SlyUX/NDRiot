@@ -178,12 +178,19 @@ export const previews: Record<string, ReactNode> = {
             name: 'Nash Illustrators',
             slug: 'nash-illustrators',
             website: 'https://example.com',
+            logo: null,
           }}
         />
       </Row>
       <Row label="Text fallback — no logo, no website">
         <OrganizationLink
-          organization={{ _id: 'demo-2', name: 'PiP Comics Collective', slug: 'pip' }}
+          organization={{
+            _id: 'demo-2',
+            name: 'PiP Comics Collective',
+            slug: 'pip',
+            website: null,
+            logo: null,
+          }}
         />
       </Row>
       <Row label="Size md — used for a creator's own studio">
@@ -193,6 +200,7 @@ export const previews: Record<string, ReactNode> = {
             name: 'Fox Storytelling',
             slug: 'fox-storytelling',
             website: 'https://example.com',
+            logo: null,
           }}
           size="md"
         />

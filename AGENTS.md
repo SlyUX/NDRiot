@@ -106,12 +106,15 @@ Components are ported from a styleguide Stephen authored for another org. He has
 
 ## 6. TypeScript
 
-- **No `any`.** Sanity query results get explicit types in `src/lib/types.ts` (or generated via `sanity typegen`), and the type must mirror what the GROQ projection actually returns.
-- Optional Sanity fields are optional in the type. Studio data is always partially filled — render accordingly.
+- **No `any`.**
+- **Sanity types are generated, not written.** `npm run typegen` extracts the schema and derives result types for every query into `sanity.types.ts`. It runs automatically on `prebuild`, so types cannot drift from the schema. `src/lib/types.ts` is a thin alias layer that gives the generated shapes readable names — add aliases there, never hand-written field lists.
+- **Optional Sanity fields are `T | null`, not `T | undefined`.** GROQ returns `null` for an absent field. A prop typed `foo?: T` is a lie the moment the value comes from a projection, and `foo !== undefined` is `true` when `foo` is `null` — which is how the creator page 500'd on 2026-07-21. Prefer optional chaining; it short-circuits on both.
+- Queries are wrapped in `defineQuery()` so typegen can find them. An unwrapped query silently gets no generated type.
 
 ## 7. Data fetching
 
-- All fetches go through `safeFetch<T>()` in `src/lib/queries.ts` with an explicit fallback. **GROQ returns `null`, not `[]`.** This has already broken production once.
+- All fetches go through `safeFetch<T>()` in `src/lib/queries.ts` with an explicit fallback. **GROQ returns `null`, not `[]` and not `undefined`.** This has broken production twice: once on `features.length`, once on `studio.logo`.
+- A projection that selects fewer fields than a sibling query needs its own type. `CREATOR_QUERY`'s nested books once omitted `genres`/`format`/`maturity` while being typed as a full `BookSummary`, so those cards silently lost their badges. Generated types catch this; hand-written ones hid it.
 - Queries are named exports colocated in `queries.ts`, not inlined in pages.
 - Never assume a list is non-empty. Every collection view needs a real empty state.
 
@@ -145,5 +148,13 @@ Decided 2026-07-20. Every value below is a CSS variable in `src/app/globals.css`
 - `npm run build` passes, and `npm run lint` is clean.
 - Verify against real Studio content, including the empty and missing-image cases.
 - Report honestly: if something is untested or partially done, say which part.
+
+### Pushing
+
+`git push` to `main` deploys to production. Commit freely — that is local and reversible — but:
+
+- **Never verify and push in the same command.** Run the route check, read the result, then push as a separate step. Collapsing them means there is no moment at which a failure can stop the deploy. A 500 once shipped this way because the failing check and the push were in one call.
+- **Smoke-test every route after any change to rendering or data shape**, not just the page you touched. A shared component or a query edit reaches pages you were not thinking about.
+- A green `npm run build` is not sufficient. It type-checks; it does not execute a page against real content.
 
 <!-- END:qa-standards -->

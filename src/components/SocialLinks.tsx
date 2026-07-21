@@ -27,7 +27,7 @@ function labelFor(platform: string, url: string): string {
   }
 }
 
-export default function SocialLinks({ socials }: { socials?: SocialLink[] }) {
+export default function SocialLinks({ socials }: { socials?: SocialLink[] | null }) {
   if (!socials?.length) return null
 
   return (

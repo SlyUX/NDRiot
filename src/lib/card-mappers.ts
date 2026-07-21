@@ -23,7 +23,7 @@ const DATE_FORMAT = new Intl.DateTimeFormat('en-GB', {
   year: 'numeric',
 })
 
-export function formatDate(iso?: string): string | undefined {
+export function formatDate(iso?: string | null): string | undefined {
   if (!iso) return undefined
   const parsed = new Date(iso)
   return Number.isNaN(parsed.getTime()) ? undefined : DATE_FORMAT.format(parsed)

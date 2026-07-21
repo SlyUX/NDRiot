@@ -28,10 +28,18 @@ const ASPECT = {
   portrait: 'aspect-[3/4]',
 } as const
 
+/**
+ * Optional fields are `T | null`, not just `T | undefined`.
+ *
+ * GROQ returns null for an absent field, so a `?:` prop is a lie the moment
+ * the value comes from a projection — and it is the lie that took the creator
+ * page down. The generated types in sanity.types.ts model null correctly, so
+ * these signatures match them rather than fighting them.
+ */
 export interface ContentCardProps {
   title: string
   href: string
-  image?: SanityImage
+  image?: SanityImage | null
   /**
    * Fallback alt text. The image's own `alt` from Sanity always wins; this is
    * only used when an editor left it blank. Empty string marks the image
@@ -39,17 +47,17 @@ export interface ContentCardProps {
    */
   imageAlt: string
   /** Small line above the title — a creator name, a byline. */
-  eyebrow?: string
+  eyebrow?: string | null
   /** Up to three. Rendered as linked badges. */
-  genres?: Genre[]
+  genres?: Genre[] | null
   /** How it was made. Rendered as an unlinked badge beside the genres. */
-  format?: BookFormat
+  format?: BookFormat | null
   /** Overlaid on the thumbnail — see MaturityOverlay. */
-  maturity?: MaturityRating
+  maturity?: MaturityRating | null
   /** Supporting copy. Comes from Sanity (`shortDescription`, `excerpt`, …). */
-  summary?: string
+  summary?: string | null
   /** Pre-formatted for display, e.g. "12 Mar 2026". */
-  date?: string
+  date?: string | null
   layout?: 'vertical' | 'horizontal' | 'overlay'
   aspectRatio?: keyof typeof ASPECT
   /** Fill the grid cell's height, for equal-height rows. */
@@ -88,8 +96,8 @@ export function TaxonomyRow({
   format,
   className,
 }: {
-  genres?: Genre[]
-  format?: BookFormat
+  genres?: Genre[] | null
+  format?: BookFormat | null
   className?: string
 }) {
   if (!genres?.length && !format) return null
@@ -119,7 +127,7 @@ function CardImage({
   width,
   className,
 }: {
-  image?: SanityImage
+  image?: SanityImage | null
   alt: string
   width: number
   className?: string
