@@ -40,8 +40,21 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
           )}
           <div>
             <h1 className="text-4xl font-black tracking-tighter uppercase">{creator.name}</h1>
-            {creator.studioName && (
-              <p className="text-primary text-sm tracking-wide uppercase">{creator.studioName}</p>
+            {creator.studio && (
+              <p className="text-sm tracking-wide uppercase">
+                {creator.studio.website ? (
+                  <a
+                    href={creator.studio.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    {creator.studio.name}
+                  </a>
+                ) : (
+                  <span className="text-primary">{creator.studio.name}</span>
+                )}
+              </p>
             )}
             {creator.location && <p className="text-muted-foreground">{creator.location}</p>}
             <div className="mt-3">

@@ -8,9 +8,10 @@ export async function safeFetch<T>(query: string, params: Record<string, unknown
   }
 }
 
-export const CREATORS_QUERY = `*[_type=="creator"]|order(name asc){_id,name,"slug":slug.current,location,studioName,photo}`
+export const CREATORS_QUERY = `*[_type=="creator"]|order(name asc){_id,name,"slug":slug.current,location,photo,studio->{_id,name,"slug":slug.current,website}}`
 export const CREATOR_QUERY = `*[_type=="creator" && slug.current==$slug][0]{
-  _id,name,location,website,bio,photo,socials,studioName,
+  _id,name,location,website,bio,photo,socials,
+  studio->{_id,name,"slug":slug.current,website},
   organizations[]->{_id,name,"slug":slug.current,website},
   favoriteCreators[]{name,url,"onSiteName":onSite->name,"onSiteSlug":onSite->slug.current},
   "books": *[_type=="book" && references(^._id)]|order(title asc){_id,title,"slug":slug.current,status,cover}

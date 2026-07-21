@@ -51,7 +51,7 @@ export function creatorToCard(creator: CreatorSummary): ContentCardProps {
     imageAlt: `Portrait of ${creator.name}`,
     // Studio name identifies a creator more usefully than a city does, and
     // makes the card findable by studio. Location is the fallback.
-    eyebrow: creator.studioName ?? creator.location,
+    eyebrow: creator.studio?.name ?? creator.location,
     aspectRatio: 'square',
   }
 }

@@ -63,8 +63,8 @@ export interface CreatorSummary extends SanityDoc {
   name: string
   slug: string
   location?: string
-  /** Trading name, e.g. "Fox Storytelling". One per creator. */
-  studioName?: string
+  /** Their own studio. An organization, so it can have several members. */
+  studio?: Organization
   photo?: SanityImage
 }
 
@@ -127,8 +127,9 @@ export interface CreatorDetail extends SanityDoc {
   name: string
   location?: string
   website?: string
-  studioName?: string
-  /** Max 3, enforced in the Studio. */
+  /** Their own studio. Distinct from `organizations` — rendered separately. */
+  studio?: Organization
+  /** Affiliations beyond the studio. Max 3, enforced in the Studio. */
   organizations?: Organization[]
   bio?: RichText
   photo?: SanityImage

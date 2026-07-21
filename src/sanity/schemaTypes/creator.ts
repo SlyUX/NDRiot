@@ -16,11 +16,12 @@ export default defineType({
     }),
     slugField('name', '/creators/their-slug'),
     defineField({
-      name: 'studioName',
-      title: 'Studio name',
-      type: 'string',
+      name: 'studio',
+      title: 'Studio',
+      type: 'reference',
+      to: [{ type: 'organization' }],
       description:
-        'Their studio or trading name, if they work under one — e.g. "Fox Storytelling". One per creator. Leave blank if they publish under their own name.',
+        'The studio they work under, if any — e.g. "Fox Storytelling". One per creator. A reference rather than free text so a studio can have several members and its own page. Create the Organization first if it is not in the list.',
     }),
     defineField({
       name: 'organizations',
@@ -28,8 +29,25 @@ export default defineType({
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'organization' }] }],
       description:
-        'Collectives or guilds they belong to. Up to three. Pick from the list — create the Organization first if it is not there yet.',
-      validation: (rule) => rule.max(3).unique(),
+        'Collectives or guilds they belong to, beyond their own studio. Up to three. Create the Organization first if it is not in the list.',
+      validation: (rule) =>
+        rule
+          .max(3)
+          .unique()
+          .custom((organizations, context) => {
+            const studioRef = (context.document?.studio as { _ref?: string } | undefined)?._ref
+            if (!studioRef || !Array.isArray(organizations)) return true
+
+            const duplicate = organizations.some(
+              (organization) => (organization as { _ref?: string })?._ref === studioRef,
+            )
+
+            // Studio and organizations render in separate places on the
+            // profile, so listing one in both prints it twice.
+            return duplicate
+              ? 'That organization is already set as this creator’s Studio above. Remove it here, or clear the Studio field.'
+              : true
+          }),
     }),
     defineField({
       name: 'photo',
@@ -73,8 +91,8 @@ export default defineType({
     }),
   ],
   preview: {
-    select: { title: 'name', studioName: 'studioName', location: 'location', media: 'photo' },
-    // Studio name is the more useful disambiguator when two creators share a
+    select: { title: 'name', studioName: 'studio.name', location: 'location', media: 'photo' },
+    // Studio is the more useful disambiguator when two creators share a
     // location; fall back to location when there is no studio.
     prepare: ({ title, studioName, location, media }) => ({
       title,

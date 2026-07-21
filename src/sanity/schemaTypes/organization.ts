@@ -3,15 +3,19 @@ import { defineType, defineField } from 'sanity'
 import { slugField } from './slugField'
 
 /**
- * A group creators belong to — a collective, guild, or association.
+ * A group creators belong to — a studio, collective, guild, or association.
  *
  * A document type rather than a text tag because organizations are shared by
  * definition: several creators reference the same one. Free text would let
  * "Nash.Illustrators" drift into "Nash Illustrators" across records, and the
  * only fix would be editing every creator by hand.
  *
- * Contrast with `creator.studioName`, which is a plain string — a studio
- * belongs to one creator, so there is nothing for it to drift against.
+ * Studios use this type too. A studio and a collective are structurally the
+ * same thing — a named group, with a website, that creators belong to — so
+ * they share one type rather than duplicating the shape. The difference is
+ * cardinality and rendering, both of which live on `creator`: `studio` is a
+ * single reference shown under the name, `organizations` is an array of up to
+ * three shown under "Member of".
  */
 export default defineType({
   name: 'organization',
