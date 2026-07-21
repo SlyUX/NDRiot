@@ -1,5 +1,6 @@
 import { defineType, defineField } from 'sanity'
 
+import { GENRES } from '@/lib/genres'
 import { slugField } from './slugField'
 
 export default defineType({
@@ -31,12 +32,13 @@ export default defineType({
     }),
     defineField({
       name: 'genres',
-      title: 'Genre tags',
+      title: 'Genres',
       type: 'array',
-      of: [{ type: 'string' }],
-      options: { layout: 'tags' },
+      of: [{ type: 'string', options: { list: [...GENRES] } }],
+      options: { layout: 'grid' },
       description:
-        'Each tag becomes a browsable category page, so reuse an existing spelling rather than inventing a new one — "Sci-Fi" and "Science Fiction" would split into two pages.',
+        'Pick up to three. A fixed list rather than free text: each genre is a browsable page, and "Sci-Fi" typed alongside "Science Fiction" would split it into two. To add a genre, edit src/lib/genres.ts.',
+      validation: (rule) => rule.max(3).unique(),
     }),
     defineField({
       name: 'status',
