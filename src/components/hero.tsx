@@ -70,7 +70,12 @@ function FeatureSlide({ item, ctaLabel }: { item: FeatureItem; ctaLabel: string 
   const square = card.aspectRatio === 'square'
 
   return (
-    <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
+    // `auto` on the first column, not a half share: the cover is 16rem, so an
+    // even split left ~440px of dead space between it and the text. Sizing
+    // the column to its content pulls the words back against the artwork.
+    // The trade is empty space on the right, which reads as deliberate
+    // margin rather than a gap in the middle of the composition.
+    <div className="grid items-center gap-8 lg:grid-cols-[auto_1fr] lg:gap-12">
       <div className="flex justify-center lg:justify-start">
         <div
           className={cn(
