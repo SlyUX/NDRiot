@@ -22,7 +22,10 @@ const logoVariants = cva('w-auto', {
     size: {
       // Sized so the lockup clears the nav bar without crowding it.
       nav: 'h-8 sm:h-9',
-      hero: 'h-32 sm:h-44 lg:h-64',
+      // Arbitrary values rather than scale steps: these are exactly 30% up
+      // from 8/11/16rem. The nearest steps would have landed at ~25%, and a
+      // logo is not on the spacing grid, so precision wins over rhythm here.
+      hero: 'h-[10.4rem] sm:h-[14.3rem] lg:h-[20.8rem]',
     },
   },
   defaultVariants: { size: 'nav' },

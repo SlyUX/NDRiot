@@ -28,9 +28,6 @@ export interface HeroProps {
   features: FeatureItem[]
 }
 
-/** Fixed so slides of different heights do not make the background jump. */
-const SLIDE_MIN_HEIGHT = 'min-h-[26rem] sm:min-h-[30rem]'
-
 /**
  * Shipped artwork, used when Sanity has no hero background.
  *
@@ -57,7 +54,7 @@ function FeatureSlide({ item, ctaLabel }: { item: FeatureItem; ctaLabel: string 
   const square = card.aspectRatio === 'square'
 
   return (
-    <div className={`grid items-center gap-8 lg:grid-cols-2 lg:gap-12 ${SLIDE_MIN_HEIGHT}`}>
+    <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
       <div className="flex justify-center lg:justify-start">
         <div
           className={cn(
@@ -110,7 +107,7 @@ export function Hero({ hero, features }: HeroProps) {
   const featureSlides = features.filter(Boolean).slice(0, 3)
 
   const pitchSlide = (
-    <div className={`grid items-center gap-8 lg:grid-cols-2 lg:gap-12 ${SLIDE_MIN_HEIGHT}`}>
+    <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
       <div className="flex justify-center lg:justify-start">
         {/* alt="" because the headline beside it already names the site — a
             screen reader would otherwise hear "ND Riot" twice. */}
@@ -169,7 +166,7 @@ export function Hero({ hero, features }: HeroProps) {
     // shape, same padding scale — just assembled here.
     <section
       data-slot="section"
-      className="relative isolate overflow-hidden px-6 py-12 sm:py-16"
+      className="relative isolate overflow-hidden px-6 py-8"
     >
       <Image
         src={hero.background ? urlFor(hero.background).width(2400).url() : BACKGROUND_FALLBACK}
