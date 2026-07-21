@@ -50,6 +50,12 @@ export function Logo({ size, alt = 'ND Riot', className, priority = false }: Log
       width={1284}
       height={824}
       priority={priority}
+      // Required: Next blocks SVG through the image optimizer unless this or
+      // `dangerouslyAllowSVG` is set, and without it the image simply fails to
+      // render. `unoptimized` is the narrow fix — the config flag would open
+      // the optimizer to every SVG including remote ones, and needs a CSP to
+      // be safe. A local vector has nothing to gain from optimization anyway.
+      unoptimized
       className={cn(logoVariants({ size }), className)}
     />
   )
