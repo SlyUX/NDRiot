@@ -36,6 +36,22 @@ const headingVariants = cva('font-black tracking-tighter', {
   },
 })
 
+/**
+ * The gap below the heading belongs to the heading's size, not to every
+ * heading equally. `mb-8` under a small uppercase eyebrow leaves it floating
+ * away from the row it labels.
+ */
+const wrapperVariants = cva('gap-4', {
+  variants: {
+    size: {
+      sm: 'mb-4',
+      md: 'mb-8',
+      lg: 'mb-8',
+    },
+  },
+  defaultVariants: { size: 'md' },
+})
+
 export interface SectionHeadingProps extends VariantProps<typeof headingVariants> {
   /** The title. ReactNode so callers can emphasise a fragment. */
   children: ReactNode
@@ -66,7 +82,7 @@ export function SectionHeading({
     <div
       data-slot="section-heading"
       className={cn(
-        'mb-8 gap-4',
+        wrapperVariants({ size }),
         centered
           ? 'flex flex-col items-center text-center'
           : 'flex flex-wrap items-end justify-between',
@@ -84,4 +100,4 @@ export function SectionHeading({
   )
 }
 
-export { headingVariants }
+export { headingVariants, wrapperVariants }
