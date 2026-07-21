@@ -64,18 +64,32 @@ export function HeroCarousel({ slides, labels, className }: HeroCarouselProps) {
         }
       }}
     >
-      {slides.map((slide, i) => (
-        <div
-          key={i}
-          id={`${baseId}-slide-${i}`}
-          role="group"
-          aria-roledescription="slide"
-          aria-label={`${i + 1} of ${count}: ${labels[i] ?? ''}`}
-          hidden={i !== index}
-        >
-          {slide}
-        </div>
-      ))}
+      {/*
+        Every slide sits in the same grid cell, so the container is as tall as
+        the tallest of them and never resizes on advance. That is the whole
+        reason for the grid: no measuring, no ResizeObserver, and it stays
+        correct when the viewport changes or an editor lengthens the copy.
+
+        Inactive slides use `visibility: hidden` rather than `display: none`.
+        Both remove an element from the accessibility tree and the tab order,
+        but only `visibility` keeps it occupying space — which is exactly what
+        holds the height open.
+      */}
+      <div className="grid">
+        {slides.map((slide, i) => (
+          <div
+            key={i}
+            id={`${baseId}-slide-${i}`}
+            role="group"
+            aria-roledescription="slide"
+            aria-label={`${i + 1} of ${count}: ${labels[i] ?? ''}`}
+            aria-hidden={i !== index}
+            className={cn('col-start-1 row-start-1', i !== index && 'invisible')}
+          >
+            {slide}
+          </div>
+        ))}
+      </div>
 
       {/* Announces the change for screen reader users, who otherwise get no
           signal that pressing a dot did anything. */}
