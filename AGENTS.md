@@ -47,6 +47,7 @@ Indie-comics directory + editorial platform — the recruitment/marketing MVP fo
 
 ## Content status
 - Old project (`nees0n70`, now orphaned) held only a placeholder "Stephen Fox" creator. Enter real creators, books, and editorial in `/studio`.
+- **Content intake direction** is sketched in [`docs/content-intake.md`](docs/content-intake.md) — form-based creator onboarding, staged. Nothing is built. Read it before adding fields that intake would touch, or before proposing an approval-workflow feature; it records why we are *not* building one yet.
 
 <!-- END:project-context -->
 
