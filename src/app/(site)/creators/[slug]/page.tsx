@@ -9,7 +9,7 @@ import { SectionHeading } from '@/components/section-heading'
 import { Section } from '@/components/ui/section'
 import { bookToCard } from '@/lib/card-mappers'
 import { safeFetch, CREATOR_QUERY } from '@/lib/queries'
-import { siteCopy } from '@/lib/site-copy'
+import { getSiteSettings } from '@/lib/site-settings'
 import type { CreatorDetail } from '@/lib/types'
 import { urlFor } from '@/sanity/image'
 
@@ -17,7 +17,10 @@ export const dynamic = 'force-dynamic'
 
 export default async function CreatorPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const creator = await safeFetch<CreatorDetail | null>(CREATOR_QUERY, { slug }, null)
+  const [creator, settings] = await Promise.all([
+    safeFetch<CreatorDetail | null>(CREATOR_QUERY, { slug }, null),
+    getSiteSettings(),
+  ])
 
   // Real 404 rather than a 200 that says "not found" — search engines and
   // monitoring both read the status code, not the copy.
@@ -82,19 +85,19 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
 
       {!!creator.books?.length && (
         <ContentCardGrid
-          heading={siteCopy.creator.booksHeading}
+          heading={settings.sections.creatorBooksHeading}
           headingSize="sm"
           cards={creator.books.map(bookToCard)}
           columns={4}
           padding="md"
           maxWidth="full"
-          emptyMessage={siteCopy.empty.books}
+          emptyMessage={settings.empty.books}
         />
       )}
 
       {!!creator.organizations?.length && (
         <Section padding="md" maxWidth="full">
-          <SectionHeading size="sm">{siteCopy.creator.organizationsHeading}</SectionHeading>
+          <SectionHeading size="sm">{settings.sections.creatorOrganizationsHeading}</SectionHeading>
           <ul className="flex flex-wrap gap-3 text-sm">
             {creator.organizations.map((org) => (
               <li key={org._id}>
@@ -118,7 +121,7 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
 
       {!!creator.favoriteCreators?.length && (
         <Section padding="md" maxWidth="full">
-          <SectionHeading size="sm">{siteCopy.creator.favoritesHeading}</SectionHeading>
+          <SectionHeading size="sm">{settings.sections.creatorFavoritesHeading}</SectionHeading>
           <ul className="flex flex-wrap gap-3 text-sm">
             {creator.favoriteCreators.map((favorite, index) => (
               <li key={favorite.onSiteSlug ?? favorite.url ?? `${favorite.name}-${index}`}>

@@ -1,17 +1,20 @@
 import { ContentCardGrid } from '@/components/content-card-grid'
 import { downloadToCard } from '@/lib/card-mappers'
 import { safeFetch, DOWNLOADS_QUERY } from '@/lib/queries'
-import { siteCopy } from '@/lib/site-copy'
+import { getSiteSettings } from '@/lib/site-settings'
 import type { DownloadSummary } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
 export default async function DownloadsPage() {
-  const downloads = await safeFetch<DownloadSummary[]>(DOWNLOADS_QUERY, {}, [])
+  const [downloads, settings] = await Promise.all([
+    safeFetch<DownloadSummary[]>(DOWNLOADS_QUERY, {}, []),
+    getSiteSettings(),
+  ])
 
   return (
     <ContentCardGrid
-      heading={siteCopy.downloads.heading}
+      heading={settings.sections.downloadsHeading}
       headingAs="h1"
       headingSize="lg"
       cards={downloads.map(downloadToCard)}
@@ -19,7 +22,7 @@ export default async function DownloadsPage() {
       columns={2}
       padding="none"
       maxWidth="full"
-      emptyMessage={siteCopy.empty.downloads}
+      emptyMessage={settings.empty.downloads}
     />
   )
 }

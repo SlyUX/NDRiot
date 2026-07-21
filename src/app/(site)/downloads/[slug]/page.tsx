@@ -2,14 +2,17 @@ import { notFound } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
 import { safeFetch, DOWNLOAD_QUERY } from '@/lib/queries'
-import { siteCopy } from '@/lib/site-copy'
+import { getSiteSettings } from '@/lib/site-settings'
 import type { DownloadDetail } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
 export default async function DownloadPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const download = await safeFetch<DownloadDetail | null>(DOWNLOAD_QUERY, { slug }, null)
+  const [download, settings] = await Promise.all([
+    safeFetch<DownloadDetail | null>(DOWNLOAD_QUERY, { slug }, null),
+    getSiteSettings(),
+  ])
 
   if (!download) notFound()
 
@@ -25,7 +28,7 @@ export default async function DownloadPage({ params }: { params: Promise<{ slug:
       {download.fileUrl && (
         <Button asChild>
           <a href={download.fileUrl} target="_blank" rel="noopener noreferrer">
-            {siteCopy.downloads.cta}
+            {settings.sections.downloadCta}
           </a>
         </Button>
       )}

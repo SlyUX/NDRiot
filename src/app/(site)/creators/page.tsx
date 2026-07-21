@@ -1,24 +1,27 @@
 import { ContentCardGrid } from '@/components/content-card-grid'
 import { creatorToCard } from '@/lib/card-mappers'
 import { safeFetch, CREATORS_QUERY } from '@/lib/queries'
-import { siteCopy } from '@/lib/site-copy'
+import { getSiteSettings } from '@/lib/site-settings'
 import type { CreatorSummary } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
 export default async function CreatorsPage() {
-  const creators = await safeFetch<CreatorSummary[]>(CREATORS_QUERY, {}, [])
+  const [creators, settings] = await Promise.all([
+    safeFetch<CreatorSummary[]>(CREATORS_QUERY, {}, []),
+    getSiteSettings(),
+  ])
 
   return (
     <ContentCardGrid
-      heading={siteCopy.home.creatorsHeading}
+      heading={settings.sections.creatorsHeading}
       headingAs="h1"
       headingSize="lg"
       cards={creators.map(creatorToCard)}
       columns={4}
       padding="none"
       maxWidth="full"
-      emptyMessage={siteCopy.empty.creators}
+      emptyMessage={settings.empty.creators}
     />
   )
 }

@@ -1,8 +1,10 @@
 import Link from 'next/link'
 
-import { siteCopy } from '@/lib/site-copy'
+import { getSiteSettings } from '@/lib/site-settings'
 
-export default function SiteLayout({ children }: { children: React.ReactNode }) {
+export default async function SiteLayout({ children }: { children: React.ReactNode }) {
+  const settings = await getSiteSettings()
+
   return (
     <>
       <header className="border-primary/40 border-b">
@@ -14,7 +16,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
             ND<span className="text-primary">Riot</span>
           </Link>
           <div className="flex flex-wrap gap-5 text-sm font-bold tracking-wide uppercase">
-            {siteCopy.nav.map(({ label, href }) => (
+            {settings.nav.map(({ label, href }) => (
               <Link
                 key={href}
                 href={href}
@@ -28,7 +30,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
       </header>
       <main className="mx-auto max-w-6xl px-6 py-10">{children}</main>
       <footer className="border-primary/40 text-muted-foreground border-t py-8 text-center text-xs tracking-widest uppercase">
-        {siteCopy.footer}
+        {settings.footer}
       </footer>
     </>
   )

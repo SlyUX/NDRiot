@@ -7,7 +7,7 @@ import PortableTextBody from '@/components/PortableTextBody'
 import { GenreBadge } from '@/components/genre-badge'
 import { Button } from '@/components/ui/button'
 import { safeFetch, BOOK_QUERY } from '@/lib/queries'
-import { siteCopy } from '@/lib/site-copy'
+import { getSiteSettings } from '@/lib/site-settings'
 import type { BookDetail } from '@/lib/types'
 import { urlFor } from '@/sanity/image'
 
@@ -15,7 +15,10 @@ export const dynamic = 'force-dynamic'
 
 export default async function BookPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const book = await safeFetch<BookDetail | null>(BOOK_QUERY, { slug }, null)
+  const [book, settings] = await Promise.all([
+    safeFetch<BookDetail | null>(BOOK_QUERY, { slug }, null),
+    getSiteSettings(),
+  ])
 
   if (!book) notFound()
 
@@ -66,7 +69,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
         {book.kickstarterUrl && (
           <Button asChild>
             <a href={book.kickstarterUrl} target="_blank" rel="noopener noreferrer">
-              {siteCopy.book.kickstarter}
+              {settings.sections.kickstarterCta}
             </a>
           </Button>
         )}
