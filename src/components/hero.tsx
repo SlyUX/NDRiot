@@ -30,6 +30,16 @@ export interface HeroProps {
 /** Fixed so slides of different heights do not make the background jump. */
 const SLIDE_MIN_HEIGHT = 'min-h-[26rem] sm:min-h-[30rem]'
 
+/**
+ * Shipped artwork, used when Sanity has no hero background.
+ *
+ * The Sanity field still wins — this is a default in the same sense as the
+ * copy defaults in site-settings.ts, not a second source of truth. It exists
+ * so the hero is never a bare black box, which is what an empty singleton
+ * would otherwise produce on first load.
+ */
+const BACKGROUND_FALLBACK = '/nd-riot-hero-bkgrd.jpg'
+
 export function Hero({ hero, features }: HeroProps) {
   const featureSlides = features.filter(Boolean).slice(0, 3)
 
@@ -99,23 +109,27 @@ export function Hero({ hero, features }: HeroProps) {
 
   return (
     <section className="relative isolate -mx-6 overflow-hidden px-6 py-12 sm:py-16">
-      {hero.background && (
-        <>
-          <Image
-            src={urlFor(hero.background).width(2400).url()}
-            alt=""
-            fill
-            sizes="100vw"
-            priority
-            className="-z-20 object-cover"
-          />
-          {/* Two layers, not one: the flat wash sets the floor so text is
-              legible anywhere, and the gradient keeps some artwork readable
-              on the right where the collage is busiest. */}
-          <div className="absolute inset-0 -z-10 bg-black/85" />
-          <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black/70 via-black/40 to-black/70" />
-        </>
-      )}
+      <Image
+        src={hero.background ? urlFor(hero.background).width(2400).url() : BACKGROUND_FALLBACK}
+        alt=""
+        fill
+        sizes="100vw"
+        priority
+        className="-z-20 object-cover"
+      />
+
+      {/*
+        Two layers, because they do different jobs. The flat wash sets a
+        legibility floor everywhere; the gradient darkens the edges further so
+        the logo and body text sit on the quietest part of the collage.
+
+        These multiply, so read them together: at the edges roughly 85% of the
+        artwork is darkened away, in the centre roughly 75%. Pushing the flat
+        wash much past 0.75 loses the collage entirely, which is the whole
+        reason it is there.
+      */}
+      <div className="absolute inset-0 -z-10 bg-black/75" />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
 
       <HeroCarousel slides={slides} labels={labels} className="mx-auto max-w-6xl" />
     </section>
