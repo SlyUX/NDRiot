@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { ContentCardGrid } from '@/components/content-card-grid'
+import { OrganizationLink } from '@/components/organization-link'
 import PortableTextBody from '@/components/PortableTextBody'
 import SocialLinks from '@/components/SocialLinks'
 import { SectionHeading } from '@/components/section-heading'
@@ -44,20 +45,9 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
           <div>
             <h1 className="text-4xl font-black tracking-tighter uppercase">{creator.name}</h1>
             {creator.studio && (
-              <p className="text-sm tracking-wide uppercase">
-                {creator.studio.website ? (
-                  <a
-                    href={creator.studio.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                  >
-                    {creator.studio.name}
-                  </a>
-                ) : (
-                  <span className="text-primary">{creator.studio.name}</span>
-                )}
-              </p>
+              <div className="mt-1">
+                <OrganizationLink organization={creator.studio} size="md" />
+              </div>
             )}
             {creator.location && <p className="text-muted-foreground">{creator.location}</p>}
             <div className="mt-3">
@@ -97,21 +87,10 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
       {!!creator.organizations?.length && (
         <Section padding="md">
           <SectionHeading size="sm">{settings.sections.creatorOrganizationsHeading}</SectionHeading>
-          <ul className="flex flex-wrap gap-3 text-sm">
+          <ul className="flex flex-wrap items-center gap-x-6 gap-y-4">
             {creator.organizations.map((org) => (
               <li key={org._id}>
-                {org.website ? (
-                  <a
-                    href={org.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                  >
-                    {org.name}
-                  </a>
-                ) : (
-                  <span>{org.name}</span>
-                )}
+                <OrganizationLink organization={org} />
               </li>
             ))}
           </ul>

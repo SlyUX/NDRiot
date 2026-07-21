@@ -36,6 +36,13 @@ export default defineType({
       type: 'url',
       description: 'Where to find them. Shown as a link on creator profiles.',
     }),
+    defineField({
+      name: 'logo',
+      title: 'Logo',
+      type: 'imageWithAlt',
+      description:
+        'Optional — the name is shown as text when there is none, which is a perfectly good result. Upload a version that works on a near-black background: a dark logo on transparency will disappear. PNG or SVG with transparency reads best.',
+    }),
   ],
   preview: { select: { title: 'name', subtitle: 'website' } },
 })

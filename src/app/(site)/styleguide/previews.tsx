@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { ContentCard } from '@/components/content-card'
 import { ContentCardGrid } from '@/components/content-card-grid'
 import { GenreBadge } from '@/components/genre-badge'
+import { OrganizationLink } from '@/components/organization-link'
 import { SectionHeading } from '@/components/section-heading'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -165,6 +166,41 @@ export const previews: Record<string, ReactNode> = {
         <GenreBadge genre="Crime &amp; Noir" size="sm" />
         <GenreBadge genre="Punk &amp; Protest" size="md" />
       </Row>
+    </>
+  ),
+
+  'organization-link': (
+    <>
+      <Row label="Text fallback — no logo, with a website">
+        <OrganizationLink
+          organization={{
+            _id: 'demo-1',
+            name: 'Nash Illustrators',
+            slug: 'nash-illustrators',
+            website: 'https://example.com',
+          }}
+        />
+      </Row>
+      <Row label="Text fallback — no logo, no website">
+        <OrganizationLink
+          organization={{ _id: 'demo-2', name: 'PiP Comics Collective', slug: 'pip' }}
+        />
+      </Row>
+      <Row label="Size md — used for a creator's own studio">
+        <OrganizationLink
+          organization={{
+            _id: 'demo-3',
+            name: 'Fox Storytelling',
+            slug: 'fox-storytelling',
+            website: 'https://example.com',
+          }}
+          size="md"
+        />
+      </Row>
+      <p className="text-muted-foreground text-xs italic">
+        The logo variant needs a real Sanity asset, so it cannot be shown here. Add a logo to an
+        Organization in the Studio and it replaces the text at the same heights.
+      </p>
     </>
   ),
 

@@ -66,6 +66,7 @@ export interface Organization extends SanityDoc {
   name: string
   slug: string
   website?: string
+  logo?: SanityImage
 }
 
 export interface CreatorSummary extends SanityDoc {

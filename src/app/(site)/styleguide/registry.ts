@@ -225,6 +225,27 @@ export const componentEntries: ComponentEntry[] = [
     ],
   },
   {
+    id: 'organization-link',
+    name: 'OrganizationLink',
+    importPath: '@/components/organization-link',
+    description:
+      'A studio or organization: its logo where one exists, its name as text where it does not. Text rather than generated initials — "NI" tells a reader nothing "Nash Illustrators" does not tell them better.',
+    category: 'composed',
+    props: [
+      {
+        name: 'organization',
+        type: 'Organization',
+        description: 'The dereferenced document. Renders a link when it has a website.',
+      },
+      {
+        name: 'size',
+        type: "'sm' | 'md'",
+        default: "'sm'",
+        description: 'md for a creator\u2019s own studio, sm for the affiliations row.',
+      },
+    ],
+  },
+  {
     id: 'content-card',
     name: 'ContentCard',
     importPath: '@/components/content-card',
