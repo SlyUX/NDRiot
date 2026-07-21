@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1283.6 823.82">
-  <!-- Fill recoloured from the source #ed1690 to #FF0095 (--primary) so the
-     site has a single pink. See AGENTS.md §8. -->
+  <!-- Fill recoloured from the source #ed1690 to #FF0095, the primary token,
+       so the site has a single pink. See AGENTS.md section 8.
+       Note: a double hyphen is illegal inside an XML comment and silently
+       breaks the whole file, so do not write the CSS variable name here. -->
   <defs>
     <style>
       .cls-1 {
