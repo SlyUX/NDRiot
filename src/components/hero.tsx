@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { PortableText } from '@portabletext/react'
 
 import { MaturityOverlay, TaxonomyRow } from '@/components/content-card'
-import { HeroCarousel } from '@/components/hero-carousel'
+import { HeroCarousel, type HeroSlide } from '@/components/hero-carousel'
 import { Logo } from '@/components/logo'
 import { Button } from '@/components/ui/button'
 import { featureToCard } from '@/lib/card-mappers'
@@ -37,6 +37,22 @@ export interface HeroProps {
  * would otherwise produce on first load.
  */
 const BACKGROUND_FALLBACK = '/nd-riot-hero-bkgrd.jpg'
+
+/**
+ * How long each slide holds.
+ *
+ * Not one shared interval, because the slides are not comparable. The pitch
+ * runs to roughly a hundred words — about 25-30 seconds at normal reading
+ * speed — so a five-second turn fades it out mid-argument, around the end of
+ * the second sentence. A featured book is a title, a byline and a line of
+ * summary, and stalling on it just makes the carousel feel stuck.
+ *
+ * 12s does not let anyone finish the pitch. It is a deliberate compromise:
+ * long enough that the argument lands and the reader chooses to stay, short
+ * enough that the featured work still surfaces on its own.
+ */
+const PITCH_DURATION_MS = 12_000
+const FEATURE_DURATION_MS = 6_000
 
 /**
  * A featured book or creator, at hero scale.
@@ -146,16 +162,17 @@ export function Hero({ hero, features }: HeroProps) {
     </div>
   )
 
-  const slides = [
-    pitchSlide,
-    ...featureSlides.map((item) => (
-      <FeatureSlide key={item._id} item={item} ctaLabel={hero.featureCtaLabel} />
-    )),
-  ]
-
-  const labels = [
-    hero.headline,
-    ...featureSlides.map((item) => item.title ?? item.name ?? 'Featured'),
+  const slides: HeroSlide[] = [
+    {
+      content: pitchSlide,
+      label: hero.headline,
+      durationMs: PITCH_DURATION_MS,
+    },
+    ...featureSlides.map((item) => ({
+      content: <FeatureSlide key={item._id} item={item} ctaLabel={hero.featureCtaLabel} />,
+      label: item.title ?? item.name ?? 'Featured',
+      durationMs: FEATURE_DURATION_MS,
+    })),
   ]
 
   return (
@@ -190,7 +207,7 @@ export function Hero({ hero, features }: HeroProps) {
       <div className="absolute inset-0 -z-10 bg-black/75" />
       <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
 
-      <HeroCarousel slides={slides} labels={labels} className="mx-auto w-full max-w-[90rem]" />
+      <HeroCarousel slides={slides} className="mx-auto w-full max-w-[90rem]" />
     </section>
   )
 }

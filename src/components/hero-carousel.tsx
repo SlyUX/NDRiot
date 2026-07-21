@@ -40,7 +40,6 @@ import { cn } from '@/lib/utils'
  *    reader caused the change.
  */
 
-const INTERVAL_MS = 5000
 const REDUCED_MOTION = '(prefers-reduced-motion: reduce)'
 
 /**
@@ -64,14 +63,27 @@ function usePrefersReducedMotion(): boolean {
   )
 }
 
+export interface HeroSlide {
+  content: ReactNode
+  /** Announced on manual change, and used to label the dot. */
+  label: string
+  /**
+   * How long this slide holds before advancing.
+   *
+   * Per-slide rather than one constant because the slides are not
+   * comparable. A pitch of a hundred words takes far longer to read than a
+   * book title and a one-line summary, and a single interval either rushes
+   * the argument or stalls on the features.
+   */
+  durationMs: number
+}
+
 export interface HeroCarouselProps {
-  slides: ReactNode[]
-  /** Accessible labels, one per slide. Announced on manual change. */
-  labels: string[]
+  slides: HeroSlide[]
   className?: string
 }
 
-export function HeroCarousel({ slides, labels, className }: HeroCarouselProps) {
+export function HeroCarousel({ slides, className }: HeroCarouselProps) {
   const [index, setIndex] = useState(0)
   /** Whether the reader has pressed pause. Their stated preference. */
   const [playing, setPlaying] = useState(true)
@@ -93,18 +105,23 @@ export function HeroCarousel({ slides, labels, className }: HeroCarouselProps) {
   )
 
   const advancing = playing && !held && !reducedMotion && count > 1
+  const currentDuration = slides[index]?.durationMs ?? 6000
 
+  // setTimeout, not setInterval: the delay changes with the slide, so the
+  // timer is re-armed on each advance rather than fixed at mount. Depending
+  // on the duration value rather than the slides array keeps this from
+  // re-running on every parent render.
   useEffect(() => {
     if (!advancing) return
-    const timer = setInterval(() => {
+    const timer = setTimeout(() => {
       setAutoAdvanced(true)
       setIndex((current) => (current + 1) % count)
-    }, INTERVAL_MS)
-    return () => clearInterval(timer)
-  }, [advancing, count])
+    }, currentDuration)
+    return () => clearTimeout(timer)
+  }, [advancing, count, index, currentDuration])
 
   if (count === 0) return null
-  if (count === 1) return <div className={className}>{slides[0]}</div>
+  if (count === 1) return <div className={className}>{slides[0].content}</div>
 
   return (
     <div
@@ -138,7 +155,7 @@ export function HeroCarousel({ slides, labels, className }: HeroCarouselProps) {
               id={`${baseId}-slide-${i}`}
               role="group"
               aria-roledescription="slide"
-              aria-label={`${i + 1} of ${count}: ${labels[i] ?? ''}`}
+              aria-label={`${i + 1} of ${count}: ${slide.label}`}
               inert={!active}
               className={cn(
                 // Same cell for every slide — this is what holds the height.
@@ -150,14 +167,14 @@ export function HeroCarousel({ slides, labels, className }: HeroCarouselProps) {
                 active ? 'opacity-100' : 'pointer-events-none opacity-0',
               )}
             >
-              {slide}
+              {slide.content}
             </div>
           )
         })}
       </div>
 
       <p aria-live={autoAdvanced ? 'off' : 'polite'} className="sr-only">
-        {`Slide ${index + 1} of ${count}: ${labels[index] ?? ''}`}
+        {`Slide ${index + 1} of ${count}: ${slides[index].label}`}
       </p>
 
       <div className="mt-8 flex items-center gap-3">
@@ -172,12 +189,12 @@ export function HeroCarousel({ slides, labels, className }: HeroCarouselProps) {
         </Button>
 
         <div className="flex items-center gap-2">
-          {slides.map((_, i) => (
+          {slides.map((slide, i) => (
             <button
               key={i}
               type="button"
               onClick={() => go(i)}
-              aria-label={`Go to slide ${i + 1}: ${labels[i] ?? ''}`}
+              aria-label={`Go to slide ${i + 1}: ${slide.label}`}
               aria-current={i === index ? 'true' : undefined}
               className={cn(
                 'focus-visible:ring-ring size-2.5 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-black focus-visible:outline-none',
