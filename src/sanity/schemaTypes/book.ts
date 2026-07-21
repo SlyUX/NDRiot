@@ -1,6 +1,12 @@
 import { defineType, defineField } from 'sanity'
 
-import { GENRES } from '@/lib/genres'
+import {
+  FORMATS,
+  FORMAT_DESCRIPTIONS,
+  GENRES,
+  MATURITY_DESCRIPTIONS,
+  MATURITY_RATINGS,
+} from '@/lib/taxonomy'
 import { slugField } from './slugField'
 
 export default defineType({
@@ -37,8 +43,31 @@ export default defineType({
       of: [{ type: 'string', options: { list: [...GENRES] } }],
       options: { layout: 'grid' },
       description:
-        'Pick up to three. A fixed list rather than free text: each genre is a browsable page, and "Sci-Fi" typed alongside "Science Fiction" would split it into two. To add a genre, edit src/lib/genres.ts.',
+        'What the book is ABOUT. Pick up to three. Format (zine, graphic novel) and audience (Mature) are separate fields below — do not spend a genre slot on them. To add a genre, edit src/lib/taxonomy.ts.',
       validation: (rule) => rule.max(3).unique(),
+    }),
+    defineField({
+      name: 'format',
+      title: 'Format',
+      type: 'string',
+      options: {
+        list: FORMATS.map((value) => ({ title: `${value} — ${FORMAT_DESCRIPTIONS[value]}`, value })),
+      },
+      description: 'How it was made and published.',
+    }),
+    defineField({
+      name: 'maturity',
+      title: 'Audience',
+      type: 'string',
+      options: {
+        list: MATURITY_RATINGS.map((value) => ({
+          title: `${value} — ${MATURITY_DESCRIPTIONS[value]}`,
+          value,
+        })),
+        layout: 'radio',
+      },
+      description:
+        'Who it is for. Comics have no ratings board — creators self-rate, and these tiers match the DC/Image system most publishers use. Leave blank if genuinely unsure; a wrong rating is worse than none.',
     }),
     defineField({
       name: 'status',

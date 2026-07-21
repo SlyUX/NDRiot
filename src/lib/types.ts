@@ -1,5 +1,7 @@
 import type { PortableTextBlock } from '@portabletext/types'
 
+import type { BookFormat, Genre, MaturityRating } from '@/lib/taxonomy'
+
 /**
  * Shapes returned by the GROQ projections in `queries.ts`.
  *
@@ -34,6 +36,11 @@ export interface SanityImage {
 /** `book.status` — the Studio offers exactly these three. */
 export type BookStatus = 'Ongoing' | 'Complete' | 'Upcoming'
 
+/* Genre, format and maturity are three separate axes — see lib/taxonomy.ts.
+   Imported for use below, re-exported so consumers have one place to import
+   content types from. */
+export type { BookFormat, Genre, MaturityRating }
+
 /**
  * What kind of thing a card is pointing at. Drives FormatBadge and the
  * `/editorial/...` vs `/books/...` href split.
@@ -44,7 +51,9 @@ export interface BookSummary extends SanityDoc {
   title: string
   slug: string
   status?: BookStatus
-  genres?: string[]
+  genres?: Genre[]
+  format?: BookFormat
+  maturity?: MaturityRating
   cover?: SanityImage
   creatorName?: string
 }
@@ -141,7 +150,9 @@ export interface CreatorDetail extends SanityDoc {
 export interface BookDetail extends SanityDoc {
   title: string
   status?: BookStatus
-  genres?: string[]
+  genres?: Genre[]
+  format?: BookFormat
+  maturity?: MaturityRating
   description?: RichText
   buyLinks?: BuyLink[]
   kickstarterUrl?: string

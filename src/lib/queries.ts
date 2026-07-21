@@ -17,13 +17,13 @@ export const CREATOR_QUERY = `*[_type=="creator" && slug.current==$slug][0]{
   "books": *[_type=="book" && references(^._id)]|order(title asc){_id,title,"slug":slug.current,status,cover}
 }`
 
-export const BOOKS_QUERY = `*[_type=="book"]|order(title asc){_id,title,"slug":slug.current,status,genres,cover,"creatorName":creator->name}`
+export const BOOKS_QUERY = `*[_type=="book"]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"creatorName":creator->name}`
 export const BOOK_QUERY = `*[_type=="book" && slug.current==$slug][0]{
-  _id,title,status,genres,description,buyLinks,kickstarterUrl,cover,
+  _id,title,status,genres,format,maturity,description,buyLinks,kickstarterUrl,cover,
   "creatorName":creator->name,"creatorSlug":creator->slug.current
 }`
 export const GENRES_QUERY = `array::unique(*[_type=="book" && defined(genres)].genres[])`
-export const GENRE_BOOKS_QUERY = `*[_type=="book" && $genre in genres]|order(title asc){_id,title,"slug":slug.current,status,cover,"creatorName":creator->name}`
+export const GENRE_BOOKS_QUERY = `*[_type=="book" && $genre in genres]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"creatorName":creator->name}`
 
 export const COLUMNS_QUERY = `*[_type=="column"]|order(publishedAt desc){_id,title,"slug":slug.current,excerpt,cover,publishedAt,"authorName":author->name}`
 export const COLUMN_QUERY = `*[_type=="column" && slug.current==$slug][0]{_id,title,body,publishedAt,cover,"authorName":author->name}`

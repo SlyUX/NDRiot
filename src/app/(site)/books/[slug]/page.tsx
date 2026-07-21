@@ -5,9 +5,11 @@ import { notFound } from 'next/navigation'
 import BuyLinks from '@/components/BuyLinks'
 import PortableTextBody from '@/components/PortableTextBody'
 import { GenreBadge } from '@/components/genre-badge'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { safeFetch, BOOK_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
+import { RESTRICTED_RATING } from '@/lib/taxonomy'
 import type { BookDetail } from '@/lib/types'
 import { urlFor } from '@/sanity/image'
 
@@ -49,10 +51,25 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
               {book.creatorName}
             </Link>
           )}
-          {book.status && (
-            <p className="text-muted-foreground mt-1 text-xs tracking-widest uppercase">
-              {book.status}
-            </p>
+          {(book.status || book.format || book.maturity) && (
+            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
+              {(book.status || book.format) && (
+                <p className="text-muted-foreground text-xs tracking-widest uppercase">
+                  {[book.status, book.format].filter(Boolean).join(' · ')}
+                </p>
+              )}
+              {book.maturity && (
+                // Mature gets the solid pink treatment; the gentler ratings
+                // sit back as outlines. A reader deciding whether to click
+                // should not have to hunt for the one that matters.
+                <Badge
+                  variant={book.maturity === RESTRICTED_RATING ? 'default' : 'outline'}
+                  className="text-[10px] tracking-wider uppercase"
+                >
+                  {book.maturity}
+                </Badge>
+              )}
+            </div>
           )}
           {!!book.genres?.length && (
             <div className="mt-3 flex flex-wrap gap-2">
