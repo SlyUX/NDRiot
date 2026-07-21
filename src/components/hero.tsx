@@ -166,7 +166,7 @@ export function Hero({ hero, features }: HeroProps) {
     // shape, same padding scale — just assembled here.
     <section
       data-slot="section"
-      className="relative isolate overflow-hidden px-6 py-8"
+      className="relative isolate overflow-hidden px-6 pt-12 pb-8"
     >
       <Image
         src={hero.background ? urlFor(hero.background).width(2400).url() : BACKGROUND_FALLBACK}

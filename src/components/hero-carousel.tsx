@@ -1,51 +1,110 @@
 'use client'
 
-import { useCallback, useId, useState, type ReactNode } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from 'react'
+import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 /**
- * Manual-advance carousel for the homepage hero.
+ * Auto-advancing carousel for the homepage hero.
  *
- * The only client component on the page, and it is deliberately dumb: slides
- * arrive fully rendered from the server, so nothing here fetches or knows what
- * a book is. It owns an index and the controls, nothing else.
+ * Slides arrive fully rendered from the server, so nothing here fetches or
+ * knows what a book is. It owns an index, a timer and the controls.
  *
- * No autoplay, by decision. WCAG 2.2.2 requires any content that moves for
- * more than five seconds to be pausable, and the first slide carries the
- * pitch — sliding it away before someone finishes reading is the failure mode
- * carousels are notorious for.
+ * Layout: every slide occupies the same grid cell, so the container is as
+ * tall as the tallest slide and never resizes on advance. No measuring, and
+ * it stays correct when the viewport or the copy changes.
  *
- * Inactive slides stay in the DOM (so the markup is crawlable) but are
- * `hidden`, which removes them from the accessibility tree and tab order.
- * Visually hiding them with opacity alone would leave their links focusable.
+ * Accessibility, which autoplay makes load-bearing rather than optional:
+ *
+ *  - A visible pause control. WCAG 2.2.2 requires content that moves for more
+ *    than five seconds to be pausable, stoppable or hideable, and a hover
+ *    handler is not a mechanism a keyboard user can reach.
+ *  - Advancing stops on hover and on focus-within, so it cannot pull a slide
+ *    away mid-read or mid-tab.
+ *  - `prefers-reduced-motion` disables both the timer and the fade. Motion
+ *    sensitivity is exactly what that setting is for.
+ *  - Inactive slides get `inert`, which removes them from the tab order and
+ *    the accessibility tree. Fading with opacity alone would leave their
+ *    links focusable but invisible — a keyboard trap in all but name.
+ *  - The live region falls silent while auto-advancing. Announcing a change
+ *    every five seconds is noise, not information; it speaks only when the
+ *    reader caused the change.
  */
+
+const INTERVAL_MS = 5000
+const REDUCED_MOTION = '(prefers-reduced-motion: reduce)'
+
+/**
+ * Subscribes to the OS motion preference.
+ *
+ * useSyncExternalStore rather than useEffect + setState: matchMedia is an
+ * external store, and reading one into state inside an effect is both a lint
+ * error and a real tearing hazard. The third argument is the server snapshot —
+ * false, because there is no media query to read during SSR, and assuming
+ * "no preference" matches what the markup would render anyway.
+ */
+function usePrefersReducedMotion(): boolean {
+  return useSyncExternalStore(
+    (onChange) => {
+      const query = window.matchMedia(REDUCED_MOTION)
+      query.addEventListener('change', onChange)
+      return () => query.removeEventListener('change', onChange)
+    },
+    () => window.matchMedia(REDUCED_MOTION).matches,
+    () => false,
+  )
+}
 
 export interface HeroCarouselProps {
   slides: ReactNode[]
-  /** Accessible labels, one per slide. Announced on change. */
+  /** Accessible labels, one per slide. Announced on manual change. */
   labels: string[]
   className?: string
 }
 
 export function HeroCarousel({ slides, labels, className }: HeroCarouselProps) {
   const [index, setIndex] = useState(0)
+  /** Whether the reader has pressed pause. Their stated preference. */
+  const [playing, setPlaying] = useState(true)
+  /** Transient pause from hover or focus. Not a stated preference. */
+  const [held, setHeld] = useState(false)
+  /** Suppresses the live region while the timer, not the reader, is driving. */
+  const [autoAdvanced, setAutoAdvanced] = useState(false)
+
+  const reducedMotion = usePrefersReducedMotion()
   const baseId = useId()
   const count = slides.length
 
   const go = useCallback(
-    (next: number) => setIndex(((next % count) + count) % count),
+    (next: number) => {
+      setAutoAdvanced(false)
+      setIndex(((next % count) + count) % count)
+    },
     [count],
   )
 
-  if (count === 0) return null
+  const advancing = playing && !held && !reducedMotion && count > 1
 
-  // A single slide needs no controls, no roledescription, and no live region.
-  if (count === 1) {
-    return <div className={className}>{slides[0]}</div>
-  }
+  useEffect(() => {
+    if (!advancing) return
+    const timer = setInterval(() => {
+      setAutoAdvanced(true)
+      setIndex((current) => (current + 1) % count)
+    }, INTERVAL_MS)
+    return () => clearInterval(timer)
+  }, [advancing, count])
+
+  if (count === 0) return null
+  if (count === 1) return <div className={className}>{slides[0]}</div>
 
   return (
     <div
@@ -53,6 +112,12 @@ export function HeroCarousel({ slides, labels, className }: HeroCarouselProps) {
       aria-roledescription="carousel"
       aria-label="Featured"
       className={cn('relative', className)}
+      onMouseEnter={() => setHeld(true)}
+      onMouseLeave={() => setHeld(false)}
+      onFocusCapture={() => setHeld(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setHeld(false)
+      }}
       onKeyDown={(event) => {
         if (event.key === 'ArrowLeft') {
           event.preventDefault()
@@ -64,36 +129,34 @@ export function HeroCarousel({ slides, labels, className }: HeroCarouselProps) {
         }
       }}
     >
-      {/*
-        Every slide sits in the same grid cell, so the container is as tall as
-        the tallest of them and never resizes on advance. That is the whole
-        reason for the grid: no measuring, no ResizeObserver, and it stays
-        correct when the viewport changes or an editor lengthens the copy.
-
-        Inactive slides use `visibility: hidden` rather than `display: none`.
-        Both remove an element from the accessibility tree and the tab order,
-        but only `visibility` keeps it occupying space — which is exactly what
-        holds the height open.
-      */}
       <div className="grid">
-        {slides.map((slide, i) => (
-          <div
-            key={i}
-            id={`${baseId}-slide-${i}`}
-            role="group"
-            aria-roledescription="slide"
-            aria-label={`${i + 1} of ${count}: ${labels[i] ?? ''}`}
-            aria-hidden={i !== index}
-            className={cn('col-start-1 row-start-1', i !== index && 'invisible')}
-          >
-            {slide}
-          </div>
-        ))}
+        {slides.map((slide, i) => {
+          const active = i === index
+          return (
+            <div
+              key={i}
+              id={`${baseId}-slide-${i}`}
+              role="group"
+              aria-roledescription="slide"
+              aria-label={`${i + 1} of ${count}: ${labels[i] ?? ''}`}
+              inert={!active}
+              className={cn(
+                // Same cell for every slide — this is what holds the height.
+                // `grid items-center` then centres each slide's content in
+                // that cell, so shorter slides sit in the middle rather than
+                // hugging the top.
+                'col-start-1 row-start-1 grid items-center',
+                'transition-opacity duration-500 motion-reduce:transition-none',
+                active ? 'opacity-100' : 'pointer-events-none opacity-0',
+              )}
+            >
+              {slide}
+            </div>
+          )
+        })}
       </div>
 
-      {/* Announces the change for screen reader users, who otherwise get no
-          signal that pressing a dot did anything. */}
-      <p aria-live="polite" className="sr-only">
+      <p aria-live={autoAdvanced ? 'off' : 'polite'} className="sr-only">
         {`Slide ${index + 1} of ${count}: ${labels[index] ?? ''}`}
       </p>
 
@@ -133,6 +196,20 @@ export function HeroCarousel({ slides, labels, className }: HeroCarouselProps) {
         >
           <ChevronRight />
         </Button>
+
+        {/* Hidden when the OS has already asked for less motion — there is no
+            timer running, so a pause button would be a lie. */}
+        {!reducedMotion && (
+          <Button
+            type="button"
+            variant="outline"
+            size="icon-sm"
+            onClick={() => setPlaying((current) => !current)}
+            aria-label={playing ? 'Pause slideshow' : 'Play slideshow'}
+          >
+            {playing ? <Pause /> : <Play />}
+          </Button>
+        )}
       </div>
     </div>
   )
