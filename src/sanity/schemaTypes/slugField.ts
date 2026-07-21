@@ -1,5 +1,7 @@
 import { defineField } from 'sanity'
 
+import { LowercaseSlugInput } from '../components/LowercaseSlugInput'
+
 /**
  * Shared slug field. Not a registered schema type — a helper that returns a
  * configured field, so every document type gets identical slug rules.
@@ -39,8 +41,9 @@ export function slugField(source: string, routeExample: string) {
     name: 'slug',
     title: 'URL slug',
     type: 'slug',
-    description: `Appears in the address bar: ${routeExample}. Click Generate. Lowercase letters, numbers and hyphens only — URLs are case-sensitive, so a capital letter here breaks any link that omits it.`,
+    description: `Appears in the address bar: ${routeExample}. Click Generate, or type it — capitals and punctuation convert as you type, because URLs are case-sensitive and a stray capital breaks every link that omits it.`,
     options: { source, slugify },
+    components: { input: LowercaseSlugInput },
     validation: (rule) =>
       rule.required().custom((value) => {
         const current = value?.current
