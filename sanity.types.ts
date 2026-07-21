@@ -408,6 +408,25 @@ export type SiteSettings = {
     interviews?: string;
     downloads?: string;
   };
+  join?: {
+    heading?: string;
+    body?: Array<{
+      children?: Array<{
+        marks?: Array<string>;
+        text?: string;
+        _type: "span";
+        _key: string;
+      }>;
+      style?: "normal";
+      listItem?: "bullet";
+      markDefs?: null;
+      level?: number;
+      _type: "block";
+      _key: string;
+    }>;
+    ctaLabel?: string;
+    formUrl?: string;
+  };
   nav?: Array<{
     label: string;
     href: string;
@@ -1052,6 +1071,49 @@ export type FEATURES_QUERY_RESULT = Array<
     }
 > | null;
 
+// Source: src/lib/queries.ts
+// Variable: SITEMAP_QUERY
+// Query: {  "books": *[_type=="book" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "creators": *[_type=="creator" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "columns": *[_type=="column" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "interviews": *[_type=="interview" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "genres": array::unique(*[_type=="book" && defined(genres)].genres[])}
+export type SITEMAP_QUERY_RESULT = {
+  books: Array<{
+    slug: string;
+    _updatedAt: string;
+  }>;
+  creators: Array<{
+    slug: string;
+    _updatedAt: string;
+  }>;
+  columns: Array<{
+    slug: string;
+    _updatedAt: string;
+  }>;
+  interviews: Array<{
+    slug: string;
+    _updatedAt: string;
+  }>;
+  downloads: Array<{
+    slug: string;
+    _updatedAt: string;
+  }>;
+  genres: Array<
+    | "Action & Adventure"
+    | "Crime & Noir"
+    | "Drama"
+    | "Fantasy"
+    | "Historical"
+    | "Horror"
+    | "Humor & Satire"
+    | "Memoir & Autobio"
+    | "Punk & Protest"
+    | "Queer"
+    | "Romance"
+    | "Sci-Fi"
+    | "Slice of Life"
+    | "Superhero"
+    | "Weird & Experimental"
+  >;
+};
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
@@ -1069,5 +1131,6 @@ declare module "@sanity/client" {
     '*[_type=="freeDownload"]|order(publishedAt desc){_id,title,"slug":slug.current,description,cover,publishedAt,"creatorName":creator->name}': DOWNLOADS_QUERY_RESULT;
     '*[_type=="freeDownload" && slug.current==$slug][0]{_id,title,description,cover,"creatorName":creator->name,"fileUrl":file.asset->url}': DOWNLOAD_QUERY_RESULT;
     '*[_type=="homepageFeature" && active==true]|order(order asc)[0].items[]->{\n  _type,_id,title,name,"slug":slug.current,cover,photo,genres,format,maturity,\n  shortDescription,excerpt,location,\n  "creatorName":creator->name,\n  "studioName":studio->name\n}': FEATURES_QUERY_RESULT;
+    '{\n  "books": *[_type=="book" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "creators": *[_type=="creator" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "columns": *[_type=="column" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "interviews": *[_type=="interview" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "genres": array::unique(*[_type=="book" && defined(genres)].genres[])\n}': SITEMAP_QUERY_RESULT;
   }
 }

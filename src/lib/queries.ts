@@ -41,3 +41,19 @@ export const FEATURES_QUERY = defineQuery(`*[_type=="homepageFeature" && active=
   "creatorName":creator->name,
   "studioName":studio->name
 }`)
+
+/**
+ * Everything with a public URL, for the sitemap.
+ *
+ * `_updatedAt` is a system field on every document, so lastModified is real
+ * rather than "now" — search engines use it to decide what to recrawl, and a
+ * sitemap that claims everything changed today teaches them to ignore it.
+ */
+export const SITEMAP_QUERY = defineQuery(`{
+  "books": *[_type=="book" && defined(slug.current)]{"slug":slug.current,_updatedAt},
+  "creators": *[_type=="creator" && defined(slug.current)]{"slug":slug.current,_updatedAt},
+  "columns": *[_type=="column" && defined(slug.current)]{"slug":slug.current,_updatedAt},
+  "interviews": *[_type=="interview" && defined(slug.current)]{"slug":slug.current,_updatedAt},
+  "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},
+  "genres": array::unique(*[_type=="book" && defined(genres)].genres[])
+}`)

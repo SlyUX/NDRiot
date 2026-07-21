@@ -41,11 +41,20 @@ export interface HeroSettings {
   featureCtaLabel: string
 }
 
+export interface JoinSettings {
+  heading: string
+  body?: RichText
+  ctaLabel: string
+  /** Absent means the page renders without a button rather than a dead link. */
+  formUrl?: string
+}
+
 export interface SiteSettings {
   siteTitle: string
   siteDescription: string
   footer: string
   hero: HeroSettings
+  join: JoinSettings
   home: {
     genresHeading: string
     booksHeading: string
@@ -98,6 +107,11 @@ const DEFAULTS: SiteSettings = {
       { label: 'All Comics', href: '/books' },
     ],
   },
+  join: {
+    heading: 'Get listed',
+    ctaLabel: 'Start your submission',
+    formUrl: 'https://forms.gle/STbaVMQ8a6Ap8rL1A',
+  },
   home: {
     genresHeading: 'Browse by genre',
     booksHeading: 'Books',
@@ -132,6 +146,7 @@ const DEFAULTS: SiteSettings = {
     { label: 'Editorial', href: '/editorial' },
     { label: 'Downloads', href: '/downloads' },
     { label: 'Magazine', href: '/magazine' },
+    { label: 'Join', href: '/join' },
   ],
 }
 
@@ -139,6 +154,7 @@ export const SITE_SETTINGS_QUERY = `*[_id=="siteSettings"][0]{
   siteTitle,siteDescription,footer,
   home,sections,empty,
   hero{background,headline,body,featureCtaLabel,ctas[]{label,href}},
+  join{heading,body,ctaLabel,formUrl},
   nav[]{label,href}
 }`
 
@@ -173,6 +189,12 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       featureCtaLabel:
         data.hero?.featureCtaLabel?.trim() || DEFAULTS.hero.featureCtaLabel,
       ctas: data.hero?.ctas?.length ? data.hero.ctas : DEFAULTS.hero.ctas,
+    },
+    join: {
+      heading: data.join?.heading?.trim() || DEFAULTS.join.heading,
+      body: data.join?.body?.length ? data.join.body : undefined,
+      ctaLabel: data.join?.ctaLabel?.trim() || DEFAULTS.join.ctaLabel,
+      formUrl: data.join?.formUrl?.trim() || DEFAULTS.join.formUrl,
     },
     home: mergeGroup(DEFAULTS.home, data.home),
     sections: mergeGroup(DEFAULTS.sections, data.sections),

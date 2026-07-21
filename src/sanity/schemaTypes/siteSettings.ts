@@ -20,6 +20,7 @@ export default defineType({
     { name: 'home', title: 'Homepage' },
     { name: 'sections', title: 'Section headings' },
     { name: 'empty', title: 'Empty states' },
+    { name: 'join', title: 'Join page' },
     { name: 'nav', title: 'Navigation' },
   ],
   fields: [
@@ -216,6 +217,51 @@ export default defineType({
         defineField({ name: 'columns', title: 'No columns', type: 'string' }),
         defineField({ name: 'interviews', title: 'No interviews', type: 'string' }),
         defineField({ name: 'downloads', title: 'No downloads', type: 'string' }),
+      ],
+    }),
+
+    defineField({
+      name: 'join',
+      title: 'Join page',
+      type: 'object',
+      group: 'join',
+      options: { collapsible: true, collapsed: false },
+      description: 'The page at /join, where a creator asks to be listed.',
+      fields: [
+        defineField({
+          name: 'heading',
+          title: 'Heading',
+          type: 'string',
+          description: 'The h1.',
+        }),
+        defineField({
+          name: 'body',
+          title: 'Body',
+          type: 'array',
+          of: [
+            {
+              type: 'block',
+              styles: [{ title: 'Paragraph', value: 'normal' }],
+              lists: [{ title: 'Bullet', value: 'bullet' }],
+              marks: { decorators: [{ title: 'Bold', value: 'strong' }], annotations: [] },
+            },
+          ],
+          description:
+            'What you are looking for and what happens after someone submits. Saying how long a reply takes is the single most useful thing here — it stops people wondering whether it worked.',
+        }),
+        defineField({
+          name: 'ctaLabel',
+          title: 'Button label',
+          type: 'string',
+          description: 'e.g. "Get listed".',
+        }),
+        defineField({
+          name: 'formUrl',
+          title: 'Form link',
+          type: 'url',
+          description:
+            'Where the button goes. A field rather than code so the form can be replaced, paused, or swapped for an on-site version without a deploy.',
+        }),
       ],
     }),
 
