@@ -202,4 +202,11 @@ export interface FeatureItem extends SanityDoc {
   genres?: Genre[]
   format?: BookFormat
   maturity?: MaturityRating
+  shortDescription?: string
+  creatorName?: string
+  /* Editorial only. */
+  excerpt?: string
+  /* Creators only. */
+  location?: string
+  studioName?: string
 }

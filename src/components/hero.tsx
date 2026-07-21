@@ -2,13 +2,14 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { PortableText } from '@portabletext/react'
 
-import { ContentCard } from '@/components/content-card'
+import { MaturityOverlay, TaxonomyRow } from '@/components/content-card'
 import { HeroCarousel } from '@/components/hero-carousel'
 import { Logo } from '@/components/logo'
 import { Button } from '@/components/ui/button'
 import { featureToCard } from '@/lib/card-mappers'
 import type { HeroSettings } from '@/lib/site-settings'
 import type { FeatureItem } from '@/lib/types'
+import { cn } from '@/lib/utils'
 import { urlFor } from '@/sanity/image'
 
 /**
@@ -39,6 +40,71 @@ const SLIDE_MIN_HEIGHT = 'min-h-[26rem] sm:min-h-[30rem]'
  * would otherwise produce on first load.
  */
 const BACKGROUND_FALLBACK = '/nd-riot-hero-bkgrd.jpg'
+
+/**
+ * A featured book or creator, at hero scale.
+ *
+ * Mirrors the pitch slide's two-column shape — art left, words right — so the
+ * carousel reads as one composition rather than a pitch followed by some
+ * cards. A ContentCard would have been the reuse-first choice, but its
+ * horizontal layout is a list row: 96px thumbnail, clamped summary, no call
+ * to action. Dropped into a 30rem hero it looked stranded, which is what the
+ * previous version did. This composes the same pieces at a different scale
+ * instead (AGENTS.md §3, option 3).
+ */
+function FeatureSlide({ item, ctaLabel }: { item: FeatureItem; ctaLabel: string }) {
+  const card = featureToCard(item)
+  const square = card.aspectRatio === 'square'
+
+  return (
+    <div className={`grid items-center gap-8 lg:grid-cols-2 lg:gap-12 ${SLIDE_MIN_HEIGHT}`}>
+      <div className="flex justify-center lg:justify-start">
+        <div
+          className={cn(
+            'relative w-48 shrink-0 overflow-hidden sm:w-56 lg:w-64',
+            square ? 'aspect-square' : 'aspect-[2/3]',
+          )}
+        >
+          {card.image ? (
+            <Image
+              src={urlFor(card.image).width(600).url()}
+              alt={card.image.alt ?? card.imageAlt}
+              fill
+              sizes="(max-width: 1024px) 14rem, 16rem"
+              className="object-cover"
+            />
+          ) : (
+            <div className="bg-muted h-full w-full" aria-hidden="true" />
+          )}
+          {card.maturity && <MaturityOverlay maturity={card.maturity} />}
+        </div>
+      </div>
+
+      <div className="max-w-xl">
+        {card.eyebrow && (
+          <p className="text-primary text-xs tracking-widest uppercase">{card.eyebrow}</p>
+        )}
+
+        {/* h2, not h1 — the page's h1 lives on the pitch slide. */}
+        <h2 className="mt-2 text-2xl leading-tight font-black tracking-tight text-white uppercase sm:text-3xl">
+          {card.title}
+        </h2>
+
+        <TaxonomyRow genres={card.genres} format={card.format} className="mt-3" />
+
+        {card.summary && (
+          <p className="mt-4 text-sm leading-relaxed text-white/85 sm:text-base">{card.summary}</p>
+        )}
+
+        <div className="mt-6">
+          <Button asChild size="lg" className="font-black tracking-wide uppercase">
+            <Link href={card.href}>{ctaLabel}</Link>
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export function Hero({ hero, features }: HeroProps) {
   const featureSlides = features.filter(Boolean).slice(0, 3)
@@ -86,19 +152,7 @@ export function Hero({ hero, features }: HeroProps) {
   const slides = [
     pitchSlide,
     ...featureSlides.map((item) => (
-      <div
-        key={item._id}
-        className={`flex items-center ${SLIDE_MIN_HEIGHT}`}
-      >
-        <div className="w-full max-w-2xl">
-          <ContentCard
-            {...featureToCard(item)}
-            layout="horizontal"
-            aspectRatio={item._type === 'creator' ? 'square' : 'cover'}
-            className="[&_h3]:text-2xl [&_h3]:text-white sm:[&_h3]:text-3xl"
-          />
-        </div>
-      </div>
+      <FeatureSlide key={item._id} item={item} ctaLabel={hero.featureCtaLabel} />
     )),
   ]
 

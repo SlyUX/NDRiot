@@ -37,6 +37,8 @@ export interface HeroSettings {
   headline: string
   body?: RichText
   ctas: Cta[]
+  /** Button label on the featured slides. */
+  featureCtaLabel: string
 }
 
 export interface SiteSettings {
@@ -89,6 +91,7 @@ const DEFAULTS: SiteSettings = {
   footer: 'Support indie comics. · ND Riot',
   hero: {
     headline: '“The Big Two”',
+    featureCtaLabel: 'Read more',
     ctas: [
       { label: 'All Creators', href: '/creators' },
       { label: 'All Comics', href: '/books' },
@@ -133,7 +136,7 @@ const DEFAULTS: SiteSettings = {
 export const SITE_SETTINGS_QUERY = `*[_id=="siteSettings"][0]{
   siteTitle,siteDescription,footer,
   home,sections,empty,
-  hero{background,headline,body,ctas[]{label,href}},
+  hero{background,headline,body,featureCtaLabel,ctas[]{label,href}},
   nav[]{label,href}
 }`
 
@@ -165,6 +168,8 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       background: data.hero?.background,
       body: data.hero?.body?.length ? data.hero.body : undefined,
       headline: data.hero?.headline?.trim() || DEFAULTS.hero.headline,
+      featureCtaLabel:
+        data.hero?.featureCtaLabel?.trim() || DEFAULTS.hero.featureCtaLabel,
       ctas: data.hero?.ctas?.length ? data.hero.ctas : DEFAULTS.hero.ctas,
     },
     home: mergeGroup(DEFAULTS.home, data.home),

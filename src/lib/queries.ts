@@ -33,4 +33,9 @@ export const INTERVIEW_QUERY = `*[_type=="interview" && slug.current==$slug][0]{
 export const DOWNLOADS_QUERY = `*[_type=="freeDownload"]|order(publishedAt desc){_id,title,"slug":slug.current,description,cover,publishedAt,"creatorName":creator->name}`
 export const DOWNLOAD_QUERY = `*[_type=="freeDownload" && slug.current==$slug][0]{_id,title,description,cover,"creatorName":creator->name,"fileUrl":file.asset->url}`
 
-export const FEATURES_QUERY = `*[_type=="homepageFeature" && active==true]|order(order asc)[0].items[]->{_type,_id,title,name,"slug":slug.current,cover,photo,genres,format,maturity}`
+export const FEATURES_QUERY = `*[_type=="homepageFeature" && active==true]|order(order asc)[0].items[]->{
+  _type,_id,title,name,"slug":slug.current,cover,photo,genres,format,maturity,
+  shortDescription,excerpt,location,
+  "creatorName":creator->name,
+  "studioName":studio->name
+}`

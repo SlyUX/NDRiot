@@ -104,6 +104,8 @@ export function featureToCard(item: FeatureItem): ContentCardProps {
   const base = {
     title: item.title ?? item.name ?? '',
     imageAlt: '',
+    // Each type keeps its supporting copy in a different field.
+    summary: item.shortDescription ?? item.excerpt,
   }
 
   switch (item._type) {
@@ -112,6 +114,7 @@ export function featureToCard(item: FeatureItem): ContentCardProps {
         ...base,
         href: `/books/${item.slug}`,
         image: item.cover,
+        eyebrow: item.creatorName,
         genres: item.genres,
         format: item.format,
         maturity: item.maturity,
@@ -123,6 +126,7 @@ export function featureToCard(item: FeatureItem): ContentCardProps {
         href: `/creators/${item.slug}`,
         image: item.photo,
         imageAlt: `Portrait of ${base.title}`,
+        eyebrow: item.studioName ?? item.location,
         aspectRatio: 'square',
       }
     case 'column':

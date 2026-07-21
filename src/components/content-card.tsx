@@ -66,7 +66,7 @@ export interface ContentCardProps {
  * near-opaque background surface (white text, ~20:1). A translucent badge
  * would be unreadable over a light cover.
  */
-function MaturityOverlay({ maturity }: { maturity: MaturityRating }) {
+export function MaturityOverlay({ maturity }: { maturity: MaturityRating }) {
   const restricted = maturity === RESTRICTED_RATING
 
   return (
@@ -83,7 +83,7 @@ function MaturityOverlay({ maturity }: { maturity: MaturityRating }) {
 }
 
 /** Genres plus format. Nothing renders if the card has neither. */
-function TaxonomyRow({
+export function TaxonomyRow({
   genres,
   format,
   className,

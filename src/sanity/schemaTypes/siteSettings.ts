@@ -88,6 +88,13 @@ export default defineType({
           description: 'A few short paragraphs. Bold carries the emphasis; there is no other styling.',
         }),
         defineField({
+          name: 'featureCtaLabel',
+          title: 'Featured slide button label',
+          type: 'string',
+          description:
+            'On slides 2 onward, the button under a featured book or creator — e.g. "Read more". One label covers them all.',
+        }),
+        defineField({
           name: 'ctas',
           title: 'Buttons',
           type: 'array',
