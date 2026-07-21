@@ -1,5 +1,7 @@
 import { defineType, defineField } from 'sanity'
 
+import { slugField } from './slugField'
+
 /**
  * A group creators belong to — a collective, guild, or association.
  *
@@ -23,15 +25,7 @@ export default defineType({
       description: 'Exactly as the organization writes it, punctuation included.',
       validation: (rule) => rule.required(),
     }),
-    defineField({
-      name: 'slug',
-      title: 'URL slug',
-      type: 'slug',
-      description:
-        'Reserved for a future organization page. Set it now — adding it later means editing every organization by hand.',
-      options: { source: 'name' },
-      validation: (rule) => rule.required(),
-    }),
+    slugField('name', '/organizations/their-slug'),
     defineField({
       name: 'website',
       title: 'Website',

@@ -20,9 +20,11 @@ export default defineType({
       title: 'Alt text',
       type: 'string',
       description:
-        'Describe the image for screen readers and for when it fails to load. Leave blank only if the image is decorative — e.g. a cover shown directly beside its own title.',
+        'Describe what the image SHOWS, not what the thing IS — this is read aloud, it is not SEO copy. Good: "A man kneels in floodwater cradling a child, lightning behind him." Not: "112-page horror graphic novel by Stephen Fox." Leave BLANK for cover art and portraits that sit right beside their own title or name — otherwise a screen reader announces the same thing twice.',
       validation: (rule) =>
-        rule.max(160).warning('Long alt text is hard to listen to. Aim for one sentence.'),
+        rule
+          .max(160)
+          .warning('Long alt text is hard to listen to. Aim for one sentence.'),
     }),
   ],
 })

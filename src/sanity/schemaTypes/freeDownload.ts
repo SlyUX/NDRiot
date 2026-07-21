@@ -1,5 +1,7 @@
 import { defineType, defineField } from 'sanity'
 
+import { slugField } from './slugField'
+
 export default defineType({
   name: 'freeDownload',
   title: 'Free download',
@@ -12,14 +14,7 @@ export default defineType({
       description: 'What the reader is getting — e.g. "Issue #1, full PDF".',
       validation: (rule) => rule.required(),
     }),
-    defineField({
-      name: 'slug',
-      title: 'URL slug',
-      type: 'slug',
-      description: 'Appears in the address bar: /downloads/your-slug. Click Generate.',
-      options: { source: 'title' },
-      validation: (rule) => rule.required(),
-    }),
+    slugField('title', '/downloads/your-slug'),
     defineField({
       name: 'creator',
       title: 'Creator',

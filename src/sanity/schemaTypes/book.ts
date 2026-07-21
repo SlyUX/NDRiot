@@ -1,5 +1,7 @@
 import { defineType, defineField } from 'sanity'
 
+import { slugField } from './slugField'
+
 export default defineType({
   name: 'book',
   title: 'Book',
@@ -12,14 +14,7 @@ export default defineType({
       description: 'The book or series title, as the creator styles it.',
       validation: (rule) => rule.required(),
     }),
-    defineField({
-      name: 'slug',
-      title: 'URL slug',
-      type: 'slug',
-      description: 'Appears in the address bar: /books/your-slug. Click Generate.',
-      options: { source: 'title' },
-      validation: (rule) => rule.required(),
-    }),
+    slugField('title', '/books/your-slug'),
     defineField({
       name: 'creator',
       title: 'Creator',
