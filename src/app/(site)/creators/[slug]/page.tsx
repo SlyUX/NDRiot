@@ -46,7 +46,12 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
             <h1 className="text-4xl font-black tracking-tighter uppercase">{creator.name}</h1>
             {creator.studio && (
               <div className="mt-1">
-                <OrganizationLink organization={creator.studio} size="md" />
+                {/* Text, not the logo. The studio sits immediately under the
+                    creator's portrait, and for a solo creator the studio mark
+                    often IS that portrait — showing it twice in the space of a
+                    few pixels reads as a duplication bug. Logos are fine
+                    elsewhere, where nothing competes with them. */}
+                <OrganizationLink organization={creator.studio} size="md" display="text" />
               </div>
             )}
             {creator.location && <p className="text-muted-foreground">{creator.location}</p>}

@@ -243,6 +243,13 @@ export const componentEntries: ComponentEntry[] = [
         default: "'sm'",
         description: 'md for a creator\u2019s own studio, sm for the affiliations row.',
       },
+      {
+        name: 'display',
+        type: "'auto' | 'text'",
+        default: "'auto'",
+        description:
+          'text forces the name even when a logo exists — used under a creator\u2019s portrait, where a solo studio\u2019s mark is often the portrait itself.',
+      },
     ],
   },
   {

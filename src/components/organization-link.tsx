@@ -40,15 +40,32 @@ const textVariants = cva('font-bold tracking-wide uppercase', {
 
 export interface OrganizationLinkProps extends VariantProps<typeof logoVariants> {
   organization: Organization
+  /**
+   * `auto` shows the logo when the organization has one.
+   *
+   * `text` forces the name even when a logo exists — for places where the
+   * logo would collide with nearby artwork. A creator's studio sits directly
+   * under their portrait, and when the studio's mark IS that portrait, the
+   * logo appears twice within a few pixels.
+   */
+  display?: 'auto' | 'text'
   className?: string
 }
 
-export function OrganizationLink({ organization, size, className }: OrganizationLinkProps) {
+export function OrganizationLink({
+  organization,
+  size,
+  display = 'auto',
+  className,
+}: OrganizationLinkProps) {
   const { name, website, logo } = organization
+  // Narrowed to the image itself rather than a boolean flag, so the branch
+  // below type-checks without non-null assertions.
+  const shownLogo = display === 'auto' ? logo : undefined
 
-  const content = logo ? (
+  const content = shownLogo ? (
     <Image
-      src={urlFor(logo).width(320).url()}
+      src={urlFor(shownLogo).width(320).url()}
       /*
        * The name, not the image's own alt — and deliberately not empty.
        *
@@ -58,7 +75,7 @@ export function OrganizationLink({ organization, size, className }: Organization
        * link's accessible name with it. `||` rather than `??` so an editor
        * saving an empty alt still gets the name.
        */
-      alt={logo.alt || name}
+      alt={shownLogo.alt || name}
       width={320}
       height={160}
       className={cn(logoVariants({ size }))}
