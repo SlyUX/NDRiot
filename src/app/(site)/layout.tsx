@@ -22,7 +22,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   return (
     <>
       <header className="border-primary/40 border-b">
-        <nav className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-4">
+        <nav className="mx-auto flex max-w-[90rem] flex-wrap items-center justify-between gap-3 px-6 py-4">
           <Link
             href="/"
             aria-label={`${settings.siteTitle} — home`}
@@ -49,7 +49,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <main>{children}</main>
 
       <footer className="border-primary/40 border-t">
-        <div className="text-muted-foreground mx-auto max-w-6xl px-6 py-8 text-center text-xs tracking-widest uppercase">
+        <div className="text-muted-foreground mx-auto max-w-[90rem] px-6 py-8 text-center text-xs tracking-widest uppercase">
           {settings.footer}
         </div>
       </footer>

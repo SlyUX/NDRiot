@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 
 /**
  * Layout backbone. Replaces the repeated
- * `py-16 px-6 <bg> / mx-auto max-w-6xl` pattern across page files.
+ * `py-16 px-6 <bg> / mx-auto max-w-*` pattern across page files.
  *
  * Two layers on purpose: the outer element owns padding/background/border
  * (so backgrounds run full-bleed), the inner div owns the max-width.
@@ -42,6 +42,20 @@ const sectionVariants = cva('', {
   },
 })
 
+/**
+ * Container widths, narrow to wide.
+ *
+ * The default is `wide` (1440px), not a text-site width. This is a directory
+ * of cover art — a 4-column grid at 1152px gives ~264px cards, which is small
+ * for the thing the page exists to show.
+ *
+ * `2xl`-`4xl` are reading measures, for prose. Long-form uses `3xl` so line
+ * length stays sane; a 1440px paragraph is unreadable.
+ *
+ * Above roughly 1500px viewports every option leaves margins, and that is
+ * correct rather than a bug — there is no container width that fills an
+ * ultrawide monitor without the content becoming unreadable.
+ */
 const innerVariants = cva('mx-auto w-full', {
   variants: {
     maxWidth: {
@@ -49,11 +63,12 @@ const innerVariants = cva('mx-auto w-full', {
       '3xl': 'max-w-3xl',
       '4xl': 'max-w-4xl',
       '6xl': 'max-w-6xl',
+      wide: 'max-w-[90rem]',
       full: 'max-w-none',
     },
   },
   defaultVariants: {
-    maxWidth: '6xl',
+    maxWidth: 'wide',
   },
 })
 

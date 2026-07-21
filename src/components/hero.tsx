@@ -110,7 +110,7 @@ export function Hero({ hero, features }: HeroProps) {
   return (
     // Hand-rolled rather than <Section>, and deliberately: the background
     // layers must be siblings of the contained inner div, not inside it, so
-    // they can span the full bleed while the slides stay at max-w-6xl.
+    // they can span the full bleed while the slides stay at the site width.
     // Section puts every child inside its inner container. Same two-layer
     // shape, same padding scale — just assembled here.
     <section
@@ -139,7 +139,7 @@ export function Hero({ hero, features }: HeroProps) {
       <div className="absolute inset-0 -z-10 bg-black/75" />
       <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
 
-      <HeroCarousel slides={slides} labels={labels} className="mx-auto max-w-6xl" />
+      <HeroCarousel slides={slides} labels={labels} className="mx-auto w-full max-w-[90rem]" />
     </section>
   )
 }
