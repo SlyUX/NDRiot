@@ -1,21 +1,25 @@
-import Link from 'next/link'
+import { ContentCardGrid } from '@/components/content-card-grid'
+import { downloadToCard } from '@/lib/card-mappers'
 import { safeFetch, DOWNLOADS_QUERY } from '@/lib/queries'
+import { siteCopy } from '@/lib/site-copy'
+import type { DownloadSummary } from '@/lib/types'
+
 export const dynamic = 'force-dynamic'
+
 export default async function DownloadsPage() {
-  const downloads = await safeFetch<any[]>(DOWNLOADS_QUERY, {}, [])
+  const downloads = await safeFetch<DownloadSummary[]>(DOWNLOADS_QUERY, {}, [])
+
   return (
-    <div>
-      <h1 className="text-3xl font-black uppercase tracking-tight">Free Downloads</h1>
-      <ul className="mt-6 grid gap-5 sm:grid-cols-2">
-        {downloads.map((d) => (
-          <li key={d._id} className="rounded-lg border border-white/10 p-4">
-            <Link href={`/downloads/${d.slug}`} className="font-bold hover:underline">{d.title}</Link>
-            <p className="text-xs uppercase tracking-wide text-lime-400">{d.creatorName}</p>
-            {d.description && <p className="mt-1 text-sm text-neutral-400">{d.description}</p>}
-          </li>
-        ))}
-        {!downloads.length && <li className="text-sm text-neutral-500">No downloads yet.</li>}
-      </ul>
-    </div>
+    <ContentCardGrid
+      heading={siteCopy.downloads.heading}
+      headingAs="h1"
+      headingSize="lg"
+      cards={downloads.map(downloadToCard)}
+      layout="horizontal"
+      columns={2}
+      padding="none"
+      maxWidth="full"
+      emptyMessage={siteCopy.empty.downloads}
+    />
   )
 }

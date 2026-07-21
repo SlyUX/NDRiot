@@ -1,17 +1,26 @@
-import BookCard from '@/components/BookCard'
+import { ContentCardGrid } from '@/components/content-card-grid'
+import { bookToCard } from '@/lib/card-mappers'
 import { safeFetch, GENRE_BOOKS_QUERY } from '@/lib/queries'
+import { siteCopy } from '@/lib/site-copy'
+import type { BookSummary } from '@/lib/types'
+
 export const dynamic = 'force-dynamic'
+
 export default async function GenrePage({ params }: { params: Promise<{ genre: string }> }) {
   const { genre } = await params
-  const g = decodeURIComponent(genre)
-  const books = await safeFetch<any[]>(GENRE_BOOKS_QUERY, { genre: g }, [])
+  const decoded = decodeURIComponent(genre)
+  const books = await safeFetch<BookSummary[]>(GENRE_BOOKS_QUERY, { genre: decoded }, [])
+
   return (
-    <div>
-      <h1 className="text-3xl font-black uppercase tracking-tight">{g}</h1>
-      <div className="mt-6 grid grid-cols-2 gap-5 sm:grid-cols-4 md:grid-cols-5">
-        {books.map((b) => <BookCard key={b._id} book={b} />)}
-        {!books.length && <p className="text-sm text-neutral-500">No books in this genre yet.</p>}
-      </div>
-    </div>
+    <ContentCardGrid
+      heading={decoded}
+      headingAs="h1"
+      headingSize="lg"
+      cards={books.map(bookToCard)}
+      columns={4}
+      padding="none"
+      maxWidth="full"
+      emptyMessage={siteCopy.empty.genreBooks}
+    />
   )
 }

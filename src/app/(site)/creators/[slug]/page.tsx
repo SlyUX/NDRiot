@@ -1,47 +1,110 @@
+import Image from 'next/image'
 import Link from 'next/link'
-import { urlFor } from '@/sanity/image'
-import BookCard from '@/components/BookCard'
-import SocialLinks from '@/components/SocialLinks'
+import { notFound } from 'next/navigation'
+
+import { ContentCardGrid } from '@/components/content-card-grid'
 import PortableTextBody from '@/components/PortableTextBody'
+import SocialLinks from '@/components/SocialLinks'
+import { SectionHeading } from '@/components/section-heading'
+import { Section } from '@/components/ui/section'
+import { bookToCard } from '@/lib/card-mappers'
 import { safeFetch, CREATOR_QUERY } from '@/lib/queries'
+import { siteCopy } from '@/lib/site-copy'
+import type { CreatorDetail } from '@/lib/types'
+import { urlFor } from '@/sanity/image'
+
 export const dynamic = 'force-dynamic'
+
 export default async function CreatorPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const c = await safeFetch<any>(CREATOR_QUERY, { slug }, null)
-  if (!c) return <p className="text-neutral-500">Not found.</p>
+  const creator = await safeFetch<CreatorDetail | null>(CREATOR_QUERY, { slug }, null)
+
+  // Real 404 rather than a 200 that says "not found" — search engines and
+  // monitoring both read the status code, not the copy.
+  if (!creator) notFound()
+
   return (
-    <div className="space-y-10">
-      <header className="flex flex-col gap-6 sm:flex-row sm:items-end">
-        {c.photo && <img src={urlFor(c.photo).width(240).height(240).url()} alt={c.name} className="h-40 w-40 rounded-lg object-cover" />}
-        <div>
-          <h1 className="text-4xl font-black uppercase tracking-tight">{c.name}</h1>
-          {c.location && <p className="text-neutral-500">{c.location}</p>}
-          <div className="mt-3"><SocialLinks socials={c.socials} /></div>
-          {c.website && <a href={c.website} target="_blank" rel="noopener noreferrer" className="text-sm text-lime-400 hover:underline">{c.website}</a>}
-        </div>
-      </header>
-      <PortableTextBody value={c.bio} />
-      {!!c.books?.length && (
-        <section>
-          <h2 className="mb-4 text-xs font-black uppercase tracking-widest text-lime-400">Books</h2>
-          <div className="grid grid-cols-2 gap-5 sm:grid-cols-4">
-            {c.books.map((b: any) => <BookCard key={b._id} book={b} />)}
+    <div>
+      <Section as="header" padding="none" maxWidth="full">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-end">
+          {creator.photo && (
+            <div className="relative h-40 w-40 shrink-0 overflow-hidden">
+              <Image
+                src={urlFor(creator.photo).width(320).height(320).url()}
+                alt={creator.photo.alt ?? `Portrait of ${creator.name}`}
+                fill
+                sizes="160px"
+                className="object-cover"
+              />
+            </div>
+          )}
+          <div>
+            <h1 className="text-4xl font-black tracking-tighter uppercase">{creator.name}</h1>
+            {creator.location && <p className="text-muted-foreground">{creator.location}</p>}
+            <div className="mt-3">
+              <SocialLinks socials={creator.socials} />
+            </div>
+            {creator.website && (
+              <a
+                href={creator.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary text-sm hover:underline"
+              >
+                {creator.website}
+              </a>
+            )}
           </div>
-        </section>
+        </div>
+      </Section>
+
+      {creator.bio && (
+        <Section padding="md" maxWidth="full">
+          <PortableTextBody value={creator.bio} />
+        </Section>
       )}
-      {!!c.favoriteCreators?.length && (
-        <section>
-          <h2 className="mb-3 text-xs font-black uppercase tracking-widest text-neutral-500">Favorite creators</h2>
+
+      {!!creator.books?.length && (
+        <ContentCardGrid
+          heading={siteCopy.creator.booksHeading}
+          headingSize="sm"
+          cards={creator.books.map(bookToCard)}
+          columns={4}
+          padding="md"
+          maxWidth="full"
+          emptyMessage={siteCopy.empty.books}
+        />
+      )}
+
+      {!!creator.favoriteCreators?.length && (
+        <Section padding="md" maxWidth="full">
+          <SectionHeading size="sm">{siteCopy.creator.favoritesHeading}</SectionHeading>
           <ul className="flex flex-wrap gap-3 text-sm">
-            {c.favoriteCreators.map((f: any, i: number) => (
-              <li key={i}>
-                {f.onSiteSlug ? <Link href={`/creators/${f.onSiteSlug}`} className="text-lime-400 hover:underline">{f.onSiteName}</Link>
-                  : f.url ? <a href={f.url} target="_blank" rel="noopener noreferrer" className="hover:underline">{f.name}</a>
-                  : <span>{f.name}</span>}
+            {creator.favoriteCreators.map((favorite, index) => (
+              <li key={favorite.onSiteSlug ?? favorite.url ?? `${favorite.name}-${index}`}>
+                {favorite.onSiteSlug ? (
+                  <Link
+                    href={`/creators/${favorite.onSiteSlug}`}
+                    className="text-primary hover:underline"
+                  >
+                    {favorite.onSiteName}
+                  </Link>
+                ) : favorite.url ? (
+                  <a
+                    href={favorite.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline"
+                  >
+                    {favorite.name}
+                  </a>
+                ) : (
+                  <span>{favorite.name}</span>
+                )}
               </li>
             ))}
           </ul>
-        </section>
+        </Section>
       )}
     </div>
   )

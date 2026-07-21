@@ -1,15 +1,36 @@
+import { notFound } from 'next/navigation'
+
 import PortableTextBody from '@/components/PortableTextBody'
+import { formatDate } from '@/lib/card-mappers'
 import { safeFetch, INTERVIEW_QUERY } from '@/lib/queries'
+import type { InterviewDetail } from '@/lib/types'
+
 export const dynamic = 'force-dynamic'
+
 export default async function InterviewPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const iv = await safeFetch<any>(INTERVIEW_QUERY, { slug }, null)
-  if (!iv) return <p className="text-neutral-500">Not found.</p>
+  const interview = await safeFetch<InterviewDetail | null>(INTERVIEW_QUERY, { slug }, null)
+
+  if (!interview) notFound()
+
+  const published = formatDate(interview.publishedAt)
+
   return (
     <article className="space-y-6">
-      <header><h1 className="text-3xl font-black uppercase tracking-tight">{iv.title}</h1>
-        <p className="text-xs uppercase tracking-wide text-lime-400">{iv.interviewerName} interviews {iv.subjectName}</p></header>
-      <PortableTextBody value={iv.body} />
+      <header>
+        <h1 className="text-3xl font-black tracking-tighter uppercase">{interview.title}</h1>
+        {interview.interviewerName && interview.subjectName && (
+          <p className="text-primary text-xs tracking-wide uppercase">
+            {interview.interviewerName} interviews {interview.subjectName}
+          </p>
+        )}
+        {published && interview.publishedAt && (
+          <time dateTime={interview.publishedAt} className="text-muted-foreground text-xs">
+            {published}
+          </time>
+        )}
+      </header>
+      <PortableTextBody value={interview.body} />
     </article>
   )
 }

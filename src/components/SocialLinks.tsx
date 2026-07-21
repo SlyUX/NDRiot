@@ -1,11 +1,19 @@
-type Social = { platform: string; url: string }
-export default function SocialLinks({ socials }: { socials?: Social[] }) {
+import type { SocialLink } from '@/lib/types'
+
+export default function SocialLinks({ socials }: { socials?: SocialLink[] }) {
   if (!socials?.length) return null
+
   return (
     <div className="flex flex-wrap gap-3 text-sm">
-      {socials.map((s) => (
-        <a key={s.url} href={s.url} target="_blank" rel="noopener noreferrer" className="text-lime-400 hover:underline">
-          {s.platform}
+      {socials.map((social) => (
+        <a
+          key={social.url}
+          href={social.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary hover:underline"
+        >
+          {social.platform}
         </a>
       ))}
     </div>

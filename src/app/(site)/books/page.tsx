@@ -1,15 +1,24 @@
-import BookCard from '@/components/BookCard'
+import { ContentCardGrid } from '@/components/content-card-grid'
+import { bookToCard } from '@/lib/card-mappers'
 import { safeFetch, BOOKS_QUERY } from '@/lib/queries'
+import { siteCopy } from '@/lib/site-copy'
+import type { BookSummary } from '@/lib/types'
+
 export const dynamic = 'force-dynamic'
+
 export default async function BooksPage() {
-  const books = await safeFetch<any[]>(BOOKS_QUERY, {}, [])
+  const books = await safeFetch<BookSummary[]>(BOOKS_QUERY, {}, [])
+
   return (
-    <div>
-      <h1 className="text-3xl font-black uppercase tracking-tight">Books</h1>
-      <div className="mt-6 grid grid-cols-2 gap-5 sm:grid-cols-4 md:grid-cols-5">
-        {books.map((b) => <BookCard key={b._id} book={b} />)}
-        {!books.length && <p className="text-sm text-neutral-500">No books yet.</p>}
-      </div>
-    </div>
+    <ContentCardGrid
+      heading={siteCopy.home.booksHeading}
+      headingAs="h1"
+      headingSize="lg"
+      cards={books.map(bookToCard)}
+      columns={4}
+      padding="none"
+      maxWidth="full"
+      emptyMessage={siteCopy.empty.books}
+    />
   )
 }
