@@ -34,16 +34,20 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
    * so the same file uploaded twice produces the same ID. Comparing refs is
    * an identity check, not a guess.
    *
+   * Read through optional chaining, never compared against `undefined`:
+   * GROQ returns `null` for an absent field, so `logo !== undefined` is true
+   * when there is no logo and the next property access throws. That mistake
+   * took this page down once already.
+   *
    * It misses a re-exported or resized copy, which hashes differently, and
    * the dimensions and format sit in the ID too, so the same picture saved as
    * PNG and JPG will not match. That is the acceptable miss: the common case
    * is one solo creator using one file for both, and the failure mode is
    * merely showing a logo we could have suppressed.
    */
-  const studioLogoIsPortrait =
-    creator.photo !== undefined &&
-    creator.studio?.logo !== undefined &&
-    creator.photo.asset._ref === creator.studio.logo.asset._ref
+  const portraitRef = creator.photo?.asset._ref
+  const studioLogoRef = creator.studio?.logo?.asset._ref
+  const studioLogoIsPortrait = Boolean(portraitRef) && portraitRef === studioLogoRef
 
   return (
     <div>
