@@ -1,4 +1,5 @@
 import { safeFetch } from '@/lib/queries'
+import type { RichText, SanityImage } from '@/lib/types'
 
 /**
  * Reader-facing chrome copy, from the `siteSettings` singleton.
@@ -24,15 +25,26 @@ export interface NavItem {
   href: string
 }
 
+export interface Cta {
+  label: string
+  href: string
+}
+
+export interface HeroSettings {
+  /** Persists behind every carousel slide. No default — absent means the
+   *  hero falls back to a plain background, which is a valid look. */
+  background?: SanityImage
+  headline: string
+  body?: RichText
+  ctas: Cta[]
+}
+
 export interface SiteSettings {
   siteTitle: string
   siteDescription: string
   footer: string
+  hero: HeroSettings
   home: {
-    headlineLead: string
-    headlineAccent: string
-    intro: string
-    featuredHeading: string
     genresHeading: string
     booksHeading: string
     creatorsHeading: string
@@ -55,7 +67,6 @@ export interface SiteSettings {
     books: string
     creators: string
     genreBooks: string
-    features: string
     columns: string
     interviews: string
     downloads: string
@@ -76,12 +87,14 @@ const DEFAULTS: SiteSettings = {
   siteTitle: 'ND Riot',
   siteDescription: 'Independent comics discovery. Support indie comics.',
   footer: 'Support indie comics. · ND Riot',
+  hero: {
+    headline: '“The Big Two”',
+    ctas: [
+      { label: 'All Creators', href: '/creators' },
+      { label: 'All Comics', href: '/books' },
+    ],
+  },
   home: {
-    headlineLead: 'Independent comics,',
-    headlineAccent: 'by the creators who make them.',
-    intro:
-      "A directory and discovery engine for indie comics. Disney and WB don't need your support — these creators do.",
-    featuredHeading: 'Featured',
     genresHeading: 'Browse by genre',
     booksHeading: 'Books',
     creatorsHeading: 'Creators',
@@ -104,7 +117,6 @@ const DEFAULTS: SiteSettings = {
     books: 'No books yet — add creators and books in the Studio.',
     creators: 'No creators yet.',
     genreBooks: 'No books in this genre yet.',
-    features: 'Nothing featured right now.',
     columns: 'No columns yet.',
     interviews: 'No interviews yet.',
     downloads: 'No downloads yet.',
@@ -121,6 +133,7 @@ const DEFAULTS: SiteSettings = {
 export const SITE_SETTINGS_QUERY = `*[_id=="siteSettings"][0]{
   siteTitle,siteDescription,footer,
   home,sections,empty,
+  hero{background,headline,body,ctas[]{label,href}},
   nav[]{label,href}
 }`
 
@@ -146,6 +159,14 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     siteTitle: data.siteTitle?.trim() || DEFAULTS.siteTitle,
     siteDescription: data.siteDescription?.trim() || DEFAULTS.siteDescription,
     footer: data.footer?.trim() || DEFAULTS.footer,
+    hero: {
+      // Image and rich text pass through untouched — there is nothing
+      // sensible to merge them with.
+      background: data.hero?.background,
+      body: data.hero?.body?.length ? data.hero.body : undefined,
+      headline: data.hero?.headline?.trim() || DEFAULTS.hero.headline,
+      ctas: data.hero?.ctas?.length ? data.hero.ctas : DEFAULTS.hero.ctas,
+    },
     home: mergeGroup(DEFAULTS.home, data.home),
     sections: mergeGroup(DEFAULTS.sections, data.sections),
     empty: mergeGroup(DEFAULTS.empty, data.empty),

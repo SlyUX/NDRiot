@@ -19,6 +19,11 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
         link: "text-primary underline-offset-4 hover:underline",
+        // Solid white with black text — the second hero CTA. Deliberately not
+        // `secondary`, which is near-black and disappears on a dark hero.
+        // Fixed white rather than a token: this reads as a paper-and-ink pair
+        // against artwork, and must not follow a surface colour. 21:1.
+        inverse: "bg-white text-black hover:bg-white/85",
       },
       size: {
         default:

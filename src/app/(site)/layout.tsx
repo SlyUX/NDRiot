@@ -1,5 +1,7 @@
 import Link from 'next/link'
 
+import { Logo } from '@/components/logo'
+
 import { getSiteSettings } from '@/lib/site-settings'
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
@@ -11,9 +13,12 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         <nav className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-4">
           <Link
             href="/"
-            className="focus-visible:ring-ring text-xl font-black tracking-tighter uppercase focus-visible:ring-2 focus-visible:outline-none"
+            aria-label={`${settings.siteTitle} — home`}
+            className="focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none"
           >
-            ND<span className="text-primary">Riot</span>
+            {/* alt="" — the link is already labelled above, so a filled alt
+                would make a screen reader announce the brand twice. */}
+            <Logo size="nav" alt="" priority />
           </Link>
           <div className="flex flex-wrap gap-5 text-sm font-bold tracking-wide uppercase">
             {settings.nav.map(({ label, href }) => (

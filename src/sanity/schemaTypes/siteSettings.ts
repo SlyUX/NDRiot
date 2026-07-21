@@ -16,6 +16,7 @@ export default defineType({
   type: 'document',
   groups: [
     { name: 'general', title: 'General', default: true },
+    { name: 'hero', title: 'Hero' },
     { name: 'home', title: 'Homepage' },
     { name: 'sections', title: 'Section headings' },
     { name: 'empty', title: 'Empty states' },
@@ -49,36 +50,87 @@ export default defineType({
     }),
 
     defineField({
+      name: 'hero',
+      title: 'Hero',
+      type: 'object',
+      group: 'hero',
+      options: { collapsible: true, collapsed: false },
+      description:
+        'The first slide of the homepage carousel. The remaining slides come from Homepage feature.',
+      fields: [
+        defineField({
+          name: 'background',
+          title: 'Background image',
+          type: 'imageWithAlt',
+          description:
+            'Runs full-bleed behind every slide and stays put as they change. A dense collage works best — it is darkened heavily in code, so detail matters more than contrast. Decorative, so alt text can stay blank.',
+        }),
+        defineField({
+          name: 'headline',
+          title: 'Headline',
+          type: 'string',
+          description: 'The h1. Type any quote marks you want — they are not added for you.',
+        }),
+        defineField({
+          name: 'body',
+          title: 'Body',
+          type: 'array',
+          of: [
+            {
+              type: 'block',
+              // Headings and lists have no place in a hero paragraph, and
+              // links would compete with the buttons directly beneath.
+              styles: [{ title: 'Paragraph', value: 'normal' }],
+              lists: [],
+              marks: { decorators: [{ title: 'Bold', value: 'strong' }], annotations: [] },
+            },
+          ],
+          description: 'A few short paragraphs. Bold carries the emphasis; there is no other styling.',
+        }),
+        defineField({
+          name: 'ctas',
+          title: 'Buttons',
+          type: 'array',
+          description: 'Up to two. The first is pink, the second white.',
+          validation: (rule) => rule.max(2),
+          of: [
+            {
+              type: 'object',
+              name: 'cta',
+              fields: [
+                defineField({
+                  name: 'label',
+                  title: 'Label',
+                  type: 'string',
+                  validation: (rule) => rule.required(),
+                }),
+                defineField({
+                  name: 'href',
+                  title: 'Path',
+                  type: 'string',
+                  description: 'A site path beginning with "/", e.g. /creators.',
+                  validation: (rule) =>
+                    rule.required().custom((value) =>
+                      typeof value === 'string' && value.startsWith('/')
+                        ? true
+                        : 'Must be a site path starting with "/".',
+                    ),
+                }),
+              ],
+              preview: { select: { title: 'label', subtitle: 'href' } },
+            },
+          ],
+        }),
+      ],
+    }),
+
+    defineField({
       name: 'home',
       title: 'Homepage',
       type: 'object',
       group: 'home',
       options: { collapsible: true, collapsed: false },
       fields: [
-        defineField({
-          name: 'headlineLead',
-          title: 'Headline — first line',
-          type: 'string',
-          description: 'Rendered in white, above the accent line.',
-        }),
-        defineField({
-          name: 'headlineAccent',
-          title: 'Headline — accent line',
-          type: 'string',
-          description: 'Rendered in pink, on its own line beneath the first.',
-        }),
-        defineField({
-          name: 'intro',
-          title: 'Intro paragraph',
-          type: 'text',
-          rows: 3,
-          description: 'The paragraph under the headline.',
-        }),
-        defineField({
-          name: 'featuredHeading',
-          title: 'Featured section heading',
-          type: 'string',
-        }),
         defineField({ name: 'genresHeading', title: 'Genres section heading', type: 'string' }),
         defineField({ name: 'booksHeading', title: 'Books section heading', type: 'string' }),
         defineField({ name: 'creatorsHeading', title: 'Creators section heading', type: 'string' }),
@@ -148,7 +200,6 @@ export default defineType({
         defineField({ name: 'books', title: 'No books', type: 'string' }),
         defineField({ name: 'creators', title: 'No creators', type: 'string' }),
         defineField({ name: 'genreBooks', title: 'No books in a genre', type: 'string' }),
-        defineField({ name: 'features', title: 'Nothing featured', type: 'string' }),
         defineField({ name: 'columns', title: 'No columns', type: 'string' }),
         defineField({ name: 'interviews', title: 'No interviews', type: 'string' }),
         defineField({ name: 'downloads', title: 'No downloads', type: 'string' }),
