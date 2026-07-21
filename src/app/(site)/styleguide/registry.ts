@@ -200,10 +200,15 @@ export const componentEntries: ComponentEntry[] = [
     name: 'GenreBadge',
     importPath: '@/components/genre-badge',
     description:
-      'A book genre, linked to its category page. Genres are free text, so the href carries the encoded original to match GENRE_BOOKS_QUERY.',
+      'A book genre, linked to its category page. Genres come from the fixed list in lib/taxonomy.ts; the href carries the encoded original to match GENRE_BOOKS_QUERY.',
     category: 'composed',
     props: [
-      { name: 'genre', type: 'string', description: 'The tag, exactly as stored in Sanity.' },
+      {
+        name: 'genre',
+        type: 'string',
+        description:
+          'Typed as string, not Genre — the categories page passes a decoded URL segment, which is a string at that boundary.',
+      },
       {
         name: 'variant',
         type: "'default' | 'outline' | 'overlay'",
@@ -236,7 +241,18 @@ export const componentEntries: ComponentEntry[] = [
         description: "Fallback only — the image's own alt from Sanity wins. '' means decorative.",
       },
       { name: 'eyebrow', type: 'string', description: 'Small line above the title.' },
-      { name: 'genre', type: 'string', description: 'Rendered as a GenreBadge.' },
+      {
+        name: 'genres',
+        type: 'Genre[]',
+        description: 'Up to three, rendered as unlinked GenreBadges (the card is already a link).',
+      },
+      { name: 'format', type: 'BookFormat', description: 'Outline badge beside the genres.' },
+      {
+        name: 'maturity',
+        type: 'MaturityRating',
+        description:
+          'Overlays the thumbnail, top right. Mature gets solid pink; the rest get an opaque dark surface so they stay legible over any cover art.',
+      },
       { name: 'summary', type: 'string', description: 'Clamped to two lines.' },
       {
         name: 'date',

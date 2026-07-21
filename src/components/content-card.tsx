@@ -1,10 +1,12 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { GenreBadge } from '@/components/genre-badge'
+import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { urlFor } from '@/sanity/image'
 import { cn } from '@/lib/utils'
-import type { SanityImage } from '@/lib/types'
+import { RESTRICTED_RATING } from '@/lib/taxonomy'
+import type { BookFormat, Genre, MaturityRating, SanityImage } from '@/lib/types'
 
 /**
  * The one card. Books, creators, columns, interviews and downloads all render
@@ -38,8 +40,12 @@ export interface ContentCardProps {
   imageAlt: string
   /** Small line above the title — a creator name, a byline. */
   eyebrow?: string
-  /** Genre tag, rendered as a linked badge. */
-  genre?: string
+  /** Up to three. Rendered as linked badges. */
+  genres?: Genre[]
+  /** How it was made. Rendered as an unlinked badge beside the genres. */
+  format?: BookFormat
+  /** Overlaid on the thumbnail — see MaturityOverlay. */
+  maturity?: MaturityRating
   /** Supporting copy. Comes from Sanity (`shortDescription`, `excerpt`, …). */
   summary?: string
   /** Pre-formatted for display, e.g. "12 Mar 2026". */
@@ -49,6 +55,62 @@ export interface ContentCardProps {
   /** Fill the grid cell's height, for equal-height rows. */
   stretch?: boolean
   className?: string
+}
+
+/**
+ * Sits over the top-right of the thumbnail, so the rating is legible while
+ * scanning a grid rather than only after clicking through.
+ *
+ * Cover art is arbitrary, so neither variant relies on the image underneath:
+ * Mature takes the solid pink (black text, 5.69:1), everything else takes a
+ * near-opaque background surface (white text, ~20:1). A translucent badge
+ * would be unreadable over a light cover.
+ */
+function MaturityOverlay({ maturity }: { maturity: MaturityRating }) {
+  const restricted = maturity === RESTRICTED_RATING
+
+  return (
+    <Badge
+      variant={restricted ? 'default' : 'outline'}
+      className={cn(
+        'absolute top-2 right-2 z-10 px-1.5 py-0 text-[10px] leading-4 tracking-wider uppercase',
+        !restricted && 'bg-background/90 text-foreground border-white/25 backdrop-blur-sm',
+      )}
+    >
+      {maturity}
+    </Badge>
+  )
+}
+
+/** Genres plus format. Nothing renders if the card has neither. */
+function TaxonomyRow({
+  genres,
+  format,
+  className,
+}: {
+  genres?: Genre[]
+  format?: BookFormat
+  className?: string
+}) {
+  if (!genres?.length && !format) return null
+
+  return (
+    <div className={cn('flex flex-wrap items-center gap-1', className)}>
+      {genres?.map((genre) => (
+        // noLink because the whole card is already a link — nesting an <a>
+        // inside an <a> is invalid and breaks keyboard navigation.
+        <GenreBadge key={genre} genre={genre} noLink />
+      ))}
+      {format && (
+        <Badge
+          variant="outline"
+          className="text-muted-foreground px-2 py-0.5 text-[10px] tracking-wider uppercase"
+        >
+          {format}
+        </Badge>
+      )}
+    </div>
+  )
 }
 
 function CardImage({
@@ -89,7 +151,9 @@ export function ContentCard({
   image,
   imageAlt,
   eyebrow,
-  genre,
+  genres,
+  format,
+  maturity,
   summary,
   date,
   layout = 'vertical',
@@ -114,9 +178,10 @@ export function ContentCard({
           width={600}
           className="transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none"
         />
+        {maturity && <MaturityOverlay maturity={maturity} />}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 space-y-2 p-4">
-          {genre && <GenreBadge genre={genre} variant="overlay" noLink />}
+          <TaxonomyRow genres={genres} format={format} />
           <h3 className="text-lg leading-tight font-black text-white">{title}</h3>
           {(eyebrow || date) && (
             <p className="text-xs tracking-wide text-white/70 uppercase">
@@ -140,15 +205,13 @@ export function ContentCard({
       >
         <div className={cn('relative w-24 shrink-0 overflow-hidden sm:w-32', ASPECT[aspectRatio])}>
           <CardImage image={image} alt={imageAlt} width={256} />
+          {maturity && <MaturityOverlay maturity={maturity} />}
         </div>
         <div className="min-w-0 flex-1 space-y-1">
-          {eyebrow && (
-            <p className="text-primary text-xs tracking-wide uppercase">{eyebrow}</p>
-          )}
+          {eyebrow && <p className="text-primary text-xs tracking-wide uppercase">{eyebrow}</p>}
           <h3 className="leading-tight font-bold group-hover:underline">{title}</h3>
-          {summary && (
-            <p className="text-muted-foreground line-clamp-2 text-sm">{summary}</p>
-          )}
+          <TaxonomyRow genres={genres} format={format} className="pt-1" />
+          {summary && <p className="text-muted-foreground line-clamp-2 text-sm">{summary}</p>}
           {date && <p className="text-muted-foreground text-xs">{date}</p>}
         </div>
       </Link>
@@ -174,20 +237,13 @@ export function ContentCard({
             width={400}
             className="transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none"
           />
+          {maturity && <MaturityOverlay maturity={maturity} />}
         </div>
         <CardContent className="flex flex-1 flex-col gap-1 px-0 pt-3 pb-0">
-          {genre && (
-            <div className="mb-1">
-              <GenreBadge genre={genre} noLink />
-            </div>
-          )}
+          <TaxonomyRow genres={genres} format={format} className="mb-1" />
           <h3 className="leading-tight font-bold group-hover:underline">{title}</h3>
-          {eyebrow && (
-            <p className="text-primary text-xs tracking-wide uppercase">{eyebrow}</p>
-          )}
-          {summary && (
-            <p className="text-muted-foreground line-clamp-2 text-sm">{summary}</p>
-          )}
+          {eyebrow && <p className="text-primary text-xs tracking-wide uppercase">{eyebrow}</p>}
+          {summary && <p className="text-muted-foreground line-clamp-2 text-sm">{summary}</p>}
           {date && <p className="text-muted-foreground mt-auto pt-2 text-xs">{date}</p>}
         </CardContent>
       </Link>

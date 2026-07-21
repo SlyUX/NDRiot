@@ -38,7 +38,9 @@ export function bookToCard(book: BookSummary): ContentCardProps {
     // art sitting directly above its own title; announcing it twice is noise.
     imageAlt: '',
     eyebrow: book.creatorName,
-    genre: book.genres?.[0],
+    genres: book.genres,
+    format: book.format,
+    maturity: book.maturity,
     aspectRatio: 'cover',
   }
 }
@@ -106,7 +108,15 @@ export function featureToCard(item: FeatureItem): ContentCardProps {
 
   switch (item._type) {
     case 'book':
-      return { ...base, href: `/books/${item.slug}`, image: item.cover, aspectRatio: 'cover' }
+      return {
+        ...base,
+        href: `/books/${item.slug}`,
+        image: item.cover,
+        genres: item.genres,
+        format: item.format,
+        maturity: item.maturity,
+        aspectRatio: 'cover',
+      }
     case 'creator':
       return {
         ...base,

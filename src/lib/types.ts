@@ -198,4 +198,8 @@ export interface FeatureItem extends SanityDoc {
   slug: string
   cover?: SanityImage
   photo?: SanityImage
+  /* Books only — undefined on the other three types. */
+  genres?: Genre[]
+  format?: BookFormat
+  maturity?: MaturityRating
 }

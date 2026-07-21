@@ -36,7 +36,9 @@ const sampleCard: ContentCardProps = {
   href: '#',
   imageAlt: '',
   eyebrow: 'Ada Verne',
-  genre: 'Sci-Fi',
+  genres: ['Sci-Fi', 'Horror'],
+  format: 'Zine',
+  maturity: 'Mature',
   summary: 'A grifter wakes up in a bunker eight years after the apocalypse that never happened.',
   date: '12 Mar 2026',
 }
@@ -157,11 +159,11 @@ export const previews: Record<string, ReactNode> = {
       <Row label="Variants">
         <GenreBadge genre="Sci-Fi" />
         <GenreBadge genre="Horror" variant="outline" />
-        <GenreBadge genre="Memoir" variant="overlay" noLink />
+        <GenreBadge genre="Memoir &amp; Autobio" variant="overlay" noLink />
       </Row>
       <Row label="Sizes">
-        <GenreBadge genre="Small" size="sm" />
-        <GenreBadge genre="Medium" size="md" />
+        <GenreBadge genre="Crime &amp; Noir" size="sm" />
+        <GenreBadge genre="Punk &amp; Protest" size="md" />
       </Row>
     </>
   ),
