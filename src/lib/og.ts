@@ -17,7 +17,7 @@ import type { SanityImage } from '@/lib/types'
 export const OG_SIZE = { width: 1200, height: 630 }
 export const OG_CONTENT_TYPE = 'image/png'
 
-/** Straight from AGENTS.md §8 — Satori cannot read CSS variables. */
+/** Straight from AGENTS.md §9 — Satori cannot read CSS variables. */
 export const OG_COLORS = {
   background: '#030303',
   foreground: '#FFFFFF',

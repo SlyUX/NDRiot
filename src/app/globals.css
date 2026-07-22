@@ -51,7 +51,7 @@
 /* ND Riot is a dark-only site — there is no light theme. Brand values live in
    :root directly rather than under .dark, so nothing depends on a theme class.
    Hex, not oklch: these exact values are the ones whose WCAG ratios were
-   computed and recorded in AGENTS.md §7. Converting would re-open that math. */
+   computed and recorded in AGENTS.md §9. Converting would re-open that math. */
 :root {
   --background: #030303;
   --foreground: #ffffff;
@@ -115,7 +115,7 @@
   }
 }
 
-/* AGENTS.md §8 — honor reduced-motion globally so individual components
+/* AGENTS.md §10 — honor reduced-motion globally so individual components
    don't each have to remember to. */
 @media (prefers-reduced-motion: reduce) {
   *,

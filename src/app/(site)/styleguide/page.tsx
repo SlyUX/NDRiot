@@ -27,7 +27,7 @@ export default function StyleguidePage() {
         <h1 className="text-4xl font-black tracking-tighter uppercase">Styleguide</h1>
         <p className="text-muted-foreground mt-2 max-w-2xl text-sm">
           Every component in the system, with its real props and a live preview. Before building
-          anything new, check here for something to reuse or extend — see AGENTS.md §3.
+          anything new, check here for something to reuse or extend — see AGENTS.md §4.
         </p>
         <nav aria-label="Styleguide sections" className="mt-6 flex flex-wrap gap-x-4 gap-y-2">
           <a href="#foundations" className="text-primary text-xs uppercase hover:underline">

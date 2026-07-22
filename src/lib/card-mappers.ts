@@ -11,7 +11,7 @@ import type {
  * Sanity projection → ContentCard props.
  *
  * This is the layer that absorbs schema differences, so ContentCard itself
- * stays presentational and there's exactly one card component (AGENTS.md §3).
+ * stays presentational and there's exactly one card component (AGENTS.md §4).
  * Date formatting lives here too — ContentCard takes display strings only.
  */
 

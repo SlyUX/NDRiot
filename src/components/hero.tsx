@@ -64,7 +64,7 @@ const FEATURE_DURATION_MS = 6_000
  * horizontal layout is a list row: 96px thumbnail, clamped summary, no call
  * to action. Dropped into a 30rem hero it looked stranded, which is what the
  * previous version did. This composes the same pieces at a different scale
- * instead (AGENTS.md §3, option 3).
+ * instead (AGENTS.md §4, option 3).
  */
 function FeatureSlide({ book, ctaLabel }: { book: HeroBook; ctaLabel: string }) {
   const card = bookToCard(book)

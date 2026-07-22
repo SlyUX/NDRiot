@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
 
 /**
- * Design tokens, rendered from the same values recorded in AGENTS.md §8.
+ * Design tokens, rendered from the same values recorded in AGENTS.md §9.
  *
  * Ratios are stated, not computed at runtime — they were verified once and
  * written down so nobody re-derives them. If a value changes, recompute and

@@ -10,7 +10,7 @@ import type { BookFormat, Genre, MaturityRating, SanityImage } from '@/lib/types
 
 /**
  * The one card. Books, creators, columns, interviews and downloads all render
- * through this — see AGENTS.md §3. If a new surface needs a card, add a layout
+ * through this — see AGENTS.md §4. If a new surface needs a card, add a layout
  * or a prop here rather than forking a second component.
  *
  * Server Component. The reference implementation was `'use client'` only

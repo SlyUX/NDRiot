@@ -76,7 +76,27 @@ Assume **every string, image, label, and link a reader sees is CMS-managed** unl
 - Every field needs a Studio-side `title` and `description` — editors are the users of the schema.
 - Images: always `urlFor()` with an explicit `width()`; always real `alt` text from Sanity (`asset->altText` or a sibling field), never the title as a fallback.
 
-## 3. Reach for a variant before a new component
+## 3. Discovery is user-directed, never inferred
+
+ND Riot has no engagement KPI, and the product is deliberately built as if it
+never will. That is a design constraint, not a phase.
+
+- **Nothing is inferred.** No "because you viewed", no popularity weighting, no
+  ordering that rewards whoever is already doing well. The only personalisation
+  is what someone explicitly asked for.
+- **Filters are the interface for that, so they stay visible.** Exposed facets,
+  legible active state, one-click clear. A hidden control says the site
+  decided; a visible one says the reader did.
+- **The hero is random and ignores every filter**, including saved ones when
+  those arrive. It is the guaranteed route to work nobody went looking for, and
+  it exists specifically to stop a narrow filter becoming a narrow world.
+- **Contributors are never ranked.** Curated front pages, "top" anything, and
+  ordering by engagement are all out. Random or neutral ordering instead —
+  alphabetical is an accepted MVP compromise, not the destination.
+- **An empty result is a discovery moment, not an error.** Offer adjacent work
+  rather than a dead end; that is where a narrowing filter does its damage.
+
+## 4. Reach for a variant before a new component
 
 Before creating any component, check `src/components/` for something close. In order of preference:
 
@@ -87,7 +107,7 @@ Before creating any component, check `src/components/` for something close. In o
 
 Watch for the failure mode this rule exists to prevent: `BookCard` and `CreatorCard` are the same component with different labels. Divergence like that is a bug, not a feature.
 
-## 4. Component conventions
+## 5. Component conventions
 
 - **shadcn/ui + Radix + CVA** is the component foundation. Primitives live in `src/components/ui/` and are ours to edit — that's the point of shadcn. Composed/domain components live in `src/components/`.
 - **Add primitives on demand, one at a time.** `npx shadcn@latest add <name>` when something actually imports it — never a speculative batch. Every unused primitive is code that gets read, reviewed, and maintained for nothing, and re-adding one takes seconds. If `src/components/ui/` grows a file nothing imports, delete it.
@@ -95,7 +115,7 @@ Watch for the failure mode this rule exists to prevent: `BookCard` and `CreatorC
 - Follow the composition pattern (`Card` → `CardHeader`/`CardTitle`/`CardContent`) rather than growing prop lists past ~7.
 - Server Components by default. `'use client'` only for interactivity, and push it to the smallest leaf.
 
-## 5. Porting from the reference styleguide
+## 6. Porting from the reference styleguide
 
 Components are ported from a styleguide Stephen authored for another org. He has permission to reuse it, but the two projects should not be visibly linked.
 
@@ -104,21 +124,21 @@ Components are ported from a styleguide Stephen authored for another org. He has
 - **Grep before every commit:** `grep -rniE "umc|united methodist" src/` must return nothing.
 - Props were written for Contentful. Re-derive every shape from `src/sanity/schemaTypes` — never copy a Contentful-shaped interface.
 
-## 6. TypeScript
+## 7. TypeScript
 
 - **No `any`.**
 - **Sanity types are generated, not written.** `npm run typegen` extracts the schema and derives result types for every query into `sanity.types.ts`. It runs automatically on `prebuild`, so types cannot drift from the schema. `src/lib/types.ts` is a thin alias layer that gives the generated shapes readable names — add aliases there, never hand-written field lists.
 - **Optional Sanity fields are `T | null`, not `T | undefined`.** GROQ returns `null` for an absent field. A prop typed `foo?: T` is a lie the moment the value comes from a projection, and `foo !== undefined` is `true` when `foo` is `null` — which is how the creator page 500'd on 2026-07-21. Prefer optional chaining; it short-circuits on both.
 - Queries are wrapped in `defineQuery()` so typegen can find them. An unwrapped query silently gets no generated type.
 
-## 7. Data fetching
+## 8. Data fetching
 
 - All fetches go through `safeFetch<T>()` in `src/lib/queries.ts` with an explicit fallback. **GROQ returns `null`, not `[]` and not `undefined`.** This has broken production twice: once on `features.length`, once on `studio.logo`.
 - A projection that selects fewer fields than a sibling query needs its own type. `CREATOR_QUERY`'s nested books once omitted `genres`/`format`/`maturity` while being typed as a full `BookSummary`, so those cards silently lost their badges. Generated types catch this; hand-written ones hid it.
 - Queries are named exports colocated in `queries.ts`, not inlined in pages.
 - Never assume a list is non-empty. Every collection view needs a real empty state.
 
-## 8. Design tokens
+## 9. Design tokens
 
 Decided 2026-07-20. Every value below is a CSS variable in `src/app/globals.css` exposed via Tailwind v4 `@theme`. **Never hardcode these hex values or use raw Tailwind color classes** (`text-lime-400`, `bg-pink-500`) in components — go through the token.
 
@@ -136,14 +156,14 @@ Decided 2026-07-20. Every value below is a CSS variable in `src/app/globals.css`
 - `zinc-500` on `#030303` is **4.27:1 and fails AA.** `zinc-400` is the floor for muted text.
 - `#FF0095` clears AA but not AAA. Fine for UI and accents; don't set long-form body copy in it.
 
-## 9. Accessibility & semantics
+## 10. Accessibility & semantics
 
 - Semantic elements; one `<h1>` per page; heading levels don't skip.
 - Interactive elements are `<button>` or `<a>`/`<Link>` — never a `div` with `onClick`.
-- Visible focus states on everything focusable. Any **new** color pair must clear **WCAG AA (4.5:1)** for body text — compute it, don't eyeball it, then add it to the table in §8.
+- Visible focus states on everything focusable. Any **new** color pair must clear **WCAG AA (4.5:1)** for body text — compute it, don't eyeball it, then add it to the table in §9.
 - Respect `prefers-reduced-motion` for any transition beyond a simple hover.
 
-## 10. Before calling work done
+## 11. Before calling work done
 
 - `npm run build` passes, and `npm run lint` is clean.
 - Verify against real Studio content, including the empty and missing-image cases.

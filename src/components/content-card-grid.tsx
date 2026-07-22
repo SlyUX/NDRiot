@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils'
  *
  * This merges what the reference repo had as two near-identical components
  * (ContentCardGrid and CardRowWithDividers) — they differed only in default
- * column count and a divider flag. See AGENTS.md §3.
+ * column count and a divider flag. See AGENTS.md §4.
  */
 
 export type GridColumns = 1 | 2 | 3 | 4
@@ -35,7 +35,7 @@ export interface ContentCardGridProps {
   heading?: string
   /**
    * Heading level. `h2` suits a section inside a page; pass `h1` when the
-   * grid *is* the page and nothing else claims the h1 (AGENTS.md §9).
+   * grid *is* the page and nothing else claims the h1 (AGENTS.md §10).
    */
   headingAs?: 'h1' | 'h2' | 'h3'
   headingSize?: 'sm' | 'md' | 'lg'
@@ -50,7 +50,7 @@ export interface ContentCardGridProps {
   viewAllLabel?: string
   /**
    * Shown when `cards` is empty. Required rather than defaulted: every
-   * collection view needs a real empty state (AGENTS.md §7), and a generic
+   * collection view needs a real empty state (AGENTS.md §8), and a generic
    * default is how that requirement gets quietly skipped.
    */
   emptyMessage: string
