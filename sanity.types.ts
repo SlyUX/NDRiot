@@ -58,16 +58,10 @@ export type SocialLink = {
   url: string;
 };
 
-export type BuyLink = {
-  _type: "buyLink";
-  store:
-    | "Own store"
-    | "Bookshop.org"
-    | "Amazon"
-    | "Gumroad"
-    | "Etsy"
-    | "Kickstarter"
-    | "Other";
+export type BookLink = {
+  _type: "bookLink";
+  kind: "Read free" | "Buy" | "Support" | "Back";
+  label?: string;
   url: string;
 };
 
@@ -244,6 +238,7 @@ export type Book = {
   >;
   format?:
     | "Graphic Novel"
+    | "One-Shot"
     | "Single Issue"
     | "Collected Edition"
     | "Anthology"
@@ -252,6 +247,7 @@ export type Book = {
     | "Webcomic";
   maturity?: "All Ages" | "Teen" | "Teen+" | "Mature";
   status?: "Ongoing" | "Complete" | "Upcoming";
+  issueCount?: number;
   shortDescription?: string;
   description?: Array<{
     children?: Array<{
@@ -271,12 +267,11 @@ export type Book = {
     _type: "block";
     _key: string;
   }>;
-  buyLinks?: Array<
+  links?: Array<
     {
       _key: string;
-    } & BuyLink
+    } & BookLink
   >;
-  kickstarterUrl?: string;
 };
 
 export type OrganizationReference = {
@@ -319,6 +314,7 @@ export type Creator = {
   >;
   formats?: Array<
     | "Graphic Novel"
+    | "One-Shot"
     | "Single Issue"
     | "Collected Edition"
     | "Anthology"
@@ -423,7 +419,6 @@ export type SiteSettings = {
     genreBooksHeading?: string;
     genreCreatorsHeading?: string;
     downloadCta?: string;
-    kickstarterCta?: string;
     creatorBooksHeading?: string;
     creatorOrganizationsHeading?: string;
     openToCollaborationLabel?: string;
@@ -584,7 +579,7 @@ export type AllSanitySchemaTypes =
   | CreatorReference
   | FavoriteCreator
   | SocialLink
-  | BuyLink
+  | BookLink
   | BookReference
   | ColumnReference
   | InterviewReference
@@ -701,6 +696,7 @@ export type CREATOR_QUERY_RESULT = {
     | "Collected Edition"
     | "Graphic Novel"
     | "Minicomic"
+    | "One-Shot"
     | "Single Issue"
     | "Webcomic"
     | "Zine"
@@ -753,6 +749,7 @@ export type CREATOR_QUERY_RESULT = {
       | "Collected Edition"
       | "Graphic Novel"
       | "Minicomic"
+      | "One-Shot"
       | "Single Issue"
       | "Webcomic"
       | "Zine"
@@ -793,6 +790,7 @@ export type BOOKS_QUERY_RESULT = Array<{
     | "Collected Edition"
     | "Graphic Novel"
     | "Minicomic"
+    | "One-Shot"
     | "Single Issue"
     | "Webcomic"
     | "Zine"
@@ -804,7 +802,7 @@ export type BOOKS_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: BOOK_QUERY
-// Query: *[_type=="book" && slug.current==$slug][0]{  _id,title,status,genres,format,maturity,description,buyLinks,kickstarterUrl,cover,  "creatorName":creator->name,"creatorSlug":creator->slug.current}
+// Query: *[_type=="book" && slug.current==$slug][0]{  _id,title,status,genres,format,maturity,issueCount,description,cover,  links[]{kind,label,url},  "creatorName":creator->name,"creatorSlug":creator->slug.current}
 export type BOOK_QUERY_RESULT = {
   _id: string;
   title: string;
@@ -831,11 +829,13 @@ export type BOOK_QUERY_RESULT = {
     | "Collected Edition"
     | "Graphic Novel"
     | "Minicomic"
+    | "One-Shot"
     | "Single Issue"
     | "Webcomic"
     | "Zine"
     | null;
   maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
+  issueCount: number | null;
   description: Array<{
     children?: Array<{
       marks?: Array<string>;
@@ -854,13 +854,12 @@ export type BOOK_QUERY_RESULT = {
     _type: "block";
     _key: string;
   }> | null;
-  buyLinks: Array<
-    {
-      _key: string;
-    } & BuyLink
-  > | null;
-  kickstarterUrl: string | null;
   cover: ImageWithAlt | null;
+  links: Array<{
+    kind: "Back" | "Buy" | "Read free" | "Support";
+    label: string | null;
+    url: string;
+  }> | null;
   creatorName: string;
   creatorSlug: string;
 } | null;
@@ -916,6 +915,7 @@ export type GENRE_BOOKS_QUERY_RESULT = Array<{
     | "Collected Edition"
     | "Graphic Novel"
     | "Minicomic"
+    | "One-Shot"
     | "Single Issue"
     | "Webcomic"
     | "Zine"
@@ -1083,6 +1083,7 @@ export type HERO_BOOKS_QUERY_RESULT = Array<{
     | "Collected Edition"
     | "Graphic Novel"
     | "Minicomic"
+    | "One-Shot"
     | "Single Issue"
     | "Webcomic"
     | "Zine"
@@ -1179,7 +1180,7 @@ declare module "@sanity/client" {
     '*[_type=="creator"]|order(name asc){_id,name,"slug":slug.current,location,photo,genres,openToCollaboration,studio->{_id,name,"slug":slug.current,website,logo}}': CREATORS_QUERY_RESULT;
     '*[_type=="creator" && slug.current==$slug][0]{\n  _id,name,location,website,bio,photo,socials,openToCollaboration,genres,formats,audience,\n  studio->{_id,name,"slug":slug.current,website,logo},\n  organizations[]->{_id,name,"slug":slug.current,website,logo},\n  favoriteCreators[]{name,url,"onSiteName":onSite->name,"onSiteSlug":onSite->slug.current},\n  "books": *[_type=="book" && references(^._id)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"creatorName":creator->name}\n}': CREATOR_QUERY_RESULT;
     '*[_type=="book"]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"creatorName":creator->name}': BOOKS_QUERY_RESULT;
-    '*[_type=="book" && slug.current==$slug][0]{\n  _id,title,status,genres,format,maturity,description,buyLinks,kickstarterUrl,cover,\n  "creatorName":creator->name,"creatorSlug":creator->slug.current\n}': BOOK_QUERY_RESULT;
+    '*[_type=="book" && slug.current==$slug][0]{\n  _id,title,status,genres,format,maturity,issueCount,description,cover,\n  links[]{kind,label,url},\n  "creatorName":creator->name,"creatorSlug":creator->slug.current\n}': BOOK_QUERY_RESULT;
     'array::unique(*[_type=="book" && defined(genres)].genres[])': GENRES_QUERY_RESULT;
     '*[_type=="book" && $genre in genres]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"creatorName":creator->name}': GENRE_BOOKS_QUERY_RESULT;
     '*[_type=="column"]|order(publishedAt desc){_id,title,"slug":slug.current,excerpt,cover,publishedAt,"authorName":author->name}': COLUMNS_QUERY_RESULT;

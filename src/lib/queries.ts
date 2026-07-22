@@ -21,7 +21,8 @@ export const CREATOR_QUERY = defineQuery(`*[_type=="creator" && slug.current==$s
 
 export const BOOKS_QUERY = defineQuery(`*[_type=="book"]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"creatorName":creator->name}`)
 export const BOOK_QUERY = defineQuery(`*[_type=="book" && slug.current==$slug][0]{
-  _id,title,status,genres,format,maturity,description,buyLinks,kickstarterUrl,cover,
+  _id,title,status,genres,format,maturity,issueCount,description,cover,
+  links[]{kind,label,url},
   "creatorName":creator->name,"creatorSlug":creator->slug.current
 }`)
 export const GENRES_QUERY = defineQuery(`array::unique(*[_type=="book" && defined(genres)].genres[])`)

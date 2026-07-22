@@ -78,6 +78,14 @@ export default defineType({
       description: 'Tells readers what they are getting into before they buy.',
     }),
     defineField({
+      name: 'issueCount',
+      title: 'Issues available',
+      type: 'number',
+      description:
+        'How many are out right now, for a series. This is the honest signal a reader wants: "Ongoing, 7 issues" reassures where "Ongoing" alone does not, and "Ongoing, 1 issue" warns without anyone passing judgement. Leave blank for a single-volume work.',
+      validation: (rule) => rule.min(1).integer(),
+    }),
+    defineField({
       name: 'shortDescription',
       title: 'Short description',
       type: 'text',
@@ -94,17 +102,12 @@ export default defineType({
       description: 'The full pitch, shown on the book page.',
     }),
     defineField({
-      name: 'buyLinks',
-      title: 'Buy links',
+      name: 'links',
+      title: 'Where to find it',
       type: 'array',
-      of: [{ type: 'buyLink' }],
-      description: 'Where to buy it. Put the creator-direct option first.',
-    }),
-    defineField({
-      name: 'kickstarterUrl',
-      title: 'Kickstarter link',
-      type: 'url',
-      description: 'Only while a campaign is live — this renders as a prominent button.',
+      of: [{ type: 'bookLink' }],
+      description:
+        'Every route to the work — free reads, shops, Patreon, a live campaign. Put the option that serves the creator best first; free reads and live campaigns are shown most prominently regardless.',
     }),
   ],
   preview: { select: { title: 'title', subtitle: 'creator.name', media: 'cover' } },

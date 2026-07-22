@@ -1,15 +1,41 @@
+import { readFileSync } from 'node:fs'
+
 /**
  * Text handling and taxonomy shared by the import scripts.
  *
- * The lists mirror src/lib/taxonomy.ts and are kept in step by hand — these
- * scripts are plain Node and cannot import a TypeScript module. Drift is
- * caught rather than written: an unrecognised value is reported, never saved,
- * because a stray genre is a category page with nothing on it.
+ * The lists are READ from src/lib/taxonomy.ts rather than copied into this
+ * file. They were copied, once, and drifted within the hour: adding One-Shot
+ * to the real taxonomy left the importer rejecting it as unrecognised, on a
+ * form that had just been told to offer it.
+ *
+ * These scripts are plain Node and cannot import a TypeScript module, so the
+ * arrays are parsed out of the source. That is a little crude, and it fails
+ * loudly if the shape of that file changes — which is the point. A parse
+ * error is a five-minute fix; a silently stale list rejects real submissions
+ * and looks like the submitter's mistake.
  */
 
-export const GENRES = ["Action & Adventure", "Sci-Fi", "Fantasy", "Horror", "Crime & Noir", "Romance", "Drama", "Slice of Life", "Historical", "Superhero", "Humor & Satire", "Memoir & Autobio", "Queer", "Weird & Experimental", "Punk & Protest"]
-export const FORMATS = ["Graphic Novel", "Single Issue", "Collected Edition", "Anthology", "Minicomic", "Zine", "Webcomic"]
-export const MATURITY = ["All Ages", "Teen", "Teen+", "Mature"]
+const TAXONOMY_SOURCE = new URL('../../src/lib/taxonomy.ts', import.meta.url)
+
+function readList(name) {
+  const source = readFileSync(TAXONOMY_SOURCE, 'utf8')
+  const block = source.match(new RegExp(`export const ${name} = \\[(.*?)\\] as const`, 's'))
+  if (!block) {
+    throw new Error(
+      `Could not find "${name}" in src/lib/taxonomy.ts. If that file was restructured, update readList() in scripts/lib/shared.mjs.`,
+    )
+  }
+  const values = [...block[1].matchAll(/'([^']+)'/g)].map((m) => m[1])
+  if (values.length === 0) throw new Error(`"${name}" parsed as empty.`)
+  return values
+}
+
+export const GENRES = readList('GENRES')
+export const FORMATS = readList('FORMATS')
+export const MATURITY = readList('MATURITY_RATINGS')
+export const LINK_KINDS = readList('LINK_KINDS')
+
+/** Not in taxonomy.ts — it lives on the book schema's status field. */
 export const STATUSES = ['Ongoing', 'Complete', 'Upcoming']
 
 /**

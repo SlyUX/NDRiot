@@ -71,7 +71,6 @@ export interface SiteSettings {
     genreBooksHeading: string
     genreCreatorsHeading: string
     downloadCta: string
-    kickstarterCta: string
     creatorBooksHeading: string
     creatorOrganizationsHeading: string
     creatorFavoritesHeading: string
@@ -131,7 +130,6 @@ const DEFAULTS: SiteSettings = {
     genreBooksHeading: 'Comics',
     genreCreatorsHeading: 'Makers working in this genre',
     downloadCta: 'Download',
-    kickstarterCta: 'Back on Kickstarter',
     creatorBooksHeading: 'Books',
     creatorOrganizationsHeading: 'Member of',
     creatorFavoritesHeading: 'Favorite creators',

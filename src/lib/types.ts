@@ -34,5 +34,5 @@ export type DownloadDetail = NonNullable<DOWNLOAD_QUERY_RESULT>
 export type Organization = NonNullable<CreatorDetail['studio']>
 export type SocialLink = NonNullable<CreatorDetail['socials']>[number]
 export type FavoriteCreator = NonNullable<CreatorDetail['favoriteCreators']>[number]
-export type BuyLink = NonNullable<NonNullable<BOOK_QUERY_RESULT>['buyLinks']>[number]
+export type BookLink = NonNullable<NonNullable<BOOK_QUERY_RESULT>['links']>[number]
 export type BookStatus = NonNullable<BOOK_QUERY_RESULT>['status']

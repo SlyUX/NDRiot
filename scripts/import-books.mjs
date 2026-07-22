@@ -26,6 +26,7 @@ import { loadToken, mutate, query, uploadImage } from './lib/sanity.mjs'
 import {
   GENRES,
   FORMATS,
+  LINK_KINDS,
   MATURITY,
   STATUSES,
   matchTaxonomy,
@@ -49,39 +50,78 @@ const MAPPED_COLUMNS = new Set([
   'Full description',
   'Cover image',
   'Describe the cover',
-  'Where to buy',
-  'Kickstarter link',
+  'Where to find it',
+  'Issues available',
   'Can we publish this?',
 ])
 
 /**
- * Parses the buy-links answer.
+ * Hosts whose purpose is unambiguous, so the kind can be filled in rather
+ * than asked for twice.
  *
- * One per line as "Store — URL". Google Forms cannot repeat a group of
- * fields, so a single paragraph with a stated format beats five fixed pairs
- * that are mostly left blank. A line with no store name still imports, using
- * the hostname, because a working link with a dull label is better than a
- * dropped link.
+ * This is import convenience, not the inference AGENTS.md §3 forbids — that
+ * rule is about the site guessing what a READER wants. Here a human reviews
+ * every draft before it publishes, and a wrong guess is visible and
+ * correctable in the Studio.
  */
-function parseBuyLinks(answer) {
+const KIND_BY_HOST = [
+  [/(^|\.)patreon\.com$/, 'Support'],
+  [/(^|\.)ko-fi\.com$/, 'Support'],
+  [/(^|\.)buymeacoffee\.com$/, 'Support'],
+  [/(^|\.)kickstarter\.com$/, 'Back'],
+  [/(^|\.)indiegogo\.com$/, 'Back'],
+  [/(^|\.)backerkit\.com$/, 'Back'],
+  [/(^|\.)webtoons?\.com$/, 'Read free'],
+  [/(^|\.)tapas\.io$/, 'Read free'],
+  [/(^|\.)globalcomix\.com$/, 'Read free'],
+]
+
+/**
+ * Parses the "where to find it" answer.
+ *
+ * One per line, either "Kind: Label — URL" or just "Label — URL". Google
+ * Forms cannot repeat a group of fields, so a paragraph with a stated format
+ * beats several fixed rows that mostly sit empty.
+ *
+ * An unstated kind is inferred from the host where that is unambiguous, and
+ * defaults to Buy otherwise — the most common case, and the one whose
+ * consequence if wrong is mildest.
+ */
+function parseLinks(answer, { kinds }) {
   return (answer ?? '')
     .split('\n')
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line, i) => {
-      const [rawStore, ...rest] = line.split(/\s+[—–-]\s+/)
-      const url = (rest.join(' — ') || rawStore).trim()
-      if (!/^https?:\/\//.test(url)) return null
+      let rest = line
+      let kind = null
 
-      let store = rest.length ? rawStore.trim() : ''
-      if (!store) {
-        try {
-          store = new URL(url).hostname.replace(/^www\./, '')
-        } catch {
-          store = 'Buy'
+      const prefixed = line.match(/^([A-Za-z ]+):\s*(.+)$/)
+      if (prefixed) {
+        const candidate = kinds.find((k) => k.toLowerCase() === prefixed[1].trim().toLowerCase())
+        if (candidate) {
+          kind = candidate
+          rest = prefixed[2]
         }
       }
-      return { _type: 'buyLink', _key: `buy${i}`, store, url }
+
+      const [rawLabel, ...tail] = rest.split(/\s+[—–-]\s+/)
+      const url = (tail.join(' — ') || rawLabel).trim()
+      if (!/^https?:\/\//.test(url)) return null
+
+      let host = ''
+      try {
+        host = new URL(url).hostname.replace(/^www\./, '')
+      } catch {
+        return null
+      }
+
+      if (!kind) {
+        kind = KIND_BY_HOST.find(([pattern]) => pattern.test(host))?.[1] ?? 'Buy'
+      }
+
+      const label = tail.length ? rawLabel.trim() : host
+      return { _type: 'bookLink', _key: `link${i}`, kind, label, url }
     })
     .filter(Boolean)
 }
@@ -194,8 +234,12 @@ async function main() {
       console.log(`   cover: ok (${((cover.bytes ?? 0) / 1024).toFixed(0)}KB)`)
     }
 
-    const buyLinks = parseBuyLinks(record['Where to buy'])
-    if (buyLinks.length) console.log(`   buy links: ${buyLinks.map((b) => b.store).join(', ')}`)
+    const links = parseLinks(record['Where to find it'] || record['Where to buy'], {
+      kinds: LINK_KINDS,
+    })
+    if (links.length) {
+      console.log(`   links: ${links.map((l) => `${l.label} (${l.kind})`).join(', ')}`)
+    }
 
     const doc = {
       _id: `drafts.book-${slug}`,
@@ -215,9 +259,10 @@ async function main() {
     const full = repairText(record['Full description'])
     if (full) doc.description = toPortableText(full)
 
-    const kickstarter = record['Kickstarter link']?.trim()
-    if (/^https?:\/\//.test(kickstarter ?? '')) doc.kickstarterUrl = kickstarter
-    if (buyLinks.length) doc.buyLinks = buyLinks
+    if (links.length) doc.links = links
+
+    const issues = Number.parseInt(record['Issues available'] ?? '', 10)
+    if (Number.isInteger(issues) && issues > 0) doc.issueCount = issues
 
     if (cover.assetId) {
       doc.cover = {

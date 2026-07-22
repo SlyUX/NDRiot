@@ -2,14 +2,12 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
-import BuyLinks from '@/components/BuyLinks'
+import BookLinks from '@/components/book-links'
 import PortableTextBody from '@/components/PortableTextBody'
 import { GenreBadge } from '@/components/genre-badge'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Section } from '@/components/ui/section'
 import { safeFetch, BOOK_QUERY } from '@/lib/queries'
-import { getSiteSettings } from '@/lib/site-settings'
 import { RESTRICTED_RATING } from '@/lib/taxonomy'
 import type { BookDetail } from '@/lib/types'
 import { urlFor } from '@/sanity/image'
@@ -18,10 +16,9 @@ export const dynamic = 'force-dynamic'
 
 export default async function BookPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const [book, settings] = await Promise.all([
-    safeFetch<BookDetail | null>(BOOK_QUERY, { slug }, null),
-    getSiteSettings(),
-  ])
+  // No site settings needed: every link now carries its own label, so there
+  // is no shared button copy left to look up.
+  const book = await safeFetch<BookDetail | null>(BOOK_QUERY, { slug }, null)
 
   if (!book) notFound()
 
@@ -54,9 +51,9 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
           )}
           {(book.status || book.format || book.maturity) && (
             <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
-              {(book.status || book.format) && (
+              {(book.status || book.format || book.issueCount) && (
                 <p className="text-muted-foreground text-xs tracking-widest uppercase">
-                  {[book.status, book.format].filter(Boolean).join(' · ')}
+                  {[book.status, book.format, book.issueCount ? `${book.issueCount} issue${book.issueCount === 1 ? '' : 's'}` : null].filter(Boolean).join(' · ')}
                 </p>
               )}
               {book.maturity && (
@@ -82,15 +79,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
         </div>
 
         <PortableTextBody value={book.description} />
-        <BuyLinks links={book.buyLinks} />
-
-        {book.kickstarterUrl && (
-          <Button asChild>
-            <a href={book.kickstarterUrl} target="_blank" rel="noopener noreferrer">
-              {settings.sections.kickstarterCta}
-            </a>
-          </Button>
-        )}
+        <BookLinks links={book.links} />
       </div>
     </Section>
   )

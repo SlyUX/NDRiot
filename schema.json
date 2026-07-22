@@ -212,7 +212,7 @@
     }
   },
   {
-    "name": "buyLink",
+    "name": "bookLink",
     "type": "type",
     "value": {
       "type": "object",
@@ -221,45 +221,40 @@
           "type": "objectAttribute",
           "value": {
             "type": "string",
-            "value": "buyLink"
+            "value": "bookLink"
           }
         },
-        "store": {
+        "kind": {
           "type": "objectAttribute",
           "value": {
             "type": "union",
             "of": [
               {
                 "type": "string",
-                "value": "Own store"
+                "value": "Read free"
               },
               {
                 "type": "string",
-                "value": "Bookshop.org"
+                "value": "Buy"
               },
               {
                 "type": "string",
-                "value": "Amazon"
+                "value": "Support"
               },
               {
                 "type": "string",
-                "value": "Gumroad"
-              },
-              {
-                "type": "string",
-                "value": "Etsy"
-              },
-              {
-                "type": "string",
-                "value": "Kickstarter"
-              },
-              {
-                "type": "string",
-                "value": "Other"
+                "value": "Back"
               }
             ]
           },
           "optional": false
+        },
+        "label": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string"
+          },
+          "optional": true
         },
         "url": {
           "type": "objectAttribute",
@@ -1339,6 +1334,10 @@
             },
             {
               "type": "string",
+              "value": "One-Shot"
+            },
+            {
+              "type": "string",
               "value": "Single Issue"
             },
             {
@@ -1408,6 +1407,13 @@
               "value": "Upcoming"
             }
           ]
+        },
+        "optional": true
+      },
+      "issueCount": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "number"
         },
         "optional": true
       },
@@ -1597,7 +1603,7 @@
         },
         "optional": true
       },
-      "buyLinks": {
+      "links": {
         "type": "objectAttribute",
         "value": {
           "type": "array",
@@ -1613,16 +1619,9 @@
             },
             "rest": {
               "type": "inline",
-              "name": "buyLink"
+              "name": "bookLink"
             }
           }
-        },
-        "optional": true
-      },
-      "kickstarterUrl": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
         },
         "optional": true
       }
@@ -1820,6 +1819,10 @@
               {
                 "type": "string",
                 "value": "Graphic Novel"
+              },
+              {
+                "type": "string",
+                "value": "One-Shot"
               },
               {
                 "type": "string",
@@ -2538,13 +2541,6 @@
               "optional": true
             },
             "downloadCta": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
-            "kickstarterCta": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

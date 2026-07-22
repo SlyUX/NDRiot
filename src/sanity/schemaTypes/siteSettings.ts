@@ -184,12 +184,6 @@ export default defineType({
           description: 'On a download page, e.g. "Download".',
         }),
         defineField({
-          name: 'kickstarterCta',
-          title: 'Kickstarter button label',
-          type: 'string',
-          description: 'On a book page with a live campaign.',
-        }),
-        defineField({
           name: 'creatorBooksHeading',
           title: "Creator page — books heading",
           type: 'string',

@@ -76,7 +76,8 @@ horror zine for adults — genre, format and audience all at once.
 **4. Format** · Multiple choice · Optional
 ```
 Graphic Novel — a complete standalone story in one volume
-Single Issue — one instalment of a series, also called a floppy
+One-Shot — a complete story in a single issue, nothing to wait for
+Single Issue — one instalment of a continuing series
 Collected Edition — several issues bound together, a trade paperback
 Anthology — a collection of short works, usually by several creators
 Minicomic — small-format, short-run, usually handmade
@@ -120,6 +121,22 @@ Complete
 Upcoming
 ```
 
+**7b. How many issues are out?** · Short answer (number) · Optional
+Help text: *For a series. Skip it for a one-shot or a single volume.*
+
+> **Why this earns a field.** Independent series stall, and readers know it —
+> starting something abandoned after issue one is the risk that puts people
+> off indie work entirely.
+>
+> The instinct is to gate: only list complete work. That excludes exactly the
+> creators this site exists to support, and it does not even solve the problem
+> — an eight-issue series admitted today can still stop tomorrow.
+>
+> A count solves it honestly. "Ongoing, 7 issues" reassures; "Ongoing, 1
+> issue" warns; neither passes judgement. It also ages better than status
+> does: a stale "3 issues" is still true, where a stale "Ongoing" has quietly
+> become a lie.
+
 ---
 
 ## Section 3 — Words
@@ -151,22 +168,30 @@ Help text: *For readers using a screen reader. Describe what the cover SHOWS —
 
 ---
 
-## Section 5 — Where to get it
+## Section 5 — Where to find it
 
-**12. Where to buy** · Paragraph · Optional
-Help text: *One per line, as "Store — link". Put the option that pays you most first.*
+**12. Where to find it** · Paragraph · Optional
+Help text: *One per line, as "Label — link". Free reads and live campaigns are shown most prominently; put the option that serves you best first among the rest.*
 Example to include in the help text:
 ```
+Free PDF — https://example.com/book.pdf
 My store — https://example.com/shop
-Bookshop.org — https://bookshop.org/...
-Amazon — https://amazon.com/...
+https://www.patreon.com/yourname
+https://www.kickstarter.com/projects/...
 ```
 
-> A line without a store name still imports — the hostname is used instead. A
-> working link with a dull label beats a dropped link.
-
-**13. Kickstarter link** · Short answer · Optional
-Help text: *Only if a campaign is live. This renders as a prominent button, so remove it when the campaign ends.*
+> **Not "where to buy".** ND Riot exposes and redirects; it does not sell.
+> Framing this as purchase left nowhere for a free read or a Patreon, and
+> forced a separate special-cased field for Kickstarter. One list covers all
+> of them.
+>
+> The importer works out the kind from the host — Patreon and Ko-fi are
+> Support, Kickstarter and BackerKit are Back, Webtoon and Tapas are free
+> reads, anything else is a shop. Prefix a line with `Read free:` to override
+> it. A line with no label still imports, using the domain.
+>
+> File types are deliberately not a format. A graphic novel you download as a
+> PDF is still a graphic novel — "Free PDF" belongs here, as a label.
 
 ---
 

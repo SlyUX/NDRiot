@@ -64,6 +64,7 @@ export type Genre = (typeof GENRES)[number]
  */
 export const FORMATS = [
   'Graphic Novel',
+  'One-Shot',
   'Single Issue',
   'Collected Edition',
   'Anthology',
@@ -77,13 +78,42 @@ export type BookFormat = (typeof FORMATS)[number]
 /** Studio-facing help, so editors do not have to guess the boundaries. */
 export const FORMAT_DESCRIPTIONS: Record<BookFormat, string> = {
   'Graphic Novel': 'A complete standalone story in one volume.',
-  'Single Issue': 'One instalment of a series. Also called a floppy.',
+  'One-Shot': 'A complete story in a single issue. Nothing to wait for.',
+  'Single Issue': 'One instalment of a continuing series.',
   'Collected Edition': 'Several issues bound together. A trade paperback.',
   Anthology: 'A collection of short works, usually by several creators.',
   Minicomic: 'Small-format, short-run, usually handmade.',
   Zine: 'Self-published and often handmade. Photocopier energy.',
   Webcomic: 'Screen-native, no fixed page count, published online.',
 }
+
+/* ------------------------------------------------------------------ links */
+
+/**
+ * How a reader gets to the work.
+ *
+ * ND Riot exposes and redirects; it does not sell. Modelling these as "buy
+ * links" assumed commerce and left no home for a free read or a Patreon —
+ * which is how the old schema ended up with a separate, special-cased
+ * kickstarterUrl field beside it.
+ *
+ * File types are deliberately absent. A graphic novel you download as a PDF
+ * is still a graphic novel: format describes what the work IS, a link
+ * describes how you GET it. "Free PDF" belongs in a link's label.
+ */
+export const LINK_KINDS = ['Read free', 'Buy', 'Support', 'Back'] as const
+
+export type LinkKind = (typeof LINK_KINDS)[number]
+
+export const LINK_KIND_DESCRIPTIONS: Record<LinkKind, string> = {
+  'Read free': 'Available to read or download at no cost.',
+  Buy: 'A shop, storefront or marketplace.',
+  Support: 'Patreon, Ko-fi — where supporting the creator is the point.',
+  Back: 'A live crowdfunding campaign. Remove it when the campaign ends.',
+}
+
+/** Kinds shown most prominently: free to read, or time-limited. */
+export const PROMINENT_LINK_KINDS: LinkKind[] = ['Read free', 'Back']
 
 /* --------------------------------------------------------------- maturity */
 
