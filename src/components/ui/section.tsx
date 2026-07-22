@@ -23,6 +23,13 @@ const sectionVariants = cva('', {
     padding: {
       none: '',
       xs: 'px-6 py-4',
+      /**
+       * For sections meant to read as one group rather than as separate
+       * bands — a filter row and the results it governs, say. Off the
+       * 4/8/12/16 rhythm deliberately: it exists to halve the gap between
+       * two `md` sections, which lands on 6.
+       */
+      tight: 'px-6 py-6',
       sm: 'px-6 py-8',
       md: 'px-6 py-12',
       lg: 'px-6 py-16',

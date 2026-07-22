@@ -98,7 +98,10 @@ export default async function Home({
     <div>
       <Hero hero={settings.hero} books={heroBooks} />
 
-      <Section padding="md">
+      {/* Keeps its top padding — the gap below the hero is doing real work —
+          but closes up underneath, so the filters and the rows they govern
+          read as one group rather than three separate bands. */}
+      <Section padding="md" className="pb-6">
         <Suspense fallback={null}>
           <FilterBar
             facets={HOME_FACETS}
@@ -113,7 +116,7 @@ export default async function Home({
         heading={settings.home.booksHeading}
         cards={books.slice(0, 8).map(bookToCard)}
         columns={4}
-        padding="md"
+        padding="tight"
         viewAllHref="/books"
         viewAllLabel={settings.home.viewAllLabel}
         emptyMessage={booksFiltering ? settings.empty.filteredBooks : settings.empty.books}
@@ -123,7 +126,7 @@ export default async function Home({
         heading={settings.home.creatorsHeading}
         cards={creators.slice(0, 8).map(creatorToCard)}
         columns={4}
-        padding="md"
+        padding="tight"
         viewAllHref="/creators"
         viewAllLabel={settings.home.viewAllLabel}
         emptyMessage={makersFiltering ? settings.empty.filteredCreators : settings.empty.creators}

@@ -134,9 +134,10 @@ export const componentEntries: ComponentEntry[] = [
       },
       {
         name: 'padding',
-        type: "'none' | 'xs' | 'sm' | 'md' | 'lg' | 'hero'",
+        type: "'none' | 'xs' | 'tight' | 'sm' | 'md' | 'lg' | 'hero'",
         default: "'lg'",
-        description: 'Vertical rhythm. none when the parent already pads.',
+        description:
+          'Vertical rhythm. `tight` is off the 4/8/12/16 scale on purpose — it halves the gap between two md sections, for stacks meant to read as one group.',
       },
       {
         name: 'maxWidth',
