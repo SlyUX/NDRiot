@@ -40,5 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# form exports — contain personal data
+# form exports — contain personal data.
+# Both lines are needed: /data/*.csv stops at one level, so an archive/
+# subfolder would not be covered by it. Exports carry email addresses, so
+# the cost of missing one is a permanent commit of personal data.
 /data/*.csv
+/data/**/*.csv
