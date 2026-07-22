@@ -68,6 +68,11 @@ export function slugify(input) {
     .trim()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
+    // Apostrophes are deleted, not spaced. Every other punctuation mark
+    // separates words, but an apostrophe sits inside one: spacing it turns
+    // "Bobby's Super Squad" into bobby-s-super-squad and "O'Brien" into
+    // o-brien. Both curly and straight, since form input has both.
+    .replace(/['\u2018\u2019]/g, '')
     .replace(/[^a-z0-9\s-]/g, ' ')
     .replace(/[\s-]+/g, '-')
     .replace(/^-+|-+$/g, '')

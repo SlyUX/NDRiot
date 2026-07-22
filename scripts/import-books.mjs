@@ -51,8 +51,16 @@ const MAPPED_COLUMNS = new Set([
   'Cover image',
   'Describe the cover',
   'Where to find it',
+  'Where to buy',
+  'Kickstarter link',
   'Issues available',
   'Can we publish this?',
+  // Known and deliberately unused. Sanity documents are publicly readable,
+  // so a contact address in the CMS is a contact address published to
+  // anyone who runs a GROQ query. Listed here so they do not each raise a
+  // "nowhere to go" warning that trains the reader to skim past real ones.
+  'Which email should we use to contact you?',
+  'Alternate email address',
 ])
 
 /**
@@ -238,9 +246,29 @@ async function main() {
       console.log(`   cover: ok (${((cover.bytes ?? 0) / 1024).toFixed(0)}KB)`)
     }
 
+    // Two column names because the live form says "Where to buy" while this
+    // expected "Where to find it". Both are accepted rather than picking a
+    // winner — renaming a question on a form that already has responses
+    // splits the sheet into two columns, so the importer tolerating both is
+    // cheaper than a migration.
     const links = parseLinks(record['Where to find it'] || record['Where to buy'], {
       kinds: LINK_KINDS,
     })
+
+    // The form still asks for a Kickstarter separately, from before links
+    // were modelled with kinds. Fold it in as a Back link rather than
+    // dropping it — a live campaign is the most time-critical thing a book
+    // page can carry.
+    const campaign = repairText(record['Kickstarter link'] || '').trim()
+    if (campaign.startsWith('http')) {
+      links.push({
+        _type: 'bookLink',
+        _key: `link-campaign`,
+        kind: 'Back',
+        label: 'Kickstarter',
+        url: campaign,
+      })
+    }
     if (links.length) {
       console.log(`   links: ${links.map((l) => `${l.label} (${l.kind})`).join(', ')}`)
     }
