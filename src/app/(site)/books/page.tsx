@@ -40,7 +40,9 @@ export default async function BooksPage({
           {settings.sections.booksHeading}
         </h1>
         <Suspense fallback={null}>
-          <FilterBar facets={BOOK_FACETS} resultCount={books.length} className="mt-8" />
+          <FilterBar facets={BOOK_FACETS} resultCount={books.length}
+            searchLabel={settings.sections.searchBooksLabel}
+            className="mt-8" />
         </Suspense>
       </Section>
 

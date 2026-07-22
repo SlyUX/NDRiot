@@ -172,6 +172,18 @@ export default defineType({
           description: 'e.g. "Comics".',
         }),
         defineField({
+          name: 'searchBooksLabel',
+          title: 'Comics search placeholder',
+          type: 'string',
+          description: 'e.g. "Search titles and makers". Also the accessible label for the field.',
+        }),
+        defineField({
+          name: 'searchCreatorsLabel',
+          title: 'Makers search placeholder',
+          type: 'string',
+          description: 'e.g. "Search makers and studios".',
+        }),
+        defineField({
           name: 'everythingElseHeading',
           title: 'Heading above the fallback row',
           type: 'string',

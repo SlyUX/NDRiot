@@ -51,12 +51,32 @@ export const CREATOR_FACETS: Facet[] = [
   { param: 'collaborating', label: 'Open to collaboration', options: [], toggle: true },
 ]
 
+/**
+ * Turns a typed phrase into a GROQ `match` pattern.
+ *
+ * A trailing `*` makes it prefix-matching, so results narrow as someone
+ * types rather than only landing on a whole word. GROQ tokenises, so "scar
+ * tis" matches "Scar Tissue" — but "issue" will not match "Tissue", because
+ * matching is per token and not a substring scan. That is the expected
+ * behaviour for a title search and worth knowing before it looks like a bug.
+ *
+ * Characters with meaning to GROQ are stripped rather than escaped: a stray
+ * quote in a search box should find nothing surprising, not error.
+ */
+export function searchTerm(value: string | string[] | undefined): string | null {
+  const raw = one(value)?.trim()
+  if (!raw) return null
+  const cleaned = raw.replace(/["'*\\]/g, ' ').replace(/\s+/g, ' ').trim()
+  return cleaned ? `${cleaned}*` : null
+}
+
 export function bookFilters(params: SearchParams) {
   return {
     genres: allowed(many(params.genre), GENRES),
     format: allowed(many(params.format), FORMATS)?.[0] ?? null,
     maturity: allowed(many(params.audience), MATURITY_RATINGS)?.[0] ?? null,
     status: allowed(many(params.status), ['Ongoing', 'Complete', 'Upcoming'])?.[0] ?? null,
+    q: searchTerm(params.q),
   }
 }
 
@@ -68,6 +88,7 @@ export function creatorFilters(params: SearchParams) {
     // A flag: present means "only those open to it". Absent means everyone,
     // not "only those who said no".
     collaborating: one(params.collaborating) ? true : null,
+    q: searchTerm(params.q),
   }
 }
 

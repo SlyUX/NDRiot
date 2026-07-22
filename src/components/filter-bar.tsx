@@ -1,8 +1,8 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { X } from 'lucide-react'
+import { Search, X } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -35,17 +35,28 @@ export interface FilterBarProps {
   facets: Facet[]
   /** Announced with the result count, so the change is not silent. */
   resultCount: number
+  /** Placeholder for the search box. Copy, so it comes from Sanity. */
+  searchLabel: string
   className?: string
 }
 
-export function FilterBar({ facets, resultCount, className }: FilterBarProps) {
+/** Long enough that typing a word is one request, short enough to feel live. */
+const SEARCH_DEBOUNCE_MS = 300
+
+export function FilterBar({ facets, resultCount, searchLabel, className }: FilterBarProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  const active = facets.flatMap((facet) =>
-    searchParams.getAll(facet.param).map((value) => ({ facet, value })),
-  )
+  const urlQuery = searchParams.get('q') ?? ''
+  const [term, setTerm] = useState(urlQuery)
+
+  const active = [
+    ...facets.flatMap((facet) =>
+      searchParams.getAll(facet.param).map((value) => ({ facet, value })),
+    ),
+    ...(urlQuery ? [{ facet: null, value: urlQuery }] : []),
+  ]
 
   const apply = useCallback(
     (next: URLSearchParams) => {
@@ -80,14 +91,55 @@ export function FilterBar({ facets, resultCount, className }: FilterBarProps) {
     [apply, searchParams],
   )
 
+  /**
+   * Pushes the search term after a pause, so a typed word is one navigation
+   * rather than one per character.
+   *
+   * The input keeps its own state and is seeded from the URL once. A back
+   * button that changes `q` therefore restores the results but leaves the box
+   * showing what was last typed — syncing it would need either a remount,
+   * which steals focus mid-typing, or focus tracking, which is more machinery
+   * than the mismatch costs.
+   */
+  useEffect(() => {
+    if (term === urlQuery) return
+    const timer = setTimeout(() => {
+      const next = new URLSearchParams(searchParams.toString())
+      if (term) next.set('q', term)
+      else next.delete('q')
+      apply(next)
+    }, SEARCH_DEBOUNCE_MS)
+    return () => clearTimeout(timer)
+  }, [term, urlQuery, searchParams, apply])
+
   const clearAll = useCallback(() => {
+    setTerm('')
     const next = new URLSearchParams(searchParams.toString())
     for (const facet of facets) next.delete(facet.param)
+    // Clear means clear — leaving the search term behind would look broken.
+    next.delete('q')
     apply(next)
   }, [apply, facets, searchParams])
 
   return (
     <div className={cn('space-y-4', className)}>
+      <div className="relative max-w-sm">
+        <Search
+          aria-hidden="true"
+          className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
+        />
+        <input
+          type="search"
+          value={term}
+          onChange={(event) => setTerm(event.target.value)}
+          // A visible placeholder is not a label — the input needs a name of
+          // its own for anyone who cannot see it.
+          aria-label={searchLabel}
+          placeholder={searchLabel}
+          className="focus-visible:ring-ring placeholder:text-muted-foreground w-full border border-white/20 bg-transparent py-2 pr-3 pl-9 text-sm focus-visible:ring-2 focus-visible:outline-none"
+        />
+      </div>
+
       {facets.map((facet) => {
         const selected = searchParams.getAll(facet.param)
 

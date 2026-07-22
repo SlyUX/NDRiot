@@ -243,6 +243,12 @@ export const componentEntries: ComponentEntry[] = [
         type: 'number',
         description: 'Announced in a live region, since filtering navigates and would otherwise be silent.',
       },
+      {
+        name: 'searchLabel',
+        type: 'string',
+        description:
+          'Placeholder and accessible name for the search box. Matching is token-prefix, so "scar tis" finds "Scar Tissue" but "issue" does not.',
+      },
     ],
   },
   {

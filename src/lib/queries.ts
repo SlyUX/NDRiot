@@ -24,6 +24,10 @@ export const BOOKS_QUERY = defineQuery(`*[_type=="book"]|order(title asc){_id,ti
 /**
  * Books, filtered.
  *
+ * `$q` searches the title AND the creator's name, so looking up a person
+ * finds their work — which is what someone typing a name into a book listing
+ * almost always means.
+ *
  * One static query with null-tolerant conditions rather than a string built
  * at runtime: typegen can only derive a result type from a literal, and an
  * untyped query is how the null-versus-undefined class of bug got in last
@@ -38,6 +42,7 @@ export const FILTERED_BOOKS_QUERY = defineQuery(`*[
   && (!defined($format) || format == $format)
   && (!defined($maturity) || maturity == $maturity)
   && (!defined($status) || status == $status)
+  && (!defined($q) || title match $q || creator->name match $q)
 ]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,issueCount,cover,"creatorName":creator->name}`)
 
 /**
@@ -53,6 +58,7 @@ export const FILTERED_CREATORS_QUERY = defineQuery(`*[
   && (!defined($format) || $format in formats)
   && (!defined($audience) || audience == $audience)
   && (!defined($collaborating) || openToCollaboration == true)
+  && (!defined($q) || name match $q || studio->name match $q)
 ]|order(name asc){
   _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,
   studio->{_id,name,"slug":slug.current,website,logo}

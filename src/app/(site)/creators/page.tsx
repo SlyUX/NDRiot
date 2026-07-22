@@ -37,7 +37,9 @@ export default async function CreatorsPage({
           {settings.sections.creatorsHeading}
         </h1>
         <Suspense fallback={null}>
-          <FilterBar facets={CREATOR_FACETS} resultCount={creators.length} className="mt-8" />
+          <FilterBar facets={CREATOR_FACETS} resultCount={creators.length}
+            searchLabel={settings.sections.searchCreatorsLabel}
+            className="mt-8" />
         </Suspense>
       </Section>
 
