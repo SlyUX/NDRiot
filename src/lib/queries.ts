@@ -68,7 +68,6 @@ export const BOOK_QUERY = defineQuery(`*[_type=="book" && slug.current==$slug][0
   links[]{kind,label,url},
   "creatorName":creator->name,"creatorSlug":creator->slug.current
 }`)
-export const GENRES_QUERY = defineQuery(`array::unique(*[_type=="book" && defined(genres)].genres[])`)
 export const GENRE_BOOKS_QUERY = defineQuery(`*[_type=="book" && $genre in genres]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"creatorName":creator->name}`)
 
 export const COLUMNS_QUERY = defineQuery(`*[_type=="column"]|order(publishedAt desc){_id,title,"slug":slug.current,excerpt,cover,publishedAt,"authorName":author->name}`)

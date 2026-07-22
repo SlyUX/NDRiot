@@ -948,27 +948,6 @@ export type BOOK_QUERY_RESULT = {
 } | null;
 
 // Source: src/lib/queries.ts
-// Variable: GENRES_QUERY
-// Query: array::unique(*[_type=="book" && defined(genres)].genres[])
-export type GENRES_QUERY_RESULT = Array<
-  | "Action & Adventure"
-  | "Crime & Noir"
-  | "Drama"
-  | "Fantasy"
-  | "Historical"
-  | "Horror"
-  | "Humor & Satire"
-  | "Memoir & Autobio"
-  | "Punk & Protest"
-  | "Queer"
-  | "Romance"
-  | "Sci-Fi"
-  | "Slice of Life"
-  | "Superhero"
-  | "Weird & Experimental"
->;
-
-// Source: src/lib/queries.ts
 // Variable: GENRE_BOOKS_QUERY
 // Query: *[_type=="book" && $genre in genres]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"creatorName":creator->name}
 export type GENRE_BOOKS_QUERY_RESULT = Array<{
@@ -1266,7 +1245,6 @@ declare module "@sanity/client" {
     '*[\n  _type=="book"\n  && (!defined($genres) || count(genres[@ in $genres]) > 0)\n  && (!defined($format) || format == $format)\n  && (!defined($maturity) || maturity == $maturity)\n  && (!defined($status) || status == $status)\n  && (!defined($q) || title match $q || creator->name match $q)\n]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,issueCount,cover,"creatorName":creator->name}': FILTERED_BOOKS_QUERY_RESULT;
     '*[\n  _type=="creator"\n  && (!defined($genres) || count(genres[@ in $genres]) > 0)\n  && (!defined($format) || $format in formats)\n  && (!defined($audience) || audience == $audience)\n  && (!defined($collaborating) || openToCollaboration == true)\n  && (!defined($q) || name match $q || studio->name match $q)\n]|order(name asc){\n  _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,\n  studio->{_id,name,"slug":slug.current,website,logo}\n}': FILTERED_CREATORS_QUERY_RESULT;
     '*[_type=="book" && slug.current==$slug][0]{\n  _id,title,status,genres,format,maturity,issueCount,description,cover,\n  links[]{kind,label,url},\n  "creatorName":creator->name,"creatorSlug":creator->slug.current\n}': BOOK_QUERY_RESULT;
-    'array::unique(*[_type=="book" && defined(genres)].genres[])': GENRES_QUERY_RESULT;
     '*[_type=="book" && $genre in genres]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"creatorName":creator->name}': GENRE_BOOKS_QUERY_RESULT;
     '*[_type=="column"]|order(publishedAt desc){_id,title,"slug":slug.current,excerpt,cover,publishedAt,"authorName":author->name}': COLUMNS_QUERY_RESULT;
     '*[_type=="column" && slug.current==$slug][0]{_id,title,body,publishedAt,cover,"authorName":author->name}': COLUMN_QUERY_RESULT;

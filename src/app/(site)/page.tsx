@@ -3,8 +3,6 @@ import { Suspense } from 'react'
 import { ContentCardGrid } from '@/components/content-card-grid'
 import { FilterBar } from '@/components/filter-bar'
 import { Hero } from '@/components/hero'
-import { GenreBadge } from '@/components/genre-badge'
-import { SectionHeading } from '@/components/section-heading'
 import { Section } from '@/components/ui/section'
 import { bookToCard, creatorToCard } from '@/lib/card-mappers'
 import {
@@ -18,7 +16,6 @@ import {
   safeFetch,
   BOOK_IDS_QUERY,
   HERO_BOOKS_QUERY,
-  GENRES_QUERY,
   FILTERED_BOOKS_QUERY,
   FILTERED_CREATORS_QUERY,
 } from '@/lib/queries'
@@ -69,16 +66,31 @@ export default async function Home({
   searchParams: Promise<SearchParams>
 }) {
   const params = await searchParams
-  const filtering = hasActiveFilters(bookFilters(params))
 
-  const [heroBooks, genres, books, creators, settings] = await Promise.all([
+  const booksFilters = bookFilters(params)
+  /**
+   * Search is comics-only on the homepage.
+   *
+   * The facets still narrow both sections — genre, format and audience mean
+   * the same thing either side. But a title search should not empty the
+   * makers row: someone typing a comic's name has not stopped being
+   * interested in who else is here.
+   *
+   * The listing pages are unaffected; /creators searches creators, as it
+   * should.
+   */
+  const makersFilters = { ...creatorFilters(params), q: null }
+
+  const booksFiltering = hasActiveFilters(booksFilters)
+  const makersFiltering = hasActiveFilters(makersFilters)
+
+  const [heroBooks, books, creators, settings] = await Promise.all([
     // Deliberately unfiltered. The hero is the guaranteed route to work
     // nobody went looking for (AGENTS.md §3), so narrowing the page must
     // never narrow it.
     pickHeroBooks(),
-    safeFetch<string[]>(GENRES_QUERY, {}, []),
-    safeFetch<BookSummary[]>(FILTERED_BOOKS_QUERY, bookFilters(params), []),
-    safeFetch<CreatorSummary[]>(FILTERED_CREATORS_QUERY, creatorFilters(params), []),
+    safeFetch<BookSummary[]>(FILTERED_BOOKS_QUERY, booksFilters, []),
+    safeFetch<CreatorSummary[]>(FILTERED_CREATORS_QUERY, makersFilters, []),
     getSiteSettings(),
   ])
 
@@ -97,17 +109,6 @@ export default async function Home({
         </Suspense>
       </Section>
 
-      {genres.length > 0 && !filtering && (
-        <Section padding="md">
-          <SectionHeading size="sm">{settings.home.genresHeading}</SectionHeading>
-          <div className="flex flex-wrap gap-2">
-            {genres.map((genre) => (
-              <GenreBadge key={genre} genre={genre} variant="outline" size="md" />
-            ))}
-          </div>
-        </Section>
-      )}
-
       <ContentCardGrid
         heading={settings.home.booksHeading}
         cards={books.slice(0, 8).map(bookToCard)}
@@ -115,7 +116,7 @@ export default async function Home({
         padding="md"
         viewAllHref="/books"
         viewAllLabel={settings.home.viewAllLabel}
-        emptyMessage={filtering ? settings.empty.filteredBooks : settings.empty.books}
+        emptyMessage={booksFiltering ? settings.empty.filteredBooks : settings.empty.books}
       />
 
       <ContentCardGrid
@@ -125,7 +126,7 @@ export default async function Home({
         padding="md"
         viewAllHref="/creators"
         viewAllLabel={settings.home.viewAllLabel}
-        emptyMessage={filtering ? settings.empty.filteredCreators : settings.empty.creators}
+        emptyMessage={makersFiltering ? settings.empty.filteredCreators : settings.empty.creators}
       />
     </div>
   )
