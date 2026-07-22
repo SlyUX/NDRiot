@@ -7,6 +7,7 @@ import { OrganizationLink } from '@/components/organization-link'
 import PortableTextBody from '@/components/PortableTextBody'
 import SocialLinks from '@/components/SocialLinks'
 import { SectionHeading } from '@/components/section-heading'
+import { GenreBadge } from '@/components/genre-badge'
 import { Badge } from '@/components/ui/badge'
 import { Section } from '@/components/ui/section'
 import { bookToCard } from '@/lib/card-mappers'
@@ -82,6 +83,35 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
               </div>
             )}
             {creator.location && <p className="text-muted-foreground">{creator.location}</p>}
+
+            {/* Genres link out to the category page, which lists creators as
+                well as books — so the badge goes somewhere useful rather than
+                being decoration. Formats and audience do not have pages, so
+                they stay unlinked. */}
+            {(creator.genres?.length || creator.formats?.length || creator.audience) && (
+              <div className="mt-4 flex flex-wrap items-center gap-1.5">
+                {creator.genres?.map((genre) => (
+                  <GenreBadge key={genre} genre={genre} size="md" />
+                ))}
+                {creator.formats?.map((format) => (
+                  <Badge
+                    key={format}
+                    variant="outline"
+                    className="text-muted-foreground px-2.5 py-0.5 text-[10px] tracking-wider uppercase"
+                  >
+                    {format}
+                  </Badge>
+                ))}
+                {creator.audience && (
+                  <Badge
+                    variant="outline"
+                    className="text-muted-foreground px-2.5 py-0.5 text-[10px] tracking-wider uppercase"
+                  >
+                    {creator.audience}
+                  </Badge>
+                )}
+              </div>
+            )}
 
             {/* Only for an explicit yes. `false` and "never answered" both mean
                 no badge — claiming someone is available when they have not said

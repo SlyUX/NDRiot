@@ -68,6 +68,8 @@ export interface SiteSettings {
     booksHeading: string
     creatorsHeading: string
     downloadsHeading: string
+    genreBooksHeading: string
+    genreCreatorsHeading: string
     downloadCta: string
     kickstarterCta: string
     creatorBooksHeading: string
@@ -79,6 +81,7 @@ export interface SiteSettings {
     books: string
     creators: string
     genreBooks: string
+    genreCreators: string
     columns: string
     interviews: string
     downloads: string
@@ -125,6 +128,8 @@ const DEFAULTS: SiteSettings = {
     booksHeading: 'Books',
     creatorsHeading: 'Creators',
     downloadsHeading: 'Free Downloads',
+    genreBooksHeading: 'Comics',
+    genreCreatorsHeading: 'Makers working in this genre',
     downloadCta: 'Download',
     kickstarterCta: 'Back on Kickstarter',
     creatorBooksHeading: 'Books',
@@ -136,6 +141,7 @@ const DEFAULTS: SiteSettings = {
     books: 'No books yet — add creators and books in the Studio.',
     creators: 'No creators yet.',
     genreBooks: 'No books in this genre yet.',
+    genreCreators: 'No creators list this genre yet.',
     columns: 'No columns yet.',
     interviews: 'No interviews yet.',
     downloads: 'No downloads yet.',

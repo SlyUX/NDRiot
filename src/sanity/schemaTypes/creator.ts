@@ -1,5 +1,6 @@
 import { defineType, defineField } from 'sanity'
 
+import { FORMATS, FORMAT_DESCRIPTIONS, GENRES, MATURITY_DESCRIPTIONS, MATURITY_RATINGS } from '@/lib/taxonomy'
 import { slugField } from './slugField'
 
 export default defineType({
@@ -48,6 +49,41 @@ export default defineType({
               ? 'That organization is already set as this creator’s Studio above. Remove it here, or clear the Studio field.'
               : true
           }),
+    }),
+    defineField({
+      name: 'genres',
+      title: 'Genres they work in',
+      type: 'array',
+      of: [{ type: 'string', options: { list: [...GENRES] } }],
+      options: { layout: 'grid' },
+      description:
+        'Up to three, describing their body of work rather than any single book. Books carry their own genres; these make the creator findable.',
+      validation: (rule) => rule.max(3).unique(),
+    }),
+    defineField({
+      name: 'formats',
+      title: 'What they make',
+      type: 'array',
+      of: [{ type: 'string', options: { list: [...FORMATS] } }],
+      options: { layout: 'grid' },
+      description: Object.entries(FORMAT_DESCRIPTIONS)
+        .map(([k, v]) => `${k}: ${v}`)
+        .join(' '),
+      validation: (rule) => rule.unique(),
+    }),
+    defineField({
+      name: 'audience',
+      title: 'Who their work is for',
+      type: 'string',
+      options: {
+        list: MATURITY_RATINGS.map((value) => ({
+          title: `${value} — ${MATURITY_DESCRIPTIONS[value]}`,
+          value,
+        })),
+        layout: 'radio',
+      },
+      description:
+        'A summary of their work overall. Individual books can differ — this is the general signal, not a rule.',
     }),
     defineField({
       name: 'openToCollaboration',

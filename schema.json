@@ -1738,6 +1738,143 @@
         },
         "optional": true
       },
+      "genres": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "array",
+          "of": {
+            "type": "union",
+            "of": [
+              {
+                "type": "string",
+                "value": "Action & Adventure"
+              },
+              {
+                "type": "string",
+                "value": "Sci-Fi"
+              },
+              {
+                "type": "string",
+                "value": "Fantasy"
+              },
+              {
+                "type": "string",
+                "value": "Horror"
+              },
+              {
+                "type": "string",
+                "value": "Crime & Noir"
+              },
+              {
+                "type": "string",
+                "value": "Romance"
+              },
+              {
+                "type": "string",
+                "value": "Drama"
+              },
+              {
+                "type": "string",
+                "value": "Slice of Life"
+              },
+              {
+                "type": "string",
+                "value": "Historical"
+              },
+              {
+                "type": "string",
+                "value": "Superhero"
+              },
+              {
+                "type": "string",
+                "value": "Humor & Satire"
+              },
+              {
+                "type": "string",
+                "value": "Memoir & Autobio"
+              },
+              {
+                "type": "string",
+                "value": "Queer"
+              },
+              {
+                "type": "string",
+                "value": "Weird & Experimental"
+              },
+              {
+                "type": "string",
+                "value": "Punk & Protest"
+              }
+            ]
+          }
+        },
+        "optional": true
+      },
+      "formats": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "array",
+          "of": {
+            "type": "union",
+            "of": [
+              {
+                "type": "string",
+                "value": "Graphic Novel"
+              },
+              {
+                "type": "string",
+                "value": "Single Issue"
+              },
+              {
+                "type": "string",
+                "value": "Collected Edition"
+              },
+              {
+                "type": "string",
+                "value": "Anthology"
+              },
+              {
+                "type": "string",
+                "value": "Minicomic"
+              },
+              {
+                "type": "string",
+                "value": "Zine"
+              },
+              {
+                "type": "string",
+                "value": "Webcomic"
+              }
+            ]
+          }
+        },
+        "optional": true
+      },
+      "audience": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "union",
+          "of": [
+            {
+              "type": "string",
+              "value": "All Ages"
+            },
+            {
+              "type": "string",
+              "value": "Teen"
+            },
+            {
+              "type": "string",
+              "value": "Teen+"
+            },
+            {
+              "type": "string",
+              "value": "Mature"
+            }
+          ]
+        },
+        "optional": true
+      },
       "openToCollaboration": {
         "type": "objectAttribute",
         "value": {
@@ -2386,6 +2523,20 @@
               },
               "optional": true
             },
+            "genreBooksHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "genreCreatorsHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "downloadCta": {
               "type": "objectAttribute",
               "value": {
@@ -2452,6 +2603,13 @@
               "optional": true
             },
             "genreBooks": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "genreCreators": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

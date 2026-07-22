@@ -166,6 +166,18 @@ export default defineType({
         defineField({ name: 'creatorsHeading', title: 'Creators page title', type: 'string' }),
         defineField({ name: 'downloadsHeading', title: 'Downloads page title', type: 'string' }),
         defineField({
+          name: 'genreBooksHeading',
+          title: 'Category page — books heading',
+          type: 'string',
+          description: 'e.g. "Comics".',
+        }),
+        defineField({
+          name: 'genreCreatorsHeading',
+          title: 'Category page — creators heading',
+          type: 'string',
+          description: 'e.g. "Makers working in this genre".',
+        }),
+        defineField({
           name: 'downloadCta',
           title: 'Download button label',
           type: 'string',
@@ -214,6 +226,7 @@ export default defineType({
         defineField({ name: 'books', title: 'No books', type: 'string' }),
         defineField({ name: 'creators', title: 'No creators', type: 'string' }),
         defineField({ name: 'genreBooks', title: 'No books in a genre', type: 'string' }),
+        defineField({ name: 'genreCreators', title: 'No creators in a genre', type: 'string' }),
         defineField({ name: 'columns', title: 'No columns', type: 'string' }),
         defineField({ name: 'interviews', title: 'No interviews', type: 'string' }),
         defineField({ name: 'downloads', title: 'No downloads', type: 'string' }),

@@ -162,6 +162,43 @@ function platformFor(url) {
 
 const isYes = (value) => /^yes\b/i.test((value ?? '').trim())
 
+/**
+ * Kept in step with src/lib/taxonomy.ts by hand, because this script is plain
+ * Node and cannot import a TypeScript module. If they ever drift, the
+ * unrecognised values are reported rather than written — a wrong genre is a
+ * dead category page.
+ */
+const GENRES = ["Action & Adventure", "Sci-Fi", "Fantasy", "Horror", "Crime & Noir", "Romance", "Drama", "Slice of Life", "Historical", "Superhero", "Humor & Satire", "Memoir & Autobio", "Queer", "Weird & Experimental", "Punk & Protest"]
+const FORMATS = ["Graphic Novel", "Single Issue", "Collected Edition", "Anthology", "Minicomic", "Zine", "Webcomic"]
+const MATURITY = ["All Ages", "Teen", "Teen+", "Mature"]
+
+/**
+ * Parses a multi-select answer against a known list.
+ *
+ * The form offers "Other", so anything can arrive here. Unknown values are
+ * returned separately rather than dropped: the whole reason genres are a
+ * fixed list is that a stray one silently creates a page with nothing on it.
+ */
+function matchTaxonomy(answer, allowed, { single = false } = {}) {
+  const matched = []
+  const unknown = []
+  // Multi-selects are comma separated; a single-select is one answer that may
+  // itself contain commas inside its description — "Teen+ — 16+, moderate
+  // violence, profanity" is one choice, not four. Splitting it produces three
+  // phantom "unrecognised" warnings on every submission, which trains the
+  // reader to ignore the warning that matters.
+  for (const raw of single ? [answer ?? ''] : (answer ?? '').split(',')) {
+    // Form option labels carry their description after an em-dash —
+    // "Teen+ — 16+, moderate violence" — so take the label only.
+    const value = raw.split('—')[0].trim()
+    if (!value) continue
+    const hit = allowed.find((a) => a.toLowerCase() === value.toLowerCase())
+    if (hit) matched.push(hit)
+    else unknown.push(value)
+  }
+  return { matched, unknown }
+}
+
 /* ----------------------------------------------------------- sanity calls */
 
 async function query(groq, params = {}) {
@@ -263,6 +300,9 @@ const MAPPED_COLUMNS = new Set([
   'Describe that image',
   'Studio or organization logo',
   'Can we publish this?',
+  'What do you make?',
+  'What genres do you work in?',
+  "Who's it for?",
 ])
 
 /**
@@ -422,6 +462,26 @@ async function main() {
       console.log(`   photo: ok (${((photo.bytes ?? 0) / 1024).toFixed(0)}KB)`)
     }
 
+    const genreMatch = matchTaxonomy(record['What genres do you work in?'], GENRES)
+    const formatMatch = matchTaxonomy(record['What do you make?'], FORMATS)
+    const audienceMatch = matchTaxonomy(record["Who's it for?"], MATURITY, { single: true })
+
+    for (const [label, { matched, unknown }] of [
+      ['genres', genreMatch],
+      ['formats', formatMatch],
+      ['audience', audienceMatch],
+    ]) {
+      if (matched.length) console.log(`   ${label}: ${matched.join(', ')}`)
+      if (unknown.length) {
+        warnings.push(`${name}: unrecognised ${label} — ${unknown.join(', ')}. Add to taxonomy.ts or correct in the Studio.`)
+        console.log(`   ${label}: UNRECOGNISED — ${unknown.join(', ')}`)
+      }
+    }
+
+    if (genreMatch.matched.length > 3) {
+      warnings.push(`${name}: picked ${genreMatch.matched.length} genres; only the first three are kept.`)
+    }
+
     const doc = {
       _id: `drafts.creator-${slug}`,
       _type: 'creator',
@@ -436,6 +496,9 @@ async function main() {
     if (website) doc.website = website
     if (bio) doc.bio = toPortableText(bio)
     if (socials.length) doc.socials = socials
+    if (genreMatch.matched.length) doc.genres = genreMatch.matched.slice(0, 3)
+    if (formatMatch.matched.length) doc.formats = formatMatch.matched
+    if (audienceMatch.matched.length) doc.audience = audienceMatch.matched[0]
     if (studioRef) doc.studio = { _type: 'reference', _ref: studioRef._ref }
     if (orgRefs.length) {
       doc.organizations = orgRefs.map(({ _key, _ref }) => ({ _type: 'reference', _key, _ref }))
