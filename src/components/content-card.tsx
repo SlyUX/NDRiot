@@ -82,6 +82,15 @@ export function MaturityOverlay({ maturity }: { maturity: MaturityRating }) {
       variant={restricted ? 'default' : 'outline'}
       className={cn(
         'absolute top-2 right-2 z-10 px-1.5 py-0 text-[10px] leading-4 tracking-wider uppercase',
+        // Black keyline on the pink. Cover art is arbitrary, and pink sitting
+        // on a pink-adjacent cover has nothing separating the two — the badge
+        // stops reading as a badge. Base Badge already sets `border` at 1px
+        // and only leaves it transparent, so this is a colour, not a new edge.
+        //
+        // border-primary-foreground rather than a black class: it is the same
+        // token the text on this badge uses, so the keyline cannot drift away
+        // from the on-primary colour if that token ever moves.
+        restricted && 'border-primary-foreground',
         !restricted && 'bg-background/90 text-foreground border-white/25 backdrop-blur-sm',
       )}
     >
