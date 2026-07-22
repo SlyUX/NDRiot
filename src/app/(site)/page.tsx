@@ -8,8 +8,10 @@ import { bookToCard, creatorToCard } from '@/lib/card-mappers'
 import {
   bookFilters,
   creatorFilters,
+  discoverSeed,
   hasActiveFilters,
   HOME_FACETS,
+  seededShuffle,
   type SearchParams,
 } from '@/lib/filters'
 import {
@@ -84,6 +86,14 @@ export default async function Home({
   const booksFiltering = hasActiveFilters(booksFilters)
   const makersFiltering = hasActiveFilters(makersFilters)
 
+  /**
+   * Discover. Shuffles both rows before they are cut to eight, so it surfaces
+   * a different set rather than just reordering the same alphabetical front.
+   * The two rows get different seeds, or the same arithmetic would move them
+   * in step.
+   */
+  const seed = discoverSeed(params)
+
   const [heroBooks, books, creators, settings] = await Promise.all([
     // Deliberately unfiltered. The hero is the guaranteed route to work
     // nobody went looking for (AGENTS.md §3), so narrowing the page must
@@ -108,13 +118,14 @@ export default async function Home({
             control="select"
             resultCount={books.length + creators.length}
             searchLabel={settings.sections.searchHomeLabel}
+            discoverLabel={settings.sections.discoverLabel}
           />
         </Suspense>
       </Section>
 
       <ContentCardGrid
         heading={settings.home.booksHeading}
-        cards={books.slice(0, 8).map(bookToCard)}
+        cards={(seed === null ? books : seededShuffle(books, seed)).slice(0, 8).map(bookToCard)}
         columns={4}
         padding="tight"
         viewAllHref="/books"
@@ -124,7 +135,7 @@ export default async function Home({
 
       <ContentCardGrid
         heading={settings.home.creatorsHeading}
-        cards={creators.slice(0, 8).map(creatorToCard)}
+        cards={(seed === null ? creators : seededShuffle(creators, seed + 1)).slice(0, 8).map(creatorToCard)}
         columns={4}
         padding="tight"
         viewAllHref="/creators"

@@ -172,6 +172,13 @@ export default defineType({
           description: 'e.g. "Comics".',
         }),
         defineField({
+          name: 'discoverLabel',
+          title: 'Randomise button label',
+          type: 'string',
+          description:
+            'Shuffles the homepage rows. Pressing it again reshuffles. e.g. "Discover".',
+        }),
+        defineField({
           name: 'searchHomeLabel',
           title: 'Homepage search placeholder',
           type: 'string',

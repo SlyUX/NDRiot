@@ -229,7 +229,16 @@ export function ContentCard({
   return (
     <Card
       className={cn(
-        'group gap-0 overflow-hidden border-0 bg-transparent shadow-none',
+        // p-0 and ring-0 are both fighting shadcn defaults, deliberately:
+        //
+        // Card applies py-(--card-spacing) with an escape hatch,
+        // `has-[>img:first-child]:pt-0`, that only fires for a bare <img> as a
+        // DIRECT child. Ours sits inside a Link and a div, so the selector
+        // never matches and the image floats 16px below the card's top edge.
+        //
+        // `border-0` does not remove `ring-1` — a ring is not a border — so
+        // the outline survived an override that reads as if it removed it.
+        'group gap-0 overflow-hidden border-0 p-0 shadow-none ring-0 bg-transparent',
         stretch && 'h-full',
         className,
       )}

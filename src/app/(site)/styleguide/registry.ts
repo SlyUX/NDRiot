@@ -245,6 +245,19 @@ export const componentEntries: ComponentEntry[] = [
         description: 'Announced in a live region, since filtering navigates and would otherwise be silent.',
       },
       {
+        name: 'control',
+        type: "'chips' | 'select'",
+        default: "'chips'",
+        description:
+          'chips exposes every option, for listings where browsing is the task; select collapses each facet to a dropdown for the homepage. Multi-select is ignored under select.',
+      },
+      {
+        name: 'discoverLabel',
+        type: 'string',
+        description:
+          'Shows a randomise button. Re-seeds on every press, so pressing again reshuffles — and the seed lives in the URL, so a shuffled view is shareable and stable on refresh.',
+      },
+      {
         name: 'searchLabel',
         type: 'string',
         description:

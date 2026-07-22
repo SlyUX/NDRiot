@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { Search, X } from 'lucide-react'
+import { Search, Shuffle, X } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -47,6 +47,8 @@ export interface FilterBarProps {
   resultCount: number
   /** Placeholder for the search box. Copy, so it comes from Sanity. */
   searchLabel: string
+  /** Label for the randomise button. Omit to hide it. */
+  discoverLabel?: string
   className?: string
 }
 
@@ -57,6 +59,7 @@ export function FilterBar({
   facets,
   resultCount,
   searchLabel,
+  discoverLabel,
   control = 'chips',
   className,
 }: FilterBarProps) {
@@ -72,6 +75,7 @@ export function FilterBar({
       searchParams.getAll(facet.param).map((value) => ({ facet, value })),
     ),
     ...(urlQuery ? [{ facet: null, value: urlQuery }] : []),
+    ...(searchParams.get('sort') === 'random' ? [{ facet: null, value: 'shuffled' }] : []),
   ]
 
   const apply = useCallback(
@@ -139,18 +143,40 @@ export function FilterBar({
     return () => clearTimeout(timer)
   }, [term, urlQuery, searchParams, apply])
 
+  const isRandom = searchParams.get('sort') === 'random'
+
+  /**
+   * Re-seeds on every press, so pressing it again reshuffles rather than
+   * doing nothing — pushing an identical URL renders nothing new.
+   *
+   * Pressing it while already on shuffles again; there is no "off". Clearing
+   * the filters restores the default order.
+   */
+  const discover = useCallback(() => {
+    const next = new URLSearchParams(searchParams.toString())
+    next.set('sort', 'random')
+    next.set('seed', String(Math.floor(Math.random() * 1_000_000)))
+    apply(next)
+  }, [apply, searchParams])
+
   const clearAll = useCallback(() => {
     setTerm('')
     const next = new URLSearchParams(searchParams.toString())
     for (const facet of facets) next.delete(facet.param)
-    // Clear means clear — leaving the search term behind would look broken.
+    // Clear means clear — leaving the search term or a shuffle behind would
+    // look broken.
     next.delete('q')
+    next.delete('sort')
+    next.delete('seed')
     apply(next)
   }, [apply, facets, searchParams])
 
   return (
     <div className={cn('space-y-4', className)}>
-      <div className="relative max-w-sm">
+      {/* Search and the dropdowns share a row under `select`, and stack under
+          `chips` where the facets need the full width. */}
+      <div className={cn(control === 'select' && 'flex flex-wrap items-center gap-2')}>
+      <div className="relative w-full max-w-xs">
         <Search
           aria-hidden="true"
           className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
@@ -168,7 +194,7 @@ export function FilterBar({
       </div>
 
       {control === 'select' && (
-        <div className="flex flex-wrap gap-2">
+        <>
           {facets.map((facet) => {
             const selected = searchParams.get(facet.param) ?? ''
             const options = facet.toggle ? ['1'] : facet.options
@@ -180,7 +206,10 @@ export function FilterBar({
                 aria-label={facet.label}
                 onChange={(event) => setValue(facet, event.target.value)}
                 className={cn(
-                  'focus-visible:ring-ring border bg-transparent px-2.5 py-2 text-[11px] tracking-wide uppercase focus-visible:ring-2 focus-visible:outline-none',
+                  // pr-8, not pr-2.5: a native select draws its caret inside
+                  // the padding box, so symmetric padding leaves the arrow
+                  // jammed against the right border.
+                  'focus-visible:ring-ring border bg-transparent py-2 pr-8 pl-2.5 text-[11px] tracking-wide uppercase focus-visible:ring-2 focus-visible:outline-none',
                   selected
                     ? 'border-primary text-primary font-bold'
                     : 'text-muted-foreground border-white/20',
@@ -203,8 +232,26 @@ export function FilterBar({
               </select>
             )
           })}
-        </div>
+
+          {discoverLabel && (
+          <button
+            type="button"
+            onClick={discover}
+            aria-pressed={isRandom}
+            className={cn(
+              'focus-visible:ring-ring border px-3 py-2 text-[11px] font-bold tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none',
+              isRandom
+                ? 'bg-primary text-primary-foreground border-primary'
+                : 'text-muted-foreground hover:border-primary/60 hover:text-foreground border-white/20',
+            )}
+          >
+            <Shuffle aria-hidden="true" className="mr-1.5 inline size-3.5" />
+            {discoverLabel}
+          </button>
+          )}
+        </>
       )}
+      </div>
 
       {control === 'chips' &&
         facets.map((facet) => {
