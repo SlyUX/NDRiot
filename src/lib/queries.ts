@@ -35,11 +35,19 @@ export const INTERVIEW_QUERY = defineQuery(`*[_type=="interview" && slug.current
 export const DOWNLOADS_QUERY = defineQuery(`*[_type=="freeDownload"]|order(publishedAt desc){_id,title,"slug":slug.current,description,cover,publishedAt,"creatorName":creator->name}`)
 export const DOWNLOAD_QUERY = defineQuery(`*[_type=="freeDownload" && slug.current==$slug][0]{_id,title,description,cover,"creatorName":creator->name,"fileUrl":file.asset->url}`)
 
-export const FEATURES_QUERY = defineQuery(`*[_type=="homepageFeature" && active==true]|order(order asc)[0].items[]->{
-  _type,_id,title,name,"slug":slug.current,cover,photo,genres,format,maturity,
-  shortDescription,excerpt,location,
-  "creatorName":creator->name,
-  "studioName":studio->name
+/**
+ * IDs only, for the hero's random pick.
+ *
+ * Two queries rather than one because there is no random() in GROQ. Fetching
+ * every book in full to shuffle three of them would grow with the roster;
+ * fetching identifiers stays cheap however large it gets.
+ */
+export const BOOK_IDS_QUERY = defineQuery(`*[_type=="book" && defined(slug.current)]._id`)
+
+/** The books the hero landed on, in full. */
+export const HERO_BOOKS_QUERY = defineQuery(`*[_type=="book" && _id in $ids]{
+  _id,title,"slug":slug.current,status,genres,format,maturity,cover,shortDescription,
+  "creatorName":creator->name
 }`)
 
 /**

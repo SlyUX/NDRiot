@@ -1049,118 +1049,49 @@ export type DOWNLOAD_QUERY_RESULT = {
 } | null;
 
 // Source: src/lib/queries.ts
-// Variable: FEATURES_QUERY
-// Query: *[_type=="homepageFeature" && active==true]|order(order asc)[0].items[]->{  _type,_id,title,name,"slug":slug.current,cover,photo,genres,format,maturity,  shortDescription,excerpt,location,  "creatorName":creator->name,  "studioName":studio->name}
-export type FEATURES_QUERY_RESULT = Array<
-  | {
-      _type: "book";
-      _id: string;
-      title: string;
-      name: null;
-      slug: string;
-      cover: ImageWithAlt | null;
-      photo: null;
-      genres: Array<
-        | "Action & Adventure"
-        | "Crime & Noir"
-        | "Drama"
-        | "Fantasy"
-        | "Historical"
-        | "Horror"
-        | "Humor & Satire"
-        | "Memoir & Autobio"
-        | "Punk & Protest"
-        | "Queer"
-        | "Romance"
-        | "Sci-Fi"
-        | "Slice of Life"
-        | "Superhero"
-        | "Weird & Experimental"
-      > | null;
-      format:
-        | "Anthology"
-        | "Collected Edition"
-        | "Graphic Novel"
-        | "Minicomic"
-        | "Single Issue"
-        | "Webcomic"
-        | "Zine"
-        | null;
-      maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
-      shortDescription: string | null;
-      excerpt: null;
-      location: null;
-      creatorName: string;
-      studioName: null;
-    }
-  | {
-      _type: "column";
-      _id: string;
-      title: string;
-      name: null;
-      slug: string;
-      cover: ImageWithAlt | null;
-      photo: null;
-      genres: null;
-      format: null;
-      maturity: null;
-      shortDescription: null;
-      excerpt: string | null;
-      location: null;
-      creatorName: null;
-      studioName: null;
-    }
-  | {
-      _type: "creator";
-      _id: string;
-      title: null;
-      name: string;
-      slug: string;
-      cover: null;
-      photo: ImageWithAlt | null;
-      genres: Array<
-        | "Action & Adventure"
-        | "Crime & Noir"
-        | "Drama"
-        | "Fantasy"
-        | "Historical"
-        | "Horror"
-        | "Humor & Satire"
-        | "Memoir & Autobio"
-        | "Punk & Protest"
-        | "Queer"
-        | "Romance"
-        | "Sci-Fi"
-        | "Slice of Life"
-        | "Superhero"
-        | "Weird & Experimental"
-      > | null;
-      format: null;
-      maturity: null;
-      shortDescription: null;
-      excerpt: null;
-      location: string | null;
-      creatorName: null;
-      studioName: string | null;
-    }
-  | {
-      _type: "interview";
-      _id: string;
-      title: string;
-      name: null;
-      slug: string;
-      cover: ImageWithAlt | null;
-      photo: null;
-      genres: null;
-      format: null;
-      maturity: null;
-      shortDescription: null;
-      excerpt: string | null;
-      location: null;
-      creatorName: null;
-      studioName: null;
-    }
-> | null;
+// Variable: BOOK_IDS_QUERY
+// Query: *[_type=="book" && defined(slug.current)]._id
+export type BOOK_IDS_QUERY_RESULT = Array<string>;
+
+// Source: src/lib/queries.ts
+// Variable: HERO_BOOKS_QUERY
+// Query: *[_type=="book" && _id in $ids]{  _id,title,"slug":slug.current,status,genres,format,maturity,cover,shortDescription,  "creatorName":creator->name}
+export type HERO_BOOKS_QUERY_RESULT = Array<{
+  _id: string;
+  title: string;
+  slug: string;
+  status: "Complete" | "Ongoing" | "Upcoming" | null;
+  genres: Array<
+    | "Action & Adventure"
+    | "Crime & Noir"
+    | "Drama"
+    | "Fantasy"
+    | "Historical"
+    | "Horror"
+    | "Humor & Satire"
+    | "Memoir & Autobio"
+    | "Punk & Protest"
+    | "Queer"
+    | "Romance"
+    | "Sci-Fi"
+    | "Slice of Life"
+    | "Superhero"
+    | "Weird & Experimental"
+  > | null;
+  format:
+    | "Anthology"
+    | "Collected Edition"
+    | "Graphic Novel"
+    | "Minicomic"
+    | "Single Issue"
+    | "Webcomic"
+    | "Zine"
+    | null;
+  maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
+  cover: ImageWithAlt | null;
+  shortDescription: string | null;
+  creatorName: string;
+}>;
 
 // Source: src/lib/queries.ts
 // Variable: SITEMAP_QUERY
@@ -1257,7 +1188,8 @@ declare module "@sanity/client" {
     '*[_type=="interview" && slug.current==$slug][0]{_id,title,body,publishedAt,cover,"interviewerName":interviewer->name,"subjectName":subject->name}': INTERVIEW_QUERY_RESULT;
     '*[_type=="freeDownload"]|order(publishedAt desc){_id,title,"slug":slug.current,description,cover,publishedAt,"creatorName":creator->name}': DOWNLOADS_QUERY_RESULT;
     '*[_type=="freeDownload" && slug.current==$slug][0]{_id,title,description,cover,"creatorName":creator->name,"fileUrl":file.asset->url}': DOWNLOAD_QUERY_RESULT;
-    '*[_type=="homepageFeature" && active==true]|order(order asc)[0].items[]->{\n  _type,_id,title,name,"slug":slug.current,cover,photo,genres,format,maturity,\n  shortDescription,excerpt,location,\n  "creatorName":creator->name,\n  "studioName":studio->name\n}': FEATURES_QUERY_RESULT;
+    '*[_type=="book" && defined(slug.current)]._id': BOOK_IDS_QUERY_RESULT;
+    '*[_type=="book" && _id in $ids]{\n  _id,title,"slug":slug.current,status,genres,format,maturity,cover,shortDescription,\n  "creatorName":creator->name\n}': HERO_BOOKS_QUERY_RESULT;
     '{\n  "books": *[_type=="book" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "creators": *[_type=="creator" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "columns": *[_type=="column" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "interviews": *[_type=="interview" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "genres": array::unique(*[_type=="book" && defined(genres)].genres[])\n}': SITEMAP_QUERY_RESULT;
     '*[_type=="creator" && $genre in genres]|order(name asc){\n  _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,\n  studio->{_id,name,"slug":slug.current,website,logo}\n}': GENRE_CREATORS_QUERY_RESULT;
   }

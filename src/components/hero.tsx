@@ -6,9 +6,9 @@ import { MaturityOverlay, TaxonomyRow } from '@/components/content-card'
 import { HeroCarousel, type HeroSlide } from '@/components/hero-carousel'
 import { Logo } from '@/components/logo'
 import { Button } from '@/components/ui/button'
-import { featureToCard } from '@/lib/card-mappers'
+import { bookToCard } from '@/lib/card-mappers'
 import type { HeroSettings } from '@/lib/site-settings'
-import type { FeatureItem } from '@/lib/types'
+import type { HeroBook } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { urlFor } from '@/sanity/image'
 
@@ -25,7 +25,8 @@ import { urlFor } from '@/sanity/image'
 
 export interface HeroProps {
   hero: HeroSettings
-  features: FeatureItem[]
+  /** Chosen at random per request — see the homepage. */
+  books: HeroBook[]
 }
 
 /**
@@ -55,7 +56,7 @@ const PITCH_DURATION_MS = 12_000
 const FEATURE_DURATION_MS = 6_000
 
 /**
- * A featured book or creator, at hero scale.
+ * A book, at hero scale.
  *
  * Mirrors the pitch slide's two-column shape — art left, words right — so the
  * carousel reads as one composition rather than a pitch followed by some
@@ -65,9 +66,8 @@ const FEATURE_DURATION_MS = 6_000
  * previous version did. This composes the same pieces at a different scale
  * instead (AGENTS.md §3, option 3).
  */
-function FeatureSlide({ item, ctaLabel }: { item: FeatureItem; ctaLabel: string }) {
-  const card = featureToCard(item)
-  const square = card.aspectRatio === 'square'
+function FeatureSlide({ book, ctaLabel }: { book: HeroBook; ctaLabel: string }) {
+  const card = bookToCard(book)
 
   return (
     // `auto` on the first column, not a half share: the cover is 16rem, so an
@@ -78,10 +78,7 @@ function FeatureSlide({ item, ctaLabel }: { item: FeatureItem; ctaLabel: string 
     <div className="grid items-center gap-8 lg:grid-cols-[auto_1fr] lg:gap-12">
       <div className="flex justify-center lg:justify-start">
         <div
-          className={cn(
-            'relative w-48 shrink-0 overflow-hidden sm:w-56 lg:w-64',
-            square ? 'aspect-square' : 'aspect-[2/3]',
-          )}
+          className={cn('relative w-48 shrink-0 overflow-hidden sm:w-56 lg:w-64 aspect-[2/3]')}
         >
           {card.image ? (
             <Image
@@ -124,8 +121,8 @@ function FeatureSlide({ item, ctaLabel }: { item: FeatureItem; ctaLabel: string 
   )
 }
 
-export function Hero({ hero, features }: HeroProps) {
-  const featureSlides = features.filter(Boolean).slice(0, 3)
+export function Hero({ hero, books }: HeroProps) {
+  const featured = books.filter(Boolean).slice(0, 3)
 
   const pitchSlide = (
     <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
@@ -173,9 +170,9 @@ export function Hero({ hero, features }: HeroProps) {
       label: hero.headline,
       durationMs: PITCH_DURATION_MS,
     },
-    ...featureSlides.map((item) => ({
-      content: <FeatureSlide key={item._id} item={item} ctaLabel={hero.featureCtaLabel} />,
-      label: item.title ?? item.name ?? 'Featured',
+    ...featured.map((book) => ({
+      content: <FeatureSlide key={book._id} book={book} ctaLabel={hero.featureCtaLabel} />,
+      label: book.title,
       durationMs: FEATURE_DURATION_MS,
     })),
   ]

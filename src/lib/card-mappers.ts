@@ -4,7 +4,6 @@ import type {
   ColumnSummary,
   CreatorSummary,
   DownloadSummary,
-  FeatureItem,
   InterviewSummary,
 } from '@/lib/types'
 
@@ -93,55 +92,5 @@ export function downloadToCard(download: DownloadSummary): ContentCardProps {
     eyebrow: download.creatorName,
     summary: download.description,
     aspectRatio: 'cover',
-  }
-}
-
-/**
- * FEATURES_QUERY returns a mixed array, so this narrows on `_type` to pick
- * the right href pattern and image field.
- */
-export function featureToCard(item: FeatureItem): ContentCardProps {
-  const base = {
-    title: item.title ?? item.name ?? '',
-    imageAlt: '',
-    // Each type keeps its supporting copy in a different field.
-    summary: item.shortDescription ?? item.excerpt,
-  }
-
-  switch (item._type) {
-    case 'book':
-      return {
-        ...base,
-        href: `/books/${item.slug}`,
-        image: item.cover,
-        eyebrow: item.creatorName,
-        genres: item.genres,
-        format: item.format,
-        maturity: item.maturity,
-        aspectRatio: 'cover',
-      }
-    case 'creator':
-      return {
-        ...base,
-        href: `/creators/${item.slug}`,
-        image: item.photo,
-        imageAlt: `Portrait of ${base.title}`,
-        eyebrow: item.studioName ?? item.location,
-        aspectRatio: 'square',
-      }
-    case 'column':
-      return {
-        ...base,
-        href: `/editorial/columns/${item.slug}`,
-        image: item.cover,
-        aspectRatio: 'video',
-      }
-    case 'interview':
-      return {
-        ...base,
-        href: `/editorial/interviews/${item.slug}`,
-        image: item.cover,
-        aspectRatio: 'video',
-      }
   }
 }
