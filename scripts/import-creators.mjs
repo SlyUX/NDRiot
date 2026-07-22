@@ -126,7 +126,11 @@ async function main() {
   const commit = flags.includes('--commit')
 
   if (!csvPath) {
-    console.error('Usage: node scripts/import-creators.mjs <csv> [--commit]')
+    // The `--` is not optional and not obvious: without it npm swallows the
+    // arguments instead of passing them to the script.
+    console.error('Usage: npm run import:creators -- <csv> [--commit]')
+    console.error('   eg: npm run import:creators -- data/creators.csv')
+    console.error('       npm run import:creators -- data/creators.csv --commit')
     process.exit(1)
   }
 

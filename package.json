@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "typegen": "sanity schema extract --enforce-required-fields && sanity typegen generate",
-    "prebuild": "npm run typegen"
+    "prebuild": "npm run typegen",
+    "import:creators": "node scripts/import-creators.mjs",
+    "import:books": "node scripts/import-books.mjs"
   },
   "dependencies": {
     "@portabletext/react": "^6.2.0",
