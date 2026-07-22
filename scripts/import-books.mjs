@@ -240,7 +240,15 @@ async function main() {
       label: `${slug}-cover`,
     })
     if (cover.error) {
-      warnings.push(`${title}: cover not imported — ${cover.error}`)
+      // The source URL goes in the warning, not just the reason. Attaching
+      // covers by hand in the Studio is the expected path, not a failure
+      // mode, so this list is a worklist: it needs to say which book and
+      // where its image is, or every line means opening the CSV again.
+      const source = repairText(record['Cover image'] || '').trim()
+      warnings.push(
+        `${title}: cover not imported — ${cover.error}` +
+          (source ? `\n     open: ${source}\n     then: /studio → Book → ${title} → Cover` : ''),
+      )
       console.log(`   cover: SKIPPED — ${cover.error}`)
     } else if (cover.assetId || cover.dryRun) {
       console.log(`   cover: ok (${((cover.bytes ?? 0) / 1024).toFixed(0)}KB)`)
