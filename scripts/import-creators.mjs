@@ -37,6 +37,32 @@ const API = `https://${PROJECT_ID}.api.sanity.io/v${API_VERSION}`
 /** Images below this are almost certainly a thumbnail, not the real asset. */
 const MIN_IMAGE_BYTES = 20_000
 
+/**
+ * Google Forms file-upload answers arrive as Drive links, in one of two
+ * shapes, neither of which serves the file directly. Rewriting to the
+ * download endpoint works — but only if the file is link-shareable, which
+ * Form uploads are not by default: they land in the form owner's Drive
+ * private to them.
+ */
+function normaliseDriveUrl(url) {
+  const id =
+    url.match(/drive\.google\.com\/open\?id=([\w-]+)/)?.[1] ??
+    url.match(/drive\.google\.com\/file\/d\/([\w-]+)/)?.[1] ??
+    url.match(/drive\.google\.com\/uc\?[^"]*id=([\w-]+)/)?.[1]
+  return id ? `https://drive.google.com/uc?export=download&id=${id}` : null
+}
+
+/**
+ * Any Drive failure gets the same explanation, because the cause is almost
+ * always the same one and the raw status says nothing useful. A private file
+ * can 404, 403, or return a sign-in page with a 200 — three symptoms, one
+ * fix.
+ */
+function driveNote(isDrive, detail) {
+  if (!isDrive) return detail
+  return `${detail} — Drive file is not readable. Form uploads are private by default; set it to "Anyone with the link", or download it and attach it in the Studio`
+}
+
 /** Hosts that only ever serve caches or previews of someone else's file. */
 const REJECTED_IMAGE_HOSTS = [
   'encrypted-tbn0.gstatic.com',
@@ -166,8 +192,11 @@ async function mutate(mutations, { token, commit }) {
  * Fetches an image and uploads it to Sanity, refusing anything that looks
  * like a placeholder rather than a real asset.
  */
-async function uploadImage(url, { token, commit, label }) {
-  if (!url) return { skipped: 'none supplied' }
+async function uploadImage(rawUrl, { token, commit, label }) {
+  if (!rawUrl) return { skipped: 'none supplied' }
+
+  const driveUrl = normaliseDriveUrl(rawUrl)
+  const url = driveUrl ?? rawUrl
 
   let host = ''
   try {
@@ -186,11 +215,16 @@ async function uploadImage(url, { token, commit, label }) {
   } catch (cause) {
     return { error: `unreachable (${cause.message})` }
   }
-  if (!res.ok) return { error: `HTTP ${res.status}` }
+  if (!res.ok) return { error: driveNote(driveUrl, `HTTP ${res.status}`) }
 
   const contentType = res.headers.get('content-type') ?? ''
   if (!contentType.startsWith('image/')) {
-    return { error: `served ${contentType || 'no content-type'}, not an image` }
+    // Drive answering with HTML means the file is private, which is the
+    // default for Form uploads. Say that, rather than "not an image" — the
+    // generic message sends you looking at the wrong thing entirely.
+    return {
+      error: driveNote(driveUrl, `served ${contentType || 'no content-type'}, not an image`),
+    }
   }
 
   const bytes = Buffer.from(await res.arrayBuffer())
@@ -229,6 +263,16 @@ const MAPPED_COLUMNS = new Set([
   'Describe that image',
   'Studio or organization logo',
   'Can we publish this?',
+])
+
+/**
+ * Columns that intentionally have no Sanity field because something else
+ * owns them. Listed so they are not reported as gaps every run, and named so
+ * it is obvious where they went if that ever changes.
+ */
+const HANDLED_ELSEWHERE = new Map([
+  ['Want the newsletter?', 'MailerLite — exported from the form separately'],
+  ['Do you meet the criteria?', 'review gate, not content'],
 ])
 
 /**
@@ -306,7 +350,7 @@ async function main() {
 
   for (const record of records) {
     for (const key of Object.keys(record)) {
-      if (!MAPPED_COLUMNS.has(key) && record[key]) unmapped.add(key)
+      if (!MAPPED_COLUMNS.has(key) && !HANDLED_ELSEWHERE.has(key) && record[key]) unmapped.add(key)
     }
 
     const name = repairText(record['Your name'])
@@ -410,13 +454,12 @@ async function main() {
 
   const all = [...orgMutations.values(), ...mutations]
   if (all.length === 0) {
-    console.log('Nothing to do.\n')
-    return
+    console.log('No new documents to create.')
+  } else {
+    const result = await mutate(all, { token, commit })
+    console.log(`${commit ? 'Created' : 'Would create'} ${result.results.length} document(s):`)
+    for (const r of result.results) console.log(`   ${r.id}`)
   }
-
-  const result = await mutate(all, { token, commit })
-  console.log(`${commit ? 'Created' : 'Would create'} ${result.results.length} draft document(s):`)
-  for (const r of result.results) console.log(`   ${r.id}`)
 
   if (warnings.length) {
     console.log('\nNeeds a human:')
@@ -427,6 +470,12 @@ async function main() {
     console.log('\nForm columns with nowhere to go in the schema:')
     for (const c of unmapped) console.log(`   • ${c}`)
     console.log('   Either add a field, or drop the question from the form.')
+  }
+
+  const present = [...HANDLED_ELSEWHERE].filter(([c]) => records.some((r) => r[c]))
+  if (present.length) {
+    console.log('\nCollected, handled outside Sanity:')
+    for (const [c, where] of present) console.log(`   • ${c} — ${where}`)
   }
 
   console.log(
