@@ -225,6 +225,27 @@ export const componentEntries: ComponentEntry[] = [
     ],
   },
   {
+    id: 'filter-bar',
+    name: 'FilterBar',
+    importPath: '@/components/filter-bar',
+    description:
+      'Visible faceted filtering, with state in the URL. Deliberately not a dropdown — a hidden control implies the site decided, and the point is that the reader did (AGENTS.md §3).',
+    category: 'composed',
+    props: [
+      {
+        name: 'facets',
+        type: 'Facet[]',
+        description:
+          'Each is { param, label, options, multi?, toggle? }. Defined in lib/filters.ts so books and creators stay in step.',
+      },
+      {
+        name: 'resultCount',
+        type: 'number',
+        description: 'Announced in a live region, since filtering navigates and would otherwise be silent.',
+      },
+    ],
+  },
+  {
     id: 'organization-link',
     name: 'OrganizationLink',
     importPath: '@/components/organization-link',

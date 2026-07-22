@@ -172,6 +172,13 @@ export default defineType({
           description: 'e.g. "Comics".',
         }),
         defineField({
+          name: 'everythingElseHeading',
+          title: 'Heading above the fallback row',
+          type: 'string',
+          description:
+            'Shown under an empty filtered result, above a sample of everything else — e.g. "While you are here".',
+        }),
+        defineField({
           name: 'genreCreatorsHeading',
           title: 'Category page — creators heading',
           type: 'string',
@@ -221,6 +228,17 @@ export default defineType({
         defineField({ name: 'creators', title: 'No creators', type: 'string' }),
         defineField({ name: 'genreBooks', title: 'No books in a genre', type: 'string' }),
         defineField({ name: 'genreCreators', title: 'No creators in a genre', type: 'string' }),
+        defineField({
+          name: 'filteredBooks',
+          title: 'No comics match the filters',
+          type: 'string',
+          description: 'Shown when filtering empties the page. Suggest widening rather than apologising.',
+        }),
+        defineField({
+          name: 'filteredCreators',
+          title: 'No makers match the filters',
+          type: 'string',
+        }),
         defineField({ name: 'columns', title: 'No columns', type: 'string' }),
         defineField({ name: 'interviews', title: 'No interviews', type: 'string' }),
         defineField({ name: 'downloads', title: 'No downloads', type: 'string' }),

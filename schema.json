@@ -2533,6 +2533,13 @@
               },
               "optional": true
             },
+            "everythingElseHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "genreCreatorsHeading": {
               "type": "objectAttribute",
               "value": {
@@ -2606,6 +2613,20 @@
               "optional": true
             },
             "genreCreators": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "filteredBooks": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "filteredCreators": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

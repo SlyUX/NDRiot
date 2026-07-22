@@ -70,6 +70,7 @@ export interface SiteSettings {
     downloadsHeading: string
     genreBooksHeading: string
     genreCreatorsHeading: string
+    everythingElseHeading: string
     downloadCta: string
     creatorBooksHeading: string
     creatorOrganizationsHeading: string
@@ -81,6 +82,8 @@ export interface SiteSettings {
     creators: string
     genreBooks: string
     genreCreators: string
+    filteredBooks: string
+    filteredCreators: string
     columns: string
     interviews: string
     downloads: string
@@ -129,6 +132,7 @@ const DEFAULTS: SiteSettings = {
     downloadsHeading: 'Free Downloads',
     genreBooksHeading: 'Comics',
     genreCreatorsHeading: 'Makers working in this genre',
+    everythingElseHeading: 'While you are here',
     downloadCta: 'Download',
     creatorBooksHeading: 'Books',
     creatorOrganizationsHeading: 'Member of',
@@ -140,6 +144,8 @@ const DEFAULTS: SiteSettings = {
     creators: 'No creators yet.',
     genreBooks: 'No books in this genre yet.',
     genreCreators: 'No creators list this genre yet.',
+    filteredBooks: 'Nothing matches all of those at once. Try loosening one.',
+    filteredCreators: 'No makers match all of those at once. Try loosening one.',
     columns: 'No columns yet.',
     interviews: 'No interviews yet.',
     downloads: 'No downloads yet.',

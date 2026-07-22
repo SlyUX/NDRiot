@@ -417,6 +417,7 @@ export type SiteSettings = {
     creatorsHeading?: string;
     downloadsHeading?: string;
     genreBooksHeading?: string;
+    everythingElseHeading?: string;
     genreCreatorsHeading?: string;
     downloadCta?: string;
     creatorBooksHeading?: string;
@@ -429,6 +430,8 @@ export type SiteSettings = {
     creators?: string;
     genreBooks?: string;
     genreCreators?: string;
+    filteredBooks?: string;
+    filteredCreators?: string;
     columns?: string;
     interviews?: string;
     downloads?: string;
@@ -798,6 +801,83 @@ export type BOOKS_QUERY_RESULT = Array<{
   maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
   cover: ImageWithAlt | null;
   creatorName: string;
+}>;
+
+// Source: src/lib/queries.ts
+// Variable: FILTERED_BOOKS_QUERY
+// Query: *[  _type=="book"  && (!defined($genres) || count(genres[@ in $genres]) > 0)  && (!defined($format) || format == $format)  && (!defined($maturity) || maturity == $maturity)  && (!defined($status) || status == $status)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,issueCount,cover,"creatorName":creator->name}
+export type FILTERED_BOOKS_QUERY_RESULT = Array<{
+  _id: string;
+  title: string;
+  slug: string;
+  status: "Complete" | "Ongoing" | "Upcoming" | null;
+  genres: Array<
+    | "Action & Adventure"
+    | "Crime & Noir"
+    | "Drama"
+    | "Fantasy"
+    | "Historical"
+    | "Horror"
+    | "Humor & Satire"
+    | "Memoir & Autobio"
+    | "Punk & Protest"
+    | "Queer"
+    | "Romance"
+    | "Sci-Fi"
+    | "Slice of Life"
+    | "Superhero"
+    | "Weird & Experimental"
+  > | null;
+  format:
+    | "Anthology"
+    | "Collected Edition"
+    | "Graphic Novel"
+    | "Minicomic"
+    | "One-Shot"
+    | "Single Issue"
+    | "Webcomic"
+    | "Zine"
+    | null;
+  maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
+  issueCount: number | null;
+  cover: ImageWithAlt | null;
+  creatorName: string;
+}>;
+
+// Source: src/lib/queries.ts
+// Variable: FILTERED_CREATORS_QUERY
+// Query: *[  _type=="creator"  && (!defined($genres) || count(genres[@ in $genres]) > 0)  && (!defined($format) || $format in formats)  && (!defined($audience) || audience == $audience)  && (!defined($collaborating) || openToCollaboration == true)]|order(name asc){  _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,  studio->{_id,name,"slug":slug.current,website,logo}}
+export type FILTERED_CREATORS_QUERY_RESULT = Array<{
+  _id: string;
+  name: string;
+  slug: string;
+  location: string | null;
+  photo: ImageWithAlt | null;
+  genres: Array<
+    | "Action & Adventure"
+    | "Crime & Noir"
+    | "Drama"
+    | "Fantasy"
+    | "Historical"
+    | "Horror"
+    | "Humor & Satire"
+    | "Memoir & Autobio"
+    | "Punk & Protest"
+    | "Queer"
+    | "Romance"
+    | "Sci-Fi"
+    | "Slice of Life"
+    | "Superhero"
+    | "Weird & Experimental"
+  > | null;
+  openToCollaboration: boolean | null;
+  studio: {
+    _id: string;
+    name: string;
+    slug: string;
+    website: string | null;
+    logo: ImageWithAlt | null;
+  } | null;
 }>;
 
 // Source: src/lib/queries.ts
@@ -1180,6 +1260,8 @@ declare module "@sanity/client" {
     '*[_type=="creator"]|order(name asc){_id,name,"slug":slug.current,location,photo,genres,openToCollaboration,studio->{_id,name,"slug":slug.current,website,logo}}': CREATORS_QUERY_RESULT;
     '*[_type=="creator" && slug.current==$slug][0]{\n  _id,name,location,website,bio,photo,socials,openToCollaboration,genres,formats,audience,\n  studio->{_id,name,"slug":slug.current,website,logo},\n  organizations[]->{_id,name,"slug":slug.current,website,logo},\n  favoriteCreators[]{name,url,"onSiteName":onSite->name,"onSiteSlug":onSite->slug.current},\n  "books": *[_type=="book" && references(^._id)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"creatorName":creator->name}\n}': CREATOR_QUERY_RESULT;
     '*[_type=="book"]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"creatorName":creator->name}': BOOKS_QUERY_RESULT;
+    '*[\n  _type=="book"\n  && (!defined($genres) || count(genres[@ in $genres]) > 0)\n  && (!defined($format) || format == $format)\n  && (!defined($maturity) || maturity == $maturity)\n  && (!defined($status) || status == $status)\n]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,issueCount,cover,"creatorName":creator->name}': FILTERED_BOOKS_QUERY_RESULT;
+    '*[\n  _type=="creator"\n  && (!defined($genres) || count(genres[@ in $genres]) > 0)\n  && (!defined($format) || $format in formats)\n  && (!defined($audience) || audience == $audience)\n  && (!defined($collaborating) || openToCollaboration == true)\n]|order(name asc){\n  _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,\n  studio->{_id,name,"slug":slug.current,website,logo}\n}': FILTERED_CREATORS_QUERY_RESULT;
     '*[_type=="book" && slug.current==$slug][0]{\n  _id,title,status,genres,format,maturity,issueCount,description,cover,\n  links[]{kind,label,url},\n  "creatorName":creator->name,"creatorSlug":creator->slug.current\n}': BOOK_QUERY_RESULT;
     'array::unique(*[_type=="book" && defined(genres)].genres[])': GENRES_QUERY_RESULT;
     '*[_type=="book" && $genre in genres]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"creatorName":creator->name}': GENRE_BOOKS_QUERY_RESULT;

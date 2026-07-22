@@ -20,6 +20,43 @@ export const CREATOR_QUERY = defineQuery(`*[_type=="creator" && slug.current==$s
 }`)
 
 export const BOOKS_QUERY = defineQuery(`*[_type=="book"]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"creatorName":creator->name}`)
+
+/**
+ * Books, filtered.
+ *
+ * One static query with null-tolerant conditions rather than a string built
+ * at runtime: typegen can only derive a result type from a literal, and an
+ * untyped query is how the null-versus-undefined class of bug got in last
+ * time.
+ *
+ * An absent parameter is null, and `!defined(null)` is true — so each clause
+ * disappears when its filter is not set.
+ */
+export const FILTERED_BOOKS_QUERY = defineQuery(`*[
+  _type=="book"
+  && (!defined($genres) || count(genres[@ in $genres]) > 0)
+  && (!defined($format) || format == $format)
+  && (!defined($maturity) || maturity == $maturity)
+  && (!defined($status) || status == $status)
+]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,issueCount,cover,"creatorName":creator->name}`)
+
+/**
+ * Creators, filtered.
+ *
+ * `formats` is an array on a creator (they make several things), so the test
+ * is membership rather than equality — the opposite way round from a book,
+ * where format is singular.
+ */
+export const FILTERED_CREATORS_QUERY = defineQuery(`*[
+  _type=="creator"
+  && (!defined($genres) || count(genres[@ in $genres]) > 0)
+  && (!defined($format) || $format in formats)
+  && (!defined($audience) || audience == $audience)
+  && (!defined($collaborating) || openToCollaboration == true)
+]|order(name asc){
+  _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,
+  studio->{_id,name,"slug":slug.current,website,logo}
+}`)
 export const BOOK_QUERY = defineQuery(`*[_type=="book" && slug.current==$slug][0]{
   _id,title,status,genres,format,maturity,issueCount,description,cover,
   links[]{kind,label,url},
