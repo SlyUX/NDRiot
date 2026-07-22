@@ -71,6 +71,7 @@ export interface SiteSettings {
     genreBooksHeading: string
     genreCreatorsHeading: string
     everythingElseHeading: string
+    searchHomeLabel: string
     searchBooksLabel: string
     searchCreatorsLabel: string
     downloadCta: string
@@ -135,6 +136,7 @@ const DEFAULTS: SiteSettings = {
     genreBooksHeading: 'Comics',
     genreCreatorsHeading: 'Makers working in this genre',
     everythingElseHeading: 'While you are here',
+    searchHomeLabel: 'Search comics and makers',
     searchBooksLabel: 'Search titles and makers',
     searchCreatorsLabel: 'Search makers and studios',
     downloadCta: 'Download',

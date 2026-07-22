@@ -33,6 +33,16 @@ export interface Facet {
 
 export interface FilterBarProps {
   facets: Facet[]
+  /**
+   * `chips` exposes every option at once — the listing pages, where browsing
+   * is the task. `select` collapses each facet to a dropdown for the
+   * homepage, where the filter is a way in rather than the main event.
+   *
+   * Multi-select is ignored under `select`: a native multiple-select is
+   * genuinely awful to use, and the homepage version is deliberately the
+   * simpler one.
+   */
+  control?: 'chips' | 'select'
   /** Announced with the result count, so the change is not silent. */
   resultCount: number
   /** Placeholder for the search box. Copy, so it comes from Sanity. */
@@ -43,7 +53,13 @@ export interface FilterBarProps {
 /** Long enough that typing a word is one request, short enough to feel live. */
 const SEARCH_DEBOUNCE_MS = 300
 
-export function FilterBar({ facets, resultCount, searchLabel, className }: FilterBarProps) {
+export function FilterBar({
+  facets,
+  resultCount,
+  searchLabel,
+  control = 'chips',
+  className,
+}: FilterBarProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -67,6 +83,17 @@ export function FilterBar({ facets, resultCount, searchLabel, className }: Filte
       router.push(query ? `${pathname}?${query}` : pathname, { scroll: false })
     },
     [pathname, router],
+  )
+
+  /** Sets or clears one value. Used by the dropdowns. */
+  const setValue = useCallback(
+    (facet: Facet, value: string) => {
+      const next = new URLSearchParams(searchParams.toString())
+      next.delete(facet.param)
+      if (value) next.append(facet.param, value)
+      apply(next)
+    },
+    [apply, searchParams],
   )
 
   const toggle = useCallback(
@@ -140,7 +167,47 @@ export function FilterBar({ facets, resultCount, searchLabel, className }: Filte
         />
       </div>
 
-      {facets.map((facet) => {
+      {control === 'select' && (
+        <div className="flex flex-wrap gap-2">
+          {facets.map((facet) => {
+            const selected = searchParams.get(facet.param) ?? ''
+            const options = facet.toggle ? ['1'] : facet.options
+
+            return (
+              <select
+                key={facet.param}
+                value={selected}
+                aria-label={facet.label}
+                onChange={(event) => setValue(facet, event.target.value)}
+                className={cn(
+                  'focus-visible:ring-ring border bg-transparent px-2.5 py-2 text-[11px] tracking-wide uppercase focus-visible:ring-2 focus-visible:outline-none',
+                  selected
+                    ? 'border-primary text-primary font-bold'
+                    : 'text-muted-foreground border-white/20',
+                )}
+              >
+                {/* The empty option is "no filter", not a value — naming it
+                    after the facet keeps the dropdown legible when closed. */}
+                <option value="" className="bg-background text-foreground">
+                  {facet.label}: Any
+                </option>
+                {options.map((option) => (
+                  <option
+                    key={option}
+                    value={facet.toggle ? '1' : option}
+                    className="bg-background text-foreground"
+                  >
+                    {facet.toggle ? facet.label : option}
+                  </option>
+                ))}
+              </select>
+            )
+          })}
+        </div>
+      )}
+
+      {control === 'chips' &&
+        facets.map((facet) => {
         const selected = searchParams.getAll(facet.param)
 
         return (

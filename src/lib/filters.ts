@@ -44,6 +44,20 @@ export const BOOK_FACETS: Facet[] = [
   { param: 'status', label: 'Status', options: ['Ongoing', 'Complete', 'Upcoming'] },
 ]
 
+/**
+ * The homepage set — only facets that mean the same thing on a book and on a
+ * creator, since one row filters both sections at once.
+ *
+ * Status is books-only and open-to-collaboration is creators-only, so neither
+ * belongs here: a control that silently applies to half the page is worse
+ * than one fewer control.
+ */
+export const HOME_FACETS: Facet[] = [
+  { param: 'genre', label: 'Genre', options: GENRES },
+  { param: 'format', label: 'Format', options: FORMATS },
+  { param: 'audience', label: 'Audience', options: MATURITY_RATINGS },
+]
+
 export const CREATOR_FACETS: Facet[] = [
   { param: 'genre', label: 'Genre', options: GENRES, multi: true },
   { param: 'format', label: 'Makes', options: FORMATS },

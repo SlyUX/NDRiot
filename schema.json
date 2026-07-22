@@ -2533,6 +2533,13 @@
               },
               "optional": true
             },
+            "searchHomeLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "searchBooksLabel": {
               "type": "objectAttribute",
               "value": {

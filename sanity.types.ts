@@ -417,6 +417,7 @@ export type SiteSettings = {
     creatorsHeading?: string;
     downloadsHeading?: string;
     genreBooksHeading?: string;
+    searchHomeLabel?: string;
     searchBooksLabel?: string;
     searchCreatorsLabel?: string;
     everythingElseHeading?: string;

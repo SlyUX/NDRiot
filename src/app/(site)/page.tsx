@@ -1,16 +1,26 @@
+import { Suspense } from 'react'
+
 import { ContentCardGrid } from '@/components/content-card-grid'
+import { FilterBar } from '@/components/filter-bar'
 import { Hero } from '@/components/hero'
 import { GenreBadge } from '@/components/genre-badge'
 import { SectionHeading } from '@/components/section-heading'
 import { Section } from '@/components/ui/section'
 import { bookToCard, creatorToCard } from '@/lib/card-mappers'
 import {
+  bookFilters,
+  creatorFilters,
+  hasActiveFilters,
+  HOME_FACETS,
+  type SearchParams,
+} from '@/lib/filters'
+import {
   safeFetch,
   BOOK_IDS_QUERY,
   HERO_BOOKS_QUERY,
   GENRES_QUERY,
-  BOOKS_QUERY,
-  CREATORS_QUERY,
+  FILTERED_BOOKS_QUERY,
+  FILTERED_CREATORS_QUERY,
 } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
 import type { BookSummary, CreatorSummary, HeroBook } from '@/lib/types'
@@ -53,12 +63,22 @@ async function pickHeroBooks(): Promise<HeroBook[]> {
   return books.sort((a, b) => (order.get(a._id) ?? 0) - (order.get(b._id) ?? 0))
 }
 
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>
+}) {
+  const params = await searchParams
+  const filtering = hasActiveFilters(bookFilters(params))
+
   const [heroBooks, genres, books, creators, settings] = await Promise.all([
+    // Deliberately unfiltered. The hero is the guaranteed route to work
+    // nobody went looking for (AGENTS.md §3), so narrowing the page must
+    // never narrow it.
     pickHeroBooks(),
     safeFetch<string[]>(GENRES_QUERY, {}, []),
-    safeFetch<BookSummary[]>(BOOKS_QUERY, {}, []),
-    safeFetch<CreatorSummary[]>(CREATORS_QUERY, {}, []),
+    safeFetch<BookSummary[]>(FILTERED_BOOKS_QUERY, bookFilters(params), []),
+    safeFetch<CreatorSummary[]>(FILTERED_CREATORS_QUERY, creatorFilters(params), []),
     getSiteSettings(),
   ])
 
@@ -66,7 +86,18 @@ export default async function Home() {
     <div>
       <Hero hero={settings.hero} books={heroBooks} />
 
-      {genres.length > 0 && (
+      <Section padding="md">
+        <Suspense fallback={null}>
+          <FilterBar
+            facets={HOME_FACETS}
+            control="select"
+            resultCount={books.length + creators.length}
+            searchLabel={settings.sections.searchHomeLabel}
+          />
+        </Suspense>
+      </Section>
+
+      {genres.length > 0 && !filtering && (
         <Section padding="md">
           <SectionHeading size="sm">{settings.home.genresHeading}</SectionHeading>
           <div className="flex flex-wrap gap-2">
@@ -84,7 +115,7 @@ export default async function Home() {
         padding="md"
         viewAllHref="/books"
         viewAllLabel={settings.home.viewAllLabel}
-        emptyMessage={settings.empty.books}
+        emptyMessage={filtering ? settings.empty.filteredBooks : settings.empty.books}
       />
 
       <ContentCardGrid
@@ -94,7 +125,7 @@ export default async function Home() {
         padding="md"
         viewAllHref="/creators"
         viewAllLabel={settings.home.viewAllLabel}
-        emptyMessage={settings.empty.creators}
+        emptyMessage={filtering ? settings.empty.filteredCreators : settings.empty.creators}
       />
     </div>
   )

@@ -172,6 +172,12 @@ export default defineType({
           description: 'e.g. "Comics".',
         }),
         defineField({
+          name: 'searchHomeLabel',
+          title: 'Homepage search placeholder',
+          type: 'string',
+          description: 'Searches comics and makers together, e.g. "Search comics and makers".',
+        }),
+        defineField({
           name: 'searchBooksLabel',
           title: 'Comics search placeholder',
           type: 'string',
