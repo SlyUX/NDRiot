@@ -71,11 +71,19 @@ function normaliseDriveUrl(url) {
 /**
  * Any Drive failure gets the same explanation, because the cause is almost
  * always the same one and the raw status says nothing useful. A private file
- * can 404, 403, or return a sign-in page with a 200 — three symptoms, one fix.
+ * can 404, 403, or return a sign-in page with a 200 — three symptoms, one
+ * cause: this script is not signed in to anything.
+ *
+ * That is worth stating precisely, because the obvious reading is wrong and
+ * expensive. Form uploads land in the FORM OWNER'S Drive, so you already have
+ * the file — it is only unreachable to an unauthenticated fetch. Telling
+ * creators to make their artwork "Anyone with the link" would add a step for
+ * the least technical submitters and publish unreleased work, to fix a
+ * permission problem that was never theirs.
  */
 function driveNote(isDrive, detail) {
   if (!isDrive) return detail
-  return `${detail} — Drive file is not readable. Form uploads are private by default; set it to "Anyone with the link", or download it and attach it in the Studio`
+  return `${detail} — this script cannot read Drive (it is not signed in). The file is in your own Drive: open the link below and attach it in the Studio. Creators do not need to change any sharing setting`
 }
 
 /**
