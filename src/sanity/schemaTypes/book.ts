@@ -9,6 +9,19 @@ import {
 } from '@/lib/taxonomy'
 import { slugField } from './slugField'
 
+/**
+ * Formats where counting issues means nothing.
+ *
+ * A graphic novel is one volume and a one-shot is one issue, so the count is
+ * always 1 and tells a reader nothing they did not already learn from the
+ * format. A webcomic has no fixed instalments to count at all.
+ *
+ * The rest keep the field: for a single issue or a collected edition, "how
+ * many are out" is the track-record signal, and it is the whole reason the
+ * field exists.
+ */
+const SINGLE_VOLUME_FORMATS = ['Graphic Novel', 'One-Shot', 'Webcomic'] as const
+
 export default defineType({
   name: 'book',
   title: 'Book',
@@ -82,8 +95,25 @@ export default defineType({
       title: 'Issues available',
       type: 'number',
       description:
-        'How many are out right now, for a series. This is the honest signal a reader wants: "Ongoing, 7 issues" reassures where "Ongoing" alone does not, and "Ongoing, 1 issue" warns without anyone passing judgement. Leave blank for a single-volume work.',
-      validation: (rule) => rule.min(1).integer(),
+        'How many are out right now, for a series. This is the honest signal a reader wants: "Ongoing, 7 issues" reassures where "Ongoing" alone does not, and "Ongoing, 1 issue" warns without anyone passing judgement. Only asked for serialised formats.',
+      hidden: ({ document }) =>
+        SINGLE_VOLUME_FORMATS.includes(document?.format as (typeof SINGLE_VOLUME_FORMATS)[number]),
+      validation: (rule) =>
+        rule
+          .min(1)
+          .integer()
+          // `hidden` does not clear a value, it only stops showing it. Enter 7
+          // issues, then change the format to Graphic Novel, and the 7 stays
+          // on the document — invisible in the Studio but still rendered on
+          // the book page as "Graphic Novel · 7 issues". This catches that.
+          .custom((value, context) => {
+            if (value === undefined || value === null) return true
+            const format = context.document?.format as string | undefined
+            if (format && SINGLE_VOLUME_FORMATS.includes(format as never)) {
+              return `A ${format} is a single volume — clear this field, or change the format if it is serialised.`
+            }
+            return true
+          }),
     }),
     defineField({
       name: 'shortDescription',
