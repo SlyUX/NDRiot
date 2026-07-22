@@ -127,16 +127,42 @@ async function main() {
 
     // A book with no creator has nowhere to live: the schema requires the
     // reference, and guessing which person was meant is worse than stopping.
-    const creatorName = repairText(record.Creator).trim()
-    const creator = creators.find((c) => c.name.toLowerCase() === creatorName.toLowerCase())
-    if (!creator) {
+    //
+    // Matched on name OR slug, never on email. Every published Sanity
+    // document is readable without auth, so an email stored on a creator is
+    // an email published to anyone who runs a GROQ query. The slug is the
+    // identifier that is already unique AND already public — it is in the
+    // URL — which makes it the right key for a spreadsheet someone fills in
+    // by hand.
+    const creatorKey = repairText(record.Creator).trim()
+    const lower = creatorKey.toLowerCase()
+
+    const bySlug = creators.filter((c) => c.slug?.toLowerCase() === lower)
+    const byName = creators.filter((c) => c.name.toLowerCase() === lower)
+    const candidates = bySlug.length ? bySlug : byName
+
+    if (candidates.length === 0) {
       warnings.push(
-        `${title}: creator "${creatorName}" is not in the CMS. Add them first, then re-run.`,
+        `${title}: creator "${creatorKey}" is not in the CMS. Add them first, then re-run.`,
       )
-      console.log(`   creator "${creatorName}" not found — skipping\n`)
+      console.log(`   creator "${creatorKey}" not found — skipping\n`)
       continue
     }
-    console.log(`   creator: ${creator.name}`)
+
+    // Two people can share a name; nobody shares a slug. Picking the first
+    // match would attribute someone's book to a stranger, and nothing
+    // downstream would ever flag it.
+    if (candidates.length > 1) {
+      const options = candidates.map((c) => c.slug).join(', ')
+      warnings.push(
+        `${title}: "${creatorKey}" matches ${candidates.length} creators. Use the slug instead — one of: ${options}`,
+      )
+      console.log(`   creator "${creatorKey}" is ambiguous (${options}) — skipping\n`)
+      continue
+    }
+
+    const creator = candidates[0]
+    console.log(`   creator: ${creator.name}${bySlug.length ? '  (matched by slug)' : ''}`)
 
     const genreMatch = matchTaxonomy(record.Genres, GENRES)
     const formatMatch = matchTaxonomy(record.Format, FORMATS, { single: true })

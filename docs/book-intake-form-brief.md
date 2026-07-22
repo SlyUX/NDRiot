@@ -45,6 +45,18 @@ Help text: *Exactly as it appears on the cover, including any subtitle.*
 Options: every creator currently in the CMS.
 Help text: *Not listed? Fill in the creator form first — we can't add a book without them.*
 
+> **Matched on name or slug, never on email.** Every published Sanity document
+> is readable without authentication, so an email stored on a creator record is
+> an email published to anyone who runs a GROQ query. The importer never writes
+> one.
+>
+> The slug is the identifier that is already unique *and* already public — it
+> is in the URL. In a hand-filled spreadsheet, put the slug (`joseph-christy`)
+> in the Creator column rather than the name: two people can share a name,
+> nobody shares a slug. The importer accepts either, prefers the slug, and
+> refuses a name that matches more than one creator rather than attributing
+> someone's book to a stranger.
+
 > **Maintenance:** this list has to track the Creator documents. It is the same
 > hand-maintained-until-it-hurts arrangement as the organisations list on the
 > creator form, and the same trigger applies: when updating it becomes a chore,
