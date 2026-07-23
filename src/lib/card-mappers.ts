@@ -6,6 +6,7 @@ import type {
   DownloadSummary,
   InterviewSummary,
 } from '@/lib/types'
+import { truncate } from '@/lib/utils'
 
 /**
  * Sanity projection → ContentCard props.
@@ -53,6 +54,10 @@ export function creatorToCard(creator: CreatorSummary): ContentCardProps {
     // Studio name identifies a creator more usefully than a city does, and
     // makes the card findable by studio. Location is the fallback.
     eyebrow: creator.studio?.name ?? creator.location,
+    // A short bio preview for the horizontal card (the homepage creators row).
+    // Only the horizontal layout renders summary, so this is inert on the
+    // vertical listing cards. bioText is pt::text(bio) — see the queries.
+    summary: truncate(creator.bioText, 160),
     aspectRatio: 'square',
   }
 }

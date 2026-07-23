@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { bookToCard } from '@/lib/card-mappers'
 import type { HeroSettings } from '@/lib/site-settings'
 import type { HeroBook } from '@/lib/types'
-import { cn } from '@/lib/utils'
+import { cn, truncate } from '@/lib/utils'
 import { urlFor } from '@/sanity/image'
 
 /**
@@ -68,6 +68,10 @@ const FEATURE_DURATION_MS = 6_000
  */
 function FeatureSlide({ book, ctaLabel }: { book: HeroBook; ctaLabel: string }) {
   const card = bookToCard(book)
+  // The full description, flattened and cut to a hero-sized preview — the "…"
+  // signals the rest is on the book page. Falls back to the short description
+  // for a book that has one but no full write-up.
+  const preview = truncate(book.descriptionText, 200) ?? truncate(book.shortDescription, 200)
 
   return (
     // `auto` on the first column, not a half share: the cover is 16rem, so an
@@ -107,8 +111,8 @@ function FeatureSlide({ book, ctaLabel }: { book: HeroBook; ctaLabel: string }) 
 
         <TaxonomyRow genres={card.genres} format={card.format} className="mt-3" />
 
-        {card.summary && (
-          <p className="mt-4 text-sm leading-relaxed text-white/85 sm:text-base">{card.summary}</p>
+        {preview && (
+          <p className="mt-4 text-sm leading-relaxed text-white/85 sm:text-base">{preview}</p>
         )}
 
         <div className="mt-6">

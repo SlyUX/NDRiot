@@ -10,7 +10,7 @@ export async function safeFetch<T>(query: string, params: Record<string, unknown
   }
 }
 
-export const CREATORS_QUERY = defineQuery(`*[_type=="creator"]|order(name asc){_id,name,"slug":slug.current,location,photo,genres,openToCollaboration,studio->{_id,name,"slug":slug.current,website,logo}}`)
+export const CREATORS_QUERY = defineQuery(`*[_type=="creator"]|order(name asc){_id,name,"slug":slug.current,location,photo,genres,openToCollaboration,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}`)
 export const CREATOR_QUERY = defineQuery(`*[_type=="creator" && slug.current==$slug][0]{
   _id,name,location,website,bio,photo,socials,openToCollaboration,genres,formats,audience,
   studio->{_id,name,"slug":slug.current,website,logo},
@@ -61,6 +61,7 @@ export const FILTERED_CREATORS_QUERY = defineQuery(`*[
   && (!defined($q) || name match $q || studio->name match $q)
 ]|order(name asc){
   _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,
+  "bioText":pt::text(bio),
   studio->{_id,name,"slug":slug.current,website,logo}
 }`)
 export const BOOK_QUERY = defineQuery(`*[_type=="book" && slug.current==$slug][0]{
@@ -90,6 +91,7 @@ export const BOOK_IDS_QUERY = defineQuery(`*[_type=="book" && defined(slug.curre
 /** The books the hero landed on, in full. */
 export const HERO_BOOKS_QUERY = defineQuery(`*[_type=="book" && _id in $ids]{
   _id,title,"slug":slug.current,status,genres,format,maturity,cover,shortDescription,
+  "descriptionText": pt::text(description),
   "creatorName":creator->name
 }`)
 
@@ -112,5 +114,6 @@ export const SITEMAP_QUERY = defineQuery(`{
 /** Creators who list a genre, for the category pages. */
 export const GENRE_CREATORS_QUERY = defineQuery(`*[_type=="creator" && $genre in genres]|order(name asc){
   _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,
+  "bioText":pt::text(bio),
   studio->{_id,name,"slug":slug.current,website,logo}
 }`)

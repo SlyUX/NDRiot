@@ -75,6 +75,7 @@ export interface SiteSettings {
     booksHeading: string
     creatorsHeading: string
     viewAllLabel: string
+    viewMoreLabel: string
   }
   sections: {
     editorialHeading: string
@@ -152,6 +153,7 @@ const DEFAULTS: SiteSettings = {
     booksHeading: 'Books',
     creatorsHeading: 'Creators',
     viewAllLabel: 'View all',
+    viewMoreLabel: 'View more',
   },
   sections: {
     editorialHeading: 'Editorial',

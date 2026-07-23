@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 
 import { ContentCard, type ContentCardProps } from '@/components/content-card'
+import { ExpandableGrid } from '@/components/expandable-grid'
 import { SectionHeading } from '@/components/section-heading'
 import { Section, type SectionProps } from '@/components/ui/section'
 import { Button } from '@/components/ui/button'
@@ -42,6 +43,8 @@ export interface ContentCardGridProps {
   subtitle?: string
   layout?: ContentCardProps['layout']
   aspectRatio?: ContentCardProps['aspectRatio']
+  /** Forwarded to each card — how many summary lines before clamping. */
+  summaryLines?: ContentCardProps['summaryLines']
   columns?: GridColumns
   /** Vertical rules between columns at lg and up. */
   dividers?: boolean
@@ -61,6 +64,13 @@ export interface ContentCardGridProps {
    * row is still there to loosen.
    */
   toolbar?: React.ReactNode
+  /**
+   * Open with this many rows and reveal the rest behind a "view more" press.
+   * Omit to render every card at once. Pairs with `viewMoreLabel`.
+   */
+  initialRows?: number
+  /** Label for the reveal button. Copy, from the caller — AGENTS.md §2. */
+  viewMoreLabel?: string
   /** Forwarded to the Section wrapper. */
   background?: SectionProps['background']
   padding?: SectionProps['padding']
@@ -76,12 +86,15 @@ export function ContentCardGrid({
   subtitle,
   layout = 'vertical',
   aspectRatio,
+  summaryLines,
   columns = 3,
   dividers = false,
   viewAllHref,
   viewAllLabel,
   emptyMessage,
   toolbar,
+  initialRows,
+  viewMoreLabel,
   background,
   padding,
   maxWidth,
@@ -112,14 +125,13 @@ export function ContentCardGrid({
       {cards.length === 0 ? (
         <p className="text-muted-foreground py-8 text-sm">{emptyMessage}</p>
       ) : (
-        <div
-          className={cn(
+        (() => {
+          const gridClassName = cn(
             'grid grid-cols-1 gap-6 sm:grid-cols-2',
             COLUMN_CLASSES[columns],
             dividers && 'lg:gap-x-12',
-          )}
-        >
-          {cards.map((card, index) => (
+          )
+          const cells = cards.map((card, index) => (
             <div key={card.href} className={cn('relative', dividers && 'lg:pl-6')}>
               {dividers && index > 0 && (
                 <Separator
@@ -130,12 +142,26 @@ export function ContentCardGrid({
               <ContentCard
                 {...card}
                 layout={layout}
+                summaryLines={summaryLines}
                 aspectRatio={card.aspectRatio ?? aspectRatio}
                 stretch
               />
             </div>
-          ))}
-        </div>
+          ))
+
+          // Reveal-on-demand when a row cap is set; otherwise render them all.
+          return initialRows && viewMoreLabel ? (
+            <ExpandableGrid
+              gridClassName={gridClassName}
+              initialCount={initialRows * columns}
+              moreLabel={viewMoreLabel}
+            >
+              {cells}
+            </ExpandableGrid>
+          ) : (
+            <div className={gridClassName}>{cells}</div>
+          )
+        })()
       )}
     </Section>
   )

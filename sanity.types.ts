@@ -408,6 +408,7 @@ export type SiteSettings = {
     booksHeading?: string;
     creatorsHeading?: string;
     viewAllLabel?: string;
+    viewMoreLabel?: string;
   };
   sections?: {
     editorialHeading?: string;
@@ -639,7 +640,7 @@ export type AllSanitySchemaTypes =
 
 // Source: src/lib/queries.ts
 // Variable: CREATORS_QUERY
-// Query: *[_type=="creator"]|order(name asc){_id,name,"slug":slug.current,location,photo,genres,openToCollaboration,studio->{_id,name,"slug":slug.current,website,logo}}
+// Query: *[_type=="creator"]|order(name asc){_id,name,"slug":slug.current,location,photo,genres,openToCollaboration,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}
 export type CREATORS_QUERY_RESULT = Array<{
   _id: string;
   name: string;
@@ -664,6 +665,7 @@ export type CREATORS_QUERY_RESULT = Array<{
     | "Weird & Experimental"
   > | null;
   openToCollaboration: boolean | null;
+  bioText: string;
   studio: {
     _id: string;
     name: string;
@@ -875,7 +877,7 @@ export type FILTERED_BOOKS_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: FILTERED_CREATORS_QUERY
-// Query: *[  _type=="creator"  && (!defined($genres) || count(genres[@ in $genres]) > 0)  && (!defined($format) || $format in formats)  && (!defined($audience) || audience == $audience)  && (!defined($collaborating) || openToCollaboration == true)  && (!defined($q) || name match $q || studio->name match $q)]|order(name asc){  _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,  studio->{_id,name,"slug":slug.current,website,logo}}
+// Query: *[  _type=="creator"  && (!defined($genres) || count(genres[@ in $genres]) > 0)  && (!defined($format) || $format in formats)  && (!defined($audience) || audience == $audience)  && (!defined($collaborating) || openToCollaboration == true)  && (!defined($q) || name match $q || studio->name match $q)]|order(name asc){  _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,  "bioText":pt::text(bio),  studio->{_id,name,"slug":slug.current,website,logo}}
 export type FILTERED_CREATORS_QUERY_RESULT = Array<{
   _id: string;
   name: string;
@@ -900,6 +902,7 @@ export type FILTERED_CREATORS_QUERY_RESULT = Array<{
     | "Weird & Experimental"
   > | null;
   openToCollaboration: boolean | null;
+  bioText: string;
   studio: {
     _id: string;
     name: string;
@@ -1143,7 +1146,7 @@ export type BOOK_IDS_QUERY_RESULT = Array<string>;
 
 // Source: src/lib/queries.ts
 // Variable: HERO_BOOKS_QUERY
-// Query: *[_type=="book" && _id in $ids]{  _id,title,"slug":slug.current,status,genres,format,maturity,cover,shortDescription,  "creatorName":creator->name}
+// Query: *[_type=="book" && _id in $ids]{  _id,title,"slug":slug.current,status,genres,format,maturity,cover,shortDescription,  "descriptionText": pt::text(description),  "creatorName":creator->name}
 export type HERO_BOOKS_QUERY_RESULT = Array<{
   _id: string;
   title: string;
@@ -1179,6 +1182,7 @@ export type HERO_BOOKS_QUERY_RESULT = Array<{
   maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
   cover: ImageWithAlt | null;
   shortDescription: string | null;
+  descriptionText: string;
   creatorName: string;
 }>;
 
@@ -1227,7 +1231,7 @@ export type SITEMAP_QUERY_RESULT = {
 
 // Source: src/lib/queries.ts
 // Variable: GENRE_CREATORS_QUERY
-// Query: *[_type=="creator" && $genre in genres]|order(name asc){  _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,  studio->{_id,name,"slug":slug.current,website,logo}}
+// Query: *[_type=="creator" && $genre in genres]|order(name asc){  _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,  "bioText":pt::text(bio),  studio->{_id,name,"slug":slug.current,website,logo}}
 export type GENRE_CREATORS_QUERY_RESULT = Array<{
   _id: string;
   name: string;
@@ -1252,6 +1256,7 @@ export type GENRE_CREATORS_QUERY_RESULT = Array<{
     | "Weird & Experimental"
   > | null;
   openToCollaboration: boolean | null;
+  bioText: string;
   studio: {
     _id: string;
     name: string;
@@ -1265,11 +1270,11 @@ export type GENRE_CREATORS_QUERY_RESULT = Array<{
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    '*[_type=="creator"]|order(name asc){_id,name,"slug":slug.current,location,photo,genres,openToCollaboration,studio->{_id,name,"slug":slug.current,website,logo}}': CREATORS_QUERY_RESULT;
+    '*[_type=="creator"]|order(name asc){_id,name,"slug":slug.current,location,photo,genres,openToCollaboration,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}': CREATORS_QUERY_RESULT;
     '*[_type=="creator" && slug.current==$slug][0]{\n  _id,name,location,website,bio,photo,socials,openToCollaboration,genres,formats,audience,\n  studio->{_id,name,"slug":slug.current,website,logo},\n  organizations[]->{_id,name,"slug":slug.current,website,logo},\n  favoriteCreators[]{name,url,"onSiteName":onSite->name,"onSiteSlug":onSite->slug.current},\n  "books": *[_type=="book" && references(^._id)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"creatorName":creator->name}\n}': CREATOR_QUERY_RESULT;
     '*[_type=="book"]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"creatorName":creator->name}': BOOKS_QUERY_RESULT;
     '*[\n  _type=="book"\n  && (!defined($genres) || count(genres[@ in $genres]) > 0)\n  && (!defined($format) || format == $format)\n  && (!defined($maturity) || maturity == $maturity)\n  && (!defined($status) || status == $status)\n  && (!defined($q) || title match $q || creator->name match $q)\n]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,issueCount,cover,"creatorName":creator->name}': FILTERED_BOOKS_QUERY_RESULT;
-    '*[\n  _type=="creator"\n  && (!defined($genres) || count(genres[@ in $genres]) > 0)\n  && (!defined($format) || $format in formats)\n  && (!defined($audience) || audience == $audience)\n  && (!defined($collaborating) || openToCollaboration == true)\n  && (!defined($q) || name match $q || studio->name match $q)\n]|order(name asc){\n  _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,\n  studio->{_id,name,"slug":slug.current,website,logo}\n}': FILTERED_CREATORS_QUERY_RESULT;
+    '*[\n  _type=="creator"\n  && (!defined($genres) || count(genres[@ in $genres]) > 0)\n  && (!defined($format) || $format in formats)\n  && (!defined($audience) || audience == $audience)\n  && (!defined($collaborating) || openToCollaboration == true)\n  && (!defined($q) || name match $q || studio->name match $q)\n]|order(name asc){\n  _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,\n  "bioText":pt::text(bio),\n  studio->{_id,name,"slug":slug.current,website,logo}\n}': FILTERED_CREATORS_QUERY_RESULT;
     '*[_type=="book" && slug.current==$slug][0]{\n  _id,title,status,genres,format,maturity,issueCount,description,cover,\n  links[]{kind,label,url},\n  "creatorName":creator->name,"creatorSlug":creator->slug.current\n}': BOOK_QUERY_RESULT;
     '*[_type=="book" && $genre in genres]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"creatorName":creator->name}': GENRE_BOOKS_QUERY_RESULT;
     '*[_type=="column"]|order(publishedAt desc){_id,title,"slug":slug.current,excerpt,cover,publishedAt,"authorName":author->name}': COLUMNS_QUERY_RESULT;
@@ -1279,8 +1284,8 @@ declare module "@sanity/client" {
     '*[_type=="freeDownload"]|order(publishedAt desc){_id,title,"slug":slug.current,description,cover,publishedAt,"creatorName":creator->name}': DOWNLOADS_QUERY_RESULT;
     '*[_type=="freeDownload" && slug.current==$slug][0]{_id,title,description,cover,"creatorName":creator->name,"fileUrl":file.asset->url}': DOWNLOAD_QUERY_RESULT;
     '*[_type=="book" && defined(slug.current)]._id': BOOK_IDS_QUERY_RESULT;
-    '*[_type=="book" && _id in $ids]{\n  _id,title,"slug":slug.current,status,genres,format,maturity,cover,shortDescription,\n  "creatorName":creator->name\n}': HERO_BOOKS_QUERY_RESULT;
+    '*[_type=="book" && _id in $ids]{\n  _id,title,"slug":slug.current,status,genres,format,maturity,cover,shortDescription,\n  "descriptionText": pt::text(description),\n  "creatorName":creator->name\n}': HERO_BOOKS_QUERY_RESULT;
     '{\n  "books": *[_type=="book" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "creators": *[_type=="creator" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "columns": *[_type=="column" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "interviews": *[_type=="interview" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "genres": array::unique(*[_type=="book" && defined(genres)].genres[])\n}': SITEMAP_QUERY_RESULT;
-    '*[_type=="creator" && $genre in genres]|order(name asc){\n  _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,\n  studio->{_id,name,"slug":slug.current,website,logo}\n}': GENRE_CREATORS_QUERY_RESULT;
+    '*[_type=="creator" && $genre in genres]|order(name asc){\n  _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,\n  "bioText":pt::text(bio),\n  studio->{_id,name,"slug":slug.current,website,logo}\n}': GENRE_CREATORS_QUERY_RESULT;
   }
 }

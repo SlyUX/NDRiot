@@ -129,22 +129,34 @@ export default async function Home({
     <div>
       <Hero hero={settings.hero} books={heroBooks} />
 
+      {/* Books: four across, opening two rows and revealing the next two on
+          "view more" (so up to 16 are cut for). "View all" still links out to
+          the full listing. */}
       <ContentCardGrid
         heading={settings.home.booksHeading}
         toolbar={booksBar}
-        cards={(bookSeed === null ? books : seededShuffle(books, bookSeed)).slice(0, 8).map(bookToCard)}
+        cards={(bookSeed === null ? books : seededShuffle(books, bookSeed)).slice(0, 16).map(bookToCard)}
         columns={4}
+        initialRows={2}
+        viewMoreLabel={settings.home.viewMoreLabel}
         padding="md"
         viewAllHref="/books"
         viewAllLabel={settings.home.viewAllLabel}
         emptyMessage={booksFiltering ? settings.empty.filteredBooks : settings.empty.books}
       />
 
+      {/* Creators: wide horizontal cards, three across, each showing a bio
+          preview. summaryLines=4 gives the ~160-character bio room the list-row
+          default (2) would clip. Two rows open, up to two more on "view more". */}
       <ContentCardGrid
         heading={settings.home.creatorsHeading}
         toolbar={creatorsBar}
-        cards={(creatorSeed === null ? creators : seededShuffle(creators, creatorSeed)).slice(0, 8).map(creatorToCard)}
-        columns={4}
+        cards={(creatorSeed === null ? creators : seededShuffle(creators, creatorSeed)).slice(0, 12).map(creatorToCard)}
+        layout="horizontal"
+        columns={3}
+        summaryLines={4}
+        initialRows={2}
+        viewMoreLabel={settings.home.viewMoreLabel}
         padding="md"
         viewAllHref="/creators"
         viewAllLabel={settings.home.viewAllLabel}

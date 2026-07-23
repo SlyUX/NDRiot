@@ -56,6 +56,13 @@ export interface ContentCardProps {
   maturity?: MaturityRating | null
   /** Supporting copy. Comes from Sanity (`shortDescription`, `excerpt`, …). */
   summary?: string | null
+  /**
+   * How many lines of summary to show before clamping (horizontal layout). The
+   * default suits a list row; the homepage creators row raises it so a ~160
+   * character bio has room. Static classes only — Tailwind cannot see a
+   * computed `line-clamp-${n}`.
+   */
+  summaryLines?: 2 | 3 | 4
   /** Pre-formatted for display, e.g. "12 Mar 2026". */
   date?: string | null
   layout?: 'vertical' | 'horizontal' | 'overlay'
@@ -172,12 +179,15 @@ export function ContentCard({
   format,
   maturity,
   summary,
+  summaryLines = 2,
   date,
   layout = 'vertical',
   aspectRatio = 'cover',
   stretch = false,
   className,
 }: ContentCardProps) {
+  // Static map — Tailwind scans source text, so the class must appear whole.
+  const clampClass = { 2: 'line-clamp-2', 3: 'line-clamp-3', 4: 'line-clamp-4' }[summaryLines]
   if (layout === 'overlay') {
     return (
       <Link
@@ -228,7 +238,7 @@ export function ContentCard({
           {eyebrow && <p className="text-primary text-xs tracking-wide uppercase">{eyebrow}</p>}
           <h3 className="leading-tight font-bold group-hover:underline">{title}</h3>
           <TaxonomyRow genres={genres} format={format} className="pt-1" />
-          {summary && <p className="text-muted-foreground line-clamp-2 text-sm">{summary}</p>}
+          {summary && <p className={cn('text-muted-foreground text-sm', clampClass)}>{summary}</p>}
           {date && <p className="text-muted-foreground text-xs">{date}</p>}
         </div>
       </Link>

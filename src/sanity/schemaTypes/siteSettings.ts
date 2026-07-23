@@ -149,6 +149,13 @@ export default defineType({
           type: 'string',
           description: 'Used on every section that links to a full listing.',
         }),
+        defineField({
+          name: 'viewMoreLabel',
+          title: '"View more" button label',
+          type: 'string',
+          description:
+            'The homepage rows open with two rows and reveal the next two on this button, e.g. "View more". "View all" (above) still links to the complete listing.',
+        }),
       ],
     }),
 
