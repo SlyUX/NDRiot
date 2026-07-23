@@ -42,6 +42,7 @@ export default async function BooksPage({
         <Suspense fallback={null}>
           <FilterBar facets={BOOK_FACETS} resultCount={books.length}
             searchLabel={settings.sections.searchBooksLabel}
+            collapsible
             className="mt-8" />
         </Suspense>
       </Section>

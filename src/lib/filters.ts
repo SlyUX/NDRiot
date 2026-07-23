@@ -45,17 +45,27 @@ export const BOOK_FACETS: Facet[] = [
 ]
 
 /**
- * The homepage set — only facets that mean the same thing on a book and on a
- * creator, since one row filters both sections at once.
+ * The homepage filter sets — one per row, each scoped to its own section.
  *
- * Status is books-only and open-to-collaboration is creators-only, so neither
- * belongs here: a control that silently applies to half the page is worse
- * than one fewer control.
+ * The comics bar owns the plain keys (genre/format/audience); the creators bar
+ * owns c-prefixed keys (cgenre/…) so the two never collide. That separation is
+ * the point: a genre picked for comics no longer silently reorders the creators
+ * row, and each control now says plainly which row it governs.
+ *
+ * Both sets omit the section-only facets (book status, creator collaboration):
+ * a homepage row is a way in, not the full listing, and those live on /books
+ * and /creators.
  */
-export const HOME_FACETS: Facet[] = [
+export const HOME_BOOK_FACETS: Facet[] = [
   { param: 'genre', label: 'Genre', options: GENRES },
   { param: 'format', label: 'Format', options: FORMATS },
   { param: 'audience', label: 'Audience', options: MATURITY_RATINGS },
+]
+
+export const HOME_CREATOR_FACETS: Facet[] = [
+  { param: 'cgenre', label: 'Genre', options: GENRES },
+  { param: 'cformat', label: 'Format', options: FORMATS },
+  { param: 'caudience', label: 'Audience', options: MATURITY_RATINGS },
 ]
 
 export const CREATOR_FACETS: Facet[] = [
@@ -107,6 +117,23 @@ export function creatorFilters(params: SearchParams) {
 }
 
 /**
+ * The homepage creators row, reading the c-prefixed keys its own filter bar
+ * writes — so it filters independently of the comics row above it.
+ *
+ * Same output shape as creatorFilters (it feeds the same query), but with no
+ * collaboration flag: the homepage row is deliberately the simpler control.
+ */
+export function creatorHomeFilters(params: SearchParams) {
+  return {
+    genres: allowed(many(params.cgenre), GENRES),
+    format: allowed(many(params.cformat), FORMATS)?.[0] ?? null,
+    audience: allowed(many(params.caudience), MATURITY_RATINGS)?.[0] ?? null,
+    collaborating: null,
+    q: searchTerm(params.cq),
+  }
+}
+
+/**
  * Deterministic shuffle, seeded from the URL.
  *
  * Seeded rather than freely random so a Discover result is stable: refreshing
@@ -135,10 +162,20 @@ export function seededShuffle<T>(items: T[], seed: number): T[] {
   return out
 }
 
-/** The seed from the URL, or null when Discover is not active. */
-export function discoverSeed(params: SearchParams): number | null {
-  if (one(params.sort) !== 'random') return null
-  const raw = Number.parseInt(one(params.seed) ?? '', 10)
+/**
+ * The seed from the URL, or null when Discover is not active.
+ *
+ * The key names are arguments so each homepage row can carry its own shuffle
+ * state (the creators bar uses csort/cseed), letting one row be shuffled while
+ * the other is not.
+ */
+export function discoverSeed(
+  params: SearchParams,
+  sortKey = 'sort',
+  seedKey = 'seed',
+): number | null {
+  if (one(params[sortKey]) !== 'random') return null
+  const raw = Number.parseInt(one(params[seedKey]) ?? '', 10)
   return Number.isFinite(raw) ? raw : 1
 }
 

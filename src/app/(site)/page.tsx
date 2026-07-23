@@ -3,14 +3,14 @@ import { Suspense } from 'react'
 import { ContentCardGrid } from '@/components/content-card-grid'
 import { FilterBar } from '@/components/filter-bar'
 import { Hero } from '@/components/hero'
-import { Section } from '@/components/ui/section'
 import { bookToCard, creatorToCard } from '@/lib/card-mappers'
 import {
   bookFilters,
-  creatorFilters,
+  creatorHomeFilters,
   discoverSeed,
   hasActiveFilters,
-  HOME_FACETS,
+  HOME_BOOK_FACETS,
+  HOME_CREATOR_FACETS,
   seededShuffle,
   type SearchParams,
 } from '@/lib/filters'
@@ -69,30 +69,24 @@ export default async function Home({
 }) {
   const params = await searchParams
 
-  const booksFilters = bookFilters(params)
   /**
-   * Search is comics-only on the homepage.
+   * Two independent filter rows, one per section.
    *
-   * The facets still narrow both sections — genre, format and audience mean
-   * the same thing either side. But a title search should not empty the
-   * makers row: someone typing a comic's name has not stopped being
-   * interested in who else is here.
-   *
-   * The listing pages are unaffected; /creators searches creators, as it
-   * should.
+   * The comics bar owns genre/format/audience/q; the creators bar owns the
+   * c-prefixed keys. So narrowing comics no longer silently reorders the
+   * creators row — each control sits above the row it governs and changes only
+   * that row, which is the whole point of the split. Discover is per-row too
+   * (sort/seed for comics, csort/cseed for creators), so one row can be
+   * shuffled while the other holds still.
    */
-  const makersFilters = { ...creatorFilters(params), q: null }
+  const booksFilters = bookFilters(params)
+  const creatorsFilters = creatorHomeFilters(params)
 
   const booksFiltering = hasActiveFilters(booksFilters)
-  const makersFiltering = hasActiveFilters(makersFilters)
+  const creatorsFiltering = hasActiveFilters(creatorsFilters)
 
-  /**
-   * Discover. Shuffles both rows before they are cut to eight, so it surfaces
-   * a different set rather than just reordering the same alphabetical front.
-   * The two rows get different seeds, or the same arithmetic would move them
-   * in step.
-   */
-  const seed = discoverSeed(params)
+  const bookSeed = discoverSeed(params, 'sort', 'seed')
+  const creatorSeed = discoverSeed(params, 'csort', 'cseed')
 
   const [heroBooks, books, creators, settings] = await Promise.all([
     // Deliberately unfiltered. The hero is the guaranteed route to work
@@ -100,34 +94,47 @@ export default async function Home({
     // never narrow it.
     pickHeroBooks(),
     safeFetch<BookSummary[]>(FILTERED_BOOKS_QUERY, booksFilters, []),
-    safeFetch<CreatorSummary[]>(FILTERED_CREATORS_QUERY, makersFilters, []),
+    safeFetch<CreatorSummary[]>(FILTERED_CREATORS_QUERY, creatorsFilters, []),
     getSiteSettings(),
   ])
+
+  const booksBar = (
+    <Suspense fallback={null}>
+      <FilterBar
+        facets={HOME_BOOK_FACETS}
+        control="select"
+        resultCount={books.length}
+        searchLabel={settings.sections.searchBooksLabel}
+        discoverLabel={settings.sections.discoverLabel}
+      />
+    </Suspense>
+  )
+
+  const creatorsBar = (
+    <Suspense fallback={null}>
+      <FilterBar
+        facets={HOME_CREATOR_FACETS}
+        control="select"
+        resultCount={creators.length}
+        searchLabel={settings.sections.searchCreatorsLabel}
+        discoverLabel={settings.sections.discoverLabel}
+        searchParam="cq"
+        sortParam="csort"
+        seedParam="cseed"
+      />
+    </Suspense>
+  )
 
   return (
     <div>
       <Hero hero={settings.hero} books={heroBooks} />
 
-      {/* Keeps its top padding — the gap below the hero is doing real work —
-          but closes up underneath, so the filters and the rows they govern
-          read as one group rather than three separate bands. */}
-      <Section padding="md" className="pb-6">
-        <Suspense fallback={null}>
-          <FilterBar
-            facets={HOME_FACETS}
-            control="select"
-            resultCount={books.length + creators.length}
-            searchLabel={settings.sections.searchHomeLabel}
-            discoverLabel={settings.sections.discoverLabel}
-          />
-        </Suspense>
-      </Section>
-
       <ContentCardGrid
         heading={settings.home.booksHeading}
-        cards={(seed === null ? books : seededShuffle(books, seed)).slice(0, 8).map(bookToCard)}
+        toolbar={booksBar}
+        cards={(bookSeed === null ? books : seededShuffle(books, bookSeed)).slice(0, 8).map(bookToCard)}
         columns={4}
-        padding="tight"
+        padding="md"
         viewAllHref="/books"
         viewAllLabel={settings.home.viewAllLabel}
         emptyMessage={booksFiltering ? settings.empty.filteredBooks : settings.empty.books}
@@ -135,12 +142,13 @@ export default async function Home({
 
       <ContentCardGrid
         heading={settings.home.creatorsHeading}
-        cards={(seed === null ? creators : seededShuffle(creators, seed + 1)).slice(0, 8).map(creatorToCard)}
+        toolbar={creatorsBar}
+        cards={(creatorSeed === null ? creators : seededShuffle(creators, creatorSeed)).slice(0, 8).map(creatorToCard)}
         columns={4}
-        padding="tight"
+        padding="md"
         viewAllHref="/creators"
         viewAllLabel={settings.home.viewAllLabel}
-        emptyMessage={makersFiltering ? settings.empty.filteredCreators : settings.empty.creators}
+        emptyMessage={creatorsFiltering ? settings.empty.filteredCreators : settings.empty.creators}
       />
     </div>
   )

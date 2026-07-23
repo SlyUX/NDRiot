@@ -54,6 +54,13 @@ export interface ContentCardGridProps {
    * default is how that requirement gets quietly skipped.
    */
   emptyMessage: string
+  /**
+   * Optional controls between the heading and the cards — the homepage puts a
+   * filter row here so each row's control sits directly above the row it
+   * governs. Rendered above the empty state too, so the filter that emptied a
+   * row is still there to loosen.
+   */
+  toolbar?: React.ReactNode
   /** Forwarded to the Section wrapper. */
   background?: SectionProps['background']
   padding?: SectionProps['padding']
@@ -74,6 +81,7 @@ export function ContentCardGrid({
   viewAllHref,
   viewAllLabel,
   emptyMessage,
+  toolbar,
   background,
   padding,
   maxWidth,
@@ -98,6 +106,8 @@ export function ContentCardGrid({
           {heading}
         </SectionHeading>
       )}
+
+      {toolbar && <div className="mb-6">{toolbar}</div>}
 
       {cards.length === 0 ? (
         <p className="text-muted-foreground py-8 text-sm">{emptyMessage}</p>
