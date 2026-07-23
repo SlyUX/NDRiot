@@ -32,6 +32,9 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# ...except the example template — it holds only placeholders and documents
+# which vars the app needs (including the contact-form / Resend set).
+!.env.local.example
 
 # vercel
 .vercel

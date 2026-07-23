@@ -21,6 +21,7 @@ export default defineType({
     { name: 'sections', title: 'Section headings' },
     { name: 'empty', title: 'Empty states' },
     { name: 'join', title: 'Join page' },
+    { name: 'contact', title: 'Contact page' },
     { name: 'nav', title: 'Navigation' },
   ],
   fields: [
@@ -311,6 +312,89 @@ export default defineType({
           type: 'url',
           description:
             'Where the button goes. A field rather than code so the form can be replaced, paused, or swapped for an on-site version without a deploy.',
+        }),
+      ],
+    }),
+
+    defineField({
+      name: 'contact',
+      title: 'Contact page',
+      type: 'object',
+      group: 'contact',
+      options: { collapsible: true, collapsed: false },
+      description:
+        'The page at /contact. Messages are emailed to you — they are never stored in the CMS, because every document here is publicly readable and a stranger’s message and address are not ours to publish.',
+      fields: [
+        defineField({
+          name: 'heading',
+          title: 'Heading',
+          type: 'string',
+          description: 'The h1, e.g. "Get in touch".',
+        }),
+        defineField({
+          name: 'linkLabel',
+          title: 'Footer link label',
+          type: 'string',
+          description:
+            'The link to this page, shown in the footer rather than the main nav — e.g. "Contact". Kept out of the header so Join stays the single call to action.',
+        }),
+        defineField({
+          name: 'body',
+          title: 'Intro',
+          type: 'array',
+          of: [
+            {
+              type: 'block',
+              styles: [{ title: 'Paragraph', value: 'normal' }],
+              lists: [],
+              marks: { decorators: [{ title: 'Bold', value: 'strong' }], annotations: [] },
+            },
+          ],
+          description:
+            'A sentence or two above the form. Saying who should write and how fast you reply is the most useful thing here.',
+        }),
+        defineField({
+          name: 'nameLabel',
+          title: 'Name field label',
+          type: 'string',
+          description: 'e.g. "Your name".',
+        }),
+        defineField({
+          name: 'emailLabel',
+          title: 'Email field label',
+          type: 'string',
+          description: 'e.g. "Your email". Used so you can reply — it is never published.',
+        }),
+        defineField({
+          name: 'subjectLabel',
+          title: 'Subject field label',
+          type: 'string',
+          description: 'e.g. "Subject". Optional for the sender.',
+        }),
+        defineField({
+          name: 'messageLabel',
+          title: 'Message field label',
+          type: 'string',
+          description: 'e.g. "Message".',
+        }),
+        defineField({
+          name: 'submitLabel',
+          title: 'Submit button label',
+          type: 'string',
+          description: 'e.g. "Send".',
+        }),
+        defineField({
+          name: 'successMessage',
+          title: 'Success message',
+          type: 'string',
+          description: 'Shown after a message sends, e.g. "Thanks — we’ll be in touch."',
+        }),
+        defineField({
+          name: 'errorMessage',
+          title: 'Error message',
+          type: 'string',
+          description:
+            'Shown if sending fails. Give an alternative if you have one — the form is not the only way to reach you.',
         }),
       ],
     }),

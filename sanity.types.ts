@@ -459,6 +459,31 @@ export type SiteSettings = {
     ctaLabel?: string;
     formUrl?: string;
   };
+  contact?: {
+    heading?: string;
+    linkLabel?: string;
+    body?: Array<{
+      children?: Array<{
+        marks?: Array<string>;
+        text?: string;
+        _type: "span";
+        _key: string;
+      }>;
+      style?: "normal";
+      listItem?: never;
+      markDefs?: null;
+      level?: number;
+      _type: "block";
+      _key: string;
+    }>;
+    nameLabel?: string;
+    emailLabel?: string;
+    subjectLabel?: string;
+    messageLabel?: string;
+    submitLabel?: string;
+    successMessage?: string;
+    errorMessage?: string;
+  };
   nav?: Array<{
     label: string;
     href: string;

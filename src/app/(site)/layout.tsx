@@ -49,8 +49,16 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <main>{children}</main>
 
       <footer className="border-primary/40 border-t">
-        <div className="text-muted-foreground mx-auto max-w-[90rem] px-6 py-8 text-center text-xs tracking-widest uppercase">
-          {settings.footer}
+        <div className="text-muted-foreground mx-auto flex max-w-[90rem] flex-col items-center gap-2 px-6 py-8 text-center text-xs tracking-widest uppercase">
+          {/* Contact sits here, not in the header, so Join stays the single
+              call to action up top and this stays the utility corner. */}
+          <Link
+            href="/contact"
+            className="hover:text-primary focus-visible:ring-ring transition-colors focus-visible:ring-2 focus-visible:outline-none"
+          >
+            {settings.contact.linkLabel}
+          </Link>
+          <span>{settings.footer}</span>
         </div>
       </footer>
     </>

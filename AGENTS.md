@@ -149,6 +149,7 @@ Decided 2026-07-20. Every value below is a CSS variable in `src/app/globals.css`
 | `--primary` | `#FF0095` | Accent, links, CTAs (5.58:1 on background) |
 | `--primary-foreground` | `#000000` | Text/icons **on** primary surfaces (5.69:1) |
 | `--muted-foreground` | `zinc-400` `#A1A1AA` | De-emphasized text (8.05:1) |
+| `--destructive` | `#FF3B30` | Form/validation errors on background (5.81:1). Not for large fills — only text and borders. |
 | `--radius` | `0px` | All radii. Square corners are the punk read — no `rounded-*` in components. |
 
 **Verified contrast, do not re-derive:**

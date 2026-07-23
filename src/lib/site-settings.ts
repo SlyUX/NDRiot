@@ -49,12 +49,27 @@ export interface JoinSettings {
   formUrl?: string
 }
 
+export interface ContactSettings {
+  heading: string
+  /** Footer link label — Contact lives in the footer, not the header nav. */
+  linkLabel: string
+  body?: RichText
+  nameLabel: string
+  emailLabel: string
+  subjectLabel: string
+  messageLabel: string
+  submitLabel: string
+  successMessage: string
+  errorMessage: string
+}
+
 export interface SiteSettings {
   siteTitle: string
   siteDescription: string
   footer: string
   hero: HeroSettings
   join: JoinSettings
+  contact: ContactSettings
   home: {
     genresHeading: string
     booksHeading: string
@@ -121,6 +136,17 @@ const DEFAULTS: SiteSettings = {
     ctaLabel: 'Start your submission',
     formUrl: 'https://forms.gle/STbaVMQ8a6Ap8rL1A',
   },
+  contact: {
+    heading: 'Get in touch',
+    linkLabel: 'Contact',
+    nameLabel: 'Your name',
+    emailLabel: 'Your email',
+    subjectLabel: 'Subject',
+    messageLabel: 'Message',
+    submitLabel: 'Send',
+    successMessage: 'Thanks — your message is on its way. We’ll be in touch.',
+    errorMessage: 'That didn’t send. Try again in a moment.',
+  },
   home: {
     genresHeading: 'Browse by genre',
     booksHeading: 'Books',
@@ -173,6 +199,7 @@ export const SITE_SETTINGS_QUERY = `*[_id=="siteSettings"][0]{
   home,sections,empty,
   hero{background,headline,body,featureCtaLabel,ctas[]{label,href}},
   join{heading,body,ctaLabel,formUrl},
+  contact{heading,linkLabel,body,nameLabel,emailLabel,subjectLabel,messageLabel,submitLabel,successMessage,errorMessage},
   nav[]{label,href}
 }`
 
@@ -213,6 +240,20 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       body: data.join?.body?.length ? data.join.body : undefined,
       ctaLabel: data.join?.ctaLabel?.trim() || DEFAULTS.join.ctaLabel,
       formUrl: data.join?.formUrl?.trim() || DEFAULTS.join.formUrl,
+    },
+    contact: {
+      // Field-by-field like `join` above: a blank string falls back to the
+      // default, and the rich-text body passes through untouched.
+      heading: data.contact?.heading?.trim() || DEFAULTS.contact.heading,
+      linkLabel: data.contact?.linkLabel?.trim() || DEFAULTS.contact.linkLabel,
+      nameLabel: data.contact?.nameLabel?.trim() || DEFAULTS.contact.nameLabel,
+      emailLabel: data.contact?.emailLabel?.trim() || DEFAULTS.contact.emailLabel,
+      subjectLabel: data.contact?.subjectLabel?.trim() || DEFAULTS.contact.subjectLabel,
+      messageLabel: data.contact?.messageLabel?.trim() || DEFAULTS.contact.messageLabel,
+      submitLabel: data.contact?.submitLabel?.trim() || DEFAULTS.contact.submitLabel,
+      successMessage: data.contact?.successMessage?.trim() || DEFAULTS.contact.successMessage,
+      errorMessage: data.contact?.errorMessage?.trim() || DEFAULTS.contact.errorMessage,
+      body: data.contact?.body?.length ? data.contact.body : undefined,
     },
     home: mergeGroup(DEFAULTS.home, data.home),
     sections: mergeGroup(DEFAULTS.sections, data.sections),
