@@ -183,19 +183,19 @@ export default defineType({
           name: 'searchHomeLabel',
           title: 'Homepage search placeholder',
           type: 'string',
-          description: 'Searches comics and makers together, e.g. "Search comics and makers".',
+          description: 'Searches comics and creators together, e.g. "Search comics and creators".',
         }),
         defineField({
           name: 'searchBooksLabel',
           title: 'Comics search placeholder',
           type: 'string',
-          description: 'e.g. "Search titles and makers". Also the accessible label for the field.',
+          description: 'e.g. "Search titles and creators". Also the accessible label for the field.',
         }),
         defineField({
           name: 'searchCreatorsLabel',
-          title: 'Makers search placeholder',
+          title: 'Creators search placeholder',
           type: 'string',
-          description: 'e.g. "Search makers and studios".',
+          description: 'e.g. "Search creators and studios".',
         }),
         defineField({
           name: 'everythingElseHeading',
@@ -208,7 +208,7 @@ export default defineType({
           name: 'genreCreatorsHeading',
           title: 'Category page — creators heading',
           type: 'string',
-          description: 'e.g. "Makers working in this genre".',
+          description: 'e.g. "Creators working in this genre".',
         }),
         defineField({
           name: 'downloadCta',
@@ -262,7 +262,7 @@ export default defineType({
         }),
         defineField({
           name: 'filteredCreators',
-          title: 'No makers match the filters',
+          title: 'No creators match the filters',
           type: 'string',
         }),
         defineField({ name: 'columns', title: 'No columns', type: 'string' }),
