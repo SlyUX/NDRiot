@@ -1,4 +1,8 @@
-import { defineType, defineField } from 'sanity'
+import { defineType, defineField, defineArrayMember } from 'sanity'
+
+/** A site-internal path: present and starting with "/". Shared by nav fields. */
+const sitePath = (value: unknown) =>
+  typeof value === 'string' && value.startsWith('/') ? true : 'Must be a site path starting with "/".'
 
 /**
  * Every reader-facing string that isn't part of a content document.
@@ -411,11 +415,13 @@ export default defineType({
       title: 'Main navigation',
       type: 'array',
       group: 'nav',
-      description: 'Header links, in order. Keep it short — this row does not collapse.',
+      description:
+        'The header, in order. Each item is either a plain Link (e.g. Join) or a Dropdown panel that opens a mega-menu of grouped links. Genres are not listed here — set a group to "Fill with genres" and the site adds them from the code taxonomy, so they never drift out of sync.',
       of: [
-        {
+        defineArrayMember({
           type: 'object',
-          name: 'navItem',
+          name: 'navLink',
+          title: 'Link',
           fields: [
             defineField({
               name: 'label',
@@ -427,17 +433,101 @@ export default defineType({
               name: 'href',
               title: 'Path',
               type: 'string',
-              description: 'A site path beginning with "/", e.g. /creators.',
-              validation: (rule) =>
-                rule.required().custom((value) =>
-                  typeof value === 'string' && value.startsWith('/')
-                    ? true
-                    : 'Must be a site path starting with "/".',
-                ),
+              description: 'A site path beginning with "/", e.g. /join.',
+              validation: (rule) => rule.required().custom(sitePath),
             }),
           ],
           preview: { select: { title: 'label', subtitle: 'href' } },
-        },
+        }),
+        defineArrayMember({
+          type: 'object',
+          name: 'navPanel',
+          title: 'Dropdown panel',
+          fields: [
+            defineField({
+              name: 'label',
+              title: 'Label',
+              type: 'string',
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: 'href',
+              title: 'Landing path',
+              type: 'string',
+              description:
+                'Optional. Where the panel’s own title links to — e.g. /books. Leave blank for a label that only opens the menu.',
+              validation: (rule) => rule.custom((value) => !value || sitePath(value)),
+            }),
+            defineField({
+              name: 'groups',
+              title: 'Groups',
+              type: 'array',
+              description: 'Columns inside the dropdown.',
+              of: [
+                defineArrayMember({
+                  type: 'object',
+                  name: 'navGroup',
+                  title: 'Group',
+                  fields: [
+                    defineField({
+                      name: 'heading',
+                      title: 'Heading',
+                      type: 'string',
+                      description: 'Optional column heading.',
+                    }),
+                    defineField({
+                      name: 'useGenres',
+                      title: 'Fill with genres',
+                      type: 'boolean',
+                      initialValue: false,
+                      description:
+                        'Populate this column from the site genre list automatically. When on, the links below are ignored.',
+                    }),
+                    defineField({
+                      name: 'links',
+                      title: 'Links',
+                      type: 'array',
+                      hidden: ({ parent }) => Boolean(parent?.useGenres),
+                      of: [
+                        defineArrayMember({
+                          type: 'object',
+                          name: 'navGroupLink',
+                          fields: [
+                            defineField({
+                              name: 'label',
+                              title: 'Label',
+                              type: 'string',
+                              validation: (rule) => rule.required(),
+                            }),
+                            defineField({
+                              name: 'href',
+                              title: 'Path',
+                              type: 'string',
+                              description: 'A site path beginning with "/".',
+                              validation: (rule) => rule.required().custom(sitePath),
+                            }),
+                          ],
+                          preview: { select: { title: 'label', subtitle: 'href' } },
+                        }),
+                      ],
+                    }),
+                  ],
+                  preview: {
+                    select: { title: 'heading', useGenres: 'useGenres' },
+                    prepare: ({ title, useGenres }) => ({
+                      title: title || (useGenres ? 'Genres' : 'Group'),
+                      subtitle: useGenres ? 'Auto: genres' : undefined,
+                    }),
+                  },
+                }),
+              ],
+            }),
+          ],
+          preview: {
+            select: { title: 'label' },
+            prepare: ({ title }) => ({ title, subtitle: 'Dropdown' }),
+          },
+        }),
       ],
     }),
   ],

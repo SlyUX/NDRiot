@@ -22,27 +22,33 @@ export default async function EditorialPage() {
         </h1>
       </Section>
 
-      <ContentCardGrid
-        heading={settings.sections.columnsHeading}
-        headingSize="sm"
-        cards={columns.map(columnToCard)}
-        layout="horizontal"
-        aspectRatio="video"
-        columns={2}
-        padding="md"
-        emptyMessage={settings.empty.columns}
-      />
+      {/* Anchor targets for the Editorial nav dropdown (Columns / Interviews).
+          scroll-mt keeps the heading clear of the top edge on jump. */}
+      <div id="columns" className="scroll-mt-24">
+        <ContentCardGrid
+          heading={settings.sections.columnsHeading}
+          headingSize="sm"
+          cards={columns.map(columnToCard)}
+          layout="horizontal"
+          aspectRatio="video"
+          columns={2}
+          padding="md"
+          emptyMessage={settings.empty.columns}
+        />
+      </div>
 
-      <ContentCardGrid
-        heading={settings.sections.interviewsHeading}
-        headingSize="sm"
-        cards={interviews.map(interviewToCard)}
-        layout="horizontal"
-        aspectRatio="video"
-        columns={2}
-        padding="md"
-        emptyMessage={settings.empty.interviews}
-      />
+      <div id="interviews" className="scroll-mt-24">
+        <ContentCardGrid
+          heading={settings.sections.interviewsHeading}
+          headingSize="sm"
+          cards={interviews.map(interviewToCard)}
+          layout="horizontal"
+          aspectRatio="video"
+          columns={2}
+          padding="md"
+          emptyMessage={settings.empty.interviews}
+        />
+      </div>
     </div>
   )
 }

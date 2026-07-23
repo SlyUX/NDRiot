@@ -485,12 +485,32 @@ export type SiteSettings = {
     successMessage?: string;
     errorMessage?: string;
   };
-  nav?: Array<{
-    label: string;
-    href: string;
-    _type: "navItem";
-    _key: string;
-  }>;
+  nav?: Array<
+    | {
+        label: string;
+        href: string;
+        _type: "navLink";
+        _key: string;
+      }
+    | {
+        label: string;
+        href?: string;
+        groups?: Array<{
+          heading?: string;
+          useGenres?: boolean;
+          links?: Array<{
+            label: string;
+            href: string;
+            _type: "navGroupLink";
+            _key: string;
+          }>;
+          _type: "navGroup";
+          _key: string;
+        }>;
+        _type: "navPanel";
+        _key: string;
+      }
+  >;
 };
 
 export type SanityImageCrop = {

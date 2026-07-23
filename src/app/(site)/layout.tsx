@@ -1,6 +1,7 @@
 import Link from 'next/link'
 
 import { Logo } from '@/components/logo'
+import { MainNav } from '@/components/main-nav'
 import { getSiteSettings } from '@/lib/site-settings'
 
 /**
@@ -21,8 +22,12 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
 
   return (
     <>
-      <header className="border-primary/40 border-b">
-        <nav className="mx-auto flex max-w-[90rem] flex-wrap items-center justify-between gap-3 px-6 py-4">
+      {/* Sticky + z-50: keeps the nav on screen and, crucially, gives it a
+          stacking context above the page so the dropdowns are not painted
+          behind content. bg-background so nothing shows through on scroll. The
+          mobile drawer (absolute, top-full) anchors to this positioned header. */}
+      <header className="border-primary/40 bg-background sticky top-0 z-50 border-b">
+        <nav className="mx-auto flex max-w-[90rem] items-center justify-between gap-3 px-6 py-4">
           <Link
             href="/"
             aria-label={`${settings.siteTitle} — home`}
@@ -32,17 +37,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
                 would make a screen reader announce the brand twice. */}
             <Logo size="nav" alt="" priority />
           </Link>
-          <div className="flex flex-wrap gap-5 text-sm font-bold tracking-wide uppercase">
-            {settings.nav.map(({ label, href }) => (
-              <Link
-                key={href}
-                href={href}
-                className="hover:text-primary focus-visible:ring-ring text-foreground/80 transition-colors focus-visible:ring-2 focus-visible:outline-none"
-              >
-                {label}
-              </Link>
-            ))}
-          </div>
+          <MainNav nav={settings.nav} />
         </nav>
       </header>
 

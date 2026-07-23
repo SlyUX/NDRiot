@@ -20,10 +20,30 @@ import type { RichText, SanityImage } from '@/lib/types'
  * is the thing AGENTS.md §2 exists to prevent.
  */
 
-export interface NavItem {
+/** A single link — either a plain header item or one row inside a group. */
+export interface NavLink {
   label: string
   href: string
 }
+
+/** One column inside a dropdown panel. */
+export interface NavGroup {
+  heading?: string
+  /** When true the links come from the genre taxonomy, not from `links`. */
+  useGenres?: boolean
+  links?: NavLink[]
+}
+
+/** A header item: a plain link, or a dropdown that opens a mega-panel. */
+export interface NavPanel {
+  _type: 'navPanel'
+  label: string
+  /** Optional landing page the panel title links to. */
+  href?: string
+  groups?: NavGroup[]
+}
+
+export type NavItem = ({ _type: 'navLink' } & NavLink) | NavPanel
 
 export interface Cta {
   label: string
@@ -186,13 +206,43 @@ const DEFAULTS: SiteSettings = {
     interviews: 'No interviews yet.',
     downloads: 'No downloads yet.',
   },
+  // Books opens a dropdown gathering the ways into the catalogue — genres,
+  // downloads, and the magazine — with "All Books" for the full listing.
+  // Creators stays a plain top-level link; Editorial is its own dropdown; Join
+  // is the CTA; Contact lives in the footer.
   nav: [
-    { label: 'Creators', href: '/creators' },
-    { label: 'Books', href: '/books' },
-    { label: 'Editorial', href: '/editorial' },
-    { label: 'Downloads', href: '/downloads' },
-    { label: 'Magazine', href: '/magazine' },
-    { label: 'Join', href: '/join' },
+    {
+      _type: 'navPanel',
+      label: 'Books',
+      href: '/books',
+      groups: [
+        { heading: 'Genres', useGenres: true },
+        {
+          heading: 'More',
+          links: [
+            { label: 'Downloads', href: '/downloads' },
+            { label: 'ND Riot Magazine', href: '/magazine' },
+          ],
+        },
+      ],
+    },
+    { _type: 'navLink', label: 'Creators', href: '/creators' },
+    {
+      _type: 'navPanel',
+      label: 'Editorial',
+      href: '/editorial',
+      groups: [
+        {
+          // Columns and Interviews are sections of /editorial, not separate
+          // listing routes, so these deep-link to the anchors on that page.
+          links: [
+            { label: 'Columns', href: '/editorial#columns' },
+            { label: 'Interviews', href: '/editorial#interviews' },
+          ],
+        },
+      ],
+    },
+    { _type: 'navLink', label: 'Join', href: '/join' },
   ],
 }
 
@@ -202,7 +252,7 @@ export const SITE_SETTINGS_QUERY = `*[_id=="siteSettings"][0]{
   hero{background,headline,body,featureCtaLabel,ctas[]{label,href}},
   join{heading,body,ctaLabel,formUrl},
   contact{heading,linkLabel,body,nameLabel,emailLabel,subjectLabel,messageLabel,submitLabel,successMessage,errorMessage},
-  nav[]{label,href}
+  nav[]{_type,label,href,groups[]{heading,useGenres,links[]{label,href}}}
 }`
 
 /** Blank strings count as absent — an editor clearing a field wants the
