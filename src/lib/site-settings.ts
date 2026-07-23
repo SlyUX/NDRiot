@@ -56,6 +56,8 @@ export interface HeroSettings {
   background?: SanityImage
   headline: string
   body?: RichText
+  /** The mobile splash line under the logo, where the carousel is not shown. */
+  tagline: string
   ctas: Cta[]
   /** Button label on the featured slides. */
   featureCtaLabel: string
@@ -146,6 +148,7 @@ const DEFAULTS: SiteSettings = {
   footer: 'Support indie comics. · ND Riot',
   hero: {
     headline: '“The Big Two”',
+    tagline: 'Elevating Independent Comics',
     featureCtaLabel: 'Read more',
     ctas: [
       { label: 'All Creators', href: '/creators' },
@@ -249,7 +252,7 @@ const DEFAULTS: SiteSettings = {
 export const SITE_SETTINGS_QUERY = `*[_id=="siteSettings"][0]{
   siteTitle,siteDescription,footer,
   home,sections,empty,
-  hero{background,headline,body,featureCtaLabel,ctas[]{label,href}},
+  hero{background,headline,body,tagline,featureCtaLabel,ctas[]{label,href}},
   join{heading,body,ctaLabel,formUrl},
   contact{heading,linkLabel,body,nameLabel,emailLabel,subjectLabel,messageLabel,submitLabel,successMessage,errorMessage},
   nav[]{_type,label,href,groups[]{heading,useGenres,links[]{label,href}}}
@@ -283,6 +286,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       background: data.hero?.background,
       body: data.hero?.body?.length ? data.hero.body : undefined,
       headline: data.hero?.headline?.trim() || DEFAULTS.hero.headline,
+      tagline: data.hero?.tagline?.trim() || DEFAULTS.hero.tagline,
       featureCtaLabel:
         data.hero?.featureCtaLabel?.trim() || DEFAULTS.hero.featureCtaLabel,
       ctas: data.hero?.ctas?.length ? data.hero.ctas : DEFAULTS.hero.ctas,

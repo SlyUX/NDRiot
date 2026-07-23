@@ -78,6 +78,13 @@ export default defineType({
           description: 'The h1. Type any quote marks you want — they are not added for you.',
         }),
         defineField({
+          name: 'tagline',
+          title: 'Mobile tagline',
+          type: 'string',
+          description:
+            'Shown under the logo on phones, where the carousel is hidden — e.g. "Elevating Independent Comics".',
+        }),
+        defineField({
           name: 'body',
           title: 'Body',
           type: 'array',

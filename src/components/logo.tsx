@@ -17,15 +17,18 @@ import { cn } from '@/lib/utils'
  * changes with it — that pairing is not automatic, so check both.
  */
 
-const logoVariants = cva('w-auto', {
+const logoVariants = cva('', {
   variants: {
     size: {
       // Sized so the lockup clears the nav bar without crowding it.
-      nav: 'h-8 sm:h-9',
+      nav: 'h-8 w-auto sm:h-9',
       // Arbitrary values rather than scale steps: these are exactly 30% up
       // from 8/11/16rem. The nearest steps would have landed at ~25%, and a
       // logo is not on the spacing grid, so precision wins over rhythm here.
-      hero: 'h-[10.4rem] sm:h-[14.3rem] lg:h-[20.8rem]',
+      hero: 'h-[10.4rem] w-auto sm:h-[14.3rem] lg:h-[20.8rem]',
+      // The mobile splash hero: a fixed 300px width (height follows the
+      // aspect ratio), per the design.
+      splash: 'h-auto w-[300px] max-w-full',
     },
   },
   defaultVariants: { size: 'nav' },

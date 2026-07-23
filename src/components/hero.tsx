@@ -80,7 +80,7 @@ function FeatureSlide({ book, ctaLabel }: { book: HeroBook; ctaLabel: string }) 
     // The trade is empty space on the right, which reads as deliberate
     // margin rather than a gap in the middle of the composition.
     <div className="grid items-center gap-8 lg:grid-cols-[auto_1fr] lg:gap-12">
-      <div className="flex justify-center lg:justify-start">
+      <div className="flex justify-start">
         <div
           className={cn('relative w-48 shrink-0 overflow-hidden sm:w-56 lg:w-64 aspect-[2/3]')}
         >
@@ -130,7 +130,7 @@ export function Hero({ hero, books }: HeroProps) {
 
   const pitchSlide = (
     <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
-      <div className="flex justify-center lg:justify-start">
+      <div className="flex justify-start">
         {/* alt="" because the headline beside it already names the site — a
             screen reader would otherwise hear "ND Riot" twice. */}
         <Logo size="hero" alt="" priority />
@@ -213,7 +213,33 @@ export function Hero({ hero, books }: HeroProps) {
       <div className="absolute inset-0 -z-10 bg-black/75" />
       <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
 
-      <HeroCarousel slides={slides} className="mx-auto w-full max-w-[90rem]" />
+      {/* Desktop: the carousel. Carousels are poor on phones, so it is hidden
+          there in favour of the static splash below. */}
+      <HeroCarousel slides={slides} className="mx-auto hidden w-full max-w-[90rem] md:block" />
+
+      {/* Mobile splash: logo, tagline, buttons — static and left-aligned, no
+          carousel. alt names the brand here since no headline text does. */}
+      <div className="mx-auto w-full max-w-[90rem] md:hidden">
+        <Logo size="splash" alt="ND Riot" priority />
+        <p className="mt-5 text-2xl leading-tight font-black tracking-tight text-white uppercase">
+          {hero.tagline}
+        </p>
+        {hero.ctas.length > 0 && (
+          <div className="mt-6 flex flex-wrap gap-3">
+            {hero.ctas.map((cta, i) => (
+              <Button
+                key={cta.href}
+                asChild
+                size="lg"
+                variant={i === 0 ? 'default' : 'inverse'}
+                className="font-black tracking-wide uppercase"
+              >
+                <Link href={cta.href}>{cta.label}</Link>
+              </Button>
+            ))}
+          </div>
+        )}
+      </div>
     </section>
   )
 }

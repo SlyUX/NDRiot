@@ -381,6 +381,7 @@ export type SiteSettings = {
   hero?: {
     background?: ImageWithAlt;
     headline?: string;
+    tagline?: string;
     body?: Array<{
       children?: Array<{
         marks?: Array<string>;

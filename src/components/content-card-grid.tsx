@@ -127,7 +127,11 @@ export function ContentCardGrid({
       ) : (
         (() => {
           const gridClassName = cn(
-            'grid grid-cols-1 gap-6 sm:grid-cols-2',
+            'grid gap-6',
+            // Phones: vertical cards (books) sit two-up before wrapping;
+            // horizontal cards (creators) are wide, so one-up. Both ramp up to
+            // `columns` at lg.
+            layout === 'horizontal' ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-2',
             COLUMN_CLASSES[columns],
             dividers && 'lg:gap-x-12',
           )

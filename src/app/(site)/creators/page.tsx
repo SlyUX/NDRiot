@@ -46,7 +46,9 @@ export default async function CreatorsPage({
 
       <ContentCardGrid
         cards={creators.map(creatorToCard)}
-        columns={4}
+        layout="horizontal"
+        columns={3}
+        summaryLines={4}
         padding="md"
         emptyMessage={
           filtering ? settings.empty.filteredCreators : settings.empty.creators
@@ -58,7 +60,9 @@ export default async function CreatorsPage({
           heading={settings.sections.everythingElseHeading}
           headingSize="sm"
           cards={fallback.slice(0, 8).map(creatorToCard)}
-          columns={4}
+          layout="horizontal"
+          columns={3}
+          summaryLines={4}
           padding="md"
           emptyMessage={settings.empty.creators}
         />
