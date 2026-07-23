@@ -1,8 +1,8 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useId, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { Search, Shuffle, X } from 'lucide-react'
+import { ChevronDown, Search, Shuffle, X } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -18,6 +18,11 @@ import { cn } from '@/lib/utils'
  * view shareable — a creator can link to their own genre — keeps the listing
  * server-rendered, and means the saved filters planned for V2 are just saved
  * URLs rather than a new storage model.
+ *
+ * The URL keys are configurable (searchParam/sortParam/seedParam) so two bars
+ * can sit on one page without fighting over `q`/`sort`/`seed` — the homepage
+ * runs a comics bar and a separate creators bar, each filtering only its own
+ * row.
  */
 
 export interface Facet {
@@ -43,12 +48,27 @@ export interface FilterBarProps {
    * simpler one.
    */
   control?: 'chips' | 'select'
+  /**
+   * Hide the facets behind a toggle, collapsed by default. For the listing
+   * pages, where the full chip grid is tall and most visitors browse before
+   * they narrow. Active filters and the clear button stay visible even when
+   * collapsed, so §3's "legible active state" holds — only the controls fold
+   * away, never the fact that a filter is on.
+   */
+  collapsible?: boolean
   /** Announced with the result count, so the change is not silent. */
   resultCount: number
   /** Placeholder for the search box. Copy, so it comes from Sanity. */
   searchLabel: string
   /** Label for the randomise button. Omit to hide it. */
   discoverLabel?: string
+  /**
+   * URL keys this bar owns. Defaults suit a page with one bar; the homepage
+   * gives its creators bar a distinct set so it never touches the comics row.
+   */
+  searchParam?: string
+  sortParam?: string
+  seedParam?: string
   className?: string
 }
 
@@ -61,21 +81,36 @@ export function FilterBar({
   searchLabel,
   discoverLabel,
   control = 'chips',
+  collapsible = false,
+  searchParam = 'q',
+  sortParam = 'sort',
+  seedParam = 'seed',
   className,
 }: FilterBarProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  const urlQuery = searchParams.get('q') ?? ''
+  const urlQuery = searchParams.get(searchParam) ?? ''
   const [term, setTerm] = useState(urlQuery)
+
+  // Collapsed by default when collapsible; always open otherwise.
+  const [open, setOpen] = useState(!collapsible)
+  const panelId = useId()
+
+  const activeFacetCount = facets.reduce(
+    (sum, facet) => sum + searchParams.getAll(facet.param).length,
+    0,
+  )
 
   const active = [
     ...facets.flatMap((facet) =>
       searchParams.getAll(facet.param).map((value) => ({ facet, value })),
     ),
     ...(urlQuery ? [{ facet: null, value: urlQuery }] : []),
-    ...(searchParams.get('sort') === 'random' ? [{ facet: null, value: 'shuffled' }] : []),
+    ...(searchParams.get(sortParam) === 'random'
+      ? [{ facet: null, value: 'shuffled' }]
+      : []),
   ]
 
   const apply = useCallback(
@@ -127,23 +162,23 @@ export function FilterBar({
    * rather than one per character.
    *
    * The input keeps its own state and is seeded from the URL once. A back
-   * button that changes `q` therefore restores the results but leaves the box
-   * showing what was last typed — syncing it would need either a remount,
-   * which steals focus mid-typing, or focus tracking, which is more machinery
-   * than the mismatch costs.
+   * button that changes the search key therefore restores the results but
+   * leaves the box showing what was last typed — syncing it would need either
+   * a remount, which steals focus mid-typing, or focus tracking, which is more
+   * machinery than the mismatch costs.
    */
   useEffect(() => {
     if (term === urlQuery) return
     const timer = setTimeout(() => {
       const next = new URLSearchParams(searchParams.toString())
-      if (term) next.set('q', term)
-      else next.delete('q')
+      if (term) next.set(searchParam, term)
+      else next.delete(searchParam)
       apply(next)
     }, SEARCH_DEBOUNCE_MS)
     return () => clearTimeout(timer)
-  }, [term, urlQuery, searchParams, apply])
+  }, [term, urlQuery, searchParams, apply, searchParam])
 
-  const isRandom = searchParams.get('sort') === 'random'
+  const isRandom = searchParams.get(sortParam) === 'random'
 
   /**
    * Re-seeds on every press, so pressing it again reshuffles rather than
@@ -154,10 +189,10 @@ export function FilterBar({
    */
   const discover = useCallback(() => {
     const next = new URLSearchParams(searchParams.toString())
-    next.set('sort', 'random')
-    next.set('seed', String(Math.floor(Math.random() * 1_000_000)))
+    next.set(sortParam, 'random')
+    next.set(seedParam, String(Math.floor(Math.random() * 1_000_000)))
     apply(next)
-  }, [apply, searchParams])
+  }, [apply, searchParams, sortParam, seedParam])
 
   const clearAll = useCallback(() => {
     setTerm('')
@@ -165,11 +200,11 @@ export function FilterBar({
     for (const facet of facets) next.delete(facet.param)
     // Clear means clear — leaving the search term or a shuffle behind would
     // look broken.
-    next.delete('q')
-    next.delete('sort')
-    next.delete('seed')
+    next.delete(searchParam)
+    next.delete(sortParam)
+    next.delete(seedParam)
     apply(next)
-  }, [apply, facets, searchParams])
+  }, [apply, facets, searchParams, searchParam, sortParam, seedParam])
 
   return (
     <div className={cn('space-y-4', className)}>
@@ -253,48 +288,73 @@ export function FilterBar({
       )}
       </div>
 
-      {control === 'chips' &&
-        facets.map((facet) => {
-        const selected = searchParams.getAll(facet.param)
+      {/* Toggle for the collapsible chip grid. Shows the active count so a
+          collapsed panel still tells you a filter is on. */}
+      {control === 'chips' && collapsible && (
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+          aria-controls={panelId}
+          className="focus-visible:ring-ring text-foreground/80 hover:text-foreground flex items-center gap-2 text-xs font-bold tracking-widest uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none"
+        >
+          <ChevronDown
+            aria-hidden="true"
+            className={cn(
+              'size-4 transition-transform motion-reduce:transition-none',
+              open && 'rotate-180',
+            )}
+          />
+          Filters
+          {activeFacetCount > 0 && <span className="text-primary">({activeFacetCount})</span>}
+        </button>
+      )}
 
-        return (
-          <fieldset key={facet.param} className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
-            <legend className="sr-only">{facet.label}</legend>
-            <span
-              aria-hidden="true"
-              className="text-muted-foreground w-24 shrink-0 text-[10px] tracking-widest uppercase"
-            >
-              {facet.label}
-            </span>
+      {control === 'chips' && (
+        <div id={panelId} hidden={collapsible && !open} className="space-y-4">
+          {facets.map((facet) => {
+            const selected = searchParams.getAll(facet.param)
 
-            <div className="flex flex-wrap gap-1.5">
-              {(facet.toggle ? ['Yes'] : facet.options).map((option) => {
-                const value = facet.toggle ? '1' : option
-                const isOn = selected.includes(value)
+            return (
+              <fieldset key={facet.param} className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
+                <legend className="sr-only">{facet.label}</legend>
+                <span
+                  aria-hidden="true"
+                  className="text-muted-foreground w-24 shrink-0 text-[10px] tracking-widest uppercase"
+                >
+                  {facet.label}
+                </span>
 
-                return (
-                  <button
-                    key={option}
-                    type="button"
-                    // aria-pressed, not aria-checked: these are toggle buttons
-                    // rather than form controls, and each one acts immediately.
-                    aria-pressed={isOn}
-                    onClick={() => toggle(facet, value)}
-                    className={cn(
-                      'focus-visible:ring-ring border px-2.5 py-1 text-[11px] tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none',
-                      isOn
-                        ? 'bg-primary text-primary-foreground border-primary font-bold'
-                        : 'text-muted-foreground hover:border-primary/60 hover:text-foreground border-white/20',
-                    )}
-                  >
-                    {facet.toggle ? facet.label : option}
-                  </button>
-                )
-              })}
-            </div>
-          </fieldset>
-        )
-      })}
+                <div className="flex flex-wrap gap-1.5">
+                  {(facet.toggle ? ['Yes'] : facet.options).map((option) => {
+                    const value = facet.toggle ? '1' : option
+                    const isOn = selected.includes(value)
+
+                    return (
+                      <button
+                        key={option}
+                        type="button"
+                        // aria-pressed, not aria-checked: these are toggle buttons
+                        // rather than form controls, and each one acts immediately.
+                        aria-pressed={isOn}
+                        onClick={() => toggle(facet, value)}
+                        className={cn(
+                          'focus-visible:ring-ring border px-2.5 py-1 text-[11px] tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none',
+                          isOn
+                            ? 'bg-primary text-primary-foreground border-primary font-bold'
+                            : 'text-muted-foreground hover:border-primary/60 hover:text-foreground border-white/20',
+                        )}
+                      >
+                        {facet.toggle ? facet.label : option}
+                      </button>
+                    )
+                  })}
+                </div>
+              </fieldset>
+            )
+          })}
+        </div>
+      )}
 
       {active.length > 0 && (
         <div className="flex items-center gap-3 pt-1">

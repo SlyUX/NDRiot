@@ -258,6 +258,20 @@ export const componentEntries: ComponentEntry[] = [
           'Shows a randomise button. Re-seeds on every press, so pressing again reshuffles — and the seed lives in the URL, so a shuffled view is shareable and stable on refresh.',
       },
       {
+        name: 'collapsible',
+        type: 'boolean',
+        default: 'false',
+        description:
+          'Hides the chip grid behind a caret toggle, collapsed by default — for the tall listing-page filters. Active filters and the clear button stay visible when collapsed, so the active state is never hidden, only the controls.',
+      },
+      {
+        name: 'searchParam / sortParam / seedParam',
+        type: 'string',
+        default: "'q' / 'sort' / 'seed'",
+        description:
+          'The URL keys this bar owns. Override them so two bars share a page without colliding — the homepage gives its creators bar cq/csort/cseed so it filters only the creators row.',
+      },
+      {
         name: 'searchLabel',
         type: 'string',
         description:
