@@ -158,6 +158,7 @@ export default async function Home({
         initialRows={2}
         viewMoreLabel={settings.home.viewMoreLabel}
         padding="md"
+        background="charcoal"
         viewAllHref="/creators"
         viewAllLabel={settings.home.viewAllLabel}
         emptyMessage={creatorsFiltering ? settings.empty.filteredCreators : settings.empty.creators}
