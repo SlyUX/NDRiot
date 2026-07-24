@@ -100,17 +100,6 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
               </div>
             )}
 
-            {/* Only for an explicit yes. `false` and "never answered" both mean
-                no badge — claiming someone is available when they have not said
-                so is worse than staying quiet. */}
-            {creator.openToCollaboration && (
-              <Badge
-                variant="outline"
-                className="border-primary/60 text-primary mt-3 px-2.5 py-0.5 text-[10px] tracking-widest uppercase"
-              >
-                {settings.sections.openToCollaborationLabel}
-              </Badge>
-            )}
             <div className="mt-3">
               <SocialLinks socials={creator.socials} />
             </div>
@@ -119,10 +108,27 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
                 href={creator.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary text-sm hover:underline"
+                className="text-primary mt-1 block text-sm hover:underline"
               >
                 {creator.website}
               </a>
+            )}
+
+            {/* Below the contact links, deliberately: "here's where to find me"
+                then "and I'm open to collaborate" reads as one thought, so the
+                reader connects the invitation to the means of reaching out — no
+                icon needed. Only for an explicit yes: `false` and "never
+                answered" both mean no badge, since claiming availability nobody
+                offered is worse than staying quiet. */}
+            {creator.openToCollaboration && (
+              <div className="mt-3">
+                <Badge
+                  variant="outline"
+                  className="border-primary/60 text-primary px-2.5 py-0.5 text-[10px] tracking-widest uppercase"
+                >
+                  {settings.sections.openToCollaborationLabel}
+                </Badge>
+              </div>
             )}
           </div>
         </div>
