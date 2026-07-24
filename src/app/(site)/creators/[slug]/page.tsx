@@ -1,5 +1,4 @@
 import Image from 'next/image'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import { ContentCardGrid } from '@/components/content-card-grid'
@@ -11,7 +10,7 @@ import { GenreBadge } from '@/components/genre-badge'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Section } from '@/components/ui/section'
-import { bookToCard } from '@/lib/card-mappers'
+import { bookToCard, favoriteToCard } from '@/lib/card-mappers'
 import { safeFetch, CREATOR_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
 import type { CreatorDetail } from '@/lib/types'
@@ -30,32 +29,19 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
   // monitoring both read the status code, not the copy.
   if (!creator) notFound()
 
-  /**
-   * Whether the studio's logo is literally the creator's portrait.
-   *
-   * Sanity asset IDs are content-addressed — `image-<sha1>-<dims>-<format>` —
-   * so the same file uploaded twice produces the same ID. Comparing refs is
-   * an identity check, not a guess.
-   *
-   * Read through optional chaining, never compared against `undefined`:
-   * GROQ returns `null` for an absent field, so `logo !== undefined` is true
-   * when there is no logo and the next property access throws. That mistake
-   * took this page down once already.
-   *
-   * It misses a re-exported or resized copy, which hashes differently, and
-   * the dimensions and format sit in the ID too, so the same picture saved as
-   * PNG and JPG will not match. That is the acceptable miss: the common case
-   * is one solo creator using one file for both, and the failure mode is
-   * merely showing a logo we could have suppressed.
-   */
-  const portraitRef = creator.photo?.asset?._ref
-  const studioLogoRef = creator.studio?.logo?.asset?._ref
-  const studioLogoIsPortrait = Boolean(portraitRef) && portraitRef === studioLogoRef
+  // Favorites are shown as horizontal creator cards. All on-site in practice;
+  // any without a profile or link are dropped.
+  const favoriteCards = (creator.favoriteCreators ?? [])
+    .map(favoriteToCard)
+    .filter((card): card is NonNullable<typeof card> => card !== null)
 
   return (
     <div>
-      <Section as="header" padding="md">
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-end">
+      {/* pb-4, not the full md bottom padding: the bio sits close beneath. */}
+      <Section as="header" padding="md" className="pb-4">
+        {/* items-start so the portrait's top aligns with the creator name,
+            rather than its bottom aligning with the last line of info. */}
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
           {creator.photo && (
             <div className="relative h-40 w-40 shrink-0 overflow-hidden">
               <Image
@@ -71,16 +57,9 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
             <h1 className="text-4xl font-black tracking-tighter uppercase">{creator.name}</h1>
             {creator.studio && (
               <div className="mt-1">
-                {/* The studio sits immediately under the creator's portrait.
-                    Fall back to text only when the logo IS that portrait —
-                    otherwise the same image appears twice within a few pixels
-                    and reads as a duplication bug. A multi-member studio with
-                    a distinct mark still gets its logo. */}
-                <OrganizationLink
-                  organization={creator.studio}
-                  size="md"
-                  display={studioLogoIsPortrait ? 'text' : 'auto'}
-                />
+                {/* Studio shown as text, not its logo: sitting directly beneath
+                    the portrait, a logo competes with the photo above it. */}
+                <OrganizationLink organization={creator.studio} size="md" display="text" />
               </div>
             )}
             {creator.location && <p className="text-muted-foreground">{creator.location}</p>}
@@ -143,7 +122,8 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
       </Section>
 
       {creator.bio && (
-        <Section padding="md">
+        // pt-2: tight to the header row above, per design.
+        <Section padding="md" className="pt-2">
           <PortableTextBody value={creator.bio} />
         </Section>
       )}
@@ -191,35 +171,17 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
         </Section>
       )}
 
-      {!!creator.favoriteCreators?.length && (
-        <Section padding="md">
-          <SectionHeading size="sm">{settings.sections.creatorFavoritesHeading}</SectionHeading>
-          <ul className="flex flex-wrap gap-3 text-sm">
-            {creator.favoriteCreators.map((favorite, index) => (
-              <li key={favorite.onSiteSlug ?? favorite.url ?? `${favorite.name}-${index}`}>
-                {favorite.onSiteSlug ? (
-                  <Link
-                    href={`/creators/${favorite.onSiteSlug}`}
-                    className="text-primary hover:underline"
-                  >
-                    {favorite.onSiteName}
-                  </Link>
-                ) : favorite.url ? (
-                  <a
-                    href={favorite.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline"
-                  >
-                    {favorite.name}
-                  </a>
-                ) : (
-                  <span>{favorite.name}</span>
-                )}
-              </li>
-            ))}
-          </ul>
-        </Section>
+      {favoriteCards.length > 0 && (
+        <ContentCardGrid
+          heading={settings.sections.creatorFavoritesHeading}
+          headingSize="sm"
+          cards={favoriteCards}
+          layout="horizontal"
+          columns={3}
+          summaryLines={4}
+          padding="md"
+          emptyMessage=""
+        />
       )}
     </div>
   )

@@ -63,6 +63,11 @@ export interface ContentCardProps {
    * computed `line-clamp-${n}`.
    */
   summaryLines?: 2 | 3 | 4
+  /**
+   * Revealed on hover over the thumbnail (vertical layout, desktop only). Used
+   * for a book's description preview — slides up from the bottom of the cover.
+   */
+  hoverText?: string | null
   /** Pre-formatted for display, e.g. "12 Mar 2026". */
   date?: string | null
   layout?: 'vertical' | 'horizontal' | 'overlay'
@@ -180,6 +185,7 @@ export function ContentCard({
   maturity,
   summary,
   summaryLines = 2,
+  hoverText,
   date,
   layout = 'vertical',
   aspectRatio = 'cover',
@@ -274,6 +280,17 @@ export function ContentCard({
             className="transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none"
           />
           {maturity && <MaturityOverlay maturity={maturity} />}
+          {/* Description preview, revealed on hover. Slides up from the bottom.
+              group-hover is gated behind @media (hover) in Tailwind, so touch
+              devices never trigger it — this is a desktop affordance. */}
+          {hoverText && (
+            <p
+              className="absolute inset-x-0 bottom-0 translate-y-full bg-black p-3 text-xs leading-relaxed text-white/90 transition-transform duration-300 ease-out group-hover:translate-y-0 motion-reduce:transition-none"
+              aria-hidden="true"
+            >
+              {hoverText}
+            </p>
+          )}
         </div>
         <CardContent className="flex flex-1 flex-col gap-1 px-0 pt-3 pb-0">
           <TaxonomyRow genres={genres} format={format} className="mb-1" />

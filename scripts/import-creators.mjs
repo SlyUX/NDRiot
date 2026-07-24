@@ -344,10 +344,12 @@ async function main() {
       // --update: backfill only the fields the live creator is missing, into a
       // review draft. setIfMissing never overwrites, so Studio edits are safe.
       const draftId = `drafts.creator-${slug}`
-      const { _id: _omitId, _type: _omitType, name: _omitName, slug: _omitSlug, ...offered } = doc
-
+      // Identity fields are never backfilled — everything else the row built is
+      // a candidate, kept only where the live doc has nothing.
+      const IDENTITY = new Set(['_id', '_type', 'name', 'slug'])
       const backfill = {}
-      for (const [key, value] of Object.entries(offered)) {
+      for (const [key, value] of Object.entries(doc)) {
+        if (IDENTITY.has(key)) continue
         const current = published?.[key]
         const empty =
           current == null || (Array.isArray(current) && current.length === 0) || current === ''
@@ -363,12 +365,17 @@ async function main() {
       // does not drop existing fields), only if no draft is already in progress.
       // Then fill the gaps. When there is no published doc (draft-only creator),
       // the stub seed is a harmless no-op — the draft already exists.
-      const seed = published
-        ? (() => {
-            const { _rev, _createdAt, _updatedAt, ...content } = published
-            return { ...content, _id: draftId }
-          })()
-        : { _id: draftId, _type: 'creator', name, slug: { _type: 'slug', current: slug } }
+      let seed
+      if (published) {
+        seed = { ...published, _id: draftId }
+        // Drop Sanity's system fields — a createIfNotExists carrying a stale
+        // _rev is rejected, and the timestamps are the destination's to set.
+        delete seed._rev
+        delete seed._createdAt
+        delete seed._updatedAt
+      } else {
+        seed = { _id: draftId, _type: 'creator', name, slug: { _type: 'slug', current: slug } }
+      }
 
       mutations.push({ createIfNotExists: seed })
       mutations.push({ patch: { id: draftId, setIfMissing: backfill } })
