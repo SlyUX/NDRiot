@@ -38,6 +38,7 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
   // Possessive, personal headings on this page — favorites and works — take the
   // creator's first name via the {name} placeholder in their CMS copy.
   const firstName = (creator.name ?? '').split(' ')[0] || (creator.name ?? '')
+  const booksHeading = settings.sections.creatorBooksHeading.replace('{name}', firstName)
   const favoritesHeading = settings.sections.creatorFavoritesHeading.replace('{name}', firstName)
   const worksHeading = settings.sections.creatorWorksHeading.replace('{name}', firstName)
 
@@ -136,7 +137,7 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
 
       {!!creator.books?.length && (
         <ContentCardGrid
-          heading={settings.sections.creatorBooksHeading}
+          heading={booksHeading}
           headingSize="sm"
           cards={creator.books.map(bookToCard)}
           columns={4}
@@ -164,8 +165,11 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
         </Section>
       )}
 
+      {/* Organizations and favorites share a charcoal band. They are adjacent,
+          so two charcoal sections read as one continuous background with no gap
+          between them. */}
       {!!creator.organizations?.length && (
-        <Section padding="md">
+        <Section padding="md" background="charcoal">
           <SectionHeading size="sm">{settings.sections.creatorOrganizationsHeading}</SectionHeading>
           <ul className="flex flex-wrap items-center gap-x-6 gap-y-4">
             {creator.organizations.map((org) => (
@@ -186,6 +190,7 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
           columns={3}
           summaryLines={4}
           padding="md"
+          background="charcoal"
           emptyMessage=""
         />
       )}

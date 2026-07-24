@@ -27,7 +27,8 @@ const COLUMN_CLASSES: Record<GridColumns, string> = {
   1: 'lg:grid-cols-1',
   2: 'lg:grid-cols-2',
   3: 'lg:grid-cols-3',
-  4: 'lg:grid-cols-4',
+  // 2 up on phones, 3 across the tablet range, 4 on desktop.
+  4: 'sm:grid-cols-3 lg:grid-cols-4',
 }
 
 export interface ContentCardGridProps {

@@ -195,7 +195,7 @@ const DEFAULTS: SiteSettings = {
     searchBooksLabel: 'Search titles and creators',
     searchCreatorsLabel: 'Search creators and studios',
     downloadCta: 'Download',
-    creatorBooksHeading: 'Books',
+    creatorBooksHeading: '{name}’s Books',
     creatorWorksHeading: 'Where to find {name}’s work',
     creatorOrganizationsHeading: 'Member of',
     creatorFavoritesHeading: '{name}’s Favorite Creators',

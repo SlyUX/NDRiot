@@ -132,8 +132,10 @@ export function Hero({ hero, books }: HeroProps) {
     <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
       <div className="flex justify-start">
         {/* alt="" because the headline beside it already names the site — a
-            screen reader would otherwise hear "ND Riot" twice. */}
-        <Logo size="hero" alt="" priority />
+            screen reader would otherwise hear "ND Riot" twice. Capped at 225px
+            through the tablet range (the carousel shows from md up); full size
+            only on desktop. */}
+        <Logo size="hero" alt="" priority className="max-w-[225px] lg:max-w-none" />
       </div>
 
       <div className="max-w-xl">

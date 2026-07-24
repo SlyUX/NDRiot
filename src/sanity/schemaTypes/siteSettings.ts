@@ -238,6 +238,7 @@ export default defineType({
           name: 'creatorBooksHeading',
           title: "Creator page — books heading",
           type: 'string',
+          description: 'Use {name} for the creator’s first name — e.g. "{name}’s Books".',
         }),
         defineField({
           name: 'creatorWorksHeading',

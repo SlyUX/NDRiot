@@ -150,6 +150,7 @@ Decided 2026-07-20. Every value below is a CSS variable in `src/app/globals.css`
 | `--primary-foreground` | `#000000` | Text/icons **on** primary surfaces (5.69:1) |
 | `--muted-foreground` | `zinc-400` `#A1A1AA` | De-emphasized text (8.05:1) |
 | `--destructive` | `#FF3B30` | Form/validation errors on background (5.81:1). Not for large fills — only text and borders. |
+| `--charcoal` | `#2A3640` | Full-width band behind grouped sections (a shade darker than #36454F). White text 12.4:1, `--muted-foreground` 4.82:1 — both clear AA. |
 | `--radius` | `0px` | All radii. Square corners are the punk read — no `rounded-*` in components. |
 
 **Verified contrast, do not re-derive:**

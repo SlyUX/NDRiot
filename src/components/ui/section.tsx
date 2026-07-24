@@ -18,6 +18,7 @@ const sectionVariants = cva('', {
       background: 'bg-background',
       card: 'bg-card',
       muted: 'bg-muted',
+      charcoal: 'bg-charcoal',
       primary: 'bg-primary text-primary-foreground',
     },
     padding: {

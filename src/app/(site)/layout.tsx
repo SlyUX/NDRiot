@@ -27,7 +27,8 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
           behind content. bg-background so nothing shows through on scroll. The
           mobile drawer (absolute, top-full) anchors to this positioned header. */}
       <header className="border-primary/40 bg-background sticky top-0 z-50 border-b">
-        <nav className="mx-auto flex max-w-[90rem] items-center justify-between gap-3 py-4">
+        {/* px-6 on phone/tablet; flush to the edge only on desktop. */}
+        <nav className="mx-auto flex max-w-[90rem] items-center justify-between gap-3 px-6 py-4 lg:px-0">
           <Link
             href="/"
             aria-label={`${settings.siteTitle} — home`}
