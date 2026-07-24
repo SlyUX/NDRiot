@@ -149,13 +149,21 @@ async function resolveOrganization(name, { existing, logoUrl, token, commit, cre
 async function main() {
   const [, , csvPath, ...flags] = process.argv
   const commit = flags.includes('--commit')
+  // --update: instead of skipping creators that already exist, backfill their
+  // EMPTY fields into a review draft. Never overwrites a value already set (in
+  // the Studio or otherwise) — it uses setIfMissing, so editing is always safe.
+  const update = flags.includes('--update')
 
   if (!csvPath) {
     // The `--` is not optional and not obvious: without it npm swallows the
     // arguments instead of passing them to the script.
-    console.error('Usage: npm run import:creators -- <csv> [--commit]')
+    console.error('Usage: npm run import:creators -- <csv> [--commit] [--update]')
     console.error('   eg: npm run import:creators -- data/creators.csv')
     console.error('       npm run import:creators -- data/creators.csv --commit')
+    console.error('       npm run import:creators -- data/creators.csv --update --commit')
+    console.error('')
+    console.error('   --update backfills empty fields of existing creators into a')
+    console.error('   review draft (never overwrites); without it, existing creators are skipped.')
     process.exit(1)
   }
 
@@ -163,12 +171,24 @@ async function main() {
   const raw = await readFile(csvPath, 'utf8')
   const records = toRecords(parseCsv(raw))
 
-  console.log(`\n${commit ? 'IMPORTING' : 'DRY RUN — nothing will be written'}`)
+  console.log(`\n${commit ? 'IMPORTING' : 'DRY RUN — nothing will be written'}${update ? ' (update mode)' : ''}`)
   console.log(`${records.length} submission(s) in ${csvPath}\n`)
 
   const existingOrgs = await query('*[_type=="organization"]{_id,name}')
   const existingCreators = await query('*[_type=="creator"]{"slug":slug.current}')
   const takenSlugs = new Set(existingCreators.map((c) => c.slug))
+
+  // For --update only: the full PUBLISHED creator docs, keyed by slug. Used to
+  // seed a review draft that is a true copy of what is live, and to tell which
+  // fields are already filled so those are left untouched.
+  const publishedBySlug = update
+    ? new Map(
+        (await query('*[_type=="creator" && !(_id in path("drafts.**"))]')).map((c) => [
+          c.slug?.current,
+          c,
+        ]),
+      )
+    : new Map()
 
   const orgMutations = new Map()
   const mutations = []
@@ -189,10 +209,12 @@ async function main() {
     const slug = slugify(record['Preferred web address'] || name)
     console.log(`── ${name}  →  /creators/${slug}`)
 
-    if (takenSlugs.has(slug)) {
-      console.log('   already exists in the dataset — skipping\n')
+    const exists = takenSlugs.has(slug)
+    if (exists && !update) {
+      console.log('   already exists — skipping (use --update to backfill empty fields)\n')
       continue
     }
+    const published = publishedBySlug.get(slug)
 
     if (!isYes(record['Can we publish this?'])) {
       warnings.push(`${name} did not grant publishing permission — skipped.`)
@@ -251,11 +273,16 @@ async function main() {
       .filter(Boolean)
     if (works.length) console.log(`   works: ${works.map((w) => w.label).join(', ')}`)
 
-    const photo = await uploadImage(record['A photo or avatar of you'], {
-      token,
-      commit,
-      label: `${slug}-photo`,
-    })
+    // In update mode, do not re-fetch a photo the creator already has — it is
+    // not going to be backfilled, so uploading it would be wasted work.
+    const photo =
+      exists && published?.photo
+        ? { skipped: 'creator already has a photo' }
+        : await uploadImage(record['A photo or avatar of you'], {
+            token,
+            commit,
+            label: `${slug}-photo`,
+          })
     if (photo.error) {
       warnings.push(`${name}: photo not imported — ${photo.error}`)
       console.log(`   photo: SKIPPED — ${photo.error}`)
@@ -313,16 +340,53 @@ async function main() {
       }
     }
 
+    if (exists) {
+      // --update: backfill only the fields the live creator is missing, into a
+      // review draft. setIfMissing never overwrites, so Studio edits are safe.
+      const draftId = `drafts.creator-${slug}`
+      const { _id: _omitId, _type: _omitType, name: _omitName, slug: _omitSlug, ...offered } = doc
+
+      const backfill = {}
+      for (const [key, value] of Object.entries(offered)) {
+        const current = published?.[key]
+        const empty =
+          current == null || (Array.isArray(current) && current.length === 0) || current === ''
+        if (empty) backfill[key] = value
+      }
+
+      if (Object.keys(backfill).length === 0) {
+        console.log('   already complete — nothing to backfill\n')
+        continue
+      }
+
+      // Seed the draft as a true copy of the published doc (so publishing it
+      // does not drop existing fields), only if no draft is already in progress.
+      // Then fill the gaps. When there is no published doc (draft-only creator),
+      // the stub seed is a harmless no-op — the draft already exists.
+      const seed = published
+        ? (() => {
+            const { _rev, _createdAt, _updatedAt, ...content } = published
+            return { ...content, _id: draftId }
+          })()
+        : { _id: draftId, _type: 'creator', name, slug: { _type: 'slug', current: slug } }
+
+      mutations.push({ createIfNotExists: seed })
+      mutations.push({ patch: { id: draftId, setIfMissing: backfill } })
+      console.log(`   backfill → draft: ${Object.keys(backfill).join(', ')}\n`)
+      continue
+    }
+
     mutations.push({ createIfNotExists: doc })
     console.log('')
   }
 
   const all = [...orgMutations.values(), ...mutations]
   if (all.length === 0) {
-    console.log('No new documents to create.')
+    console.log(update ? 'Nothing to create or backfill.' : 'No new documents to create.')
   } else {
     const result = await mutate(all, { token, commit })
-    console.log(`${commit ? 'Created' : 'Would create'} ${result.results.length} document(s):`)
+    const verb = commit ? 'Wrote' : 'Would write'
+    console.log(`${verb} ${result.results.length} mutation(s)${update ? ' (creates + backfill drafts)' : ''}:`)
     for (const r of result.results) console.log(`   ${r.id}`)
   }
 

@@ -38,3 +38,16 @@ skipped with a warning rather than guessed at.
 
 Everything is created as a **draft**. Nothing reaches the site until it is
 published in the Studio.
+
+## Backfilling existing creators (`--update`)
+
+By default an existing creator is skipped. To fill in fields they are missing
+— e.g. after adding a new schema field — add `--update`:
+
+    npm run import:creators -- data/creators.csv --update           # dry run
+    npm run import:creators -- data/creators.csv --update --commit  # writes review drafts
+
+It writes a **review draft** for each existing creator and fills only the
+fields that are currently empty (via `setIfMissing`) — it never overwrites a
+value set in the Studio. Review and publish the drafts to make the backfill
+live. Photos already present are not re-fetched.
