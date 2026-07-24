@@ -126,6 +126,34 @@ export default defineType({
       description: 'Only the accounts they actually use.',
     }),
     defineField({
+      name: 'works',
+      title: 'Where to find their work',
+      type: 'array',
+      description:
+        'External links to their books — a shop, a marketplace, a free read — each a title and a URL. Books entered as full documents in the directory appear above this with covers and details; this list carries everything else they have made.',
+      of: [
+        {
+          type: 'object',
+          name: 'workLink',
+          fields: [
+            defineField({
+              name: 'label',
+              title: 'Title',
+              type: 'string',
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: 'url',
+              title: 'URL',
+              type: 'url',
+              validation: (rule) => rule.required(),
+            }),
+          ],
+          preview: { select: { title: 'label', subtitle: 'url' } },
+        },
+      ],
+    }),
+    defineField({
       name: 'favoriteCreators',
       title: 'Favorite independent creators',
       type: 'array',

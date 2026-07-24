@@ -13,6 +13,7 @@ export async function safeFetch<T>(query: string, params: Record<string, unknown
 export const CREATORS_QUERY = defineQuery(`*[_type=="creator"]|order(name asc){_id,name,"slug":slug.current,location,photo,genres,openToCollaboration,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}`)
 export const CREATOR_QUERY = defineQuery(`*[_type=="creator" && slug.current==$slug][0]{
   _id,name,location,website,bio,photo,socials,openToCollaboration,genres,formats,audience,
+  works[]{label,url},
   studio->{_id,name,"slug":slug.current,website,logo},
   organizations[]->{_id,name,"slug":slug.current,website,logo},
   favoriteCreators[]{name,url,"onSiteName":onSite->name,"onSiteSlug":onSite->slug.current},

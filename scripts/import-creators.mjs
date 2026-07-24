@@ -61,6 +61,7 @@ const MAPPED_COLUMNS = new Set([
   'What do you make?',
   'What genres do you work in?',
   "Who's it for?",
+  'Where can people get your books?',
 ])
 
 /**
@@ -236,6 +237,20 @@ async function main() {
       .map((url, i) => ({ _type: 'socialLink', _key: `s${i}`, platform: platformFor(url), url }))
     if (socials.length) console.log(`   socials: ${socials.map((s) => s.platform).join(', ')}`)
 
+    // "Title  https://…" per line — the creator's works and where to get them.
+    // Title is everything before the first URL; the URL runs to whitespace.
+    const works = (record['Where can people get your books?'] || '')
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .map((line, i) => {
+        const match = line.match(/^(.*?)\s*(https?:\/\/\S+)\s*$/)
+        if (!match) return null
+        const [, label, url] = match
+        return { _type: 'workLink', _key: `w${i}`, label: label.trim() || url, url }
+      })
+      .filter(Boolean)
+    if (works.length) console.log(`   works: ${works.map((w) => w.label).join(', ')}`)
+
     const photo = await uploadImage(record['A photo or avatar of you'], {
       token,
       commit,
@@ -282,6 +297,7 @@ async function main() {
     if (website) doc.website = website
     if (bio) doc.bio = toPortableText(bio)
     if (socials.length) doc.socials = socials
+    if (works.length) doc.works = works
     if (genreMatch.matched.length) doc.genres = genreMatch.matched.slice(0, 3)
     if (formatMatch.matched.length) doc.formats = formatMatch.matched
     if (audienceMatch.matched.length) doc.audience = audienceMatch.matched[0]

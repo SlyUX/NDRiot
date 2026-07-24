@@ -240,6 +240,13 @@ export default defineType({
           type: 'string',
         }),
         defineField({
+          name: 'creatorWorksHeading',
+          title: 'Creator page — external works heading',
+          type: 'string',
+          description:
+            'Above the creator’s external book links (works not entered as full documents), e.g. "Where to find their work".',
+        }),
+        defineField({
           name: 'creatorOrganizationsHeading',
           title: 'Creator page — organizations heading',
           type: 'string',

@@ -9,6 +9,7 @@ import SocialLinks from '@/components/SocialLinks'
 import { SectionHeading } from '@/components/section-heading'
 import { GenreBadge } from '@/components/genre-badge'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Section } from '@/components/ui/section'
 import { bookToCard } from '@/lib/card-mappers'
 import { safeFetch, CREATOR_QUERY } from '@/lib/queries'
@@ -156,6 +157,25 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
           padding="md"
           emptyMessage={settings.empty.books}
         />
+      )}
+
+      {/* External works — books the creator listed with a link, not (yet)
+          entered as full documents. The Books section above carries the rich,
+          in-directory ones; this is the "everything else, and where to get it"
+          list. */}
+      {!!creator.works?.length && (
+        <Section padding="md">
+          <SectionHeading size="sm">{settings.sections.creatorWorksHeading}</SectionHeading>
+          <div className="flex flex-wrap gap-2">
+            {creator.works.map((work) => (
+              <Button key={work.url} asChild variant="outline" size="sm">
+                <a href={work.url} target="_blank" rel="noopener noreferrer">
+                  {work.label}
+                </a>
+              </Button>
+            ))}
+          </div>
+        </Section>
       )}
 
       {!!creator.organizations?.length && (

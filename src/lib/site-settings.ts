@@ -115,6 +115,7 @@ export interface SiteSettings {
     searchCreatorsLabel: string
     downloadCta: string
     creatorBooksHeading: string
+    creatorWorksHeading: string
     creatorOrganizationsHeading: string
     creatorFavoritesHeading: string
     openToCollaborationLabel: string
@@ -194,6 +195,7 @@ const DEFAULTS: SiteSettings = {
     searchCreatorsLabel: 'Search creators and studios',
     downloadCta: 'Download',
     creatorBooksHeading: 'Books',
+    creatorWorksHeading: 'Where to find their work',
     creatorOrganizationsHeading: 'Member of',
     creatorFavoritesHeading: 'Favorite creators',
     openToCollaborationLabel: 'Open to collaboration',
