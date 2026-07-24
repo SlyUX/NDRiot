@@ -47,8 +47,12 @@ export interface OrganizationLinkProps extends VariantProps<typeof logoVariants>
    * logo would collide with nearby artwork. A creator's studio sits directly
    * under their portrait, and when the studio's mark IS that portrait, the
    * logo appears twice within a few pixels.
+   *
+   * `badge` shows the logo inside a circular frame — a deliberate exception to
+   * the square-corner rule (§9), for the "member of" row where round marks read
+   * as membership badges. An org without a logo still falls back to text.
    */
-  display?: 'auto' | 'text'
+  display?: 'auto' | 'text' | 'badge'
   className?: string
 }
 
@@ -59,30 +63,40 @@ export function OrganizationLink({
   className,
 }: OrganizationLinkProps) {
   const { name, website, logo } = organization
-  // Narrowed to the image itself rather than a boolean flag, so the branch
-  // below type-checks without non-null assertions.
-  const shownLogo = display === 'auto' ? logo : null
+  // The alt is the name, not the image's own — the logo REPLACES the name, so a
+  // blank alt would make the organization vanish for a screen reader. `||`, so
+  // an editor who saved an empty alt still gets the name.
+  const alt = logo ? logo.alt || name : name
 
-  const content = shownLogo ? (
-    <Image
-      src={urlFor(shownLogo).width(320).url()}
-      /*
-       * The name, not the image's own alt — and deliberately not empty.
-       *
-       * Elsewhere a blank alt is right, because the image sits beside a title
-       * that already names it. Here the logo REPLACES the name: leave it
-       * blank and the organization vanishes for a screen reader, taking the
-       * link's accessible name with it. `||` rather than `??` so an editor
-       * saving an empty alt still gets the name.
-       */
-      alt={shownLogo.alt || name}
-      width={320}
-      height={160}
-      className={cn(logoVariants({ size }))}
-    />
-  ) : (
-    <span className={cn(textVariants({ size }))}>{name}</span>
-  )
+  let content
+  if (display === 'badge' && logo) {
+    // Circular logo badge. No padding — a square/badge-style mark fills the
+    // disc edge to edge. object-contain (not cover) so a non-square logo is
+    // shown whole rather than cropped.
+    content = (
+      <span className="border-foreground/20 bg-background flex size-20 items-center justify-center overflow-hidden rounded-full border">
+        <Image
+          src={urlFor(logo).width(240).url()}
+          alt={alt}
+          width={240}
+          height={240}
+          className="h-auto max-h-full w-auto max-w-full object-contain"
+        />
+      </span>
+    )
+  } else if (display === 'auto' && logo) {
+    content = (
+      <Image
+        src={urlFor(logo).width(320).url()}
+        alt={alt}
+        width={320}
+        height={160}
+        className={cn(logoVariants({ size }))}
+      />
+    )
+  } else {
+    content = <span className={cn(textVariants({ size }))}>{name}</span>
+  }
 
   if (!website) {
     return <span className={cn('inline-flex items-center', className)}>{content}</span>

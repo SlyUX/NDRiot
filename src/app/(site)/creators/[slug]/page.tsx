@@ -171,10 +171,10 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
       {!!creator.organizations?.length && (
         <Section padding="md" background="charcoal">
           <SectionHeading size="sm">{settings.sections.creatorOrganizationsHeading}</SectionHeading>
-          <ul className="flex flex-wrap items-center gap-x-6 gap-y-4">
+          <ul className="flex flex-wrap items-center gap-4">
             {creator.organizations.map((org) => (
               <li key={org._id}>
-                <OrganizationLink organization={org} />
+                <OrganizationLink organization={org} display="badge" />
               </li>
             ))}
           </ul>
