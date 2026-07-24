@@ -129,7 +129,11 @@ export function Hero({ hero, books }: HeroProps) {
   const featured = books.filter(Boolean).slice(0, 3)
 
   const pitchSlide = (
-    <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-12">
+    // `auto` on the logo column, not a half share — the container is the width
+    // of the logo, and the text pulls left against it. Matches FeatureSlide and
+    // the site's left-alignment; a 50/50 split floated the text off in a way
+    // nothing else does.
+    <div className="grid items-center gap-8 lg:grid-cols-[auto_1fr] lg:gap-12">
       <div className="flex justify-start">
         {/* alt="" because the headline beside it already names the site — a
             screen reader would otherwise hear "ND Riot" twice. Capped at 225px
