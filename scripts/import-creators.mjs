@@ -74,6 +74,30 @@ const HANDLED_ELSEWHERE = new Map([
 ])
 
 /**
+ * Maps a social URL's host to one of the socialLink `platform` options. Order
+ * does not matter — hosts are distinct. Anything unrecognised falls back to
+ * "Website": the field is required, a bare domain is usually a personal site,
+ * and the value is easy to correct on the draft before publishing.
+ */
+const PLATFORM_BY_HOST = [
+  [/(^|\.)instagram\.com$/, 'Instagram'],
+  [/(^|\.)(x|twitter)\.com$/, 'X'],
+  [/(^|\.)bsky\.(app|social)$/, 'Bluesky'],
+  [/(^|\.)tiktok\.com$/, 'TikTok'],
+  [/(^|\.)(youtube\.com|youtu\.be)$/, 'YouTube'],
+]
+
+function platformFor(url) {
+  let host = ''
+  try {
+    host = new URL(url).hostname.toLowerCase()
+  } catch {
+    return 'Website'
+  }
+  return PLATFORM_BY_HOST.find(([pattern]) => pattern.test(host))?.[1] ?? 'Website'
+}
+
+/**
  * Organizations are created PUBLISHED, unlike everything else here.
  *
  * This is a deliberate exception to the drafts-only rule, and the alternatives
