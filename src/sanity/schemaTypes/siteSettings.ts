@@ -244,7 +244,7 @@ export default defineType({
           title: 'Creator page — external works heading',
           type: 'string',
           description:
-            'Above the creator’s external book links (works not entered as full documents), e.g. "Where to find their work".',
+            'Above the creator’s external book links (works not entered as full documents). Use {name} for their first name — e.g. "Where to find {name}’s work".',
         }),
         defineField({
           name: 'creatorOrganizationsHeading',
@@ -262,6 +262,15 @@ export default defineType({
           name: 'creatorFavoritesHeading',
           title: 'Creator page — favorite creators heading',
           type: 'string',
+          description:
+            'Use {name} for the creator’s first name — e.g. "{name}’s Favorite Creators" renders as "Stephen’s Favorite Creators".',
+        }),
+        defineField({
+          name: 'otherBooksHeading',
+          title: 'Book page — more from the creator heading',
+          type: 'string',
+          description:
+            'Above the creator’s other books on a book page. Use {name} for their full name — e.g. "Other books by {name}".',
         }),
       ],
     }),

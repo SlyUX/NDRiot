@@ -26,7 +26,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   return new ImageResponse(
     (
       <OgCard
-        eyebrow={book.creatorName}
+        eyebrow={book.creator?.name}
         title={book.title}
         imageUrl={book.cover ? ogImageUrl(book.cover, 600, 900) : null}
         logoUrl={logoUrl}

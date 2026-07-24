@@ -35,6 +35,12 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
     .map(favoriteToCard)
     .filter((card): card is NonNullable<typeof card> => card !== null)
 
+  // Possessive, personal headings on this page — favorites and works — take the
+  // creator's first name via the {name} placeholder in their CMS copy.
+  const firstName = (creator.name ?? '').split(' ')[0] || (creator.name ?? '')
+  const favoritesHeading = settings.sections.creatorFavoritesHeading.replace('{name}', firstName)
+  const worksHeading = settings.sections.creatorWorksHeading.replace('{name}', firstName)
+
   return (
     <div>
       {/* pb-4, not the full md bottom padding: the bio sits close beneath. */}
@@ -145,7 +151,7 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
           list. */}
       {!!creator.works?.length && (
         <Section padding="md">
-          <SectionHeading size="sm">{settings.sections.creatorWorksHeading}</SectionHeading>
+          <SectionHeading size="sm">{worksHeading}</SectionHeading>
           <div className="flex flex-wrap gap-2">
             {creator.works.map((work) => (
               <Button key={work.url} asChild variant="outline" size="sm">
@@ -173,7 +179,7 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
 
       {favoriteCards.length > 0 && (
         <ContentCardGrid
-          heading={settings.sections.creatorFavoritesHeading}
+          heading={favoritesHeading}
           headingSize="sm"
           cards={favoriteCards}
           layout="horizontal"

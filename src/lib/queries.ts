@@ -68,7 +68,11 @@ export const FILTERED_CREATORS_QUERY = defineQuery(`*[
 export const BOOK_QUERY = defineQuery(`*[_type=="book" && slug.current==$slug][0]{
   _id,title,status,genres,format,maturity,issueCount,description,cover,
   links[]{kind,label,url},
-  "creatorName":creator->name,"creatorSlug":creator->slug.current
+  creator->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}},
+  "otherBooks": *[_type=="book" && _id != ^._id && creator._ref == ^.creator._ref]|order(title asc){
+    _id,title,"slug":slug.current,status,genres,format,maturity,cover,
+    "descriptionText":pt::text(description),"creatorName":creator->name
+  }
 }`)
 export const GENRE_BOOKS_QUERY = defineQuery(`*[_type=="book" && $genre in genres]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"creatorName":creator->name}`)
 
