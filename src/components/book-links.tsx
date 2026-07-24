@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { formatDate } from '@/lib/card-mappers'
 import { PROMINENT_LINK_KINDS } from '@/lib/taxonomy'
 import type { BookLink } from '@/lib/types'
 
@@ -10,7 +11,10 @@ import type { BookLink } from '@/lib/types'
  * purchase, and Kickstarter needed its own special-cased field beside it.
  *
  * Free reads and live campaigns lead, because those are the two a reader most
- * wants to know about — one costs nothing, the other expires.
+ * wants to know about — one costs nothing, the other expires. A `Back`
+ * campaign carries an optional end date: it shows an "Ends …" deadline while
+ * live and disappears once past (the query flags `expired`), so a finished
+ * campaign never lingers as a stale call to action.
  */
 
 /** Falls back to the domain so a link with no label is still legible. */
@@ -26,24 +30,39 @@ function labelFor(link: BookLink): string {
 export default function BookLinks({ links }: { links?: BookLink[] | null }) {
   if (!links?.length) return null
 
-  const prominent = links.filter((l) => PROMINENT_LINK_KINDS.includes(l.kind))
-  const rest = links.filter((l) => !PROMINENT_LINK_KINDS.includes(l.kind))
+  // A past campaign is not an action — drop expired `Back` links entirely.
+  const live = links.filter((l) => !(l.kind === 'Back' && l.expired))
+
+  const prominent = live.filter((l) => PROMINENT_LINK_KINDS.includes(l.kind))
+  const rest = live.filter((l) => !PROMINENT_LINK_KINDS.includes(l.kind))
+
+  if (prominent.length === 0 && rest.length === 0) return null
 
   return (
     <div className="space-y-3">
       {prominent.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {prominent.map((link) => (
-            <Button key={link.url} asChild size="lg" className="font-black tracking-wide uppercase">
-              <a href={link.url} target="_blank" rel="noopener noreferrer">
-                {/* The kind is said aloud, not just implied by styling — a
-                    prominent button is not self-explanatory to a screen
-                    reader, and "free" is the part that matters. */}
-                <span className="sr-only">{link.kind}: </span>
-                {labelFor(link)}
-              </a>
-            </Button>
-          ))}
+        <div className="flex flex-wrap items-start gap-3">
+          {prominent.map((link) => {
+            const deadline = link.kind === 'Back' && link.endDate ? formatDate(link.endDate) : null
+            return (
+              <div key={link.url} className="flex flex-col gap-1">
+                <Button asChild size="lg" className="font-black tracking-wide uppercase">
+                  <a href={link.url} target="_blank" rel="noopener noreferrer">
+                    {/* The kind is said aloud, not just implied by styling — a
+                        prominent button is not self-explanatory to a screen
+                        reader, and "free" is the part that matters. */}
+                    <span className="sr-only">{link.kind}: </span>
+                    {labelFor(link)}
+                  </a>
+                </Button>
+                {deadline && (
+                  <span className="text-primary text-xs font-bold tracking-wide uppercase">
+                    Ends {deadline}
+                  </span>
+                )}
+              </div>
+            )
+          })}
         </div>
       )}
 

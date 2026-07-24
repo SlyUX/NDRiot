@@ -40,6 +40,16 @@ export default defineType({
       type: 'url',
       validation: (rule) => rule.required(),
     }),
+    defineField({
+      name: 'endDate',
+      title: 'Campaign end date',
+      type: 'date',
+      // Only meaningful for a live campaign. Hidden otherwise so it does not
+      // clutter every shop or free-read link.
+      hidden: ({ parent }) => parent?.kind !== 'Back',
+      description:
+        'For a "Back" campaign only. Drives the "Ends …" urgency, and the campaign steps back on its own once the date passes — so you do not have to remember to remove it.',
+    }),
   ],
   preview: {
     select: { label: 'label', kind: 'kind', url: 'url' },

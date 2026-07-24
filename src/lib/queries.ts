@@ -67,7 +67,7 @@ export const FILTERED_CREATORS_QUERY = defineQuery(`*[
 }`)
 export const BOOK_QUERY = defineQuery(`*[_type=="book" && slug.current==$slug][0]{
   _id,title,status,genres,format,maturity,issueCount,description,cover,
-  links[]{kind,label,url},
+  links[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},
   creator->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}},
   "otherBooks": *[_type=="book" && _id != ^._id && creator._ref == ^.creator._ref]|order(title asc){
     _id,title,"slug":slug.current,status,genres,format,maturity,cover,

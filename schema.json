@@ -262,6 +262,13 @@
             "type": "string"
           },
           "optional": false
+        },
+        "endDate": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string"
+          },
+          "optional": true
         }
       }
     }

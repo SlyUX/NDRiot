@@ -63,6 +63,7 @@ export type BookLink = {
   kind: "Read free" | "Buy" | "Support" | "Back";
   label?: string;
   url: string;
+  endDate?: string;
 };
 
 export type BookReference = {
@@ -958,7 +959,7 @@ export type FILTERED_CREATORS_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: BOOK_QUERY
-// Query: *[_type=="book" && slug.current==$slug][0]{  _id,title,status,genres,format,maturity,issueCount,description,cover,  links[]{kind,label,url},  creator->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}},  "otherBooks": *[_type=="book" && _id != ^._id && creator._ref == ^.creator._ref]|order(title asc){    _id,title,"slug":slug.current,status,genres,format,maturity,cover,    "descriptionText":pt::text(description),"creatorName":creator->name  }}
+// Query: *[_type=="book" && slug.current==$slug][0]{  _id,title,status,genres,format,maturity,issueCount,description,cover,  links[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},  creator->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}},  "otherBooks": *[_type=="book" && _id != ^._id && creator._ref == ^.creator._ref]|order(title asc){    _id,title,"slug":slug.current,status,genres,format,maturity,cover,    "descriptionText":pt::text(description),"creatorName":creator->name  }}
 export type BOOK_QUERY_RESULT = {
   _id: string;
   title: string;
@@ -1015,6 +1016,8 @@ export type BOOK_QUERY_RESULT = {
     kind: "Back" | "Buy" | "Read free" | "Support";
     label: string | null;
     url: string;
+    endDate: string | null;
+    expired: boolean | false | null;
   }> | null;
   creator: {
     name: string;
@@ -1365,7 +1368,7 @@ declare module "@sanity/client" {
     '*[_type=="book"]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"creatorName":creator->name}': BOOKS_QUERY_RESULT;
     '*[\n  _type=="book"\n  && (!defined($genres) || count(genres[@ in $genres]) > 0)\n  && (!defined($format) || format == $format)\n  && (!defined($maturity) || maturity == $maturity)\n  && (!defined($status) || status == $status)\n  && (!defined($q) || title match $q || creator->name match $q)\n]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,issueCount,cover,"descriptionText":pt::text(description),"creatorName":creator->name}': FILTERED_BOOKS_QUERY_RESULT;
     '*[\n  _type=="creator"\n  && (!defined($genres) || count(genres[@ in $genres]) > 0)\n  && (!defined($format) || $format in formats)\n  && (!defined($audience) || audience == $audience)\n  && (!defined($collaborating) || openToCollaboration == true)\n  && (!defined($q) || name match $q || studio->name match $q)\n]|order(name asc){\n  _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,\n  "bioText":pt::text(bio),\n  studio->{_id,name,"slug":slug.current,website,logo}\n}': FILTERED_CREATORS_QUERY_RESULT;
-    '*[_type=="book" && slug.current==$slug][0]{\n  _id,title,status,genres,format,maturity,issueCount,description,cover,\n  links[]{kind,label,url},\n  creator->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}},\n  "otherBooks": *[_type=="book" && _id != ^._id && creator._ref == ^.creator._ref]|order(title asc){\n    _id,title,"slug":slug.current,status,genres,format,maturity,cover,\n    "descriptionText":pt::text(description),"creatorName":creator->name\n  }\n}': BOOK_QUERY_RESULT;
+    '*[_type=="book" && slug.current==$slug][0]{\n  _id,title,status,genres,format,maturity,issueCount,description,cover,\n  links[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},\n  creator->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}},\n  "otherBooks": *[_type=="book" && _id != ^._id && creator._ref == ^.creator._ref]|order(title asc){\n    _id,title,"slug":slug.current,status,genres,format,maturity,cover,\n    "descriptionText":pt::text(description),"creatorName":creator->name\n  }\n}': BOOK_QUERY_RESULT;
     '*[_type=="book" && $genre in genres]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"creatorName":creator->name}': GENRE_BOOKS_QUERY_RESULT;
     '*[_type=="column"]|order(publishedAt desc){_id,title,"slug":slug.current,excerpt,cover,publishedAt,"authorName":author->name}': COLUMNS_QUERY_RESULT;
     '*[_type=="column" && slug.current==$slug][0]{_id,title,body,publishedAt,cover,"authorName":author->name}': COLUMN_QUERY_RESULT;

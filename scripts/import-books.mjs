@@ -53,6 +53,7 @@ const MAPPED_COLUMNS = new Set([
   'Where to find it',
   'Where to buy',
   'Kickstarter link',
+  'Crowdfunding end date',
   'Issues available',
   'Can we publish this?',
   // Known and deliberately unused. Sanity documents are publicly readable,
@@ -83,6 +84,20 @@ const KIND_BY_HOST = [
   [/(^|\.)tapas\.io$/, 'Read free'],
   [/(^|\.)globalcomix\.com$/, 'Read free'],
 ]
+
+/**
+ * A Google Forms date answer to Sanity's `YYYY-MM-DD`. Accepts the ISO form
+ * and the US `M/D/YYYY` the form exports in most locales; anything else returns
+ * null rather than guessing a wrong deadline.
+ */
+function toISODate(value) {
+  const raw = (value ?? '').trim()
+  if (!raw) return null
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw
+  const m = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/)
+  if (m) return `${m[3]}-${m[1].padStart(2, '0')}-${m[2].padStart(2, '0')}`
+  return null
+}
 
 /**
  * Parses the "where to find it" answer.
@@ -276,6 +291,13 @@ async function main() {
         label: 'Kickstarter',
         url: campaign,
       })
+    }
+
+    // A crowdfunding end date attaches to the Back link(s) — the deadline
+    // belongs to that campaign, and there is normally just the one.
+    const endDate = toISODate(record['Crowdfunding end date'])
+    if (endDate) {
+      for (const link of links) if (link.kind === 'Back') link.endDate = endDate
     }
     if (links.length) {
       console.log(`   links: ${links.map((l) => `${l.label} (${l.kind})`).join(', ')}`)
