@@ -103,14 +103,14 @@ export function FilterBar({
     0,
   )
 
+  // Shuffle is deliberately absent here: it is an action, not a filter. It
+  // reorders without narrowing, so counting it among the active filters (and
+  // letting Clear "remove" it) is what made it read as a stuck-on toggle.
   const active = [
     ...facets.flatMap((facet) =>
       searchParams.getAll(facet.param).map((value) => ({ facet, value })),
     ),
     ...(urlQuery ? [{ facet: null, value: urlQuery }] : []),
-    ...(searchParams.get(sortParam) === 'random'
-      ? [{ facet: null, value: 'shuffled' }]
-      : []),
   ]
 
   const apply = useCallback(
@@ -178,14 +178,13 @@ export function FilterBar({
     return () => clearTimeout(timer)
   }, [term, urlQuery, searchParams, apply, searchParam])
 
-  const isRandom = searchParams.get(sortParam) === 'random'
-
   /**
    * Re-seeds on every press, so pressing it again reshuffles rather than
    * doing nothing — pushing an identical URL renders nothing new.
    *
-   * Pressing it while already on shuffles again; there is no "off". Clearing
-   * the filters restores the default order.
+   * An action, not a toggle: every press is another shuffle, and the button
+   * never latches into an "on" state. Clearing the filters, or a fresh visit,
+   * restores the default order.
    */
   const discover = useCallback(() => {
     const next = new URLSearchParams(searchParams.toString())
@@ -291,16 +290,16 @@ export function FilterBar({
           <button
             type="button"
             onClick={discover}
-            aria-pressed={isRandom}
-            className={cn(
-              'focus-visible:ring-ring border px-3 py-2 text-[11px] font-bold tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none',
-              isRandom
-                ? 'bg-primary text-primary-foreground border-primary'
-                : 'text-muted-foreground hover:border-primary/60 hover:text-foreground border-white/20',
-            )}
+            // Icon-only, so it needs a name of its own — the CMS label supplies
+            // it (AGENTS.md §2) without printing the word on screen.
+            aria-label={discoverLabel}
+            // A neutral grey action button, not a filter chip: it keeps one look
+            // no matter how many times it is pressed. charcoal is the site's
+            // grey surface (§9); the white icon on it is 12.4:1. A 1px
+            // transparent border keeps its height in line with the selects.
+            className="focus-visible:ring-ring bg-charcoal text-foreground hover:bg-charcoal/80 border border-transparent px-3 py-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
           >
-            <Shuffle aria-hidden="true" className="mr-1.5 inline size-3.5" />
-            {discoverLabel}
+            <Shuffle aria-hidden="true" strokeWidth={2.5} className="size-4" />
           </button>
           )}
         </>
