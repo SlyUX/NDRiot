@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button'
 import { formatDate } from '@/lib/card-mappers'
 import { PROMINENT_LINK_KINDS } from '@/lib/taxonomy'
 import type { BookLink } from '@/lib/types'
+import { cn } from '@/lib/utils'
 
 /**
  * Every route to a book, ordered by what serves the reader.
@@ -43,10 +44,21 @@ export default function BookLinks({ links }: { links?: BookLink[] | null }) {
       {prominent.length > 0 && (
         <div className="flex flex-wrap items-start gap-3">
           {prominent.map((link) => {
-            const deadline = link.kind === 'Back' && link.endDate ? formatDate(link.endDate) : null
+            // A live campaign is the one time-sensitive route, so it wears the
+            // funding green (black text — white fails AA on it, §9) rather than
+            // the default pink, matching the "Currently Funding" badge on covers.
+            const campaign = link.kind === 'Back'
+            const deadline = campaign && link.endDate ? formatDate(link.endDate) : null
             return (
               <div key={link.url} className="flex flex-col gap-1">
-                <Button asChild size="lg" className="font-black tracking-wide uppercase">
+                <Button
+                  asChild
+                  size="lg"
+                  className={cn(
+                    'font-black tracking-wide uppercase',
+                    campaign && 'bg-funding text-black hover:bg-funding/90',
+                  )}
+                >
                   <a href={link.url} target="_blank" rel="noopener noreferrer">
                     {/* The kind is said aloud, not just implied by styling — a
                         prominent button is not self-explanatory to a screen
@@ -56,7 +68,7 @@ export default function BookLinks({ links }: { links?: BookLink[] | null }) {
                   </a>
                 </Button>
                 {deadline && (
-                  <span className="text-primary text-xs font-bold tracking-wide uppercase">
+                  <span className="text-funding text-xs font-bold tracking-wide uppercase">
                     Ends {deadline}
                   </span>
                 )}

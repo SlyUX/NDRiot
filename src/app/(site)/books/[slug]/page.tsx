@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
+import { ExternalLink } from 'lucide-react'
 
 import BookLinks from '@/components/book-links'
 import { ContentCard, FundingBadge } from '@/components/content-card'
@@ -102,9 +103,10 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
           <PortableTextBody value={book.description} />
           <BookLinks links={book.links} />
           {book.previewUrl && (
-            <Button asChild variant="outline">
+            <Button asChild variant="outline" className="font-bold">
               <a href={book.previewUrl} target="_blank" rel="noopener noreferrer">
                 {settings.sections.previewCta}
+                <ExternalLink aria-hidden="true" />
               </a>
             </Button>
           )}

@@ -17,11 +17,20 @@ import { truncate } from '@/lib/utils'
  * Date formatting lives here too — ContentCard takes display strings only.
  */
 
-/** Stable across locales and server/client, unlike bare toLocaleDateString(). */
-const DATE_FORMAT = new Intl.DateTimeFormat('en-GB', {
-  day: 'numeric',
+/**
+ * "Jul 30, 2026" — month first, US style. Stable across locales and
+ * server/client, unlike bare toLocaleDateString(). Uppercased by CSS where the
+ * surrounding label is (e.g. a campaign's "Ends" line) → "JUL 30, 2026".
+ */
+const DATE_FORMAT = new Intl.DateTimeFormat('en-US', {
   month: 'short',
+  day: 'numeric',
   year: 'numeric',
+  // Sanity `date` values are plain calendar dates ("2026-07-31"); Date parses
+  // them as UTC midnight, so formatting in the runtime's zone (Vercel is UTC,
+  // a laptop is not) would shift a deadline a day earlier west of UTC. Pin to
+  // UTC so the day shown is always the day stored.
+  timeZone: 'UTC',
 })
 
 export function formatDate(iso?: string | null): string | undefined {
