@@ -2,7 +2,7 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 
 import BookLinks from '@/components/book-links'
-import { ContentCard } from '@/components/content-card'
+import { ContentCard, FundingBadge } from '@/components/content-card'
 import { ContentCardGrid } from '@/components/content-card-grid'
 import PortableTextBody from '@/components/PortableTextBody'
 import { GenreBadge } from '@/components/genre-badge'
@@ -63,6 +63,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
               priority
             />
           )}
+          {book.fundingUrl && <FundingBadge url={book.fundingUrl} />}
         </div>
 
         <div className="space-y-5">

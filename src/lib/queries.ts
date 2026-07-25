@@ -17,10 +17,10 @@ export const CREATOR_QUERY = defineQuery(`*[_type=="creator" && slug.current==$s
   studio->{_id,name,"slug":slug.current,website,logo},
   organizations[]->{_id,name,"slug":slug.current,website,logo},
   favoriteCreators[]{name,url,onSite->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}}},
-  "books": *[_type=="book" && references(^._id)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"creatorName":creator->name}
+  "books": *[_type=="book" && references(^._id)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}
 }`)
 
-export const BOOKS_QUERY = defineQuery(`*[_type=="book"]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"creatorName":creator->name}`)
+export const BOOKS_QUERY = defineQuery(`*[_type=="book"]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}`)
 
 /**
  * Books, filtered.
@@ -44,7 +44,7 @@ export const FILTERED_BOOKS_QUERY = defineQuery(`*[
   && (!defined($maturity) || maturity == $maturity)
   && (!defined($status) || status == $status)
   && (!defined($q) || title match $q || creator->name match $q)
-]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,issueCount,cover,"descriptionText":pt::text(description),"creatorName":creator->name}`)
+]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,issueCount,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}`)
 
 /**
  * Creators, filtered.
@@ -68,13 +68,14 @@ export const FILTERED_CREATORS_QUERY = defineQuery(`*[
 export const BOOK_QUERY = defineQuery(`*[_type=="book" && slug.current==$slug][0]{
   _id,title,status,genres,format,maturity,issueCount,description,cover,
   links[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},
+  "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,
   creator->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}},
   "otherBooks": *[_type=="book" && _id != ^._id && creator._ref == ^.creator._ref]|order(title asc){
     _id,title,"slug":slug.current,status,genres,format,maturity,cover,
-    "descriptionText":pt::text(description),"creatorName":creator->name
+    "descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name
   }
 }`)
-export const GENRE_BOOKS_QUERY = defineQuery(`*[_type=="book" && $genre in genres]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"creatorName":creator->name}`)
+export const GENRE_BOOKS_QUERY = defineQuery(`*[_type=="book" && $genre in genres]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}`)
 
 export const COLUMNS_QUERY = defineQuery(`*[_type=="column"]|order(publishedAt desc){_id,title,"slug":slug.current,excerpt,cover,publishedAt,"authorName":author->name}`)
 export const COLUMN_QUERY = defineQuery(`*[_type=="column" && slug.current==$slug][0]{_id,title,body,publishedAt,cover,"authorName":author->name}`)
@@ -97,6 +98,7 @@ export const BOOK_IDS_QUERY = defineQuery(`*[_type=="book" && defined(slug.curre
 export const HERO_BOOKS_QUERY = defineQuery(`*[_type=="book" && _id in $ids]{
   _id,title,"slug":slug.current,status,genres,format,maturity,cover,shortDescription,
   "descriptionText": pt::text(description),
+  "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,
   "creatorName":creator->name
 }`)
 

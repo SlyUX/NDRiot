@@ -46,6 +46,7 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
   --color-charcoal: var(--charcoal);
+  --color-funding: var(--funding);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
@@ -89,6 +90,8 @@
   /* Charcoal band behind grouped sections — a shade darker than #36454F.
      White text 12.4:1, muted-foreground 4.82:1: both clear AA. */
   --charcoal: #2a3640;
+  /* "Currently funding" badge. Black text 11.8:1 (white fails at 1.8:1). */
+  --funding: #2bde73;
   /* zinc-400 is the floor for muted text — zinc-500 is 4.27:1 and fails AA. */
   --muted-foreground: #a1a1aa;
   --accent: #18181b;

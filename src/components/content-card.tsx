@@ -54,6 +54,11 @@ export interface ContentCardProps {
   format?: BookFormat | null
   /** Overlaid on the thumbnail — see MaturityOverlay. */
   maturity?: MaturityRating | null
+  /**
+   * A live crowdfunding campaign URL. When set, a "Currently Funding" badge
+   * links to it from the cover's top-left (opposite the maturity badge).
+   */
+  fundingUrl?: string | null
   /** Supporting copy. Comes from Sanity (`shortDescription`, `excerpt`, …). */
   summary?: string | null
   /**
@@ -108,6 +113,34 @@ export function MaturityOverlay({ maturity }: { maturity: MaturityRating }) {
     >
       {maturity}
     </Badge>
+  )
+}
+
+/**
+ * "Currently Funding" — top-left of the cover, opposite the maturity badge,
+ * linking to the live campaign. Only shown while a `Back` campaign is active
+ * (the query resolves `fundingUrl` to null once it expires).
+ *
+ * A LINK, so on a card it must be a sibling of the card's own link rather than
+ * nested inside it — the caller positions it over a `relative` container.
+ *
+ * "Currently Funding" is a fixed status label, in the same family as the
+ * maturity and genre indicators (code, not CMS): a state the site reports, not
+ * editorial copy an editor tunes.
+ */
+export function FundingBadge({ url, className }: { url: string; className?: string }) {
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={cn(
+        'bg-funding focus-visible:ring-ring absolute top-2 left-2 z-20 px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-black uppercase transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:outline-none',
+        className,
+      )}
+    >
+      Currently Funding
+    </a>
   )
 }
 
@@ -183,6 +216,7 @@ export function ContentCard({
   genres,
   format,
   maturity,
+  fundingUrl,
   summary,
   summaryLines = 2,
   hoverText,
@@ -263,11 +297,15 @@ export function ContentCard({
         //
         // `border-0` does not remove `ring-1` — a ring is not a border — so
         // the outline survived an override that reads as if it removed it.
-        'group gap-0 overflow-hidden border-0 p-0 shadow-none ring-0 bg-transparent',
+        // `relative` so the funding badge — a sibling of the Link, not nested
+        // inside it (anchors cannot nest) — anchors to the card's top-left,
+        // which is the cover's top-left since the image leads the card.
+        'group relative gap-0 overflow-hidden border-0 p-0 shadow-none ring-0 bg-transparent',
         stretch && 'h-full',
         className,
       )}
     >
+      {fundingUrl && <FundingBadge url={fundingUrl} />}
       <Link
         href={href}
         className="focus-visible:ring-ring flex h-full flex-col focus-visible:ring-2 focus-visible:outline-none"

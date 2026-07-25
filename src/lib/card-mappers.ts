@@ -42,6 +42,7 @@ export function bookToCard(book: BookSummary): ContentCardProps {
     genres: book.genres,
     format: book.format,
     maturity: book.maturity,
+    fundingUrl: book.fundingUrl,
     // Shown on hover over the cover (desktop) — the opening of the description.
     hoverText: truncate(book.descriptionText, 200),
     aspectRatio: 'cover',

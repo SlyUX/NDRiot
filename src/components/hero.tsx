@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { PortableText } from '@portabletext/react'
 
-import { MaturityOverlay, TaxonomyRow } from '@/components/content-card'
+import { FundingBadge, MaturityOverlay, TaxonomyRow } from '@/components/content-card'
 import { HeroCarousel, type HeroSlide } from '@/components/hero-carousel'
 import { Logo } from '@/components/logo'
 import { Button } from '@/components/ui/button'
@@ -96,6 +96,7 @@ function FeatureSlide({ book, ctaLabel }: { book: HeroBook; ctaLabel: string }) 
             <div className="bg-muted h-full w-full" aria-hidden="true" />
           )}
           {card.maturity && <MaturityOverlay maturity={card.maturity} />}
+          {card.fundingUrl && <FundingBadge url={card.fundingUrl} />}
         </div>
       </div>
 
