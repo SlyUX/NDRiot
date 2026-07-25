@@ -882,7 +882,7 @@ export type BOOKS_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: FILTERED_BOOKS_QUERY
-// Query: *[  _type=="book"  && (!defined($genres) || count(genres[@ in $genres]) > 0)  && (!defined($format) || format == $format)  && (!defined($maturity) || maturity == $maturity)  && (!defined($status) || status == $status)  && (!defined($q) || title match $q || creator->name match $q)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,issueCount,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}
+// Query: *[  _type=="book"  && (!defined($genres) || count(genres[@ in $genres]) > 0)  && (!defined($format) || format == $format)  && (!defined($maturity) || maturity == $maturity)  && (!defined($status) || status == $status)  && (!defined($funding) || count(links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))]) > 0)  && (!defined($q) || title match $q || creator->name match $q)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,issueCount,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}
 export type FILTERED_BOOKS_QUERY_RESULT = Array<{
   _id: string;
   title: string;
@@ -1114,6 +1114,27 @@ export type GENRE_BOOKS_QUERY_RESULT = Array<{
   fundingUrl: string | null;
   creatorName: string;
 }>;
+
+// Source: src/lib/queries.ts
+// Variable: GENRES_WITH_BOOKS_QUERY
+// Query: array::unique(*[_type=="book" && defined(genres)].genres[])
+export type GENRES_WITH_BOOKS_QUERY_RESULT = Array<
+  | "Action & Adventure"
+  | "Crime & Noir"
+  | "Drama"
+  | "Fantasy"
+  | "Historical"
+  | "Horror"
+  | "Humor & Satire"
+  | "Memoir & Autobio"
+  | "Punk & Protest"
+  | "Queer"
+  | "Romance"
+  | "Sci-Fi"
+  | "Slice of Life"
+  | "Superhero"
+  | "Weird & Experimental"
+>;
 
 // Source: src/lib/queries.ts
 // Variable: COLUMNS_QUERY
@@ -1373,10 +1394,11 @@ declare module "@sanity/client" {
     '*[_type=="creator"]|order(name asc){_id,name,"slug":slug.current,location,photo,genres,openToCollaboration,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}': CREATORS_QUERY_RESULT;
     '*[_type=="creator" && slug.current==$slug][0]{\n  _id,name,location,website,bio,photo,socials,openToCollaboration,genres,formats,audience,\n  works[]{label,url},\n  studio->{_id,name,"slug":slug.current,website,logo},\n  organizations[]->{_id,name,"slug":slug.current,website,logo},\n  favoriteCreators[]{name,url,onSite->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}}},\n  "books": *[_type=="book" && references(^._id)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}\n}': CREATOR_QUERY_RESULT;
     '*[_type=="book"]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}': BOOKS_QUERY_RESULT;
-    '*[\n  _type=="book"\n  && (!defined($genres) || count(genres[@ in $genres]) > 0)\n  && (!defined($format) || format == $format)\n  && (!defined($maturity) || maturity == $maturity)\n  && (!defined($status) || status == $status)\n  && (!defined($q) || title match $q || creator->name match $q)\n]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,issueCount,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}': FILTERED_BOOKS_QUERY_RESULT;
+    '*[\n  _type=="book"\n  && (!defined($genres) || count(genres[@ in $genres]) > 0)\n  && (!defined($format) || format == $format)\n  && (!defined($maturity) || maturity == $maturity)\n  && (!defined($status) || status == $status)\n  && (!defined($funding) || count(links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))]) > 0)\n  && (!defined($q) || title match $q || creator->name match $q)\n]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,issueCount,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}': FILTERED_BOOKS_QUERY_RESULT;
     '*[\n  _type=="creator"\n  && (!defined($genres) || count(genres[@ in $genres]) > 0)\n  && (!defined($format) || $format in formats)\n  && (!defined($audience) || audience == $audience)\n  && (!defined($collaborating) || openToCollaboration == true)\n  && (!defined($q) || name match $q || studio->name match $q)\n]|order(name asc){\n  _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,\n  "bioText":pt::text(bio),\n  studio->{_id,name,"slug":slug.current,website,logo}\n}': FILTERED_CREATORS_QUERY_RESULT;
     '*[_type=="book" && slug.current==$slug][0]{\n  _id,title,status,genres,format,maturity,issueCount,description,cover,\n  links[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},\n  "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,\n  creator->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}},\n  "otherBooks": *[_type=="book" && _id != ^._id && creator._ref == ^.creator._ref]|order(title asc){\n    _id,title,"slug":slug.current,status,genres,format,maturity,cover,\n    "descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name\n  }\n}': BOOK_QUERY_RESULT;
     '*[_type=="book" && $genre in genres]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}': GENRE_BOOKS_QUERY_RESULT;
+    'array::unique(*[_type=="book" && defined(genres)].genres[])': GENRES_WITH_BOOKS_QUERY_RESULT;
     '*[_type=="column"]|order(publishedAt desc){_id,title,"slug":slug.current,excerpt,cover,publishedAt,"authorName":author->name}': COLUMNS_QUERY_RESULT;
     '*[_type=="column" && slug.current==$slug][0]{_id,title,body,publishedAt,cover,"authorName":author->name}': COLUMN_QUERY_RESULT;
     '*[_type=="interview"]|order(publishedAt desc){_id,title,"slug":slug.current,excerpt,cover,publishedAt,"interviewerName":interviewer->name,"subjectName":subject->name}': INTERVIEWS_QUERY_RESULT;

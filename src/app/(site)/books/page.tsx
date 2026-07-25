@@ -4,8 +4,8 @@ import { ContentCardGrid } from '@/components/content-card-grid'
 import { FilterBar } from '@/components/filter-bar'
 import { Section } from '@/components/ui/section'
 import { bookToCard } from '@/lib/card-mappers'
-import { BOOK_FACETS, bookFilters, hasActiveFilters, type SearchParams } from '@/lib/filters'
-import { safeFetch, BOOKS_QUERY, FILTERED_BOOKS_QUERY } from '@/lib/queries'
+import { bookFacets, bookFilters, genreOptions, hasActiveFilters, type SearchParams } from '@/lib/filters'
+import { safeFetch, BOOKS_QUERY, FILTERED_BOOKS_QUERY, GENRES_WITH_BOOKS_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
 import type { BookSummary } from '@/lib/types'
 
@@ -20,8 +20,9 @@ export default async function BooksPage({
   const filters = bookFilters(params)
   const filtering = hasActiveFilters(filters)
 
-  const [books, settings] = await Promise.all([
+  const [books, genresWithBooks, settings] = await Promise.all([
     safeFetch<BookSummary[]>(FILTERED_BOOKS_QUERY, filters, []),
+    safeFetch<string[]>(GENRES_WITH_BOOKS_QUERY, {}, []),
     getSiteSettings(),
   ])
 
@@ -35,12 +36,15 @@ export default async function BooksPage({
 
   return (
     <div>
-      <Section as="header" padding="md">
+      {/* pb-6 here + pt-6 on the grid halves the gap between two `md` bands, so
+          the filters and the results they govern read as one group rather than
+          two stacked sections (AGENTS.md §3 — the filter is the interface). */}
+      <Section as="header" padding="md" className="pb-6">
         <h1 className="text-3xl font-black tracking-tighter uppercase md:text-4xl">
           {settings.sections.booksHeading}
         </h1>
         <Suspense fallback={null}>
-          <FilterBar facets={BOOK_FACETS} resultCount={books.length}
+          <FilterBar facets={bookFacets(genreOptions(genresWithBooks))} resultCount={books.length}
             searchLabel={settings.sections.searchBooksLabel}
             collapsible
             className="mt-8" />
@@ -51,6 +55,7 @@ export default async function BooksPage({
         cards={books.map(bookToCard)}
         columns={4}
         padding="md"
+        className="pt-6"
         emptyMessage={
           filtering ? settings.empty.filteredBooks : settings.empty.books
         }

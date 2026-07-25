@@ -8,15 +8,17 @@ import {
   bookFilters,
   creatorHomeFilters,
   discoverSeed,
+  genreOptions,
   hasActiveFilters,
-  HOME_BOOK_FACETS,
-  HOME_CREATOR_FACETS,
+  homeBookFacets,
+  homeCreatorFacets,
   seededShuffle,
   type SearchParams,
 } from '@/lib/filters'
 import {
   safeFetch,
   BOOK_IDS_QUERY,
+  GENRES_WITH_BOOKS_QUERY,
   HERO_BOOKS_QUERY,
   FILTERED_BOOKS_QUERY,
   FILTERED_CREATORS_QUERY,
@@ -88,20 +90,24 @@ export default async function Home({
   const bookSeed = discoverSeed(params, 'sort', 'seed')
   const creatorSeed = discoverSeed(params, 'csort', 'cseed')
 
-  const [heroBooks, books, creators, settings] = await Promise.all([
+  const [heroBooks, books, creators, genresWithBooks, settings] = await Promise.all([
     // Deliberately unfiltered. The hero is the guaranteed route to work
     // nobody went looking for (AGENTS.md §3), so narrowing the page must
     // never narrow it.
     pickHeroBooks(),
     safeFetch<BookSummary[]>(FILTERED_BOOKS_QUERY, booksFilters, []),
     safeFetch<CreatorSummary[]>(FILTERED_CREATORS_QUERY, creatorsFilters, []),
+    safeFetch<string[]>(GENRES_WITH_BOOKS_QUERY, {}, []),
     getSiteSettings(),
   ])
+
+  // Both rows offer the same genres — the set a book actually uses.
+  const genres = genreOptions(genresWithBooks)
 
   const booksBar = (
     <Suspense fallback={null}>
       <FilterBar
-        facets={HOME_BOOK_FACETS}
+        facets={homeBookFacets(genres)}
         control="select"
         resultCount={books.length}
         searchLabel={settings.sections.searchBooksLabel}
@@ -113,7 +119,7 @@ export default async function Home({
   const creatorsBar = (
     <Suspense fallback={null}>
       <FilterBar
-        facets={HOME_CREATOR_FACETS}
+        facets={homeCreatorFacets(genres)}
         control="select"
         resultCount={creators.length}
         searchLabel={settings.sections.searchCreatorsLabel}

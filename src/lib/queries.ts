@@ -43,6 +43,7 @@ export const FILTERED_BOOKS_QUERY = defineQuery(`*[
   && (!defined($format) || format == $format)
   && (!defined($maturity) || maturity == $maturity)
   && (!defined($status) || status == $status)
+  && (!defined($funding) || count(links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))]) > 0)
   && (!defined($q) || title match $q || creator->name match $q)
 ]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,issueCount,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}`)
 
@@ -76,6 +77,15 @@ export const BOOK_QUERY = defineQuery(`*[_type=="book" && slug.current==$slug][0
   }
 }`)
 export const GENRE_BOOKS_QUERY = defineQuery(`*[_type=="book" && $genre in genres]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}`)
+
+/**
+ * Every genre that at least one book actually uses — the source for every
+ * genre list a reader sees (filter facets, the Browse nav). A genre nobody has
+ * published under is a dead category: filtering by it lands on an empty page,
+ * so it should not be offered. Order is re-applied against the taxonomy by the
+ * caller; array::unique gives no guaranteed order of its own.
+ */
+export const GENRES_WITH_BOOKS_QUERY = defineQuery(`array::unique(*[_type=="book" && defined(genres)].genres[])`)
 
 export const COLUMNS_QUERY = defineQuery(`*[_type=="column"]|order(publishedAt desc){_id,title,"slug":slug.current,excerpt,cover,publishedAt,"authorName":author->name}`)
 export const COLUMN_QUERY = defineQuery(`*[_type=="column" && slug.current==$slug][0]{_id,title,body,publishedAt,cover,"authorName":author->name}`)

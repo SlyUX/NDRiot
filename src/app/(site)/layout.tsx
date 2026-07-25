@@ -2,6 +2,8 @@ import Link from 'next/link'
 
 import { Logo } from '@/components/logo'
 import { MainNav } from '@/components/main-nav'
+import { genreOptions } from '@/lib/filters'
+import { safeFetch, GENRES_WITH_BOOKS_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
 
 /**
@@ -18,7 +20,11 @@ import { getSiteSettings } from '@/lib/site-settings'
  * with negative margins before.
  */
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const settings = await getSiteSettings()
+  const [settings, genresWithBooks] = await Promise.all([
+    getSiteSettings(),
+    safeFetch<string[]>(GENRES_WITH_BOOKS_QUERY, {}, []),
+  ])
+  const navGenres = genreOptions(genresWithBooks)
 
   return (
     <>
@@ -38,7 +44,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
                 would make a screen reader announce the brand twice. */}
             <Logo size="nav" alt="" priority />
           </Link>
-          <MainNav nav={settings.nav} />
+          <MainNav nav={settings.nav} genres={navGenres} />
         </nav>
       </header>
 

@@ -37,43 +37,80 @@ function allowed<T extends readonly string[]>(values: string[] | null, list: T):
   return kept.length ? kept : null
 }
 
-export const BOOK_FACETS: Facet[] = [
-  { param: 'genre', label: 'Genre', options: GENRES, multi: true },
-  { param: 'format', label: 'Format', options: FORMATS },
-  { param: 'audience', label: 'Audience', options: MATURITY_RATINGS },
-  { param: 'status', label: 'Status', options: ['Ongoing', 'Complete', 'Upcoming'] },
-]
+/**
+ * Genre options, restricted to genres a book actually uses and returned in the
+ * taxonomy's canonical order.
+ *
+ * The facets take their genre list from here rather than from the full GENRES
+ * taxonomy, so a category nobody has published under is never offered as a
+ * filter — picking it would only land on an empty page. `present` comes from
+ * GENRES_WITH_BOOKS_QUERY (unordered); intersecting with GENRES both orders it
+ * and drops any stray value the taxonomy no longer knows.
+ */
+export function genreOptions(present: readonly string[]): string[] {
+  const set = new Set(present)
+  return GENRES.filter((g) => set.has(g))
+}
+
+/**
+ * Facet sets are built per request, not module constants, because their genre
+ * options depend on live content (see genreOptions). Everything else in each
+ * set is fixed taxonomy.
+ */
+export function bookFacets(genres: readonly string[]): Facet[] {
+  return [
+    { param: 'genre', label: 'Genre', options: genres, multi: true },
+    { param: 'format', label: 'Format', options: FORMATS },
+    { param: 'audience', label: 'Audience', options: MATURITY_RATINGS },
+    { param: 'status', label: 'Status', options: ['Ongoing', 'Complete', 'Upcoming'] },
+  ]
+}
 
 /**
  * The homepage filter sets — one per row, each scoped to its own section.
  *
- * The comics bar owns the plain keys (genre/format/audience); the creators bar
- * owns c-prefixed keys (cgenre/…) so the two never collide. That separation is
- * the point: a genre picked for comics no longer silently reorders the creators
- * row, and each control now says plainly which row it governs.
+ * The comics bar owns the plain keys (genre/format/audience/funding); the
+ * creators bar owns c-prefixed keys (cgenre/…) so the two never collide. That
+ * separation is the point: a genre picked for comics no longer silently
+ * reorders the creators row, and each control now says plainly which row it
+ * governs.
  *
- * Both sets omit the section-only facets (book status, creator collaboration):
- * a homepage row is a way in, not the full listing, and those live on /books
- * and /creators.
+ * The comics row carries a "Currently funding" toggle — a fast route to work
+ * with a live campaign, the one time-sensitive thing on the page. The creators
+ * set omits the section-only facets (creator collaboration lives on /creators);
+ * book status likewise stays on /books, a way-in row being narrower than the
+ * full listing.
  */
-export const HOME_BOOK_FACETS: Facet[] = [
-  { param: 'genre', label: 'Genre', options: GENRES },
-  { param: 'format', label: 'Format', options: FORMATS },
-  { param: 'audience', label: 'Audience', options: MATURITY_RATINGS },
-]
+export function homeBookFacets(genres: readonly string[]): Facet[] {
+  return [
+    { param: 'genre', label: 'Genre', options: genres },
+    { param: 'format', label: 'Format', options: FORMATS },
+    { param: 'audience', label: 'Audience', options: MATURITY_RATINGS },
+    { param: 'funding', label: 'Currently funding', options: [], toggle: true },
+  ]
+}
 
-export const HOME_CREATOR_FACETS: Facet[] = [
-  { param: 'cgenre', label: 'Genre', options: GENRES },
-  { param: 'cformat', label: 'Format', options: FORMATS },
-  { param: 'caudience', label: 'Audience', options: MATURITY_RATINGS },
-]
+export function homeCreatorFacets(genres: readonly string[]): Facet[] {
+  return [
+    { param: 'cgenre', label: 'Genre', options: genres },
+    { param: 'cformat', label: 'Format', options: FORMATS },
+    { param: 'caudience', label: 'Audience', options: MATURITY_RATINGS },
+  ]
+}
 
-export const CREATOR_FACETS: Facet[] = [
-  { param: 'genre', label: 'Genre', options: GENRES, multi: true },
-  { param: 'format', label: 'Makes', options: FORMATS },
-  { param: 'audience', label: 'Audience', options: MATURITY_RATINGS },
-  { param: 'collaborating', label: 'Open to collaboration', options: [], toggle: true },
-]
+/**
+ * Creators filter by genre, audience, and whether they are open to
+ * collaboration. Format ("Makes") is deliberately absent: on a creator, a
+ * single format says little — most make more than one thing — and collaboration
+ * is the filter a reader browsing creators actually reaches for.
+ */
+export function creatorFacets(genres: readonly string[]): Facet[] {
+  return [
+    { param: 'genre', label: 'Genre', options: genres, multi: true },
+    { param: 'audience', label: 'Audience', options: MATURITY_RATINGS },
+    { param: 'collaborating', label: 'Open to collaboration', options: [], toggle: true },
+  ]
+}
 
 /**
  * Turns a typed phrase into a GROQ `match` pattern.
@@ -100,6 +137,9 @@ export function bookFilters(params: SearchParams) {
     format: allowed(many(params.format), FORMATS)?.[0] ?? null,
     maturity: allowed(many(params.audience), MATURITY_RATINGS)?.[0] ?? null,
     status: allowed(many(params.status), ['Ongoing', 'Complete', 'Upcoming'])?.[0] ?? null,
+    // A flag: present means "only books with a live campaign". Absent means
+    // every book, not "only books that are not funding".
+    funding: one(params.funding) ? true : null,
     q: searchTerm(params.q),
   }
 }

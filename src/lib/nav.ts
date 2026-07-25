@@ -9,10 +9,14 @@ import type { NavGroup, NavItem, NavLink, NavPanel } from '@/lib/site-settings'
  * pages, so listing them in the CMS would only invite drift. Every other group
  * uses its editor-entered links. The genre href matches GenreBadge exactly, so
  * both land on the same /categories page.
+ *
+ * `genres` narrows the list to categories a book actually uses (see
+ * genreOptions in lib/filters) — Browse should not offer a genre whose page is
+ * empty. Falls back to the full taxonomy when the caller has no live list.
  */
-export function groupLinks(group: NavGroup): NavLink[] {
+export function groupLinks(group: NavGroup, genres?: readonly string[]): NavLink[] {
   if (group.useGenres) {
-    return GENRES.map((genre) => ({
+    return (genres ?? GENRES).map((genre) => ({
       label: genre,
       href: `/categories/${encodeURIComponent(genre)}`,
     }))

@@ -231,8 +231,31 @@ export function FilterBar({
       {control === 'select' && (
         <>
           {facets.map((facet) => {
+            // A flag is on or off — a two-option dropdown ("Any"/label) reads as
+            // a choice with a default answer, which a toggle is not. Render it
+            // as a press-to-apply button instead, matching Discover beside it.
+            if (facet.toggle) {
+              const isOn = searchParams.getAll(facet.param).length > 0
+              return (
+                <button
+                  key={facet.param}
+                  type="button"
+                  aria-pressed={isOn}
+                  onClick={() => setValue(facet, isOn ? '' : '1')}
+                  className={cn(
+                    'focus-visible:ring-ring border px-3 py-2 text-[11px] font-bold tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none',
+                    isOn
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'text-muted-foreground hover:border-primary/60 hover:text-foreground border-white/20',
+                  )}
+                >
+                  {facet.label}
+                </button>
+              )
+            }
+
             const selected = searchParams.get(facet.param) ?? ''
-            const options = facet.toggle ? ['1'] : facet.options
+            const options = facet.options
 
             return (
               <select
@@ -256,12 +279,8 @@ export function FilterBar({
                   {facet.label}: Any
                 </option>
                 {options.map((option) => (
-                  <option
-                    key={option}
-                    value={facet.toggle ? '1' : option}
-                    className="bg-background text-foreground"
-                  >
-                    {facet.toggle ? facet.label : option}
+                  <option key={option} value={option} className="bg-background text-foreground">
+                    {option}
                   </option>
                 ))}
               </select>

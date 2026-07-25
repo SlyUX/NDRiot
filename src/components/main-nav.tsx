@@ -30,7 +30,7 @@ const LINK = 'block px-3 py-1.5 text-sm text-foreground/80 hover:text-primary tr
 const HEADING = 'text-muted-foreground mb-2 px-3 text-[10px] font-bold tracking-widest uppercase'
 
 /** Desktop dropdown contents: each group a column; a long group (genres) wraps. */
-function DesktopPanel({ panel }: { panel: NavPanel }) {
+function DesktopPanel({ panel, genres }: { panel: NavPanel; genres?: readonly string[] }) {
   return (
     <div className="p-5">
       {/* The trigger opens the menu rather than navigating, so the panel's own
@@ -47,7 +47,7 @@ function DesktopPanel({ panel }: { panel: NavPanel }) {
       )}
       <div className="flex gap-8">
       {panel.groups?.map((group, i) => {
-        const links = groupLinks(group)
+        const links = groupLinks(group, genres)
         const many = links.length > 8
         return (
           <div key={group.heading ?? i} className={cn(many && 'min-w-[20rem]')}>
@@ -71,7 +71,7 @@ function DesktopPanel({ panel }: { panel: NavPanel }) {
   )
 }
 
-function DesktopNav({ nav }: { nav: NavItem[] }) {
+function DesktopNav({ nav, genres }: { nav: NavItem[]; genres?: readonly string[] }) {
   return (
     <NavigationMenu viewport={false} className="hidden md:flex">
       <NavigationMenuList className="gap-1">
@@ -93,7 +93,7 @@ function DesktopNav({ nav }: { nav: NavItem[] }) {
                   right-0/left-auto: anchor the panel to the trigger's right
                   edge so a wide menu opens leftward and never runs off-screen. */}
               <NavigationMenuContent className="!rounded-none !bg-background !ring-0 border-primary/40 z-50 right-0 left-auto border">
-                <DesktopPanel panel={item} />
+                <DesktopPanel panel={item} genres={genres} />
               </NavigationMenuContent>
             </NavigationMenuItem>
           ) : (
@@ -114,7 +114,7 @@ function DesktopNav({ nav }: { nav: NavItem[] }) {
   )
 }
 
-function MobileNav({ nav }: { nav: NavItem[] }) {
+function MobileNav({ nav, genres }: { nav: NavItem[]; genres?: readonly string[] }) {
   const [open, setOpen] = useState(false)
   const close = () => setOpen(false)
 
@@ -160,7 +160,7 @@ function MobileNav({ nav }: { nav: NavItem[] }) {
                     <div key={group.heading ?? i}>
                       {group.heading && <p className={HEADING}>{group.heading}</p>}
                       <ul className="grid grid-cols-2 gap-x-4">
-                        {groupLinks(group).map((link) => (
+                        {groupLinks(group, genres).map((link) => (
                           <li key={link.href}>
                             <Link href={link.href} onClick={close} className={LINK}>
                               {link.label}
@@ -189,11 +189,11 @@ function MobileNav({ nav }: { nav: NavItem[] }) {
   )
 }
 
-export function MainNav({ nav }: { nav: NavItem[] }) {
+export function MainNav({ nav, genres }: { nav: NavItem[]; genres?: readonly string[] }) {
   return (
     <>
-      <DesktopNav nav={nav} />
-      <MobileNav nav={nav} />
+      <DesktopNav nav={nav} genres={genres} />
+      <MobileNav nav={nav} genres={genres} />
     </>
   )
 }
