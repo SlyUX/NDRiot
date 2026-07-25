@@ -1,10 +1,12 @@
 # Content intake strategy
 
-Status: **direction, not a commitment.** Nothing here is built. It exists so
-today's schema decisions don't paint us into a corner, and so we recognise the
-moment each stage becomes worth building.
+Status: **mostly direction; Stage 2 is now partly built.** The import scripts
+(`scripts/import-creators.mjs`, `import-books.mjs`) produce review drafts, and
+Apps Scripts sync the form dropdowns. Stages 3–4 remain direction, not
+commitment. This exists so today's schema decisions don't paint us into a
+corner, and so we recognise the moment each stage becomes worth building.
 
-Last reviewed: 2026-07-21.
+Last reviewed: 2026-07-25.
 
 ---
 
@@ -122,8 +124,10 @@ investing much in Stage 1 tooling.
 The sync runs **Sanity → form, one way, always.** Sanity is canonical; the form
 is a mirror of it. The moment anything flows the other way — form edits writing
 back to Sanity records — there are two sources of truth and the principle at the
-top of this document is broken. Submissions are new drafts for review, never
-direct edits to existing documents.
+top of this document is broken. A submission becomes a draft for review; it
+never edits *live* content. An update may target an existing record's **draft**
+(see "Updates: matching a resubmission to its record"), which a human still
+approves before it goes live — so the one-way-to-live guarantee holds.
 
 ### What it does not solve
 
@@ -132,6 +136,43 @@ A dropdown constrains *choice*, not *identity*. It stops someone inventing
 back into a document reference. Syncing the option list alongside its document
 ID — rather than the label alone — is what closes that gap, and is worth doing
 from the first sync rather than retrofitting.
+
+## Updates: matching a resubmission to its record
+
+Decided 2026-07-25. The Stage 2 importer now handles a returning creator,
+closing the "handles updates badly" gap noted under Open questions.
+
+The failure it fixes came in pairs. A creator resubmitting the form as "Joseph
+B Christy" instead of the "Joseph Christy" already on file forked a *second*
+creator document; free-texting a studio name ("PiP Publishing") forked a second
+organization beside the intended "PiP Comics Collective". Two duplication axes,
+one root cause — **free text where a controlled value belongs.**
+
+The fix is controlled vocabularies, plus an importer that honours them:
+
+- **A New/Update gate on the form.** "Updating an existing profile?" routes a
+  *Yes* to a required **dropdown of existing creators**, synced from Sanity like
+  every other dropdown. The real profile is the only thing selectable; a
+  near-miss of the name is no longer typeable.
+- **Identity comes from the selection, never the typed name.** On an update the
+  importer keys off the chosen profile's real document id — UUID or
+  `creator-<slug>` — and ignores whatever name or address the row carries.
+  Re-deriving identity from a typed name is exactly what forked the record.
+- **Edits, not rewrites.** Only the fields the creator actually filled are
+  written; blanks keep what is live. The write is a `set` onto a **review draft
+  seeded from the published document**, so publishing the edit never drops an
+  untouched field — and a human still approves it.
+- **A "new" submission that collides with an existing profile is refused,** with
+  a warning, rather than duplicated.
+- **Studios get the same treatment:** a dropdown of existing orgs plus a "not
+  listed" escape that feeds a follow-up field. The importer already matches an
+  org by exact name against every existing organization (including hand-made
+  UUID ones), so a selected studio reuses its record.
+
+Matching is by **name** today, because that is what the synced dropdown offers.
+The more robust key is the document id carried alongside the label (see "What it
+does not solve") — the natural next step whenever the dropdown sync starts
+emitting `label + id` rather than the label alone.
 
 ## Separate forms per entity
 
@@ -173,6 +214,9 @@ truth for "is this live" is how content states get out of sync.
   Stage 3 and 4 both need that link. Adding it later means revisiting every
   profile — cheap at one creator, not at fifty. Worth deciding before the
   roster grows, even if we do not build on it yet.
-- **Edits vs. submissions.** A creator updating their bio is a different flow
-  from a creator joining. Stage 2 handles new records well and updates badly.
+- ~~**Edits vs. submissions.**~~ *Resolved 2026-07-25* — see "Updates: matching
+  a resubmission to its record". An update is now a distinct, safe flow: matched
+  to the real record by the profile the form had them pick, written as an edit
+  into a review draft. The form-side New/Update branch and synced dropdowns are
+  specced but not yet in the live form.
 - **Who owns a studio's page** when the studio has several members.
