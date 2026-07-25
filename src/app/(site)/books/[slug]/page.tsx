@@ -7,6 +7,7 @@ import { ContentCard, FundingBadge } from '@/components/content-card'
 import { ContentCardGrid } from '@/components/content-card-grid'
 import PortableTextBody from '@/components/PortableTextBody'
 import { GenreBadge } from '@/components/genre-badge'
+import { SectionHeading } from '@/components/section-heading'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Section } from '@/components/ui/section'
@@ -118,7 +119,15 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
       {creatorCard && (
         <Section padding="md" className="pt-0">
           <div className="max-w-xl">
-            <ContentCard {...creatorCard} layout="horizontal" summaryLines={4} />
+            <SectionHeading as="h3" size="sm">
+              {settings.sections.bookCreatorsHeading}
+            </SectionHeading>
+            {/* 1px white keyline, 15px inset — frames the creator apart from the
+                book's own detail block above it. border-foreground is the #FFF
+                token (§9); square corners are the house style. */}
+            <div className="border-foreground border p-[15px]">
+              <ContentCard {...creatorCard} layout="horizontal" summaryLines={4} />
+            </div>
           </div>
         </Section>
       )}

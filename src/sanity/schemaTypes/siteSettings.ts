@@ -279,6 +279,12 @@ export default defineType({
           description:
             'Above the creator’s other books on a book page. Use {name} for their full name — e.g. "Other books by {name}".',
         }),
+        defineField({
+          name: 'bookCreatorsHeading',
+          title: 'Book page — creator block heading',
+          type: 'string',
+          description: 'Above the creator card on a book page, e.g. "Creators:".',
+        }),
       ],
     }),
 

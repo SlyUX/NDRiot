@@ -441,6 +441,7 @@ export type SiteSettings = {
     openToCollaborationLabel?: string;
     creatorFavoritesHeading?: string;
     otherBooksHeading?: string;
+    bookCreatorsHeading?: string;
   };
   empty?: {
     books?: string;
