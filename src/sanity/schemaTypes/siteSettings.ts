@@ -235,6 +235,12 @@ export default defineType({
           description: 'On a download page, e.g. "Download".',
         }),
         defineField({
+          name: 'previewCta',
+          title: 'Book preview button label',
+          type: 'string',
+          description: 'On a book page with a preview PDF, e.g. "Read a preview (PDF)".',
+        }),
+        defineField({
           name: 'creatorBooksHeading',
           title: "Creator page — books heading",
           type: 'string',

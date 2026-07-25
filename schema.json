@@ -1631,6 +1631,13 @@
           }
         },
         "optional": true
+      },
+      "previewUrl": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
       }
     }
   },
@@ -2641,6 +2648,13 @@
               "optional": true
             },
             "downloadCta": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "previewCta": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

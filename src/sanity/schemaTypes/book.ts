@@ -139,6 +139,18 @@ export default defineType({
       description:
         'Every route to the work — free reads, shops, Patreon, a live campaign. Put the option that serves the creator best first; free reads and live campaigns are shown most prominently regardless.',
     }),
+    defineField({
+      name: 'previewUrl',
+      title: 'Preview PDF',
+      type: 'url',
+      // Interim: we collect a LINK rather than a file, because form uploads land
+      // in Drive where the import cannot fetch them (see scripts/lib/sanity.mjs).
+      // A URL we can just point at sidesteps that. Revisit once intake moves off
+      // Drive — a hosted file asset would then be the sturdier choice.
+      description:
+        'Optional. A direct, public link to a SHORT preview PDF — the first few pages, not the whole book. It must open the PDF straight away for anyone, with no sign-in: a Google Drive "share" link that shows a login or a preview page will not do. Shown as a "Read a preview" button on the book page.',
+      validation: (rule) => rule.uri({ scheme: ['http', 'https'] }),
+    }),
   ],
   preview: { select: { title: 'title', subtitle: 'creator.name', media: 'cover' } },
 })

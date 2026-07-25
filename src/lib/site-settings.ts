@@ -114,6 +114,7 @@ export interface SiteSettings {
     searchBooksLabel: string
     searchCreatorsLabel: string
     downloadCta: string
+    previewCta: string
     creatorBooksHeading: string
     creatorWorksHeading: string
     creatorOrganizationsHeading: string
@@ -195,6 +196,7 @@ const DEFAULTS: SiteSettings = {
     searchBooksLabel: 'Search titles and creators',
     searchCreatorsLabel: 'Search creators and studios',
     downloadCta: 'Download',
+    previewCta: 'Read a preview (PDF)',
     creatorBooksHeading: '{name}’s Books',
     creatorWorksHeading: 'Where to find {name}’s work',
     creatorOrganizationsHeading: 'Member of',

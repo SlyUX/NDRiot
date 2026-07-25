@@ -54,6 +54,7 @@ const MAPPED_COLUMNS = new Set([
   'Where to buy',
   'Kickstarter link',
   'Crowdfunding end date',
+  'Preview PDF link',
   'Issues available',
   'Can we publish this?',
   // Known and deliberately unused. Sanity documents are publicly readable,
@@ -322,6 +323,27 @@ async function main() {
     if (full) doc.description = toPortableText(full)
 
     if (links.length) doc.links = links
+
+    // A preview is stored as a plain link, not a fetched file — form uploads
+    // land in Drive, which the import cannot read. Take only a real http(s)
+    // URL; anything else (a bare filename, a Drive "share" phrase) is flagged
+    // rather than saved, so a broken button never reaches a book page.
+    const previewRaw = repairText(record['Preview PDF link'] || '').trim()
+    if (previewRaw) {
+      let valid = false
+      try {
+        valid = /^https?:$/.test(new URL(previewRaw).protocol)
+      } catch {
+        valid = false
+      }
+      if (valid) {
+        doc.previewUrl = previewRaw
+        console.log(`   preview: ${previewRaw}`)
+      } else {
+        warnings.push(`${title}: preview link is not a usable URL — skipped (${previewRaw}).`)
+        console.log('   preview: SKIPPED — not a usable URL')
+      }
+    }
 
     const issues = Number.parseInt(record['Issues available'] ?? '', 10)
     if (Number.isInteger(issues) && issues > 0) doc.issueCount = issues

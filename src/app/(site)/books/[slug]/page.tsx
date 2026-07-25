@@ -7,6 +7,7 @@ import { ContentCardGrid } from '@/components/content-card-grid'
 import PortableTextBody from '@/components/PortableTextBody'
 import { GenreBadge } from '@/components/genre-badge'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Section } from '@/components/ui/section'
 import { bookToCard } from '@/lib/card-mappers'
 import { safeFetch, BOOK_QUERY } from '@/lib/queries'
@@ -100,6 +101,13 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
 
           <PortableTextBody value={book.description} />
           <BookLinks links={book.links} />
+          {book.previewUrl && (
+            <Button asChild variant="outline">
+              <a href={book.previewUrl} target="_blank" rel="noopener noreferrer">
+                {settings.sections.previewCta}
+              </a>
+            </Button>
+          )}
         </div>
       </Section>
 
