@@ -111,26 +111,24 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
               </a>
             </Button>
           )}
+
+          {/* The creator, nested in the detail column beside the cover rather
+              than in a band of its own. */}
+          {creatorCard && (
+            <div>
+              <SectionHeading as="h3" size="sm">
+                {settings.sections.bookCreatorsHeading}
+              </SectionHeading>
+              {/* 1px white keyline, 15px inset — frames the creator apart from
+                  the book's own detail above it. border-foreground is the #FFF
+                  token (§9); square corners are the house style. */}
+              <div className="border-foreground border p-[15px]">
+                <ContentCard {...creatorCard} layout="horizontal" summaryLines={4} />
+              </div>
+            </div>
+          )}
         </div>
       </Section>
-
-      {/* The creator, as a card, after the description. pt-0 keeps it tucked
-          under the detail block above rather than opening a new band. */}
-      {creatorCard && (
-        <Section padding="md" className="pt-0">
-          <div className="max-w-xl">
-            <SectionHeading as="h3" size="sm">
-              {settings.sections.bookCreatorsHeading}
-            </SectionHeading>
-            {/* 1px white keyline, 15px inset — frames the creator apart from the
-                book's own detail block above it. border-foreground is the #FFF
-                token (§9); square corners are the house style. */}
-            <div className="border-foreground border p-[15px]">
-              <ContentCard {...creatorCard} layout="horizontal" summaryLines={4} />
-            </div>
-          </div>
-        </Section>
-      )}
 
       {!!book.otherBooks?.length && (
         <ContentCardGrid
