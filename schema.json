@@ -703,6 +703,14 @@
         },
         "optional": true
       },
+      "thumbnail": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "inline",
+          "name": "imageWithAlt"
+        },
+        "optional": true
+      },
       "body": {
         "type": "objectAttribute",
         "value": {
@@ -977,6 +985,14 @@
         "optional": true
       },
       "cover": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "inline",
+          "name": "imageWithAlt"
+        },
+        "optional": true
+      },
+      "thumbnail": {
         "type": "objectAttribute",
         "value": {
           "type": "inline",
@@ -2527,6 +2543,13 @@
               "optional": true
             },
             "creatorsHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "editorialHeading": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

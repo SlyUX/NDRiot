@@ -5,6 +5,7 @@ import type {
   CreatorSummary,
   DownloadSummary,
   FavoriteCreator,
+  HomeEditorial,
   InterviewSummary,
   SanityImage,
 } from '@/lib/types'
@@ -137,12 +138,13 @@ export function columnToCard(column: ColumnSummary): ContentCardProps {
   return {
     title: column.title,
     href: `/editorial/columns/${column.slug}`,
-    image: column.cover,
+    // The 4:3 card thumbnail; the 16:9 header image is the fallback.
+    image: column.thumbnail ?? column.cover,
     imageAlt: '',
     eyebrow: column.authorName,
     summary: column.excerpt,
     date: formatDate(column.publishedAt),
-    aspectRatio: 'video',
+    aspectRatio: 'landscape',
   }
 }
 
@@ -150,12 +152,31 @@ export function interviewToCard(interview: InterviewSummary): ContentCardProps {
   return {
     title: interview.title,
     href: `/editorial/interviews/${interview.slug}`,
-    image: interview.cover,
+    image: interview.thumbnail ?? interview.cover,
     imageAlt: '',
     eyebrow: interview.subjectName,
     summary: interview.excerpt,
     date: formatDate(interview.publishedAt),
-    aspectRatio: 'video',
+    aspectRatio: 'landscape',
+  }
+}
+
+/**
+ * A mixed column/interview row (the homepage editorial row) → a card,
+ * discriminated by `_type`. Same output as columnToCard/interviewToCard, from
+ * the combined HOME_EDITORIAL_QUERY shape.
+ */
+export function editorialToCard(item: HomeEditorial): ContentCardProps {
+  const isColumn = item._type === 'column'
+  return {
+    title: item.title,
+    href: isColumn ? `/editorial/columns/${item.slug}` : `/editorial/interviews/${item.slug}`,
+    image: item.thumbnail ?? item.cover,
+    imageAlt: '',
+    eyebrow: isColumn ? item.authorName : item.subjectName,
+    summary: item.excerpt,
+    date: formatDate(item.publishedAt),
+    aspectRatio: 'landscape',
   }
 }
 

@@ -154,6 +154,7 @@ export default defineType({
         defineField({ name: 'genresHeading', title: 'Genres section heading', type: 'string' }),
         defineField({ name: 'booksHeading', title: 'Books section heading', type: 'string' }),
         defineField({ name: 'creatorsHeading', title: 'Creators section heading', type: 'string' }),
+        defineField({ name: 'editorialHeading', title: 'Editorial section heading', type: 'string' }),
         defineField({
           name: 'viewAllLabel',
           title: '"View all" link label',

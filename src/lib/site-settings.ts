@@ -96,6 +96,7 @@ export interface SiteSettings {
     genresHeading: string
     booksHeading: string
     creatorsHeading: string
+    editorialHeading: string
     viewAllLabel: string
     viewMoreLabel: string
   }
@@ -180,6 +181,7 @@ const DEFAULTS: SiteSettings = {
     genresHeading: 'Browse by genre',
     booksHeading: 'Books',
     creatorsHeading: 'Creators',
+    editorialHeading: 'Editorial',
     viewAllLabel: 'View all',
     viewMoreLabel: 'View more',
   },

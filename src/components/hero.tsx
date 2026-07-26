@@ -81,7 +81,7 @@ function FeatureSlide({ book, ctaLabel }: { book: HeroBook; ctaLabel: string }) 
     // the column to its content pulls the words back against the artwork.
     // The trade is empty space on the right, which reads as deliberate
     // margin rather than a gap in the middle of the composition.
-    <div className="grid items-center gap-8 lg:grid-cols-[auto_1fr] lg:gap-12">
+    <div className="grid items-center gap-8 md:grid-cols-[auto_1fr] md:gap-12">
       <div className="flex justify-start">
         <div
           className={cn('relative w-48 shrink-0 overflow-hidden sm:w-56 lg:w-64 aspect-[2/3]')}
@@ -147,7 +147,7 @@ function EditorialSlide({ item, ctaLabel }: { item: LatestEditorial; ctaLabel: s
   const preview = truncate(item.excerpt, 200)
 
   return (
-    <div className="grid items-center gap-8 lg:grid-cols-[auto_1fr] lg:gap-12">
+    <div className="grid items-center gap-8 md:grid-cols-[auto_1fr] md:gap-12">
       <div className="flex justify-start">
         <div className="relative aspect-video w-64 shrink-0 overflow-hidden sm:w-80 lg:w-96">
           {item.cover ? (
@@ -194,7 +194,7 @@ export function Hero({ hero, books, editorial }: HeroProps) {
     // of the logo, and the text pulls left against it. Matches FeatureSlide and
     // the site's left-alignment; a 50/50 split floated the text off in a way
     // nothing else does.
-    <div className="grid items-center gap-8 lg:grid-cols-[auto_1fr] lg:gap-12">
+    <div className="grid items-center gap-8 md:grid-cols-[auto_1fr] md:gap-12">
       {/* The hero logo shows on desktop only. The nav already carries the brand,
           and through the tablet/mobile range the headline leads instead — so the
           logo is hidden below lg rather than competing with it. alt="" because

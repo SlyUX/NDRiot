@@ -87,10 +87,22 @@ export const GENRE_BOOKS_QUERY = defineQuery(`*[_type=="book" && $genre in genre
  */
 export const GENRES_WITH_BOOKS_QUERY = defineQuery(`array::unique(*[_type=="book" && defined(genres)].genres[])`)
 
-export const COLUMNS_QUERY = defineQuery(`*[_type=="column"]|order(publishedAt desc){_id,title,"slug":slug.current,excerpt,cover,publishedAt,"authorName":author->name}`)
+export const COLUMNS_QUERY = defineQuery(`*[_type=="column"]|order(publishedAt desc){_id,title,"slug":slug.current,excerpt,cover,thumbnail,publishedAt,"authorName":author->name}`)
 export const COLUMN_QUERY = defineQuery(`*[_type=="column" && slug.current==$slug][0]{_id,title,body,publishedAt,cover,"authorName":author->name,"author":author->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}}}`)
-export const INTERVIEWS_QUERY = defineQuery(`*[_type=="interview"]|order(publishedAt desc){_id,title,"slug":slug.current,excerpt,cover,publishedAt,"interviewerName":interviewer->name,"subjectName":subject->name}`)
+export const INTERVIEWS_QUERY = defineQuery(`*[_type=="interview"]|order(publishedAt desc){_id,title,"slug":slug.current,excerpt,cover,thumbnail,publishedAt,"interviewerName":interviewer->name,"subjectName":subject->name}`)
 export const INTERVIEW_QUERY = defineQuery(`*[_type=="interview" && slug.current==$slug][0]{_id,title,body,publishedAt,cover,"interviewerName":interviewer->name,"subjectName":subject->name,"interviewer":interviewer->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}}}`)
+
+/**
+ * Recent editorial — columns and interviews interleaved by date — for the
+ * homepage's editorial row. One shared shape, discriminated by `_type`, so a
+ * single mapper (editorialToCard) can card either. Uses the card thumbnail with
+ * the header image as fallback.
+ */
+export const HOME_EDITORIAL_QUERY = defineQuery(`*[_type in ["column","interview"] && defined(slug.current)]|order(publishedAt desc)[0...8]{
+  _id,_type,title,"slug":slug.current,excerpt,cover,thumbnail,publishedAt,
+  "authorName":author->name,
+  "subjectName":subject->name
+}`)
 
 /**
  * The single most recent editorial piece — column or interview — for the hero

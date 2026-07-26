@@ -30,7 +30,7 @@ export default async function EditorialPage() {
           headingSize="sm"
           cards={columns.map(columnToCard)}
           layout="horizontal"
-          aspectRatio="video"
+          aspectRatio="landscape"
           columns={3}
           padding="md"
           emptyMessage={settings.empty.columns}
@@ -43,7 +43,7 @@ export default async function EditorialPage() {
           headingSize="sm"
           cards={interviews.map(interviewToCard)}
           layout="horizontal"
-          aspectRatio="video"
+          aspectRatio="landscape"
           columns={3}
           padding="md"
           emptyMessage={settings.empty.interviews}

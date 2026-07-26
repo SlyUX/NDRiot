@@ -36,7 +36,14 @@ export default defineType({
       name: 'cover',
       title: 'Header image',
       type: 'imageWithAlt',
-      description: 'Landscape reads best — editorial cards crop to 16:9.',
+      description: 'The wide image at the top of the article. Landscape (16:9) reads best here.',
+    }),
+    defineField({
+      name: 'thumbnail',
+      title: 'Card thumbnail',
+      type: 'imageWithAlt',
+      description:
+        'A squarer 4:3 image for cards and previews, where the 16:9 header image crops badly. Optional — the header image is used if this is blank.',
     }),
     defineField({
       name: 'body',

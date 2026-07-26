@@ -26,6 +26,9 @@ const ASPECT = {
   video: 'aspect-video',
   square: 'aspect-square',
   portrait: 'aspect-[3/4]',
+  // 4:3 — editorial card thumbnails. The 16:9 header image crops badly this
+  // small, so pieces carry a separate squarer thumbnail for previews.
+  landscape: 'aspect-[4/3]',
 } as const
 
 /**

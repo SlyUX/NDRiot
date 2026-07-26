@@ -3,7 +3,7 @@ import { Suspense } from 'react'
 import { ContentCardGrid } from '@/components/content-card-grid'
 import { FilterBar } from '@/components/filter-bar'
 import { Hero } from '@/components/hero'
-import { bookToCard, creatorToCard } from '@/lib/card-mappers'
+import { bookToCard, creatorToCard, editorialToCard } from '@/lib/card-mappers'
 import {
   bookFilters,
   creatorHomeFilters,
@@ -20,12 +20,19 @@ import {
   BOOK_IDS_QUERY,
   GENRES_WITH_BOOKS_QUERY,
   HERO_BOOKS_QUERY,
+  HOME_EDITORIAL_QUERY,
   LATEST_EDITORIAL_QUERY,
   FILTERED_BOOKS_QUERY,
   FILTERED_CREATORS_QUERY,
 } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
-import type { BookSummary, CreatorSummary, HeroBook, LatestEditorial } from '@/lib/types'
+import type {
+  BookSummary,
+  CreatorSummary,
+  HeroBook,
+  HomeEditorial,
+  LatestEditorial,
+} from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -91,7 +98,8 @@ export default async function Home({
   const bookSeed = discoverSeed(params, 'sort', 'seed')
   const creatorSeed = discoverSeed(params, 'csort', 'cseed')
 
-  const [heroBooks, books, creators, genresWithBooks, editorial, settings] = await Promise.all([
+  const [heroBooks, books, creators, genresWithBooks, editorial, homeEditorial, settings] =
+    await Promise.all([
     // Deliberately unfiltered. The hero is the guaranteed route to work
     // nobody went looking for (AGENTS.md §3), so narrowing the page must
     // never narrow it.
@@ -100,6 +108,7 @@ export default async function Home({
     safeFetch<CreatorSummary[]>(FILTERED_CREATORS_QUERY, creatorsFilters, []),
     safeFetch<string[]>(GENRES_WITH_BOOKS_QUERY, {}, []),
     safeFetch<LatestEditorial | null>(LATEST_EDITORIAL_QUERY, {}, null),
+    safeFetch<HomeEditorial[]>(HOME_EDITORIAL_QUERY, {}, []),
     getSiteSettings(),
   ])
 
@@ -171,6 +180,24 @@ export default async function Home({
         viewAllLabel={settings.home.viewAllLabel}
         emptyMessage={creatorsFiltering ? settings.empty.filteredCreators : settings.empty.creators}
       />
+
+      {/* Editorial: one row of the most recent columns and interviews, wide
+          horizontal cards with the 4:3 thumbnail. Hidden entirely when there is
+          none, so the homepage never carries an empty editorial band. */}
+      {homeEditorial.length > 0 && (
+        <ContentCardGrid
+          heading={settings.home.editorialHeading}
+          cards={homeEditorial.slice(0, 4).map(editorialToCard)}
+          layout="horizontal"
+          columns={4}
+          aspectRatio="landscape"
+          summaryLines={3}
+          padding="md"
+          viewAllHref="/editorial"
+          viewAllLabel={settings.home.viewAllLabel}
+          emptyMessage=""
+        />
+      )}
     </div>
   )
 }
