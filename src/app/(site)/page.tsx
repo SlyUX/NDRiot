@@ -20,11 +20,12 @@ import {
   BOOK_IDS_QUERY,
   GENRES_WITH_BOOKS_QUERY,
   HERO_BOOKS_QUERY,
+  LATEST_EDITORIAL_QUERY,
   FILTERED_BOOKS_QUERY,
   FILTERED_CREATORS_QUERY,
 } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
-import type { BookSummary, CreatorSummary, HeroBook } from '@/lib/types'
+import type { BookSummary, CreatorSummary, HeroBook, LatestEditorial } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -90,7 +91,7 @@ export default async function Home({
   const bookSeed = discoverSeed(params, 'sort', 'seed')
   const creatorSeed = discoverSeed(params, 'csort', 'cseed')
 
-  const [heroBooks, books, creators, genresWithBooks, settings] = await Promise.all([
+  const [heroBooks, books, creators, genresWithBooks, editorial, settings] = await Promise.all([
     // Deliberately unfiltered. The hero is the guaranteed route to work
     // nobody went looking for (AGENTS.md §3), so narrowing the page must
     // never narrow it.
@@ -98,6 +99,7 @@ export default async function Home({
     safeFetch<BookSummary[]>(FILTERED_BOOKS_QUERY, booksFilters, []),
     safeFetch<CreatorSummary[]>(FILTERED_CREATORS_QUERY, creatorsFilters, []),
     safeFetch<string[]>(GENRES_WITH_BOOKS_QUERY, {}, []),
+    safeFetch<LatestEditorial | null>(LATEST_EDITORIAL_QUERY, {}, null),
     getSiteSettings(),
   ])
 
@@ -133,7 +135,7 @@ export default async function Home({
 
   return (
     <div>
-      <Hero hero={settings.hero} books={heroBooks} />
+      <Hero hero={settings.hero} books={heroBooks} editorial={editorial} />
 
       {/* Books: four across, opening two rows and revealing the next two on
           "view more" (so up to 16 are cut for). "View all" still links out to
@@ -142,7 +144,7 @@ export default async function Home({
         heading={settings.home.booksHeading}
         toolbar={booksBar}
         cards={(bookSeed === null ? books : seededShuffle(books, bookSeed)).slice(0, 16).map(bookToCard)}
-        columns={4}
+        columns={5}
         initialRows={2}
         viewMoreLabel={settings.home.viewMoreLabel}
         padding="md"
@@ -159,7 +161,7 @@ export default async function Home({
         toolbar={creatorsBar}
         cards={(creatorSeed === null ? creators : seededShuffle(creators, creatorSeed)).slice(0, 12).map(creatorToCard)}
         layout="horizontal"
-        columns={3}
+        columns={4}
         summaryLines={4}
         initialRows={2}
         viewMoreLabel={settings.home.viewMoreLabel}

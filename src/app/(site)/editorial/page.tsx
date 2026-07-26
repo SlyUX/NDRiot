@@ -31,7 +31,7 @@ export default async function EditorialPage() {
           cards={columns.map(columnToCard)}
           layout="horizontal"
           aspectRatio="video"
-          columns={2}
+          columns={3}
           padding="md"
           emptyMessage={settings.empty.columns}
         />
@@ -44,7 +44,7 @@ export default async function EditorialPage() {
           cards={interviews.map(interviewToCard)}
           layout="horizontal"
           aspectRatio="video"
-          columns={2}
+          columns={3}
           padding="md"
           emptyMessage={settings.empty.interviews}
         />

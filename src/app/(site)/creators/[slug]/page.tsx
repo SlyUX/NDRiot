@@ -146,7 +146,7 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
           heading={booksHeading}
           headingSize="sm"
           cards={creator.books.map(bookToCard)}
-          columns={4}
+          columns={5}
           padding="md"
           emptyMessage={settings.empty.books}
         />
@@ -193,7 +193,7 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
           headingSize="sm"
           cards={favoriteCards}
           layout="horizontal"
-          columns={3}
+          columns={4}
           summaryLines={4}
           padding="md"
           background="charcoal"

@@ -10,6 +10,7 @@ import type {
   HERO_BOOKS_QUERY_RESULT,
   INTERVIEWS_QUERY_RESULT,
   INTERVIEW_QUERY_RESULT,
+  LATEST_EDITORIAL_QUERY_RESULT,
   ImageWithAlt,
 } from '../../sanity.types'
 
@@ -24,6 +25,7 @@ export type ColumnSummary = COLUMNS_QUERY_RESULT[number]
 export type InterviewSummary = INTERVIEWS_QUERY_RESULT[number]
 export type DownloadSummary = DOWNLOADS_QUERY_RESULT[number]
 export type HeroBook = HERO_BOOKS_QUERY_RESULT[number]
+export type LatestEditorial = NonNullable<LATEST_EDITORIAL_QUERY_RESULT>
 
 export type CreatorDetail = NonNullable<CREATOR_QUERY_RESULT>
 export type BookDetail = NonNullable<BOOK_QUERY_RESULT>

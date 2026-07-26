@@ -135,7 +135,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
           heading={otherBooksHeading}
           headingSize="sm"
           cards={book.otherBooks.map(bookToCard)}
-          columns={4}
+          columns={5}
           padding="md"
           background="charcoal"
           emptyMessage=""

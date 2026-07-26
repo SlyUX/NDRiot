@@ -19,7 +19,7 @@ export default async function DownloadsPage() {
       headingSize="lg"
       cards={downloads.map(downloadToCard)}
       layout="horizontal"
-      columns={2}
+      columns={3}
       emptyMessage={settings.empty.downloads}
     />
   )

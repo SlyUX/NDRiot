@@ -8,7 +8,7 @@ import { Logo } from '@/components/logo'
 import { Button } from '@/components/ui/button'
 import { bookToCard } from '@/lib/card-mappers'
 import type { HeroSettings } from '@/lib/site-settings'
-import type { HeroBook } from '@/lib/types'
+import type { HeroBook, LatestEditorial } from '@/lib/types'
 import { cn, truncate } from '@/lib/utils'
 import { urlFor } from '@/sanity/image'
 
@@ -27,6 +27,8 @@ export interface HeroProps {
   hero: HeroSettings
   /** Chosen at random per request — see the homepage. */
   books: HeroBook[]
+  /** The newest column/interview, for the carousel's closing slide. */
+  editorial?: LatestEditorial | null
 }
 
 /**
@@ -126,7 +128,65 @@ function FeatureSlide({ book, ctaLabel }: { book: HeroBook; ctaLabel: string }) 
   )
 }
 
-export function Hero({ hero, books }: HeroProps) {
+/**
+ * The latest editorial piece, at hero scale — the carousel's closing slide.
+ *
+ * Same art-left / words-right shape as FeatureSlide, but the cover is 16:9
+ * (editorial covers are landscape), so the art column is wider and shorter.
+ */
+function EditorialSlide({ item, ctaLabel }: { item: LatestEditorial; ctaLabel: string }) {
+  const href =
+    item._type === 'column'
+      ? `/editorial/columns/${item.slug}`
+      : `/editorial/interviews/${item.slug}`
+  const kind = item._type === 'column' ? 'Column' : 'Interview'
+  // The column's author, the interview's subject — the person the piece is by
+  // or about, matching how each reads on its listing card.
+  const who = item._type === 'column' ? item.authorName : item.subjectName
+  const eyebrow = who ? `${kind} · ${who}` : kind
+  const preview = truncate(item.excerpt, 200)
+
+  return (
+    <div className="grid items-center gap-8 lg:grid-cols-[auto_1fr] lg:gap-12">
+      <div className="flex justify-start">
+        <div className="relative aspect-video w-64 shrink-0 overflow-hidden sm:w-80 lg:w-96">
+          {item.cover ? (
+            <Image
+              src={urlFor(item.cover).width(800).url()}
+              alt={item.cover.alt ?? ''}
+              fill
+              sizes="(max-width: 1024px) 20rem, 24rem"
+              className="object-cover"
+            />
+          ) : (
+            <div className="bg-muted h-full w-full" aria-hidden="true" />
+          )}
+        </div>
+      </div>
+
+      <div className="max-w-xl">
+        <p className="text-primary text-xs tracking-widest uppercase">{eyebrow}</p>
+
+        {/* h2, not h1 — the page's h1 lives on the pitch slide. */}
+        <h2 className="mt-2 text-2xl leading-tight font-black tracking-tight text-white uppercase sm:text-3xl">
+          {item.title}
+        </h2>
+
+        {preview && (
+          <p className="mt-4 text-sm leading-relaxed text-white/85 sm:text-base">{preview}</p>
+        )}
+
+        <div className="mt-6">
+          <Button asChild size="lg" className="font-black tracking-wide uppercase">
+            <Link href={href}>{ctaLabel}</Link>
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export function Hero({ hero, books, editorial }: HeroProps) {
   const featured = books.filter(Boolean).slice(0, 3)
 
   const pitchSlide = (
@@ -135,12 +195,12 @@ export function Hero({ hero, books }: HeroProps) {
     // the site's left-alignment; a 50/50 split floated the text off in a way
     // nothing else does.
     <div className="grid items-center gap-8 lg:grid-cols-[auto_1fr] lg:gap-12">
-      <div className="flex justify-start">
-        {/* alt="" because the headline beside it already names the site — a
-            screen reader would otherwise hear "ND Riot" twice. Capped at 225px
-            through the tablet range (the carousel shows from md up); full size
-            only on desktop. */}
-        <Logo size="hero" alt="" priority className="max-w-[225px] lg:max-w-none" />
+      {/* The hero logo shows on desktop only. The nav already carries the brand,
+          and through the tablet/mobile range the headline leads instead — so the
+          logo is hidden below lg rather than competing with it. alt="" because
+          the headline beside it already names the site. */}
+      <div className="hidden justify-start lg:flex">
+        <Logo size="hero" alt="" priority />
       </div>
 
       <div className="max-w-xl">
@@ -186,6 +246,19 @@ export function Hero({ hero, books }: HeroProps) {
       label: book.title,
       durationMs: FEATURE_DURATION_MS,
     })),
+    // The latest editorial, always last — the one slide that changes as the
+    // magazine publishes rather than with the random book draw.
+    ...(editorial
+      ? [
+          {
+            content: (
+              <EditorialSlide key={editorial._id} item={editorial} ctaLabel={hero.featureCtaLabel} />
+            ),
+            label: editorial.title,
+            durationMs: FEATURE_DURATION_MS,
+          },
+        ]
+      : []),
   ]
 
   return (
@@ -224,11 +297,11 @@ export function Hero({ hero, books }: HeroProps) {
           there in favour of the static splash below. */}
       <HeroCarousel slides={slides} className="mx-auto hidden w-full max-w-[90rem] md:block" />
 
-      {/* Mobile splash: logo, tagline, buttons — static and left-aligned, no
-          carousel. alt names the brand here since no headline text does. */}
+      {/* Mobile splash: tagline + buttons, static and left-aligned, no carousel.
+          The hero logo is intentionally omitted here (as on tablet) — the nav
+          already carries the brand, so the tagline leads. */}
       <div className="mx-auto w-full max-w-[90rem] md:hidden">
-        <Logo size="splash" alt="ND Riot" priority />
-        <p className="mt-5 text-2xl leading-tight font-black tracking-tight text-white uppercase">
+        <p className="text-2xl leading-tight font-black tracking-tight text-white uppercase">
           {hero.tagline}
         </p>
         {hero.ctas.length > 0 && (

@@ -53,7 +53,7 @@ export default async function BooksPage({
 
       <ContentCardGrid
         cards={books.map(bookToCard)}
-        columns={4}
+        columns={5}
         padding="md"
         className="pt-6"
         emptyMessage={
@@ -66,7 +66,7 @@ export default async function BooksPage({
           heading={settings.sections.everythingElseHeading}
           headingSize="sm"
           cards={fallback.slice(0, 8).map(bookToCard)}
-          columns={4}
+          columns={5}
           padding="md"
           emptyMessage={settings.empty.books}
         />

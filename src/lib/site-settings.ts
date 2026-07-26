@@ -121,6 +121,7 @@ export interface SiteSettings {
     creatorFavoritesHeading: string
     otherBooksHeading: string
     bookCreatorsHeading: string
+    editorialAuthorHeading: string
     openToCollaborationLabel: string
   }
   empty: {
@@ -204,6 +205,7 @@ const DEFAULTS: SiteSettings = {
     creatorFavoritesHeading: '{name}’s Favorite Creators',
     otherBooksHeading: 'Other books by {name}',
     bookCreatorsHeading: 'Creators:',
+    editorialAuthorHeading: 'Author:',
     openToCollaborationLabel: 'Open to collaboration',
   },
   empty: {

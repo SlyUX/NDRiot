@@ -17,18 +17,23 @@ import { cn } from '@/lib/utils'
  * column count and a divider flag. See AGENTS.md §4.
  */
 
-export type GridColumns = 1 | 2 | 3 | 4
+export type GridColumns = 1 | 2 | 3 | 4 | 5
 
 /**
  * Static map, not interpolation. Tailwind scans source text, so a template
  * literal like `lg:grid-cols-${n}` produces no CSS.
+ *
+ * Phone counts come from the layout's base grid (2-up vertical, 1-up
+ * horizontal); these set the tablet (sm) and desktop (lg) counts, which run one
+ * denser than the phone.
  */
 const COLUMN_CLASSES: Record<GridColumns, string> = {
   1: 'lg:grid-cols-1',
   2: 'lg:grid-cols-2',
-  3: 'lg:grid-cols-3',
-  // 2 up on phones, 3 across the tablet range, 4 on desktop.
+  3: 'sm:grid-cols-3 lg:grid-cols-3',
   4: 'sm:grid-cols-3 lg:grid-cols-4',
+  // Books: 2 up on phones, 4 across the tablet range, 5 on desktop.
+  5: 'sm:grid-cols-4 lg:grid-cols-5',
 }
 
 export interface ContentCardGridProps {

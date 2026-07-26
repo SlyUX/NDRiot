@@ -285,6 +285,12 @@ export default defineType({
           type: 'string',
           description: 'Above the creator card on a book page, e.g. "Creators:".',
         }),
+        defineField({
+          name: 'editorialAuthorHeading',
+          title: 'Editorial page — author block heading',
+          type: 'string',
+          description: 'Above the author card at the foot of a column/interview, e.g. "Author:".',
+        }),
       ],
     }),
 

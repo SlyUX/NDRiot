@@ -36,7 +36,7 @@ export default async function GenrePage({ params }: { params: Promise<{ genre: s
         heading={settings.sections.genreBooksHeading}
         headingSize="sm"
         cards={books.map(bookToCard)}
-        columns={4}
+        columns={5}
         padding="md"
         emptyMessage={settings.empty.genreBooks}
       />
@@ -46,7 +46,7 @@ export default async function GenrePage({ params }: { params: Promise<{ genre: s
         headingSize="sm"
         cards={creators.map(creatorToCard)}
         layout="horizontal"
-        columns={3}
+        columns={4}
         summaryLines={4}
         padding="md"
         emptyMessage={settings.empty.genreCreators}

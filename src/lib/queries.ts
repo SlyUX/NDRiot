@@ -88,9 +88,21 @@ export const GENRE_BOOKS_QUERY = defineQuery(`*[_type=="book" && $genre in genre
 export const GENRES_WITH_BOOKS_QUERY = defineQuery(`array::unique(*[_type=="book" && defined(genres)].genres[])`)
 
 export const COLUMNS_QUERY = defineQuery(`*[_type=="column"]|order(publishedAt desc){_id,title,"slug":slug.current,excerpt,cover,publishedAt,"authorName":author->name}`)
-export const COLUMN_QUERY = defineQuery(`*[_type=="column" && slug.current==$slug][0]{_id,title,body,publishedAt,cover,"authorName":author->name}`)
+export const COLUMN_QUERY = defineQuery(`*[_type=="column" && slug.current==$slug][0]{_id,title,body,publishedAt,cover,"authorName":author->name,"author":author->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}}}`)
 export const INTERVIEWS_QUERY = defineQuery(`*[_type=="interview"]|order(publishedAt desc){_id,title,"slug":slug.current,excerpt,cover,publishedAt,"interviewerName":interviewer->name,"subjectName":subject->name}`)
-export const INTERVIEW_QUERY = defineQuery(`*[_type=="interview" && slug.current==$slug][0]{_id,title,body,publishedAt,cover,"interviewerName":interviewer->name,"subjectName":subject->name}`)
+export const INTERVIEW_QUERY = defineQuery(`*[_type=="interview" && slug.current==$slug][0]{_id,title,body,publishedAt,cover,"interviewerName":interviewer->name,"subjectName":subject->name,"interviewer":interviewer->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}}}`)
+
+/**
+ * The single most recent editorial piece — column or interview — for the hero
+ * carousel's closing slide. Requires a cover, since the slide is a visual
+ * preview; without one it would be a blank panel, so an imageless piece is
+ * skipped in favour of the latest that has art. Returns null when there is none.
+ */
+export const LATEST_EDITORIAL_QUERY = defineQuery(`*[_type in ["column","interview"] && defined(slug.current) && defined(publishedAt) && defined(cover)]|order(publishedAt desc)[0]{
+  _id,_type,title,"slug":slug.current,excerpt,cover,publishedAt,
+  "authorName":author->name,
+  "subjectName":subject->name
+}`)
 
 export const DOWNLOADS_QUERY = defineQuery(`*[_type=="freeDownload"]|order(publishedAt desc){_id,title,"slug":slug.current,description,cover,publishedAt,"creatorName":creator->name}`)
 export const DOWNLOAD_QUERY = defineQuery(`*[_type=="freeDownload" && slug.current==$slug][0]{_id,title,description,cover,"creatorName":creator->name,"fileUrl":file.asset->url}`)

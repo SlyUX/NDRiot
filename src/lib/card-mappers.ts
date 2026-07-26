@@ -6,6 +6,7 @@ import type {
   DownloadSummary,
   FavoriteCreator,
   InterviewSummary,
+  SanityImage,
 } from '@/lib/types'
 import { truncate } from '@/lib/utils'
 
@@ -98,6 +99,35 @@ export function creatorToCard(creator: CreatorSummary): ContentCardProps {
     // A short bio preview for the horizontal card (the homepage creators row).
     // Only the horizontal layout renders summary, so this is inert on the
     // vertical listing cards. bioText is pt::text(bio) — see the queries.
+    summary: truncate(creator.bioText, 160),
+    aspectRatio: 'square',
+  }
+}
+
+/**
+ * A referenced creator — a book's creator, an article's author/interviewer —
+ * as an author card. Same output as creatorToCard, but from the nested
+ * `creator->{…}` / `author->{…}` projection rather than a top-level
+ * CreatorSummary, and null-safe: the reference (or its slug) can be missing, in
+ * which case there is nothing to link to and it returns null.
+ */
+export interface CreatorRef {
+  name?: string | null
+  slug?: string | null
+  location?: string | null
+  photo?: SanityImage | null
+  bioText?: string | null
+  studio?: { name?: string | null } | null
+}
+
+export function creatorRefToCard(creator: CreatorRef | null | undefined): ContentCardProps | null {
+  if (!creator?.slug) return null
+  return {
+    title: creator.name ?? 'Creator',
+    href: `/creators/${creator.slug}`,
+    image: creator.photo ?? null,
+    imageAlt: `Portrait of ${creator.name ?? 'creator'}`,
+    eyebrow: creator.studio?.name ?? creator.location ?? undefined,
     summary: truncate(creator.bioText, 160),
     aspectRatio: 'square',
   }
