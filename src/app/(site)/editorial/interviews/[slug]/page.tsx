@@ -67,7 +67,7 @@ export default async function InterviewPage({ params }: { params: Promise<{ slug
           <SectionHeading as="h3" size="sm">
             {settings.sections.editorialAuthorHeading}
           </SectionHeading>
-          <div className="border-foreground border p-[15px]">
+          <div className="border-border border p-[15px]">
             <ContentCard {...authorCard} layout="horizontal" summaryLines={4} />
           </div>
         </div>

@@ -120,6 +120,7 @@ export default async function Home({
       <FilterBar
         facets={homeBookFacets(genres)}
         control="select"
+        collapsible
         resultCount={books.length}
         searchLabel={settings.sections.searchBooksLabel}
         discoverLabel={settings.sections.discoverLabel}
@@ -132,6 +133,7 @@ export default async function Home({
       <FilterBar
         facets={homeCreatorFacets(genres)}
         control="select"
+        collapsible
         resultCount={creators.length}
         searchLabel={settings.sections.searchCreatorsLabel}
         discoverLabel={settings.sections.discoverLabel}

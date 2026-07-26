@@ -34,6 +34,12 @@ export interface Facet {
   multi?: boolean
   /** A flag rather than a value — present or absent, no options. */
   toggle?: boolean
+  /**
+   * Colour a toggle to its subject. `funding` uses the funding green so the
+   * "Currently funding" control matches the badge it filters for; the default
+   * is the site's pink accent.
+   */
+  tone?: 'funding'
 }
 
 export interface FilterBarProps {
@@ -207,34 +213,70 @@ export function FilterBar({
 
   return (
     <div className={cn('space-y-4', className)}>
-      {/* Search and the dropdowns share a row under `select`, and stack under
-          `chips` where the facets need the full width. */}
-      <div className={cn(control === 'select' && 'flex flex-wrap items-center gap-2')}>
-      <div className="relative w-full max-w-xs">
-        <Search
-          aria-hidden="true"
-          className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
-        />
-        <input
-          type="search"
-          value={term}
-          onChange={(event) => setTerm(event.target.value)}
-          // A visible placeholder is not a label — the input needs a name of
-          // its own for anyone who cannot see it.
-          aria-label={searchLabel}
-          placeholder={searchLabel}
-          className="focus-visible:ring-ring placeholder:text-muted-foreground w-full border border-white/20 bg-transparent py-2 pr-3 pl-9 text-sm focus-visible:ring-2 focus-visible:outline-none"
-        />
-      </div>
+      {/* Under `select` (the homepage rows): the search stays visible and the
+          controls collapse behind a "Filters" toggle on mobile — like the chip
+          pages — then sit inline from md up. Under `chips`, search stands alone
+          and the facets are their own panel below. */}
+      <div className={cn(control === 'select' && 'space-y-3')}>
+        <div className={cn(control === 'select' && 'flex flex-wrap items-center gap-2')}>
+          <div className="relative w-full max-w-xs">
+            <Search
+              aria-hidden="true"
+              className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
+            />
+            <input
+              type="search"
+              value={term}
+              onChange={(event) => setTerm(event.target.value)}
+              // A visible placeholder is not a label — the input needs a name of
+              // its own for anyone who cannot see it.
+              aria-label={searchLabel}
+              placeholder={searchLabel}
+              className="focus-visible:ring-ring placeholder:text-muted-foreground w-full border border-white/20 bg-transparent py-2 pr-3 pl-9 text-sm focus-visible:ring-2 focus-visible:outline-none"
+            />
+          </div>
 
-      {control === 'select' && (
-        <>
+          {/* Mobile-only collapse toggle — the select controls fold behind it
+              below md, exactly as the chip filters do on the listing pages. */}
+          {control === 'select' && collapsible && (
+            <button
+              type="button"
+              onClick={() => setOpen((o) => !o)}
+              aria-expanded={open}
+              aria-controls={panelId}
+              className="focus-visible:ring-ring text-foreground/80 hover:text-foreground flex items-center gap-2 text-xs font-bold tracking-widest uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none md:hidden"
+            >
+              <ChevronDown
+                aria-hidden="true"
+                className={cn(
+                  'size-4 transition-transform motion-reduce:transition-none',
+                  open && 'rotate-180',
+                )}
+              />
+              Filters
+              {activeFacetCount > 0 && <span className="text-primary">({activeFacetCount})</span>}
+            </button>
+          )}
+        </div>
+
+        {control === 'select' && (
+          <div
+            id={panelId}
+            className={cn(
+              'flex-wrap items-center gap-2',
+              // Collapsed on mobile until the toggle opens it; always inline md+.
+              collapsible && !open ? 'hidden md:flex' : 'flex',
+            )}
+          >
           {facets.map((facet) => {
             // A flag is on or off — a two-option dropdown ("Any"/label) reads as
             // a choice with a default answer, which a toggle is not. Render it
             // as a press-to-apply button instead, matching Discover beside it.
             if (facet.toggle) {
               const isOn = searchParams.getAll(facet.param).length > 0
+              // The funding toggle wears the funding green (black text on it,
+              // §9) so it reads as the control for the badge it filters for.
+              const funding = facet.tone === 'funding'
               return (
                 <button
                   key={facet.param}
@@ -244,8 +286,12 @@ export function FilterBar({
                   className={cn(
                     'focus-visible:ring-ring border px-3 py-2 text-[11px] font-bold tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none',
                     isOn
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'text-muted-foreground hover:border-primary/60 hover:text-foreground border-white/20',
+                      ? funding
+                        ? 'bg-funding border-funding text-black'
+                        : 'bg-primary text-primary-foreground border-primary'
+                      : funding
+                        ? 'text-funding border-funding hover:bg-funding/10'
+                        : 'text-muted-foreground hover:border-primary/60 hover:text-foreground border-white/20',
                   )}
                 >
                   {facet.label}
@@ -302,8 +348,8 @@ export function FilterBar({
             <Shuffle aria-hidden="true" strokeWidth={2.5} className="size-4" />
           </button>
           )}
-        </>
-      )}
+          </div>
+        )}
       </div>
 
       {/* Toggle for the collapsible chip grid. Shows the active count so a

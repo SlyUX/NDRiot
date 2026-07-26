@@ -119,10 +119,10 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
               <SectionHeading as="h3" size="sm">
                 {settings.sections.bookCreatorsHeading}
               </SectionHeading>
-              {/* 1px white keyline, 15px inset — frames the creator apart from
-                  the book's own detail above it. border-foreground is the #FFF
-                  token (§9); square corners are the house style. */}
-              <div className="border-foreground border p-[15px]">
+              {/* A subtle keyline (the site's --border) with a 15px inset,
+                  framing the creator apart from the book's own detail above it.
+                  Square corners are the house style. */}
+              <div className="border-border border p-[15px]">
                 <ContentCard {...creatorCard} layout="horizontal" summaryLines={4} />
               </div>
             </div>

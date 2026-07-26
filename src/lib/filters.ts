@@ -86,7 +86,7 @@ export function homeBookFacets(genres: readonly string[]): Facet[] {
     { param: 'genre', label: 'Genre', options: genres },
     { param: 'format', label: 'Format', options: FORMATS },
     { param: 'audience', label: 'Audience', options: MATURITY_RATINGS },
-    { param: 'funding', label: 'Currently funding', options: [], toggle: true },
+    { param: 'funding', label: 'Currently funding', options: [], toggle: true, tone: 'funding' },
   ]
 }
 
