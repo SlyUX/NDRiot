@@ -75,9 +75,11 @@ export interface ContentCardGridProps {
   /**
    * Render as a single horizontally-scrolling row instead of a wrapping grid —
    * the homepage's browse rows, where one row is a taste and the rest is a
-   * swipe/scroll away. Ignored when `initialRows` is set.
+   * swipe/scroll away.
    */
   scroll?: boolean
+  /** Rows the scroller stacks on phones (see HorizontalScroller). */
+  scrollRows?: 1 | 2
   /** Forwarded to the Section wrapper. */
   background?: SectionProps['background']
   padding?: SectionProps['padding']
@@ -102,6 +104,7 @@ export function ContentCardGrid({
   toolbar,
   footer,
   scroll = false,
+  scrollRows = 1,
   background,
   padding,
   maxWidth,
@@ -172,7 +175,7 @@ export function ContentCardGrid({
 
           // One scrolling row (browse) or a plain wrapping grid.
           return scroll ? (
-            <HorizontalScroller>{cells}</HorizontalScroller>
+            <HorizontalScroller rows={scrollRows}>{cells}</HorizontalScroller>
           ) : (
             <div className={gridClassName}>{cells}</div>
           )

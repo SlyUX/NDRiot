@@ -388,6 +388,7 @@ export type SiteSettings = {
   siteTitle: string;
   siteDescription?: string;
   footer?: string;
+  discordUrl?: string;
   hero?: {
     background?: ImageWithAlt;
     headline?: string;

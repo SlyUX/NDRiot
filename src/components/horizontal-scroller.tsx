@@ -17,9 +17,16 @@ import { cn } from '@/lib/utils'
 export function HorizontalScroller({
   children,
   className,
+  rows = 1,
 }: {
   children: React.ReactNode
   className?: string
+  /**
+   * Rows to stack on phones before scrolling sideways. `2` reads fuller on a
+   * narrow screen where a single row shows only a card or two; it collapses to
+   * one row from sm up. Desktop is always one row.
+   */
+  rows?: 1 | 2
 }) {
   const ref = useRef<HTMLDivElement>(null)
 
@@ -33,7 +40,10 @@ export function HorizontalScroller({
       <div
         ref={ref}
         className={cn(
-          'flex snap-x snap-mandatory gap-6 overflow-x-auto pb-1',
+          'snap-x snap-mandatory gap-6 overflow-x-auto pb-1',
+          // Two rows on phones (grid flowing down columns), one row — a flex
+          // strip — from sm up. `sm:flex` wins over `grid` at the breakpoint.
+          rows === 2 ? 'grid grid-flow-col grid-rows-2 sm:flex' : 'flex',
           // No visible scrollbar — the peeking card and the arrows are the cue.
           '[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
           className,

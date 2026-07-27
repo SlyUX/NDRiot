@@ -2329,6 +2329,13 @@
         },
         "optional": true
       },
+      "discordUrl": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
       "hero": {
         "type": "objectAttribute",
         "value": {

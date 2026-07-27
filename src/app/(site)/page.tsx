@@ -201,6 +201,7 @@ export default async function Home({
         cards={displayBooks.map(bookToCard)}
         columns={BOOKS_COLS}
         scroll={!booksFiltering}
+        scrollRows={2}
         footer={
           booksFiltering ? (
             <LoadMore

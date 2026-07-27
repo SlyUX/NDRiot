@@ -93,6 +93,8 @@ export interface SiteSettings {
   siteTitle: string
   siteDescription: string
   footer: string
+  /** Invite to the ND Riot Discord — shown in the nav and footer. Absent hides them. */
+  discordUrl?: string
   hero: HeroSettings
   join: JoinSettings
   contact: ContactSettings
@@ -156,6 +158,7 @@ const DEFAULTS: SiteSettings = {
   siteTitle: 'ND Riot',
   siteDescription: 'Independent comics discovery. Support indie comics.',
   footer: 'Support indie comics. · ND Riot',
+  discordUrl: 'https://discord.gg/fSSMjE5dw',
   hero: {
     headline: '“The Big Two”',
     tagline: 'Elevating Independent Comics',
@@ -268,7 +271,7 @@ const DEFAULTS: SiteSettings = {
 }
 
 export const SITE_SETTINGS_QUERY = `*[_id=="siteSettings"][0]{
-  siteTitle,siteDescription,footer,
+  siteTitle,siteDescription,footer,discordUrl,
   home,sections,empty,
   hero{background,headline,body,tagline,featureCtaLabel,featuredHeading,newHeading,ctas[]{label,href}},
   join{heading,body,ctaLabel,formUrl},
@@ -298,6 +301,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     siteTitle: data.siteTitle?.trim() || DEFAULTS.siteTitle,
     siteDescription: data.siteDescription?.trim() || DEFAULTS.siteDescription,
     footer: data.footer?.trim() || DEFAULTS.footer,
+    discordUrl: data.discordUrl?.trim() || DEFAULTS.discordUrl,
     hero: {
       // Image and rich text pass through untouched — there is nothing
       // sensible to merge them with.

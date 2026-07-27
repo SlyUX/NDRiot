@@ -1,7 +1,9 @@
 import Link from 'next/link'
+import { Mail } from 'lucide-react'
 
 import { Logo } from '@/components/logo'
 import { MainNav } from '@/components/main-nav'
+import { SocialIcon } from '@/components/social-icon'
 import { genreOptions } from '@/lib/filters'
 import { safeFetch, GENRES_WITH_BOOKS_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
@@ -44,22 +46,50 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
                 would make a screen reader announce the brand twice. */}
             <Logo size="nav" alt="" priority />
           </Link>
-          <MainNav nav={settings.nav} genres={navGenres} />
+          <div className="flex items-center gap-3 lg:gap-5">
+            <MainNav nav={settings.nav} genres={navGenres} />
+            {settings.discordUrl && (
+              <a
+                href={settings.discordUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="ND Riot Discord"
+                className="text-foreground/80 hover:text-primary focus-visible:ring-ring transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              >
+                <SocialIcon platform="Discord" className="size-5" />
+              </a>
+            )}
+          </div>
         </nav>
       </header>
 
       <main>{children}</main>
 
       <footer className="border-primary/40 border-t">
-        <div className="text-muted-foreground mx-auto flex max-w-[90rem] flex-col items-center gap-2 px-6 py-8 text-center text-xs tracking-widest uppercase">
-          {/* Contact sits here, not in the header, so Join stays the single
-              call to action up top and this stays the utility corner. */}
-          <Link
-            href="/contact"
-            className="hover:text-primary focus-visible:ring-ring transition-colors focus-visible:ring-2 focus-visible:outline-none"
-          >
-            {settings.contact.linkLabel}
-          </Link>
+        <div className="text-muted-foreground mx-auto flex max-w-[90rem] flex-col items-center gap-3 px-6 py-8 text-center text-xs tracking-widest uppercase">
+          {/* Utility corner. Contact is a glyph rather than a text link, matched
+              to the Discord mark beside it. Both keep Join the single worded CTA
+              up top. */}
+          <div className="flex items-center gap-4">
+            <Link
+              href="/contact"
+              aria-label={settings.contact.linkLabel}
+              className="hover:text-primary focus-visible:ring-ring transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            >
+              <Mail className="size-5" />
+            </Link>
+            {settings.discordUrl && (
+              <a
+                href={settings.discordUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="ND Riot Discord"
+                className="hover:text-primary focus-visible:ring-ring transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              >
+                <SocialIcon platform="Discord" className="size-5" />
+              </a>
+            )}
+          </div>
           <span>{settings.footer}</span>
         </div>
       </footer>

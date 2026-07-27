@@ -54,6 +54,13 @@ export default defineType({
       group: 'general',
       description: 'The single line at the bottom of every page.',
     }),
+    defineField({
+      name: 'discordUrl',
+      title: 'Discord invite URL',
+      type: 'url',
+      group: 'general',
+      description: 'The ND Riot Discord invite — shown as an icon in the nav and footer. Blank hides it.',
+    }),
 
     defineField({
       name: 'hero',
