@@ -86,10 +86,16 @@ function FeatureBook({ book, ctaLabel }: { book: HeroBook; ctaLabel: string }) {
             {book.creatorName}
           </p>
         )}
-        <h2 className="text-lg leading-tight font-black tracking-tight text-white uppercase group-hover:underline sm:text-3xl lg:text-4xl">
+        <h2 className="text-base leading-tight font-black tracking-tight text-white uppercase group-hover:underline sm:text-2xl lg:text-3xl">
           {book.title}
         </h2>
-        <TaxonomyRow genres={book.genres} format={book.format} />
+        {/* Only the top genre on phones, where the column is tight; the full row
+            from sm up. */}
+        <TaxonomyRow
+          genres={book.genres}
+          format={book.format}
+          className="max-sm:[&>*:nth-child(n+2)]:hidden"
+        />
         {/* The blurb is room-permitting: hidden in the tight phone column, back
             from sm up. Cover + title + CTA carry the phone layout. */}
         {preview && (
@@ -239,7 +245,11 @@ export function Hero({ hero, feature, newItems, discoverHref, discoverLabel }: H
                     {hero.newHeading}
                   </h2>
                 </div>
-                <ul className="space-y-4">
+                {/* On phones the rail stacks below the feature, so cap it to
+                    three rows there — enough for a taste without pushing the
+                    content rows a screen down. Full list from sm up, where it
+                    sits beside the feature and balances its height. */}
+                <ul className="space-y-4 max-sm:[&>li:nth-child(n+4)]:hidden">
                   {newItems.map((item) => (
                     <NewRow key={item._id} item={item} />
                   ))}
