@@ -200,23 +200,34 @@ export function Hero({ hero, feature, newItems, discoverHref, discoverLabel }: H
         {(feature || newItems.length > 0) && (
           <div className="mt-8 grid gap-6 lg:grid-cols-[1.7fr_1fr] lg:gap-8">
             {feature && (
-              // The Discover button is a sibling of the feature's link, not
-              // nested inside it (anchors cannot nest), positioned over the
-              // panel's top-right.
-              <div className="relative h-full">
-                <FeatureBook book={feature} ctaLabel={hero.featureCtaLabel} />
-                {discoverHref && (
-                  <Link
-                    href={discoverHref}
-                    scroll={false}
-                    aria-label={discoverLabel ?? 'Discover'}
-                    className="focus-visible:ring-ring border-border bg-background/70 text-foreground hover:bg-background absolute top-3 right-3 z-10 inline-flex items-center gap-1.5 border p-2 text-xs font-bold tracking-widest uppercase backdrop-blur transition-colors focus-visible:ring-2 focus-visible:outline-none sm:px-3 sm:py-1.5"
-                  >
-                    {/* Icon-only in the tight phone column; labelled from sm up. */}
-                    <span className="hidden sm:inline">{discoverLabel ?? 'Discover'}</span>
-                    <Shuffle aria-hidden="true" strokeWidth={2.5} className="size-3.5" />
-                  </Link>
-                )}
+              <div className="flex h-full flex-col">
+                {/* "Featured" — named and set apart from the tagline above,
+                    mirroring the rail's heading opposite it. */}
+                <div className="mb-4 flex items-center gap-3">
+                  <h2 className="text-primary text-xs font-black tracking-[0.2em] uppercase">
+                    {hero.featuredHeading}
+                  </h2>
+                  <span className="h-px flex-1 bg-white/20" aria-hidden="true" />
+                </div>
+
+                {/* The Discover button is a sibling of the feature's link, not
+                    nested inside it (anchors cannot nest), over the panel's
+                    top-right. */}
+                <div className="relative flex-1">
+                  <FeatureBook book={feature} ctaLabel={hero.featureCtaLabel} />
+                  {discoverHref && (
+                    <Link
+                      href={discoverHref}
+                      scroll={false}
+                      aria-label={discoverLabel ?? 'Discover'}
+                      className="focus-visible:ring-ring border-border bg-background/70 text-foreground hover:bg-background absolute top-3 right-3 z-10 inline-flex items-center gap-1.5 border p-2 text-xs font-bold tracking-widest uppercase backdrop-blur transition-colors focus-visible:ring-2 focus-visible:outline-none sm:px-3 sm:py-1.5"
+                    >
+                      {/* Icon-only in the tight phone column; labelled from sm up. */}
+                      <span className="hidden sm:inline">{discoverLabel ?? 'Discover'}</span>
+                      <Shuffle aria-hidden="true" strokeWidth={2.5} className="size-3.5" />
+                    </Link>
+                  )}
+                </div>
               </div>
             )}
 

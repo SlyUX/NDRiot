@@ -2475,6 +2475,13 @@
               },
               "optional": true
             },
+            "featuredHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "newHeading": {
               "type": "objectAttribute",
               "value": {

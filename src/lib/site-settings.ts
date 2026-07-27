@@ -61,6 +61,8 @@ export interface HeroSettings {
   ctas: Cta[]
   /** "Read more" affordance on the featured book. */
   featureCtaLabel: string
+  /** Label over the featured book — e.g. "Featured". */
+  featuredHeading: string
   /** Heading over the "new books & creators" rail. */
   newHeading: string
 }
@@ -158,6 +160,7 @@ const DEFAULTS: SiteSettings = {
     headline: '“The Big Two”',
     tagline: 'Elevating Independent Comics',
     featureCtaLabel: 'Read more',
+    featuredHeading: 'Featured',
     newHeading: 'New Books & Creators',
     ctas: [
       { label: 'All Creators', href: '/creators' },
@@ -267,7 +270,7 @@ const DEFAULTS: SiteSettings = {
 export const SITE_SETTINGS_QUERY = `*[_id=="siteSettings"][0]{
   siteTitle,siteDescription,footer,
   home,sections,empty,
-  hero{background,headline,body,tagline,featureCtaLabel,newHeading,ctas[]{label,href}},
+  hero{background,headline,body,tagline,featureCtaLabel,featuredHeading,newHeading,ctas[]{label,href}},
   join{heading,body,ctaLabel,formUrl},
   contact{heading,linkLabel,body,nameLabel,emailLabel,subjectLabel,messageLabel,submitLabel,successMessage,errorMessage},
   nav[]{_type,label,href,groups[]{heading,useGenres,links[]{label,href}}}
@@ -304,6 +307,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       tagline: data.hero?.tagline?.trim() || DEFAULTS.hero.tagline,
       featureCtaLabel:
         data.hero?.featureCtaLabel?.trim() || DEFAULTS.hero.featureCtaLabel,
+      featuredHeading: data.hero?.featuredHeading?.trim() || DEFAULTS.hero.featuredHeading,
       newHeading: data.hero?.newHeading?.trim() || DEFAULTS.hero.newHeading,
       ctas: data.hero?.ctas?.length ? data.hero.ctas : DEFAULTS.hero.ctas,
     },

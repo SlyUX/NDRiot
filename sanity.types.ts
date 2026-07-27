@@ -407,6 +407,7 @@ export type SiteSettings = {
       _key: string;
     }>;
     featureCtaLabel?: string;
+    featuredHeading?: string;
     newHeading?: string;
     ctas?: Array<{
       label: string;

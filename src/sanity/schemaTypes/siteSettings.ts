@@ -107,6 +107,12 @@ export default defineType({
           description: 'The "read more" affordance on the featured book — e.g. "Read more".',
         }),
         defineField({
+          name: 'featuredHeading',
+          title: 'Featured book label',
+          type: 'string',
+          description: 'Small label over the featured book — e.g. "Featured".',
+        }),
+        defineField({
           name: 'newHeading',
           title: 'New books & creators heading',
           type: 'string',
