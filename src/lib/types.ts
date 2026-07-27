@@ -20,6 +20,9 @@ export type { BookFormat, Genre, MaturityRating } from '@/lib/taxonomy'
 export type SanityImage = ImageWithAlt
 export type RichText = NonNullable<COLUMN_QUERY_RESULT>['body']
 
+/** A page of results plus the full count, from a `{items,total}` query. */
+export type Paginated<T> = { items: T[]; total: number }
+
 export type BookSummary = BOOKS_QUERY_RESULT[number]
 export type CreatorSummary = CREATORS_QUERY_RESULT[number]
 export type ColumnSummary = COLUMNS_QUERY_RESULT[number]

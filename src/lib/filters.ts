@@ -223,3 +223,24 @@ export function discoverSeed(
 export function hasActiveFilters(filters: Record<string, unknown>): boolean {
   return Object.values(filters).some((v) => v !== null)
 }
+
+/**
+ * How many rows a paginated view shows before the first "Load More", and how
+ * many each press adds. Kept generous so most searches never need a second
+ * page, small enough that a 1,000-book roster never lands in one payload.
+ */
+export const PAGE_SIZE = 24
+
+/** A single scrollable row's worth for the homepage's browse rows. */
+export const HOME_ROW_LIMIT = 24
+
+/**
+ * The row count to fetch, read from a `limit` URL param and grown by Load More.
+ * Never below one page; capped so a hand-typed `?limit=999999` cannot pull the
+ * whole table at once.
+ */
+export function pageLimit(params: SearchParams, key = 'limit'): number {
+  const raw = Number.parseInt(one(params[key]) ?? '', 10)
+  if (!Number.isFinite(raw) || raw < PAGE_SIZE) return PAGE_SIZE
+  return Math.min(raw, 5000)
+}

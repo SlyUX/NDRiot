@@ -2,12 +2,21 @@ import { Suspense } from 'react'
 
 import { ContentCardGrid } from '@/components/content-card-grid'
 import { FilterBar } from '@/components/filter-bar'
+import { LoadMore } from '@/components/load-more'
 import { Section } from '@/components/ui/section'
 import { creatorToCard } from '@/lib/card-mappers'
-import { creatorFacets, creatorFilters, genreOptions, hasActiveFilters, type SearchParams } from '@/lib/filters'
+import {
+  PAGE_SIZE,
+  creatorFacets,
+  creatorFilters,
+  genreOptions,
+  hasActiveFilters,
+  pageLimit,
+  type SearchParams,
+} from '@/lib/filters'
 import { safeFetch, CREATORS_QUERY, FILTERED_CREATORS_QUERY, GENRES_WITH_BOOKS_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
-import type { CreatorSummary } from '@/lib/types'
+import type { CreatorSummary, Paginated } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,12 +28,18 @@ export default async function CreatorsPage({
   const params = await searchParams
   const filters = creatorFilters(params)
   const filtering = hasActiveFilters(filters)
+  const limit = pageLimit(params)
 
-  const [creators, genresWithBooks, settings] = await Promise.all([
-    safeFetch<CreatorSummary[]>(FILTERED_CREATORS_QUERY, filters, []),
+  const [result, genresWithBooks, settings] = await Promise.all([
+    safeFetch<Paginated<CreatorSummary>>(
+      FILTERED_CREATORS_QUERY,
+      { ...filters, limit },
+      { items: [], total: 0 },
+    ),
     safeFetch<string[]>(GENRES_WITH_BOOKS_QUERY, {}, []),
     getSiteSettings(),
   ])
+  const creators = result.items
 
   const fallback =
     filtering && creators.length === 0
@@ -40,7 +55,7 @@ export default async function CreatorsPage({
           {settings.sections.creatorsHeading}
         </h1>
         <Suspense fallback={null}>
-          <FilterBar facets={creatorFacets(genreOptions(genresWithBooks))} resultCount={creators.length}
+          <FilterBar facets={creatorFacets(genreOptions(genresWithBooks))} resultCount={result.total}
             searchLabel={settings.sections.searchCreatorsLabel}
             collapsible
             className="mt-8" />
@@ -54,6 +69,14 @@ export default async function CreatorsPage({
         summaryLines={4}
         padding="md"
         className="pt-6"
+        footer={
+          <LoadMore
+            searchParams={params}
+            shown={creators.length}
+            total={result.total}
+            pageSize={PAGE_SIZE}
+          />
+        }
         emptyMessage={
           filtering ? settings.empty.filteredCreators : settings.empty.creators
         }

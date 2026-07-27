@@ -77,6 +77,8 @@ export interface ContentCardGridProps {
   initialRows?: number
   /** Label for the reveal button. Copy, from the caller — AGENTS.md §2. */
   viewMoreLabel?: string
+  /** Rendered under the grid, inside the section — e.g. a "Load more" control. */
+  footer?: React.ReactNode
   /** Forwarded to the Section wrapper. */
   background?: SectionProps['background']
   padding?: SectionProps['padding']
@@ -101,6 +103,7 @@ export function ContentCardGrid({
   toolbar,
   initialRows,
   viewMoreLabel,
+  footer,
   background,
   padding,
   maxWidth,
@@ -173,6 +176,8 @@ export function ContentCardGrid({
           )
         })()
       )}
+
+      {footer}
     </Section>
   )
 }

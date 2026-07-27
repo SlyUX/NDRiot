@@ -2,12 +2,21 @@ import { Suspense } from 'react'
 
 import { ContentCardGrid } from '@/components/content-card-grid'
 import { FilterBar } from '@/components/filter-bar'
+import { LoadMore } from '@/components/load-more'
 import { Section } from '@/components/ui/section'
 import { bookToCard } from '@/lib/card-mappers'
-import { bookFacets, bookFilters, genreOptions, hasActiveFilters, type SearchParams } from '@/lib/filters'
+import {
+  PAGE_SIZE,
+  bookFacets,
+  bookFilters,
+  genreOptions,
+  hasActiveFilters,
+  pageLimit,
+  type SearchParams,
+} from '@/lib/filters'
 import { safeFetch, BOOKS_QUERY, FILTERED_BOOKS_QUERY, GENRES_WITH_BOOKS_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
-import type { BookSummary } from '@/lib/types'
+import type { BookSummary, Paginated } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,12 +28,18 @@ export default async function BooksPage({
   const params = await searchParams
   const filters = bookFilters(params)
   const filtering = hasActiveFilters(filters)
+  const limit = pageLimit(params)
 
-  const [books, genresWithBooks, settings] = await Promise.all([
-    safeFetch<BookSummary[]>(FILTERED_BOOKS_QUERY, filters, []),
+  const [result, genresWithBooks, settings] = await Promise.all([
+    safeFetch<Paginated<BookSummary>>(
+      FILTERED_BOOKS_QUERY,
+      { ...filters, limit },
+      { items: [], total: 0 },
+    ),
     safeFetch<string[]>(GENRES_WITH_BOOKS_QUERY, {}, []),
     getSiteSettings(),
   ])
+  const books = result.items
 
   // Only fetched when filtering emptied the page. An empty result is a
   // discovery moment, not an error (AGENTS.md §3) — so offer the rest of the
@@ -44,7 +59,7 @@ export default async function BooksPage({
           {settings.sections.booksHeading}
         </h1>
         <Suspense fallback={null}>
-          <FilterBar facets={bookFacets(genreOptions(genresWithBooks))} resultCount={books.length}
+          <FilterBar facets={bookFacets(genreOptions(genresWithBooks))} resultCount={result.total}
             searchLabel={settings.sections.searchBooksLabel}
             collapsible
             className="mt-8" />
@@ -56,6 +71,14 @@ export default async function BooksPage({
         columns={5}
         padding="md"
         className="pt-6"
+        footer={
+          <LoadMore
+            searchParams={params}
+            shown={books.length}
+            total={result.total}
+            pageSize={PAGE_SIZE}
+          />
+        }
         emptyMessage={
           filtering ? settings.empty.filteredBooks : settings.empty.books
         }

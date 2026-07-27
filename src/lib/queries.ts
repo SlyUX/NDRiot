@@ -37,15 +37,26 @@ export const BOOKS_QUERY = defineQuery(`*[_type=="book"]|order(title asc){_id,ti
  * An absent parameter is null, and `!defined(null)` is true — so each clause
  * disappears when its filter is not set.
  */
-export const FILTERED_BOOKS_QUERY = defineQuery(`*[
-  _type=="book"
-  && (!defined($genres) || count(genres[@ in $genres]) > 0)
-  && (!defined($format) || format == $format)
-  && (!defined($maturity) || maturity == $maturity)
-  && (!defined($status) || status == $status)
-  && (!defined($funding) || count(links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))]) > 0)
-  && (!defined($q) || title match $q || creator->name match $q)
-]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,issueCount,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}`)
+export const FILTERED_BOOKS_QUERY = defineQuery(`{
+  "items": *[
+    _type=="book"
+    && (!defined($genres) || count(genres[@ in $genres]) > 0)
+    && (!defined($format) || format == $format)
+    && (!defined($maturity) || maturity == $maturity)
+    && (!defined($status) || status == $status)
+    && (!defined($funding) || count(links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))]) > 0)
+    && (!defined($q) || title match $q || creator->name match $q)
+  ]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturity,issueCount,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},
+  "total": count(*[
+    _type=="book"
+    && (!defined($genres) || count(genres[@ in $genres]) > 0)
+    && (!defined($format) || format == $format)
+    && (!defined($maturity) || maturity == $maturity)
+    && (!defined($status) || status == $status)
+    && (!defined($funding) || count(links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))]) > 0)
+    && (!defined($q) || title match $q || creator->name match $q)
+  ])
+}`)
 
 /**
  * Creators, filtered.
@@ -54,17 +65,27 @@ export const FILTERED_BOOKS_QUERY = defineQuery(`*[
  * is membership rather than equality — the opposite way round from a book,
  * where format is singular.
  */
-export const FILTERED_CREATORS_QUERY = defineQuery(`*[
-  _type=="creator"
-  && (!defined($genres) || count(genres[@ in $genres]) > 0)
-  && (!defined($format) || $format in formats)
-  && (!defined($audience) || audience == $audience)
-  && (!defined($collaborating) || openToCollaboration == true)
-  && (!defined($q) || name match $q || studio->name match $q)
-]|order(name asc){
-  _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,
-  "bioText":pt::text(bio),
-  studio->{_id,name,"slug":slug.current,website,logo}
+export const FILTERED_CREATORS_QUERY = defineQuery(`{
+  "items": *[
+    _type=="creator"
+    && (!defined($genres) || count(genres[@ in $genres]) > 0)
+    && (!defined($format) || $format in formats)
+    && (!defined($audience) || audience == $audience)
+    && (!defined($collaborating) || openToCollaboration == true)
+    && (!defined($q) || name match $q || studio->name match $q)
+  ]|order(name asc)[0...$limit]{
+    _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,
+    "bioText":pt::text(bio),
+    studio->{_id,name,"slug":slug.current,website,logo}
+  },
+  "total": count(*[
+    _type=="creator"
+    && (!defined($genres) || count(genres[@ in $genres]) > 0)
+    && (!defined($format) || $format in formats)
+    && (!defined($audience) || audience == $audience)
+    && (!defined($collaborating) || openToCollaboration == true)
+    && (!defined($q) || name match $q || studio->name match $q)
+  ])
 }`)
 export const BOOK_QUERY = defineQuery(`*[_type=="book" && slug.current==$slug][0]{
   _id,title,status,genres,format,maturity,issueCount,description,cover,previewUrl,
@@ -76,7 +97,10 @@ export const BOOK_QUERY = defineQuery(`*[_type=="book" && slug.current==$slug][0
     "descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name
   }
 }`)
-export const GENRE_BOOKS_QUERY = defineQuery(`*[_type=="book" && $genre in genres]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}`)
+export const GENRE_BOOKS_QUERY = defineQuery(`{
+  "items": *[_type=="book" && $genre in genres]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},
+  "total": count(*[_type=="book" && $genre in genres])
+}`)
 
 /**
  * Every genre that at least one book actually uses — the source for every
@@ -157,8 +181,11 @@ export const SITEMAP_QUERY = defineQuery(`{
 }`)
 
 /** Creators who list a genre, for the category pages. */
-export const GENRE_CREATORS_QUERY = defineQuery(`*[_type=="creator" && $genre in genres]|order(name asc){
-  _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,
-  "bioText":pt::text(bio),
-  studio->{_id,name,"slug":slug.current,website,logo}
+export const GENRE_CREATORS_QUERY = defineQuery(`{
+  "items": *[_type=="creator" && $genre in genres]|order(name asc)[0...$limit]{
+    _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,
+    "bioText":pt::text(bio),
+    studio->{_id,name,"slug":slug.current,website,logo}
+  },
+  "total": count(*[_type=="creator" && $genre in genres])
 }`)

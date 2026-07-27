@@ -5,6 +5,7 @@ import { FilterBar } from '@/components/filter-bar'
 import { Hero } from '@/components/hero'
 import { bookToCard, creatorToCard, editorialToCard } from '@/lib/card-mappers'
 import {
+  HOME_ROW_LIMIT,
   bookFilters,
   creatorHomeFilters,
   discoverSeed,
@@ -12,6 +13,7 @@ import {
   hasActiveFilters,
   homeBookFacets,
   homeCreatorFacets,
+  pageLimit,
   seededShuffle,
   type SearchParams,
 } from '@/lib/filters'
@@ -32,6 +34,7 @@ import type {
   HeroBook,
   HomeEditorial,
   HomeNewItem,
+  Paginated,
 } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
@@ -81,19 +84,34 @@ export default async function Home({
   const bookSeed = discoverSeed(params, 'sort', 'seed')
   const creatorSeed = discoverSeed(params, 'csort', 'cseed')
 
-  const [feature, books, creators, genresWithBooks, newItems, homeEditorial, settings] =
+  // Browse shows a row's worth; a search on a row grows its own limit. Capped
+  // either way, so a 1,000-book roster never lands in one homepage payload.
+  const booksLimit = booksFiltering ? pageLimit(params, 'blimit') : HOME_ROW_LIMIT
+  const creatorsLimit = creatorsFiltering ? pageLimit(params, 'climit') : HOME_ROW_LIMIT
+
+  const [feature, booksResult, creatorsResult, genresWithBooks, newItems, homeEditorial, settings] =
     await Promise.all([
-    // Deliberately unfiltered. The hero is the guaranteed route to work
-    // nobody went looking for (AGENTS.md §3), so narrowing the page must
-    // never narrow it.
-    pickFeatureBook(),
-    safeFetch<BookSummary[]>(FILTERED_BOOKS_QUERY, booksFilters, []),
-    safeFetch<CreatorSummary[]>(FILTERED_CREATORS_QUERY, creatorsFilters, []),
-    safeFetch<string[]>(GENRES_WITH_BOOKS_QUERY, {}, []),
-    safeFetch<HomeNewItem[]>(HOME_NEW_QUERY, {}, []),
-    safeFetch<HomeEditorial[]>(HOME_EDITORIAL_QUERY, {}, []),
-    getSiteSettings(),
-  ])
+      // Deliberately unfiltered. The hero is the guaranteed route to work
+      // nobody went looking for (AGENTS.md §3), so narrowing the page must
+      // never narrow it.
+      pickFeatureBook(),
+      safeFetch<Paginated<BookSummary>>(
+        FILTERED_BOOKS_QUERY,
+        { ...booksFilters, limit: booksLimit },
+        { items: [], total: 0 },
+      ),
+      safeFetch<Paginated<CreatorSummary>>(
+        FILTERED_CREATORS_QUERY,
+        { ...creatorsFilters, limit: creatorsLimit },
+        { items: [], total: 0 },
+      ),
+      safeFetch<string[]>(GENRES_WITH_BOOKS_QUERY, {}, []),
+      safeFetch<HomeNewItem[]>(HOME_NEW_QUERY, {}, []),
+      safeFetch<HomeEditorial[]>(HOME_EDITORIAL_QUERY, {}, []),
+      getSiteSettings(),
+    ])
+  const books = booksResult.items
+  const creators = creatorsResult.items
 
   // Both rows offer the same genres — the set a book actually uses.
   const genres = genreOptions(genresWithBooks)
