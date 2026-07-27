@@ -1,276 +1,155 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { PortableText } from '@portabletext/react'
+import { ArrowRight, Book, User } from 'lucide-react'
 
-import { FundingBadge, MaturityOverlay, TaxonomyRow } from '@/components/content-card'
-import { HeroCarousel, type HeroSlide } from '@/components/hero-carousel'
-import { Logo } from '@/components/logo'
+import { MaturityOverlay, TaxonomyRow } from '@/components/content-card'
 import { Button } from '@/components/ui/button'
-import { bookToCard } from '@/lib/card-mappers'
 import type { HeroSettings } from '@/lib/site-settings'
-import type { HeroBook, LatestEditorial } from '@/lib/types'
+import type { HeroBook, HomeNewItem } from '@/lib/types'
 import { cn, truncate } from '@/lib/utils'
 import { urlFor } from '@/sanity/image'
 
 /**
- * Homepage hero: one persistent background, several foreground slides.
+ * Homepage hero — a split, not a carousel.
  *
- * Server Component. It builds the slides and hands them to HeroCarousel,
- * which is the only client code involved — so the cards keep rendering on the
- * server and nothing about books ships to the browser as logic.
+ * Left: one random book, given the spotlight. It is the §3 discovery hero — a
+ * guaranteed route to work nobody went looking for — so it stays random, never
+ * curated. Right: the newest books and creators to join the directory, ordered
+ * by arrival (which surfaces new entrants, not established ones). Above both,
+ * the site's identity line and its calls to action.
  *
- * Slide 1 is the pitch (logo, headline, body, CTAs) from siteSettings.
- * Slides 2-4 are the Homepage feature references, as horizontal cards.
+ * All server-rendered; nothing about the random draw ships to the browser.
  */
 
 export interface HeroProps {
   hero: HeroSettings
-  /** Chosen at random per request — see the homepage. */
-  books: HeroBook[]
-  /** The newest column/interview, for the carousel's closing slide. */
-  editorial?: LatestEditorial | null
+  /** One random book, chosen per request — the spotlight. */
+  feature: HeroBook | null
+  /** Newest books and creators, for the rail. */
+  newItems: HomeNewItem[]
 }
 
 /**
- * Shipped artwork, used when Sanity has no hero background.
- *
- * The Sanity field still wins — this is a default in the same sense as the
- * copy defaults in site-settings.ts, not a second source of truth. It exists
- * so the hero is never a bare black box, which is what an empty singleton
- * would otherwise produce on first load.
+ * Shipped artwork, used when Sanity has no hero background. The Sanity field
+ * still wins — this just keeps the hero from being a bare black box on first
+ * load, the way an empty singleton would otherwise render.
  */
 const BACKGROUND_FALLBACK = '/nd-riot-hero-bkgrd.jpg'
 
 /**
- * How long each slide holds.
- *
- * Not one shared interval, because the slides are not comparable. The pitch
- * runs to roughly a hundred words — about 25-30 seconds at normal reading
- * speed — so a five-second turn fades it out mid-argument, around the end of
- * the second sentence. A featured book is a title, a byline and a line of
- * summary, and stalling on it just makes the carousel feel stuck.
- *
- * 12s does not let anyone finish the pitch. It is a deliberate compromise:
- * long enough that the argument lands and the reader chooses to stay, short
- * enough that the featured work still surfaces on its own.
+ * The featured book — the full cover flush left, filling the panel's height at
+ * its native 2:3 (nothing cropped), with the title and blurb beside it. The
+ * whole panel links to the book. Stacks to cover-over-text on phones.
  */
-const PITCH_DURATION_MS = 12_000
-const FEATURE_DURATION_MS = 6_000
-
-/**
- * A book, at hero scale.
- *
- * Mirrors the pitch slide's two-column shape — art left, words right — so the
- * carousel reads as one composition rather than a pitch followed by some
- * cards. A ContentCard would have been the reuse-first choice, but its
- * horizontal layout is a list row: 96px thumbnail, clamped summary, no call
- * to action. Dropped into a 30rem hero it looked stranded, which is what the
- * previous version did. This composes the same pieces at a different scale
- * instead (AGENTS.md §4, option 3).
- */
-function FeatureSlide({ book, ctaLabel }: { book: HeroBook; ctaLabel: string }) {
-  const card = bookToCard(book)
-  // The full description, flattened and cut to a hero-sized preview — the "…"
-  // signals the rest is on the book page. Falls back to the short description
-  // for a book that has one but no full write-up.
-  const preview = truncate(book.descriptionText, 200) ?? truncate(book.shortDescription, 200)
+function FeatureBook({ book, ctaLabel }: { book: HeroBook; ctaLabel: string }) {
+  const preview = truncate(book.descriptionText, 280) ?? truncate(book.shortDescription, 280)
 
   return (
-    // `auto` on the first column, not a half share: the cover is 16rem, so an
-    // even split left ~440px of dead space between it and the text. Sizing
-    // the column to its content pulls the words back against the artwork.
-    // The trade is empty space on the right, which reads as deliberate
-    // margin rather than a gap in the middle of the composition.
-    <div className="grid items-center gap-8 md:grid-cols-[auto_1fr] md:gap-12">
-      <div className="flex justify-start">
-        <div
-          className={cn('relative w-48 shrink-0 overflow-hidden sm:w-56 lg:w-64 aspect-[2/3]')}
-        >
-          {card.image ? (
-            <Image
-              src={urlFor(card.image).width(600).url()}
-              alt={card.image.alt ?? card.imageAlt}
-              fill
-              sizes="(max-width: 1024px) 14rem, 16rem"
-              className="object-cover"
-            />
-          ) : (
-            <div className="bg-muted h-full w-full" aria-hidden="true" />
-          )}
-          {card.maturity && <MaturityOverlay maturity={card.maturity} />}
-          {card.fundingUrl && <FundingBadge url={card.fundingUrl} />}
-        </div>
-      </div>
-
-      <div className="max-w-xl">
-        {card.eyebrow && (
-          <p className="text-primary text-xs tracking-widest uppercase">{card.eyebrow}</p>
-        )}
-
-        {/* h2, not h1 — the page's h1 lives on the pitch slide. */}
-        <h2 className="mt-2 text-2xl leading-tight font-black tracking-tight text-white uppercase sm:text-3xl">
-          {card.title}
-        </h2>
-
-        <TaxonomyRow genres={card.genres} format={card.format} className="mt-3" />
-
-        {preview && (
-          <p className="mt-4 text-sm leading-relaxed text-white/85 sm:text-base">{preview}</p>
-        )}
-
-        <div className="mt-6">
-          <Button asChild size="lg" className="font-black tracking-wide uppercase">
-            <Link href={card.href}>{ctaLabel}</Link>
-          </Button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/**
- * The latest editorial piece, at hero scale — the carousel's closing slide.
- *
- * Same art-left / words-right shape as FeatureSlide, but the cover is 16:9
- * (editorial covers are landscape), so the art column is wider and shorter.
- */
-function EditorialSlide({ item, ctaLabel }: { item: LatestEditorial; ctaLabel: string }) {
-  const href =
-    item._type === 'column'
-      ? `/editorial/columns/${item.slug}`
-      : `/editorial/interviews/${item.slug}`
-  const kind = item._type === 'column' ? 'Column' : 'Interview'
-  // The column's author, the interview's subject — the person the piece is by
-  // or about, matching how each reads on its listing card.
-  const who = item._type === 'column' ? item.authorName : item.subjectName
-  const eyebrow = who ? `${kind} · ${who}` : kind
-  const preview = truncate(item.excerpt, 200)
-
-  return (
-    <div className="grid items-center gap-8 md:grid-cols-[auto_1fr] md:gap-12">
-      <div className="flex justify-start">
-        <div className="relative aspect-video w-64 shrink-0 overflow-hidden sm:w-80 lg:w-96">
-          {item.cover ? (
-            <Image
-              src={urlFor(item.cover).width(800).url()}
-              alt={item.cover.alt ?? ''}
-              fill
-              sizes="(max-width: 1024px) 20rem, 24rem"
-              className="object-cover"
-            />
-          ) : (
-            <div className="bg-muted h-full w-full" aria-hidden="true" />
-          )}
-        </div>
-      </div>
-
-      <div className="max-w-xl">
-        <p className="text-primary text-xs tracking-widest uppercase">{eyebrow}</p>
-
-        {/* h2, not h1 — the page's h1 lives on the pitch slide. */}
-        <h2 className="mt-2 text-2xl leading-tight font-black tracking-tight text-white uppercase sm:text-3xl">
-          {item.title}
-        </h2>
-
-        {preview && (
-          <p className="mt-4 text-sm leading-relaxed text-white/85 sm:text-base">{preview}</p>
-        )}
-
-        <div className="mt-6">
-          <Button asChild size="lg" className="font-black tracking-wide uppercase">
-            <Link href={href}>{ctaLabel}</Link>
-          </Button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-export function Hero({ hero, books, editorial }: HeroProps) {
-  const featured = books.filter(Boolean).slice(0, 3)
-
-  const pitchSlide = (
-    // `auto` on the logo column, not a half share — the container is the width
-    // of the logo, and the text pulls left against it. Matches FeatureSlide and
-    // the site's left-alignment; a 50/50 split floated the text off in a way
-    // nothing else does.
-    <div className="grid items-center gap-8 md:grid-cols-[auto_1fr] md:gap-12">
-      {/* The hero logo shows on desktop only. The nav already carries the brand,
-          and through the tablet/mobile range the headline leads instead — so the
-          logo is hidden below lg rather than competing with it. alt="" because
-          the headline beside it already names the site. */}
-      <div className="hidden justify-start lg:flex">
-        <Logo size="hero" alt="" priority />
-      </div>
-
-      <div className="max-w-xl">
-        <h1 className="text-3xl leading-none font-black tracking-tight text-white uppercase sm:text-4xl">
-          {hero.headline}
-        </h1>
-
-        {hero.body && (
-          <div className="mt-5 space-y-4 text-sm leading-relaxed text-white/85 sm:text-base [&_strong]:font-bold [&_strong]:text-white">
-            <PortableText value={hero.body} />
-          </div>
-        )}
-
-        {hero.ctas.length > 0 && (
-          <div className="mt-7 flex flex-wrap gap-3">
-            {hero.ctas.map((cta, i) => (
-              <Button
-                key={cta.href}
-                asChild
-                size="lg"
-                // First is the pink primary, second the white inverse —
-                // matching the design's paper-and-ink pairing.
-                variant={i === 0 ? 'default' : 'inverse'}
-                className="font-black tracking-wide uppercase"
-              >
-                <Link href={cta.href}>{cta.label}</Link>
-              </Button>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-
-  const slides: HeroSlide[] = [
-    {
-      content: pitchSlide,
-      label: hero.headline,
-      durationMs: PITCH_DURATION_MS,
-    },
-    ...featured.map((book) => ({
-      content: <FeatureSlide key={book._id} book={book} ctaLabel={hero.featureCtaLabel} />,
-      label: book.title,
-      durationMs: FEATURE_DURATION_MS,
-    })),
-    // The latest editorial, always last — the one slide that changes as the
-    // magazine publishes rather than with the random book draw.
-    ...(editorial
-      ? [
-          {
-            content: (
-              <EditorialSlide key={editorial._id} item={editorial} ctaLabel={hero.featureCtaLabel} />
-            ),
-            label: editorial.title,
-            durationMs: FEATURE_DURATION_MS,
-          },
-        ]
-      : []),
-  ]
-
-  return (
-    // Hand-rolled rather than <Section>, and deliberately: the background
-    // layers must be siblings of the contained inner div, not inside it, so
-    // they can span the full bleed while the slides stay at the site width.
-    // Section puts every child inside its inner container. Same two-layer
-    // shape, same padding scale — just assembled here.
-    <section
-      data-slot="section"
-      className="relative isolate overflow-hidden px-6 pt-12 pb-8"
+    <Link
+      href={`/books/${book.slug}`}
+      className="group focus-visible:ring-ring border-border flex h-full flex-col overflow-hidden border bg-black/40 focus-visible:ring-2 focus-visible:outline-none sm:min-h-[24rem] sm:flex-row"
     >
+      {/* Full-height on desktop (aspect derives the width), full-width portrait
+          on phones. Shown at the cover's native 2:3, so nothing is cropped. */}
+      <div className="bg-muted relative aspect-[2/3] w-full shrink-0 overflow-hidden sm:h-full sm:w-auto">
+        {book.cover ? (
+          <Image
+            src={urlFor(book.cover).width(800).url()}
+            alt={book.cover.alt ?? ''}
+            fill
+            sizes="(max-width: 640px) 100vw, 320px"
+            className="object-cover"
+            priority
+          />
+        ) : (
+          <div className="h-full w-full" aria-hidden="true" />
+        )}
+        {book.maturity && <MaturityOverlay maturity={book.maturity} />}
+        {book.fundingUrl && (
+          // A plain badge, not the linking FundingBadge: the panel already links
+          // to the book, and an anchor cannot nest inside another.
+          <span className="bg-funding absolute top-2 left-2 z-10 px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-black uppercase">
+            Currently Funding
+          </span>
+        )}
+      </div>
+
+      <div className="flex flex-1 flex-col justify-center gap-3 p-6 sm:p-8">
+        {book.creatorName && (
+          <p className="text-primary text-xs font-bold tracking-widest uppercase">
+            {book.creatorName}
+          </p>
+        )}
+        <h2 className="text-2xl leading-tight font-black tracking-tight text-white uppercase group-hover:underline sm:text-3xl lg:text-4xl">
+          {book.title}
+        </h2>
+        <TaxonomyRow genres={book.genres} format={book.format} />
+        {preview && (
+          <p className="line-clamp-4 text-sm leading-relaxed text-white/85 sm:text-base">
+            {preview}
+          </p>
+        )}
+        <span className="text-primary mt-1 inline-flex items-center gap-1 text-xs font-bold tracking-widest uppercase">
+          {ctaLabel}
+          <ArrowRight
+            aria-hidden="true"
+            className="size-3.5 transition-transform group-hover:translate-x-0.5 motion-reduce:transform-none"
+          />
+        </span>
+      </div>
+    </Link>
+  )
+}
+
+/** One rail row — a new book or creator, typed by its icon. */
+function NewRow({ item }: { item: HomeNewItem }) {
+  const isBook = item._type === 'book'
+  const href = isBook ? `/books/${item.slug}` : `/creators/${item.slug}`
+  const title = isBook ? item.title : item.name
+  const subtitle = isBook ? item.creatorName : (item.studioName ?? item.location)
+  const image = isBook ? item.cover : item.photo
+  const Icon = isBook ? Book : User
+  const typeLabel = isBook ? 'Comic' : 'Creator'
+  // A creator's portrait needs describing; a cover sits beside its own title.
+  const alt = isBook ? '' : `Portrait of ${item.name ?? 'creator'}`
+
+  return (
+    <li>
+      <Link
+        href={href}
+        className="group focus-visible:ring-ring flex items-center gap-3 focus-visible:ring-2 focus-visible:outline-none"
+      >
+        <div className="min-w-0 flex-1">
+          <p className="text-muted-foreground flex items-center gap-1.5 text-[10px] font-bold tracking-widest uppercase">
+            <Icon aria-hidden="true" className="size-3" />
+            {typeLabel}
+          </p>
+          <p className="group-hover:text-primary mt-1 line-clamp-2 text-sm leading-snug font-bold text-white transition-colors">
+            {title}
+          </p>
+          {subtitle && <p className="text-muted-foreground mt-0.5 truncate text-xs">{subtitle}</p>}
+        </div>
+        <div className="bg-muted relative aspect-[4/3] w-20 shrink-0 overflow-hidden sm:w-24">
+          {image && (
+            <Image
+              src={urlFor(image).width(240).url()}
+              alt={alt}
+              fill
+              sizes="96px"
+              className="object-cover"
+            />
+          )}
+        </div>
+      </Link>
+    </li>
+  )
+}
+
+export function Hero({ hero, feature, newItems }: HeroProps) {
+  return (
+    // Hand-rolled rather than <Section> so the background layers can span the
+    // full bleed while the content stays at the site width.
+    <section data-slot="section" className="relative isolate overflow-hidden px-6 pt-12 pb-10">
       <Image
         src={hero.background ? urlFor(hero.background).width(2400).url() : BACKGROUND_FALLBACK}
         alt=""
@@ -279,44 +158,56 @@ export function Hero({ hero, books, editorial }: HeroProps) {
         priority
         className="-z-20 object-cover"
       />
-
-      {/*
-        Two layers, because they do different jobs. The flat wash sets a
-        legibility floor everywhere; the gradient darkens the edges further so
-        the logo and body text sit on the quietest part of the collage.
-
-        These multiply, so read them together: at the edges roughly 85% of the
-        artwork is darkened away, in the centre roughly 75%. Pushing the flat
-        wash much past 0.75 loses the collage entirely, which is the whole
-        reason it is there.
-      */}
+      {/* A flat wash for a legibility floor, plus edge-darkening so text sits on
+          the quietest part of the collage. */}
       <div className="absolute inset-0 -z-10 bg-black/75" />
       <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
 
-      {/* Desktop: the carousel. Carousels are poor on phones, so it is hidden
-          there in favour of the static splash below. */}
-      <HeroCarousel slides={slides} className="mx-auto hidden w-full max-w-[90rem] md:block" />
+      <div className="mx-auto w-full max-w-[90rem]">
+        {/* Identity strip — the site's line and its calls to action. Outward
+            evangelism, so it leads the page. */}
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <h1 className="text-3xl leading-none font-black tracking-tight text-white uppercase sm:text-4xl lg:text-5xl">
+            {hero.tagline}
+          </h1>
+          {hero.ctas.length > 0 && (
+            <div className="flex flex-wrap gap-3">
+              {hero.ctas.map((cta, i) => (
+                <Button
+                  key={cta.href}
+                  asChild
+                  size="lg"
+                  // First is the pink primary, second the white inverse.
+                  variant={i === 0 ? 'default' : 'inverse'}
+                  className="font-black tracking-wide uppercase"
+                >
+                  <Link href={cta.href}>{cta.label}</Link>
+                </Button>
+              ))}
+            </div>
+          )}
+        </div>
 
-      {/* Mobile splash: tagline + buttons, static and left-aligned, no carousel.
-          The hero logo is intentionally omitted here (as on tablet) — the nav
-          already carries the brand, so the tagline leads. */}
-      <div className="mx-auto w-full max-w-[90rem] md:hidden">
-        <p className="text-2xl leading-tight font-black tracking-tight text-white uppercase">
-          {hero.tagline}
-        </p>
-        {hero.ctas.length > 0 && (
-          <div className="mt-6 flex flex-wrap gap-3">
-            {hero.ctas.map((cta, i) => (
-              <Button
-                key={cta.href}
-                asChild
-                size="lg"
-                variant={i === 0 ? 'default' : 'inverse'}
-                className="font-black tracking-wide uppercase"
-              >
-                <Link href={cta.href}>{cta.label}</Link>
-              </Button>
-            ))}
+        {/* The split: featured book left, new-arrivals rail right. */}
+        {(feature || newItems.length > 0) && (
+          <div className="mt-8 grid gap-6 lg:grid-cols-[1.7fr_1fr] lg:gap-8">
+            {feature && <FeatureBook book={feature} ctaLabel={hero.featureCtaLabel} />}
+
+            {newItems.length > 0 && (
+              <div className={cn(!feature && 'lg:col-span-full')}>
+                <div className="mb-4 flex items-center gap-3">
+                  <span className="h-px flex-1 bg-white/20" aria-hidden="true" />
+                  <h2 className="text-primary text-xs font-black tracking-[0.2em] uppercase">
+                    {hero.newHeading}
+                  </h2>
+                </div>
+                <ul className="space-y-4">
+                  {newItems.map((item) => (
+                    <NewRow key={item._id} item={item} />
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         )}
       </div>

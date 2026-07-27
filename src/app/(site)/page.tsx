@@ -21,7 +21,7 @@ import {
   GENRES_WITH_BOOKS_QUERY,
   HERO_BOOKS_QUERY,
   HOME_EDITORIAL_QUERY,
-  LATEST_EDITORIAL_QUERY,
+  HOME_NEW_QUERY,
   FILTERED_BOOKS_QUERY,
   FILTERED_CREATORS_QUERY,
 } from '@/lib/queries'
@@ -31,45 +31,28 @@ import type {
   CreatorSummary,
   HeroBook,
   HomeEditorial,
-  LatestEditorial,
+  HomeNewItem,
 } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
-/** Hero slides after the pitch. Three is what the carousel was built around. */
-const HERO_SLOTS = 3
-
 /**
- * Picks the books the hero will show.
+ * One random book for the hero spotlight.
  *
- * Random per request, not curated. Every book gets the same odds of the
- * homepage, which is the point: a directory that hand-picks its front page is
- * ranking its contributors, and this one deliberately does not.
+ * Random per request, not curated. Every book gets the same odds of the front
+ * page, which is the point (AGENTS.md §3): a directory that hand-picks its
+ * spotlight is ranking its contributors, and this one deliberately does not.
  *
- * Two queries because GROQ has no random(). Fetching identifiers and then only
- * the chosen few keeps the cost flat as the roster grows — fetching every book
- * in full to shuffle three of them would not.
+ * Two queries because GROQ has no random(): fetch identifiers, pick one, fetch
+ * only that — cost stays flat as the roster grows.
  */
-async function pickHeroBooks(): Promise<HeroBook[]> {
+async function pickFeatureBook(): Promise<HeroBook | null> {
   const ids = await safeFetch<string[]>(BOOK_IDS_QUERY, {}, [])
-  if (ids.length === 0) return []
+  if (ids.length === 0) return null
 
-  // Fisher-Yates over a copy. Partial is fine — we only need the front.
-  const pool = [...ids]
-  const take = Math.min(HERO_SLOTS, pool.length)
-  for (let i = 0; i < take; i++) {
-    const j = i + Math.floor(Math.random() * (pool.length - i))
-    ;[pool[i], pool[j]] = [pool[j], pool[i]]
-  }
-
-  const chosen = pool.slice(0, take)
-  const books = await safeFetch<HeroBook[]>(HERO_BOOKS_QUERY, { ids: chosen }, [])
-
-  // `in $ids` does not preserve the order we asked for, so re-apply it —
-  // otherwise the shuffle is undone by the query and the same book leads
-  // every time.
-  const order = new Map(chosen.map((id, i) => [id, i]))
-  return books.sort((a, b) => (order.get(a._id) ?? 0) - (order.get(b._id) ?? 0))
+  const id = ids[Math.floor(Math.random() * ids.length)]
+  const [book] = await safeFetch<HeroBook[]>(HERO_BOOKS_QUERY, { ids: [id] }, [])
+  return book ?? null
 }
 
 export default async function Home({
@@ -98,16 +81,16 @@ export default async function Home({
   const bookSeed = discoverSeed(params, 'sort', 'seed')
   const creatorSeed = discoverSeed(params, 'csort', 'cseed')
 
-  const [heroBooks, books, creators, genresWithBooks, editorial, homeEditorial, settings] =
+  const [feature, books, creators, genresWithBooks, newItems, homeEditorial, settings] =
     await Promise.all([
     // Deliberately unfiltered. The hero is the guaranteed route to work
     // nobody went looking for (AGENTS.md §3), so narrowing the page must
     // never narrow it.
-    pickHeroBooks(),
+    pickFeatureBook(),
     safeFetch<BookSummary[]>(FILTERED_BOOKS_QUERY, booksFilters, []),
     safeFetch<CreatorSummary[]>(FILTERED_CREATORS_QUERY, creatorsFilters, []),
     safeFetch<string[]>(GENRES_WITH_BOOKS_QUERY, {}, []),
-    safeFetch<LatestEditorial | null>(LATEST_EDITORIAL_QUERY, {}, null),
+    safeFetch<HomeNewItem[]>(HOME_NEW_QUERY, {}, []),
     safeFetch<HomeEditorial[]>(HOME_EDITORIAL_QUERY, {}, []),
     getSiteSettings(),
   ])
@@ -146,7 +129,7 @@ export default async function Home({
 
   return (
     <div>
-      <Hero hero={settings.hero} books={heroBooks} editorial={editorial} />
+      <Hero hero={settings.hero} feature={feature} newItems={newItems} />
 
       {/* Books: four across, opening two rows and revealing the next two on
           "view more" (so up to 16 are cut for). "View all" still links out to

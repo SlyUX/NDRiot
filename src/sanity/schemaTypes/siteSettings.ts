@@ -102,10 +102,15 @@ export default defineType({
         }),
         defineField({
           name: 'featureCtaLabel',
-          title: 'Featured slide button label',
+          title: 'Featured book link label',
           type: 'string',
-          description:
-            'On slides 2 onward, the button under a featured book or creator — e.g. "Read more". One label covers them all.',
+          description: 'The "read more" affordance on the featured book — e.g. "Read more".',
+        }),
+        defineField({
+          name: 'newHeading',
+          title: 'New books & creators heading',
+          type: 'string',
+          description: 'Over the rail beside the featured book — e.g. "New Books & Creators".',
         }),
         defineField({
           name: 'ctas',

@@ -56,11 +56,13 @@ export interface HeroSettings {
   background?: SanityImage
   headline: string
   body?: RichText
-  /** The mobile splash line under the logo, where the carousel is not shown. */
+  /** The hero's identity line — evangelism, not the pitch. */
   tagline: string
   ctas: Cta[]
-  /** Button label on the featured slides. */
+  /** "Read more" affordance on the featured book. */
   featureCtaLabel: string
+  /** Heading over the "new books & creators" rail. */
+  newHeading: string
 }
 
 export interface JoinSettings {
@@ -156,6 +158,7 @@ const DEFAULTS: SiteSettings = {
     headline: '“The Big Two”',
     tagline: 'Elevating Independent Comics',
     featureCtaLabel: 'Read more',
+    newHeading: 'New Books & Creators',
     ctas: [
       { label: 'All Creators', href: '/creators' },
       { label: 'All Comics', href: '/books' },
@@ -264,7 +267,7 @@ const DEFAULTS: SiteSettings = {
 export const SITE_SETTINGS_QUERY = `*[_id=="siteSettings"][0]{
   siteTitle,siteDescription,footer,
   home,sections,empty,
-  hero{background,headline,body,tagline,featureCtaLabel,ctas[]{label,href}},
+  hero{background,headline,body,tagline,featureCtaLabel,newHeading,ctas[]{label,href}},
   join{heading,body,ctaLabel,formUrl},
   contact{heading,linkLabel,body,nameLabel,emailLabel,subjectLabel,messageLabel,submitLabel,successMessage,errorMessage},
   nav[]{_type,label,href,groups[]{heading,useGenres,links[]{label,href}}}
@@ -301,6 +304,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       tagline: data.hero?.tagline?.trim() || DEFAULTS.hero.tagline,
       featureCtaLabel:
         data.hero?.featureCtaLabel?.trim() || DEFAULTS.hero.featureCtaLabel,
+      newHeading: data.hero?.newHeading?.trim() || DEFAULTS.hero.newHeading,
       ctas: data.hero?.ctas?.length ? data.hero.ctas : DEFAULTS.hero.ctas,
     },
     join: {

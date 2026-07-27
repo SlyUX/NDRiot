@@ -105,15 +105,19 @@ export const HOME_EDITORIAL_QUERY = defineQuery(`*[_type in ["column","interview
 }`)
 
 /**
- * The single most recent editorial piece — column or interview — for the hero
- * carousel's closing slide. Requires a cover, since the slide is a visual
- * preview; without one it would be a blank panel, so an imageless piece is
- * skipped in favour of the latest that has art. Returns null when there is none.
+ * Newest additions to the directory — books and creators interleaved — for the
+ * hero's "New Books & Creators" rail. Ordered by when each joined the directory
+ * (_createdAt), which is neutral and, by design, surfaces new entrants first
+ * (AGENTS.md §3) rather than rewarding whoever is already established.
+ *
+ * One shared shape discriminated by `_type`: a book fills title/cover/maturity/
+ * creatorName, a creator fills name/photo/location/studioName, and the fields
+ * that do not apply resolve to null.
  */
-export const LATEST_EDITORIAL_QUERY = defineQuery(`*[_type in ["column","interview"] && defined(slug.current) && defined(publishedAt) && defined(cover)]|order(publishedAt desc)[0]{
-  _id,_type,title,"slug":slug.current,excerpt,cover,publishedAt,
-  "authorName":author->name,
-  "subjectName":subject->name
+export const HOME_NEW_QUERY = defineQuery(`*[_type in ["book","creator"] && defined(slug.current)]|order(_createdAt desc)[0...6]{
+  _id,_type,"slug":slug.current,
+  title,cover,maturity,"creatorName":creator->name,
+  name,photo,location,"studioName":studio->name
 }`)
 
 export const DOWNLOADS_QUERY = defineQuery(`*[_type=="freeDownload"]|order(publishedAt desc){_id,title,"slug":slug.current,description,cover,publishedAt,"creatorName":creator->name}`)

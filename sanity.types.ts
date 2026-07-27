@@ -407,6 +407,7 @@ export type SiteSettings = {
       _key: string;
     }>;
     featureCtaLabel?: string;
+    newHeading?: string;
     ctas?: Array<{
       label: string;
       href: string;
@@ -1295,32 +1296,36 @@ export type HOME_EDITORIAL_QUERY_RESULT = Array<
 >;
 
 // Source: src/lib/queries.ts
-// Variable: LATEST_EDITORIAL_QUERY
-// Query: *[_type in ["column","interview"] && defined(slug.current) && defined(publishedAt) && defined(cover)]|order(publishedAt desc)[0]{  _id,_type,title,"slug":slug.current,excerpt,cover,publishedAt,  "authorName":author->name,  "subjectName":subject->name}
-export type LATEST_EDITORIAL_QUERY_RESULT =
+// Variable: HOME_NEW_QUERY
+// Query: *[_type in ["book","creator"] && defined(slug.current)]|order(_createdAt desc)[0...6]{  _id,_type,"slug":slug.current,  title,cover,maturity,"creatorName":creator->name,  name,photo,location,"studioName":studio->name}
+export type HOME_NEW_QUERY_RESULT = Array<
   | {
       _id: string;
-      _type: "column";
-      title: string;
+      _type: "book";
       slug: string;
-      excerpt: string | null;
+      title: string;
       cover: ImageWithAlt | null;
-      publishedAt: string;
-      authorName: string;
-      subjectName: null;
+      maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
+      creatorName: string;
+      name: null;
+      photo: null;
+      location: null;
+      studioName: null;
     }
   | {
       _id: string;
-      _type: "interview";
-      title: string;
+      _type: "creator";
       slug: string;
-      excerpt: string | null;
-      cover: ImageWithAlt | null;
-      publishedAt: string;
-      authorName: null;
-      subjectName: string;
+      title: null;
+      cover: null;
+      maturity: null;
+      creatorName: null;
+      name: string;
+      photo: ImageWithAlt | null;
+      location: string | null;
+      studioName: string | null;
     }
-  | null;
+>;
 
 // Source: src/lib/queries.ts
 // Variable: DOWNLOADS_QUERY
@@ -1492,7 +1497,7 @@ declare module "@sanity/client" {
     '*[_type=="interview"]|order(publishedAt desc){_id,title,"slug":slug.current,excerpt,cover,thumbnail,publishedAt,"interviewerName":interviewer->name,"subjectName":subject->name}': INTERVIEWS_QUERY_RESULT;
     '*[_type=="interview" && slug.current==$slug][0]{_id,title,body,publishedAt,cover,"interviewerName":interviewer->name,"subjectName":subject->name,"interviewer":interviewer->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}}}': INTERVIEW_QUERY_RESULT;
     '*[_type in ["column","interview"] && defined(slug.current)]|order(publishedAt desc)[0...8]{\n  _id,_type,title,"slug":slug.current,excerpt,cover,thumbnail,publishedAt,\n  "authorName":author->name,\n  "subjectName":subject->name\n}': HOME_EDITORIAL_QUERY_RESULT;
-    '*[_type in ["column","interview"] && defined(slug.current) && defined(publishedAt) && defined(cover)]|order(publishedAt desc)[0]{\n  _id,_type,title,"slug":slug.current,excerpt,cover,publishedAt,\n  "authorName":author->name,\n  "subjectName":subject->name\n}': LATEST_EDITORIAL_QUERY_RESULT;
+    '*[_type in ["book","creator"] && defined(slug.current)]|order(_createdAt desc)[0...6]{\n  _id,_type,"slug":slug.current,\n  title,cover,maturity,"creatorName":creator->name,\n  name,photo,location,"studioName":studio->name\n}': HOME_NEW_QUERY_RESULT;
     '*[_type=="freeDownload"]|order(publishedAt desc){_id,title,"slug":slug.current,description,cover,publishedAt,"creatorName":creator->name}': DOWNLOADS_QUERY_RESULT;
     '*[_type=="freeDownload" && slug.current==$slug][0]{_id,title,description,cover,"creatorName":creator->name,"fileUrl":file.asset->url}': DOWNLOAD_QUERY_RESULT;
     '*[_type=="book" && defined(slug.current)]._id': BOOK_IDS_QUERY_RESULT;

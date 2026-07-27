@@ -2475,6 +2475,13 @@
               },
               "optional": true
             },
+            "newHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "ctas": {
               "type": "objectAttribute",
               "value": {
