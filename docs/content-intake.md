@@ -211,9 +211,11 @@ truth for "is this live" is how content states get out of sync.
 
 - **Ownership.** Nothing currently links a Sanity user to a creator document.
   A creator record today *describes* a person; it does not *belong to* one.
-  Stage 3 and 4 both need that link. Adding it later means revisiting every
-  profile — cheap at one creator, not at fifty. Worth deciding before the
-  roster grows, even if we do not build on it yet.
+  Stage 3 and 4 both need that link. *Direction agreed 2026-07-27:* validate
+  identity with **Google sign-in** and hold the email→creator link in a
+  **private store** (never on the public doc — it is PII). Seed it from the
+  intake email; a "claim your profile" flow is the fallback. Full plan in
+  [`native-intake-brief.md`](native-intake-brief.md). Not built yet.
 - ~~**Edits vs. submissions.**~~ *Resolved 2026-07-25* — see "Updates: matching
   a resubmission to its record". An update is now a distinct, safe flow: matched
   to the real record by the profile the form had them pick, written as an edit
