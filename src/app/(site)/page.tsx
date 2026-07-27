@@ -50,11 +50,15 @@ export const dynamic = 'force-dynamic'
  * Two queries because GROQ has no random(): fetch identifiers, pick one, fetch
  * only that — cost stays flat as the roster grows.
  */
-async function pickFeatureBook(): Promise<HeroBook | null> {
+async function pickFeatureBook(exclude?: string): Promise<HeroBook | null> {
   const ids = await safeFetch<string[]>(BOOK_IDS_QUERY, {}, [])
   if (ids.length === 0) return null
 
-  const id = ids[Math.floor(Math.random() * ids.length)]
+  // "Discover" passes the current book so the next press lands on a different
+  // one — unless it is the only book, where there is nothing else to show.
+  const pool = exclude ? ids.filter((id) => id !== exclude) : ids
+  const from = pool.length ? pool : ids
+  const id = from[Math.floor(Math.random() * from.length)]
   const [book] = await safeFetch<HeroBook[]>(HERO_BOOKS_QUERY, { ids: [id] }, [])
   return book ?? null
 }
@@ -97,12 +101,15 @@ export default async function Home({
     ? pageLimit(params, 'climit', creatorsPage)
     : HOME_ROW_LIMIT
 
+  // The book the hero last showed, so "Discover" re-rolls to a different one.
+  const notFeature = Array.isArray(params.notf) ? params.notf[0] : params.notf
+
   const [feature, booksResult, creatorsResult, genresWithBooks, newItems, homeEditorial, settings] =
     await Promise.all([
       // Deliberately unfiltered. The hero is the guaranteed route to work
       // nobody went looking for (AGENTS.md §3), so narrowing the page must
       // never narrow it.
-      pickFeatureBook(),
+      pickFeatureBook(notFeature),
       safeFetch<Paginated<BookSummary>>(
         FILTERED_BOOKS_QUERY,
         { ...booksFilters, limit: booksLimit },
@@ -166,9 +173,25 @@ export default async function Home({
       ? creators
       : seededShuffle(creators, creatorSeed)
 
+  // "Discover" re-rolls the feature: the same URL with `notf` set to the current
+  // book, so the next render excludes it. Carries the other params through.
+  const discoverParams = new URLSearchParams()
+  for (const [key, value] of Object.entries(params)) {
+    if (value == null) continue
+    if (Array.isArray(value)) value.forEach((v) => discoverParams.append(key, v))
+    else discoverParams.set(key, value)
+  }
+  if (feature) discoverParams.set('notf', feature._id)
+
   return (
     <div>
-      <Hero hero={settings.hero} feature={feature} newItems={newItems} />
+      <Hero
+        hero={settings.hero}
+        feature={feature}
+        newItems={newItems}
+        discoverHref={feature ? `?${discoverParams.toString()}` : undefined}
+        discoverLabel={settings.sections.discoverLabel}
+      />
 
       {/* Books: one scrolling row while browsing; a two-row grid with "Load
           more" once a search narrows it. "View all" links to the full listing. */}

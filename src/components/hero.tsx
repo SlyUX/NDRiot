@@ -1,8 +1,8 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowRight, Book, User } from 'lucide-react'
+import { ArrowRight, Book, Shuffle, User } from 'lucide-react'
 
-import { MaturityOverlay, TaxonomyRow } from '@/components/content-card'
+import { TaxonomyRow } from '@/components/content-card'
 import { Button } from '@/components/ui/button'
 import type { HeroSettings } from '@/lib/site-settings'
 import type { HeroBook, HomeNewItem } from '@/lib/types'
@@ -27,6 +27,10 @@ export interface HeroProps {
   feature: HeroBook | null
   /** Newest books and creators, for the rail. */
   newItems: HomeNewItem[]
+  /** URL that re-rolls the feature to a different random book. Omit to hide. */
+  discoverHref?: string
+  /** Label for that button — CMS copy (AGENTS.md §2). */
+  discoverLabel?: string
 }
 
 /**
@@ -39,7 +43,7 @@ const BACKGROUND_FALLBACK = '/nd-riot-hero-bkgrd.jpg'
 /**
  * The featured book — the full cover flush left, filling the panel's height at
  * its native 2:3 (nothing cropped), with the title and blurb beside it. The
- * whole panel links to the book. Stacks to cover-over-text on phones.
+ * whole panel links to the book. Stays a two-column row down to phones.
  */
 function FeatureBook({ book, ctaLabel }: { book: HeroBook; ctaLabel: string }) {
   const preview = truncate(book.descriptionText, 280) ?? truncate(book.shortDescription, 280)
@@ -47,11 +51,12 @@ function FeatureBook({ book, ctaLabel }: { book: HeroBook; ctaLabel: string }) {
   return (
     <Link
       href={`/books/${book.slug}`}
-      className="group focus-visible:ring-ring border-border flex h-full flex-col overflow-hidden border bg-black/40 focus-visible:ring-2 focus-visible:outline-none sm:min-h-[24rem] sm:flex-row"
+      className="group focus-visible:ring-ring border-border flex h-full min-h-[13rem] flex-row overflow-hidden border bg-black/40 focus-visible:ring-2 focus-visible:outline-none sm:min-h-[26rem]"
     >
-      {/* Full-height on desktop (aspect derives the width), full-width portrait
-          on phones. Shown at the cover's native 2:3, so nothing is cropped. */}
-      <div className="bg-muted relative aspect-[2/3] w-full shrink-0 overflow-hidden sm:h-full sm:w-auto">
+      {/* The cover fills the panel height and the aspect derives its width, at
+          the cover's native 2:3 so nothing is cropped — a two-column row at
+          every width. */}
+      <div className="bg-muted relative aspect-[2/3] h-full w-auto shrink-0 overflow-hidden">
         {book.cover ? (
           <Image
             src={urlFor(book.cover).width(800).url()}
@@ -64,7 +69,6 @@ function FeatureBook({ book, ctaLabel }: { book: HeroBook; ctaLabel: string }) {
         ) : (
           <div className="h-full w-full" aria-hidden="true" />
         )}
-        {book.maturity && <MaturityOverlay maturity={book.maturity} />}
         {book.fundingUrl && (
           // A plain badge, not the linking FundingBadge: the panel already links
           // to the book, and an anchor cannot nest inside another.
@@ -74,18 +78,22 @@ function FeatureBook({ book, ctaLabel }: { book: HeroBook; ctaLabel: string }) {
         )}
       </div>
 
-      <div className="flex flex-1 flex-col justify-center gap-3 p-6 sm:p-8">
+      {/* pr-12 on mobile keeps the top lines clear of the Discover button in
+          the panel's corner; roomy uniform padding from sm up. */}
+      <div className="flex min-w-0 flex-1 flex-col justify-center gap-3 p-4 pr-12 sm:p-8">
         {book.creatorName && (
-          <p className="text-primary text-xs font-bold tracking-widest uppercase">
+          <p className="text-primary truncate text-xs font-bold tracking-widest uppercase">
             {book.creatorName}
           </p>
         )}
-        <h2 className="text-2xl leading-tight font-black tracking-tight text-white uppercase group-hover:underline sm:text-3xl lg:text-4xl">
+        <h2 className="text-lg leading-tight font-black tracking-tight text-white uppercase group-hover:underline sm:text-3xl lg:text-4xl">
           {book.title}
         </h2>
         <TaxonomyRow genres={book.genres} format={book.format} />
+        {/* The blurb is room-permitting: hidden in the tight phone column, back
+            from sm up. Cover + title + CTA carry the phone layout. */}
         {preview && (
-          <p className="line-clamp-4 text-sm leading-relaxed text-white/85 sm:text-base">
+          <p className="hidden text-sm leading-relaxed text-white/85 sm:line-clamp-4 sm:block sm:text-base">
             {preview}
           </p>
         )}
@@ -145,7 +153,7 @@ function NewRow({ item }: { item: HomeNewItem }) {
   )
 }
 
-export function Hero({ hero, feature, newItems }: HeroProps) {
+export function Hero({ hero, feature, newItems, discoverHref, discoverLabel }: HeroProps) {
   return (
     // Hand-rolled rather than <Section> so the background layers can span the
     // full bleed while the content stays at the site width.
@@ -191,7 +199,26 @@ export function Hero({ hero, feature, newItems }: HeroProps) {
         {/* The split: featured book left, new-arrivals rail right. */}
         {(feature || newItems.length > 0) && (
           <div className="mt-8 grid gap-6 lg:grid-cols-[1.7fr_1fr] lg:gap-8">
-            {feature && <FeatureBook book={feature} ctaLabel={hero.featureCtaLabel} />}
+            {feature && (
+              // The Discover button is a sibling of the feature's link, not
+              // nested inside it (anchors cannot nest), positioned over the
+              // panel's top-right.
+              <div className="relative h-full">
+                <FeatureBook book={feature} ctaLabel={hero.featureCtaLabel} />
+                {discoverHref && (
+                  <Link
+                    href={discoverHref}
+                    scroll={false}
+                    aria-label={discoverLabel ?? 'Discover'}
+                    className="focus-visible:ring-ring border-border bg-background/70 text-foreground hover:bg-background absolute top-3 right-3 z-10 inline-flex items-center gap-1.5 border p-2 text-xs font-bold tracking-widest uppercase backdrop-blur transition-colors focus-visible:ring-2 focus-visible:outline-none sm:px-3 sm:py-1.5"
+                  >
+                    {/* Icon-only in the tight phone column; labelled from sm up. */}
+                    <span className="hidden sm:inline">{discoverLabel ?? 'Discover'}</span>
+                    <Shuffle aria-hidden="true" strokeWidth={2.5} className="size-3.5" />
+                  </Link>
+                )}
+              </div>
+            )}
 
             {newItems.length > 0 && (
               <div className={cn(!feature && 'lg:col-span-full')}>
