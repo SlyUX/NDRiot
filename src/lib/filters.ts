@@ -239,8 +239,8 @@ export const HOME_ROW_LIMIT = 24
  * Never below one page; capped so a hand-typed `?limit=999999` cannot pull the
  * whole table at once.
  */
-export function pageLimit(params: SearchParams, key = 'limit'): number {
+export function pageLimit(params: SearchParams, key = 'limit', floor = PAGE_SIZE): number {
   const raw = Number.parseInt(one(params[key]) ?? '', 10)
-  if (!Number.isFinite(raw) || raw < PAGE_SIZE) return PAGE_SIZE
+  if (!Number.isFinite(raw) || raw < floor) return floor
   return Math.min(raw, 5000)
 }

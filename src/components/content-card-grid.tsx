@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 
 import { ContentCard, type ContentCardProps } from '@/components/content-card'
-import { ExpandableGrid } from '@/components/expandable-grid'
+import { HorizontalScroller } from '@/components/horizontal-scroller'
 import { SectionHeading } from '@/components/section-heading'
 import { Section, type SectionProps } from '@/components/ui/section'
 import { Button } from '@/components/ui/button'
@@ -70,15 +70,14 @@ export interface ContentCardGridProps {
    * row is still there to loosen.
    */
   toolbar?: React.ReactNode
-  /**
-   * Open with this many rows and reveal the rest behind a "view more" press.
-   * Omit to render every card at once. Pairs with `viewMoreLabel`.
-   */
-  initialRows?: number
-  /** Label for the reveal button. Copy, from the caller — AGENTS.md §2. */
-  viewMoreLabel?: string
   /** Rendered under the grid, inside the section — e.g. a "Load more" control. */
   footer?: React.ReactNode
+  /**
+   * Render as a single horizontally-scrolling row instead of a wrapping grid —
+   * the homepage's browse rows, where one row is a taste and the rest is a
+   * swipe/scroll away. Ignored when `initialRows` is set.
+   */
+  scroll?: boolean
   /** Forwarded to the Section wrapper. */
   background?: SectionProps['background']
   padding?: SectionProps['padding']
@@ -101,9 +100,8 @@ export function ContentCardGrid({
   viewAllLabel,
   emptyMessage,
   toolbar,
-  initialRows,
-  viewMoreLabel,
   footer,
+  scroll = false,
   background,
   padding,
   maxWidth,
@@ -145,7 +143,17 @@ export function ContentCardGrid({
             dividers && 'lg:gap-x-12',
           )
           const cells = cards.map((card, index) => (
-            <div key={card.href} className={cn('relative', dividers && 'lg:pl-6')}>
+            <div
+              key={card.href}
+              className={cn(
+                'relative',
+                dividers && 'lg:pl-6',
+                // In a scroll row each cell holds a fixed width and snaps —
+                // narrow for vertical covers, wider for horizontal list rows.
+                scroll && 'shrink-0 snap-start',
+                scroll && (layout === 'horizontal' ? 'w-72 sm:w-80' : 'w-40 sm:w-44 lg:w-56'),
+              )}
+            >
               {dividers && index > 0 && (
                 <Separator
                   orientation="vertical"
@@ -162,15 +170,9 @@ export function ContentCardGrid({
             </div>
           ))
 
-          // Reveal-on-demand when a row cap is set; otherwise render them all.
-          return initialRows && viewMoreLabel ? (
-            <ExpandableGrid
-              gridClassName={gridClassName}
-              initialCount={initialRows * columns}
-              moreLabel={viewMoreLabel}
-            >
-              {cells}
-            </ExpandableGrid>
+          // One scrolling row (browse) or a plain wrapping grid.
+          return scroll ? (
+            <HorizontalScroller>{cells}</HorizontalScroller>
           ) : (
             <div className={gridClassName}>{cells}</div>
           )

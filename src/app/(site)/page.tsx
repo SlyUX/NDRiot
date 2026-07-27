@@ -3,6 +3,7 @@ import { Suspense } from 'react'
 import { ContentCardGrid } from '@/components/content-card-grid'
 import { FilterBar } from '@/components/filter-bar'
 import { Hero } from '@/components/hero'
+import { LoadMore } from '@/components/load-more'
 import { bookToCard, creatorToCard, editorialToCard } from '@/lib/card-mappers'
 import {
   HOME_ROW_LIMIT,
@@ -86,8 +87,15 @@ export default async function Home({
 
   // Browse shows a row's worth; a search on a row grows its own limit. Capped
   // either way, so a 1,000-book roster never lands in one homepage payload.
-  const booksLimit = booksFiltering ? pageLimit(params, 'blimit') : HOME_ROW_LIMIT
-  const creatorsLimit = creatorsFiltering ? pageLimit(params, 'climit') : HOME_ROW_LIMIT
+  // A search opens on two rows and grows a page (two rows) per "Load more".
+  const BOOKS_COLS = 5
+  const CREATORS_COLS = 4
+  const booksPage = 2 * BOOKS_COLS
+  const creatorsPage = 2 * CREATORS_COLS
+  const booksLimit = booksFiltering ? pageLimit(params, 'blimit', booksPage) : HOME_ROW_LIMIT
+  const creatorsLimit = creatorsFiltering
+    ? pageLimit(params, 'climit', creatorsPage)
+    : HOME_ROW_LIMIT
 
   const [feature, booksResult, creatorsResult, genresWithBooks, newItems, homeEditorial, settings] =
     await Promise.all([
@@ -122,7 +130,7 @@ export default async function Home({
         facets={homeBookFacets(genres)}
         control="select"
         collapsible
-        resultCount={books.length}
+        resultCount={booksResult.total}
         searchLabel={settings.sections.searchBooksLabel}
         discoverLabel={settings.sections.discoverLabel}
       />
@@ -135,7 +143,7 @@ export default async function Home({
         facets={homeCreatorFacets(genres)}
         control="select"
         collapsible
-        resultCount={creators.length}
+        resultCount={creatorsResult.total}
         searchLabel={settings.sections.searchCreatorsLabel}
         discoverLabel={settings.sections.discoverLabel}
         searchParam="cq"
@@ -145,38 +153,69 @@ export default async function Home({
     </Suspense>
   )
 
+  // Browsing shuffles when Discover is on; a search leaves the order alone so
+  // Load More does not reshuffle the set under the reader.
+  const displayBooks = booksFiltering
+    ? books
+    : bookSeed === null
+      ? books
+      : seededShuffle(books, bookSeed)
+  const displayCreators = creatorsFiltering
+    ? creators
+    : creatorSeed === null
+      ? creators
+      : seededShuffle(creators, creatorSeed)
+
   return (
     <div>
       <Hero hero={settings.hero} feature={feature} newItems={newItems} />
 
-      {/* Books: four across, opening two rows and revealing the next two on
-          "view more" (so up to 16 are cut for). "View all" still links out to
-          the full listing. */}
+      {/* Books: one scrolling row while browsing; a two-row grid with "Load
+          more" once a search narrows it. "View all" links to the full listing. */}
       <ContentCardGrid
         heading={settings.home.booksHeading}
         toolbar={booksBar}
-        cards={(bookSeed === null ? books : seededShuffle(books, bookSeed)).slice(0, 16).map(bookToCard)}
-        columns={5}
-        initialRows={2}
-        viewMoreLabel={settings.home.viewMoreLabel}
+        cards={displayBooks.map(bookToCard)}
+        columns={BOOKS_COLS}
+        scroll={!booksFiltering}
+        footer={
+          booksFiltering ? (
+            <LoadMore
+              searchParams={params}
+              param="blimit"
+              shown={books.length}
+              total={booksResult.total}
+              pageSize={booksPage}
+            />
+          ) : undefined
+        }
         padding="md"
         viewAllHref="/books"
         viewAllLabel={settings.home.viewAllLabel}
         emptyMessage={booksFiltering ? settings.empty.filteredBooks : settings.empty.books}
       />
 
-      {/* Creators: wide horizontal cards, three across, each showing a bio
-          preview. summaryLines=4 gives the ~160-character bio room the list-row
-          default (2) would clip. Two rows open, up to two more on "view more". */}
+      {/* Creators: wide horizontal cards. Same browse-scroll / search-grid split
+          as the books row above. */}
       <ContentCardGrid
         heading={settings.home.creatorsHeading}
         toolbar={creatorsBar}
-        cards={(creatorSeed === null ? creators : seededShuffle(creators, creatorSeed)).slice(0, 12).map(creatorToCard)}
+        cards={displayCreators.map(creatorToCard)}
         layout="horizontal"
-        columns={4}
+        columns={CREATORS_COLS}
         summaryLines={4}
-        initialRows={2}
-        viewMoreLabel={settings.home.viewMoreLabel}
+        scroll={!creatorsFiltering}
+        footer={
+          creatorsFiltering ? (
+            <LoadMore
+              searchParams={params}
+              param="climit"
+              shown={creators.length}
+              total={creatorsResult.total}
+              pageSize={creatorsPage}
+            />
+          ) : undefined
+        }
         padding="md"
         background="charcoal"
         viewAllHref="/creators"
@@ -190,11 +229,12 @@ export default async function Home({
       {homeEditorial.length > 0 && (
         <ContentCardGrid
           heading={settings.home.editorialHeading}
-          cards={homeEditorial.slice(0, 4).map(editorialToCard)}
+          cards={homeEditorial.map(editorialToCard)}
           layout="horizontal"
           columns={4}
           aspectRatio="landscape"
           summaryLines={3}
+          scroll
           padding="md"
           viewAllHref="/editorial"
           viewAllLabel={settings.home.viewAllLabel}
