@@ -17,7 +17,9 @@ import { apiVersion, projectId } from './env'
  * per creator). Server-only: the token must never reach the browser.
  */
 
-const OWNERSHIP_DATASET = process.env.SANITY_OWNERSHIP_DATASET ?? 'ownership'
+// The private dataset holding the ownership map. Overridable via env, defaulting
+// to the provisioned `ndriot_auth` dataset so no extra Vercel var is required.
+const OWNERSHIP_DATASET = process.env.SANITY_OWNERSHIP_DATASET ?? 'ndriot_auth'
 
 let cached: SanityClient | null = null
 
