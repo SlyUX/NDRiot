@@ -113,6 +113,7 @@ export type CreatorIntakeSettings = {
   websiteLabel: string
   socialsLabel: string
   socialsHint: string
+  socialPlatformPlaceholder: string
   worksLabel: string
   worksHint: string
   workPlatformPlaceholder: string
@@ -269,7 +270,8 @@ const DEFAULTS: SiteSettings = {
     collabNoLabel: 'Not right now',
     websiteLabel: 'Your website',
     socialsLabel: 'Social links',
-    socialsHint: 'One link per line.',
+    socialsHint: 'Pick a platform and paste the link to your profile there. Add a row for each.',
+    socialPlatformPlaceholder: 'Choose a platform',
     worksLabel: 'Where can readers find your work?',
     worksHint:
       'Add platform profile pages like Amazon Author pages, Webtoon Series pages, or similar. NOT individual book pages — those go on your book pages, which you’ll be able to create once your Creator page is published.',

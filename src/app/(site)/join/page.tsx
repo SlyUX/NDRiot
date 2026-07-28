@@ -34,7 +34,7 @@ type EditProfile = {
   location: string | null
   website: string | null
   bioText: string | null
-  socialUrls: string[] | null
+  socials: { platform: string | null; url: string | null }[] | null
   works: { label: string | null; url: string | null }[] | null
   genres: string[] | null
   formats: string[] | null
@@ -53,7 +53,7 @@ function toInitial(p: EditProfile): CreatorIntakeInitial {
     location: p.location ?? '',
     website: p.website ?? '',
     bio: p.bioText ?? '',
-    socials: (p.socialUrls ?? []).join('\n'),
+    socials: (p.socials ?? []).map((s) => ({ platform: s.platform ?? '', url: s.url ?? '' })),
     works: (p.works ?? []).map((w) => ({ label: w.label ?? '', url: w.url ?? '' })),
     genres: p.genres ?? [],
     formats: p.formats ?? [],

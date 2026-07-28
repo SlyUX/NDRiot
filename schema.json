@@ -191,6 +191,10 @@
               },
               {
                 "type": "string",
+                "value": "Discord"
+              },
+              {
+                "type": "string",
                 "value": "Website"
               },
               {
@@ -3200,6 +3204,13 @@
               "optional": true
             },
             "socialsHint": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "socialPlatformPlaceholder": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

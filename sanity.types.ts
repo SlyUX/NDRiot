@@ -54,7 +54,14 @@ export type FavoriteCreator = {
 export type SocialLink = {
   _type: "socialLink";
   platform:
-    "Instagram" | "X" | "Bluesky" | "TikTok" | "YouTube" | "Website" | "Other";
+    | "Instagram"
+    | "X"
+    | "Bluesky"
+    | "TikTok"
+    | "YouTube"
+    | "Discord"
+    | "Website"
+    | "Other";
   url: string;
 };
 
@@ -512,6 +519,7 @@ export type SiteSettings = {
     websiteLabel?: string;
     socialsLabel?: string;
     socialsHint?: string;
+    socialPlatformPlaceholder?: string;
     worksLabel?: string;
     worksHint?: string;
     workPlatformPlaceholder?: string;
@@ -1528,7 +1536,7 @@ export type INTAKE_CREATORS_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: INTAKE_CREATOR_EDIT_QUERY
-// Query: *[_type=="creator" && _id==$id][0]{  _id,name,"slug":slug.current,location,website,  "bioText":pt::text(bio),  "socialUrls":socials[].url,  works[]{label,url},  genres,formats,audience,openToCollaboration,  "studioId":studio._ref,  "orgIds":organizations[]._ref}
+// Query: *[_type=="creator" && _id==$id][0]{  _id,name,"slug":slug.current,location,website,  "bioText":pt::text(bio),  socials[]{platform,url},  works[]{label,url},  genres,formats,audience,openToCollaboration,  "studioId":studio._ref,  "orgIds":organizations[]._ref}
 export type INTAKE_CREATOR_EDIT_QUERY_RESULT = {
   _id: string;
   name: string;
@@ -1536,7 +1544,18 @@ export type INTAKE_CREATOR_EDIT_QUERY_RESULT = {
   location: string | null;
   website: string | null;
   bioText: string;
-  socialUrls: Array<string> | null;
+  socials: Array<{
+    platform:
+      | "Bluesky"
+      | "Discord"
+      | "Instagram"
+      | "Other"
+      | "TikTok"
+      | "Website"
+      | "X"
+      | "YouTube";
+    url: string;
+  }> | null;
   works: Array<{
     label: string;
     url: string;
@@ -1640,7 +1659,7 @@ declare module "@sanity/client" {
     '*[_type=="organization" && defined(name)]|order(name asc){_id,name}': INTAKE_ORGANIZATIONS_QUERY_RESULT;
     '*[_type=="creator"]._id': INTAKE_CREATOR_IDS_QUERY_RESULT;
     '*[_type=="creator" && defined(slug.current)]|order(name asc){_id,name}': INTAKE_CREATORS_QUERY_RESULT;
-    '*[_type=="creator" && _id==$id][0]{\n  _id,name,"slug":slug.current,location,website,\n  "bioText":pt::text(bio),\n  "socialUrls":socials[].url,\n  works[]{label,url},\n  genres,formats,audience,openToCollaboration,\n  "studioId":studio._ref,\n  "orgIds":organizations[]._ref\n}': INTAKE_CREATOR_EDIT_QUERY_RESULT;
+    '*[_type=="creator" && _id==$id][0]{\n  _id,name,"slug":slug.current,location,website,\n  "bioText":pt::text(bio),\n  socials[]{platform,url},\n  works[]{label,url},\n  genres,formats,audience,openToCollaboration,\n  "studioId":studio._ref,\n  "orgIds":organizations[]._ref\n}': INTAKE_CREATOR_EDIT_QUERY_RESULT;
     '{\n  "items": *[_type=="creator" && $genre in genres]|order(name asc)[0...$limit]{\n    _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,\n    "bioText":pt::text(bio),\n    studio->{_id,name,"slug":slug.current,website,logo}\n  },\n  "total": count(*[_type=="creator" && $genre in genres])\n}': GENRE_CREATORS_QUERY_RESULT;
   }
 }

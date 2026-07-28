@@ -461,7 +461,18 @@ export default defineType({
         defineField({ name: 'collabNoLabel', title: 'Collaboration — no option', type: 'string' }),
         defineField({ name: 'websiteLabel', title: 'Website label', type: 'string' }),
         defineField({ name: 'socialsLabel', title: 'Socials label', type: 'string' }),
-        defineField({ name: 'socialsHint', title: 'Socials hint', type: 'string', description: 'e.g. "One link per line."' }),
+        defineField({
+          name: 'socialsHint',
+          title: 'Socials hint',
+          type: 'string',
+          description: 'Under the platform + URL rows, e.g. "Pick a platform and paste your profile link."',
+        }),
+        defineField({
+          name: 'socialPlatformPlaceholder',
+          title: 'Socials — platform dropdown placeholder',
+          type: 'string',
+          description: 'The unselected option in each row’s platform dropdown, e.g. "Choose a platform". The platform list itself comes from the site taxonomy.',
+        }),
         defineField({
           name: 'worksLabel',
           title: 'Work links — label',

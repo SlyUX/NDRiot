@@ -216,7 +216,7 @@ export const INTAKE_CREATORS_QUERY = defineQuery(
 export const INTAKE_CREATOR_EDIT_QUERY = defineQuery(`*[_type=="creator" && _id==$id][0]{
   _id,name,"slug":slug.current,location,website,
   "bioText":pt::text(bio),
-  "socialUrls":socials[].url,
+  socials[]{platform,url},
   works[]{label,url},
   genres,formats,audience,openToCollaboration,
   "studioId":studio._ref,

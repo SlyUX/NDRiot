@@ -1,12 +1,12 @@
 'use server'
 
-import { GENRES, FORMATS, MATURITY_RATINGS } from '@/lib/taxonomy'
+import { GENRES, FORMATS, MATURITY_RATINGS, SOCIAL_PLATFORMS } from '@/lib/taxonomy'
 import { honeypotTripped, rateLimited, submittedTooFast } from '@/lib/intake/anti-spam'
 import {
+  buildSocials,
   buildWorks,
   isYes,
   matchTaxonomy,
-  parseSocials,
   slugify,
   toPortableText,
 } from '@/lib/intake/mapping'
@@ -49,7 +49,6 @@ export type CreatorIntakeState = {
     slug: string
     location: string
     website: string
-    socials: string
     photoAlt: string
     anythingElse: string
   }
@@ -85,7 +84,6 @@ export async function submitCreator(
     slug: String(formData.get('slug') ?? '').trim(),
     location: String(formData.get('location') ?? '').trim(),
     website: String(formData.get('website') ?? '').trim(),
-    socials: String(formData.get('socials') ?? '').trim(),
     photoAlt: String(formData.get('photoAlt') ?? '').trim(),
     anythingElse: String(formData.get('anythingElse') ?? '').trim(),
   }
@@ -201,7 +199,11 @@ export async function submitCreator(
   if (values.location) fields.location = values.location
   if (website) fields.website = website
   if (values.bio) fields.bio = toPortableText(values.bio)
-  const socials = parseSocials(values.socials)
+  const socials = buildSocials(
+    formData.getAll('socialPlatform').map(String),
+    formData.getAll('socialUrl').map(String),
+    SOCIAL_PLATFORMS,
+  )
   if (socials.length) fields.socials = socials
   const works = buildWorks(
     formData.getAll('workLabel').map(String),

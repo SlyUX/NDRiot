@@ -4,7 +4,13 @@ import { useActionState, useEffect, useRef, useState } from 'react'
 
 import { submitCreator, type CreatorIntakeState } from '@/app/actions/creator-intake'
 import { Button } from '@/components/ui/button'
-import { GENRES, FORMATS, MATURITY_RATINGS, MATURITY_DESCRIPTIONS } from '@/lib/taxonomy'
+import {
+  GENRES,
+  FORMATS,
+  MATURITY_RATINGS,
+  MATURITY_DESCRIPTIONS,
+  SOCIAL_PLATFORMS,
+} from '@/lib/taxonomy'
 import { cn } from '@/lib/utils'
 import type { CreatorIntakeSettings } from '@/lib/site-settings'
 
@@ -45,7 +51,7 @@ export interface CreatorIntakeInitial {
   location: string
   website: string
   bio: string
-  socials: string
+  socials: { platform: string; url: string }[]
   works: { label: string; url: string }[]
   genres: string[]
   formats: string[]
@@ -116,6 +122,100 @@ function CreatorSearchPicker({
       </ul>
       <p className={hintClass}>{copy.updateSkipHint}</p>
     </div>
+  )
+}
+
+/**
+ * Repeatable "platform + URL" rows for a creator's social links. Each row's
+ * dropdown offers only platforms not already chosen by another row (plus its
+ * own current pick), so a platform disappears from the rest as it's used.
+ * Submits parallel `socialPlatform` / `socialUrl` arrays the action zips.
+ * Prepopulated on an update; capped at one row per platform.
+ */
+function SocialLinksField({
+  copy,
+  initial,
+}: {
+  copy: CreatorIntakeSettings
+  initial?: { platform: string; url: string }[]
+}) {
+  const [rows, setRows] = useState<{ platform: string; url: string; key: number }[]>(() =>
+    (initial && initial.length ? initial : [{ platform: '', url: '' }]).map((r, i) => ({
+      ...r,
+      key: i,
+    })),
+  )
+
+  const addRow = () =>
+    setRows((prev) => [
+      ...prev,
+      { platform: '', url: '', key: prev.reduce((m, r) => Math.max(m, r.key), -1) + 1 },
+    ])
+  const removeRow = (key: number) =>
+    setRows((prev) => (prev.length > 1 ? prev.filter((r) => r.key !== key) : prev))
+  const update = (key: number, field: 'platform' | 'url', value: string) =>
+    setRows((prev) => prev.map((r) => (r.key === key ? { ...r, [field]: value } : r)))
+
+  const used = new Set(rows.map((r) => r.platform).filter(Boolean))
+
+  return (
+    <fieldset className="space-y-3">
+      <legend className={labelClass}>
+        {copy.socialsLabel}
+        <Optional label={copy.optionalLabel} />
+      </legend>
+      <p className={hintClass}>{copy.socialsHint}</p>
+      <div className="space-y-2">
+        {rows.map((row) => (
+          <div key={row.key} className="flex flex-col gap-2 sm:flex-row">
+            <select
+              name="socialPlatform"
+              value={row.platform}
+              onChange={(e) => update(row.key, 'platform', e.target.value)}
+              aria-label={copy.socialPlatformPlaceholder}
+              className={cn(fieldClass, 'appearance-none sm:w-1/3')}
+            >
+              <option value="">{copy.socialPlatformPlaceholder}</option>
+              {SOCIAL_PLATFORMS.filter((p) => p === row.platform || !used.has(p)).map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
+            </select>
+            <div className="flex gap-2 sm:flex-1">
+              <input
+                type="url"
+                name="socialUrl"
+                value={row.url}
+                onChange={(e) => update(row.key, 'url', e.target.value)}
+                placeholder={copy.workUrlPlaceholder}
+                aria-label={copy.socialsLabel}
+                className={cn(fieldClass, 'flex-1')}
+              />
+              {rows.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeRow(row.key)}
+                  aria-label={copy.workRemoveLabel}
+                  className="text-muted-foreground hover:text-destructive focus-visible:ring-ring shrink-0 px-2 focus-visible:ring-2 focus-visible:outline-none"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+      {rows.length < SOCIAL_PLATFORMS.length && (
+        <button
+          type="button"
+          onClick={addRow}
+          className="text-primary focus-visible:ring-ring text-xs font-semibold tracking-widest uppercase focus-visible:ring-2 focus-visible:outline-none"
+        >
+          + {copy.workAddLabel}
+        </button>
+      )}
+    </fieldset>
   )
 }
 
@@ -532,20 +632,7 @@ export function CreatorIntakeForm({
             />
           </div>
 
-          <div className="space-y-1.5">
-            <label htmlFor="socials" className={labelClass}>
-              {copy.socialsLabel}
-              <Optional label={copy.optionalLabel} />
-            </label>
-            <textarea
-              id="socials"
-              name="socials"
-              rows={3}
-              defaultValue={initialText('socials', initial?.socials)}
-              className={cn(fieldClass, 'resize-y')}
-            />
-            <p className={hintClass}>{copy.socialsHint}</p>
-          </div>
+          <SocialLinksField copy={copy} initial={initial?.socials} />
 
           <WorkLinksField copy={copy} initial={initial?.works} />
         </fieldset>

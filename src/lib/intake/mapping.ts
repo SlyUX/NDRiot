@@ -97,34 +97,29 @@ export function matchTaxonomy(
   return { matched, unknown }
 }
 
-/** Host → social platform name, matching the importer's PLATFORM_BY_HOST. */
-const PLATFORM_BY_HOST: [RegExp, string][] = [
-  [/(^|\.)instagram\.com$/, 'Instagram'],
-  [/(^|\.)(x|twitter)\.com$/, 'X'],
-  [/(^|\.)bsky\.(app|social)$/, 'Bluesky'],
-  [/(^|\.)tiktok\.com$/, 'TikTok'],
-  [/(^|\.)(youtube\.com|youtu\.be)$/, 'YouTube'],
-]
-
-function platformFor(url: string): string {
-  let host = ''
-  try {
-    host = new URL(url).hostname
-  } catch {
-    return 'Website'
-  }
-  return PLATFORM_BY_HOST.find(([re]) => re.test(host))?.[1] ?? 'Website'
-}
-
 export type SocialLink = { _type: 'socialLink'; _key: string; platform: string; url: string }
 
-/** One URL per line (or comma-separated); non-URLs dropped. */
-export function parseSocials(text: string): SocialLink[] {
-  return (text ?? '')
-    .split(/[\n,]+/)
-    .map((s) => s.trim())
-    .filter((s) => /^https?:\/\//.test(s))
-    .map((url, i) => ({ _type: 'socialLink' as const, _key: `s${i}`, platform: platformFor(url), url }))
+/**
+ * Build social links from parallel "platform" and "URL" columns — the two
+ * inputs the form now collects per row. A row is kept only if it has a URL (a
+ * scheme is added when missing) AND a platform in `allowed`, so an empty or
+ * tampered platform is dropped rather than stored. Zipped by index.
+ */
+export function buildSocials(
+  platforms: string[],
+  urls: string[],
+  allowed: readonly string[],
+): SocialLink[] {
+  const out: SocialLink[] = []
+  const rows = Math.max(platforms.length, urls.length)
+  for (let r = 0; r < rows; r += 1) {
+    let url = (urls[r] ?? '').trim()
+    if (url && !/^https?:\/\//i.test(url)) url = `https://${url}`
+    const platform = (platforms[r] ?? '').trim()
+    if (!url || !allowed.includes(platform)) continue
+    out.push({ _type: 'socialLink', _key: `s${out.length}`, platform, url })
+  }
+  return out
 }
 
 export type WorkLink = { _type: 'workLink'; _key: string; label: string; url: string }

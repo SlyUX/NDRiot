@@ -147,3 +147,28 @@ export const MATURITY_DESCRIPTIONS: Record<MaturityRating, string> = {
 
 /** The rating that most needs surfacing to readers before they click. */
 export const RESTRICTED_RATING: MaturityRating = 'Mature'
+
+/* --------------------------------------------------------------- socials */
+
+/**
+ * Platforms a creator can attach a profile link to. Deliberately only those
+ * the site can render a brand mark for (see `social-icon.tsx`) plus the two
+ * catch-alls — `Website` and `Other` — which fall back to a generic glyph.
+ *
+ * Single source of truth: the `socialLink` schema's option list and the intake
+ * form's platform dropdown both read this, so they never drift. Adding a new
+ * platform means adding its Simple Icons path to `social-icon.tsx` first —
+ * a mark that is subtly wrong is worse than none.
+ */
+export const SOCIAL_PLATFORMS = [
+  'Instagram',
+  'X',
+  'Bluesky',
+  'TikTok',
+  'YouTube',
+  'Discord',
+  'Website',
+  'Other',
+] as const
+
+export type SocialPlatform = (typeof SOCIAL_PLATFORMS)[number]
