@@ -375,9 +375,10 @@ export default defineType({
         }),
         defineField({
           name: 'ctaLabel',
-          title: 'Button label',
+          title: 'Google Form fallback link label',
           type: 'string',
-          description: 'e.g. "Get listed".',
+          description:
+            'The on-site form is primary now; this labels the small fallback link to the old Google Form beneath it — e.g. "Form not working? Submit via Google Forms".',
         }),
         defineField({
           name: 'formUrl',
@@ -410,6 +411,24 @@ export default defineType({
           type: 'string',
           description: 'One line under the heading, e.g. what is required vs optional.',
         }),
+        defineField({
+          name: 'updatePrompt',
+          title: 'Update — prompt',
+          type: 'string',
+          description: 'Heads the "updating an existing profile?" picker above the form.',
+        }),
+        defineField({ name: 'updateSelectLabel', title: 'Update — profile picker label', type: 'string' }),
+        defineField({ name: 'updateLoadLabel', title: 'Update — load button label', type: 'string' }),
+        defineField({ name: 'updateSkipHint', title: 'Update — "I\'m new" hint', type: 'string' }),
+        defineField({
+          name: 'editingNotice',
+          title: 'Update — editing notice',
+          type: 'text',
+          rows: 2,
+          description:
+            'Shown once a profile is loaded for editing. Use {name} for the profile’s name. Say that blanks keep the live value and a human reviews the change.',
+        }),
+        defineField({ name: 'editingResetLabel', title: 'Update — "add new instead" link', type: 'string' }),
         defineField({ name: 'sectionYou', title: 'Section: who you are', type: 'string' }),
         defineField({ name: 'sectionWork', title: 'Section: your work', type: 'string' }),
         defineField({ name: 'sectionFind', title: 'Section: where to find you', type: 'string' }),

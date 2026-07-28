@@ -17,33 +17,31 @@ import { getWriteClient } from '@/sanity/write-client'
 /**
  * Creator intake — Stage 3 of the content-intake strategy.
  *
- * A public, anonymous form (like today's Google Form) that writes a single
- * creator **review draft** straight into Sanity. Never live content, never a
- * published document: the draft/publish split IS the approval queue
- * (content-intake.md), and a human publishes in the Studio. The only writes
- * this makes are one `drafts.creator-<slug>` document and its uploaded photo
- * asset — organizations are referenced, never created here, so nothing
- * anonymous ever reaches a published document.
+ * A public form (like today's Google Form) that writes a single creator
+ * **review draft** straight into Sanity — never live content, never a published
+ * document. The draft/publish split IS the approval queue (content-intake.md);
+ * a human publishes in the Studio. The only writes are one `drafts.creator-*`
+ * document and its uploaded photo; organizations are referenced, never created,
+ * so nothing anonymous reaches a published document.
  *
- * The email is a consent record, not content. It rides the team notification
- * below and is deliberately NOT stored in the public dataset (§ no-PII).
+ * Two modes:
+ *  - **New**: creates a fresh draft at a unique `creator-<slug>` id.
+ *  - **Update**: seeds a draft from the chosen published profile, then patches
+ *    only the fields the submitter supplied — matching the importer's update
+ *    path (content-intake.md "Updates"), so publishing never drops a field and
+ *    identity (name/slug) is preserved. Anonymous for now: contained by
+ *    drafts-only + human review, with Google-auth gating as the follow-up.
  *
- * Validation microcopy is inline, matching the sibling contact action — these
- * are error-boundary strings, the §2 exception, not display copy.
+ * The email is a consent + confirmation record, not content. It rides the team
+ * and creator notifications and is never stored in the public dataset (no PII).
  */
 
 type FieldName = 'name' | 'email' | 'bio' | 'permission'
 
 export type CreatorIntakeState = {
   status: 'idle' | 'success' | 'error'
-  /** A send-level message — a reason it failed the reader can act on. */
   message?: string
-  /** Per-field problems for inline display. */
   fieldErrors?: Partial<Record<FieldName, string>>
-  /**
-   * Text fields echoed back so a validation error doesn't wipe the form. File
-   * inputs and multi-selects can't be restored by the browser, but prose can.
-   */
   values?: {
     name: string
     email: string
@@ -60,9 +58,9 @@ export type CreatorIntakeState = {
 
 const LIMITS = { name: 120, bio: 8000 }
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const CREATOR_REPLY_TO = 'submission@ndriot.com'
 
-/** A `creator-<slug>` id nobody holds yet — published or draft. Two submitters
- *  picking the same web address must not collide onto one document. */
+/** A `creator-<slug>` id nobody holds yet — published or draft. */
 function uniqueSlug(base: string, takenIds: Set<string>): string {
   const root = base || 'creator'
   let slug = root
@@ -78,8 +76,6 @@ export async function submitCreator(
   _prev: CreatorIntakeState,
   formData: FormData,
 ): Promise<CreatorIntakeState> {
-  // Two bot signals → silent success. Telling a bot it was caught just teaches
-  // it to adapt (matches the contact action).
   if (honeypotTripped(formData)) return { status: 'success' }
   if (submittedTooFast(formData)) return { status: 'success' }
 
@@ -124,7 +120,6 @@ export async function submitCreator(
   try {
     client = getWriteClient()
   } catch (cause) {
-    // Missing token is our misconfiguration, not the sender's fault.
     console.error('[creator-intake] write client unavailable', cause)
     return {
       status: 'error',
@@ -133,7 +128,24 @@ export async function submitCreator(
     }
   }
 
-  // Reads through the WRITE client (token) so creator ids include drafts.
+  // Is this an update? A supplied `updateId` must resolve to a real published
+  // creator; anything else is treated as a new submission.
+  const submittedUpdateId = String(formData.get('updateId') ?? '').trim()
+  let target: { _id: string; name?: string; slug?: { current?: string } } | null = null
+  if (submittedUpdateId) {
+    try {
+      target = await client.fetch<typeof target>(
+        `*[_type=="creator" && _id==$id && defined(slug.current)][0]`,
+        { id: submittedUpdateId },
+      )
+    } catch (cause) {
+      console.error('[creator-intake] update target read failed', cause)
+    }
+  }
+  const isUpdate = Boolean(target)
+
+  // Reference validation + slug uniqueness (uniqueness only matters for a new
+  // profile). Reads through the WRITE client so creator ids include drafts.
   let orgIdSet: Set<string>
   let takenIds: Set<string>
   try {
@@ -148,26 +160,26 @@ export async function submitCreator(
     return { status: 'error', message: 'Something went wrong — please try again.', values }
   }
 
-  // References: keep only ids that really exist, so a tampered post can't attach
-  // a creator to an invented org. Studio is single; memberships cap at three and
-  // never duplicate the studio.
   const submittedStudio = String(formData.get('studio') ?? '').trim()
   const studioId = orgIdSet.has(submittedStudio) ? submittedStudio : null
   const orgIds = [...new Set(formData.getAll('orgs').map(String))]
     .filter((id) => orgIdSet.has(id) && id !== studioId)
     .slice(0, 3)
 
-  // Taxonomy values are already canonical from the form, but match anyway so a
-  // tampered value is dropped rather than stored. Genres capped at three.
   const genres = matchTaxonomy(formData.getAll('genres').map(String), GENRES).matched.slice(0, 3)
   const formats = matchTaxonomy(formData.getAll('formats').map(String), FORMATS).matched
   const audience = matchTaxonomy(String(formData.get('audience') ?? ''), MATURITY_RATINGS, {
     single: true,
   }).matched[0]
 
-  const slug = uniqueSlug(slugify(values.slug || values.name), takenIds)
+  // On update the slug and id are the target's; a new profile gets a free one.
+  const slug = isUpdate
+    ? (target!.slug?.current ?? slugify(values.name))
+    : uniqueSlug(slugify(values.slug || values.name), takenIds)
+  const targetId = isUpdate ? target!._id : `creator-${slug}`
 
-  // Photo is optional and its failure is non-fatal — note it and keep the draft.
+  // Photo (optional, non-fatal). On update, only a newly-uploaded photo is
+  // written; without one the seeded draft keeps the live photo.
   let photoAssetId: string | null = null
   let photoNote: string | null = null
   const photo = formData.get('photo')
@@ -182,65 +194,92 @@ export async function submitCreator(
       ? `https://${values.website}`
       : values.website
 
-  // Every optional field is written only when it has a value — matching the
-  // importer, so a later edit's blank never silently clears a filled field.
-  const doc: { _id: string; _type: string; [key: string]: unknown } = {
-    _id: `drafts.creator-${slug}`,
-    _type: 'creator',
-    name: values.name,
-    slug: { _type: 'slug', current: slug },
+  // The editable fields, each included only when it has a value — so a blank
+  // never overwrites a filled field (matches the importer). Shared by both the
+  // new-doc build and the update patch.
+  const fields: Record<string, unknown> = {
     openToCollaboration: isYes(String(formData.get('collab') ?? '')),
   }
-  if (values.location) doc.location = values.location
-  if (website) doc.website = website
-  if (values.bio) doc.bio = toPortableText(values.bio)
+  if (values.location) fields.location = values.location
+  if (website) fields.website = website
+  if (values.bio) fields.bio = toPortableText(values.bio)
   const socials = parseSocials(values.socials)
-  if (socials.length) doc.socials = socials
+  if (socials.length) fields.socials = socials
   const works = parseWorks(values.works)
-  if (works.length) doc.works = works
-  if (genres.length) doc.genres = genres
-  if (formats.length) doc.formats = formats
-  if (audience) doc.audience = audience
-  if (studioId) doc.studio = { _type: 'reference', _ref: studioId }
+  if (works.length) fields.works = works
+  if (genres.length) fields.genres = genres
+  if (formats.length) fields.formats = formats
+  if (audience) fields.audience = audience
+  if (studioId) fields.studio = { _type: 'reference', _ref: studioId }
   if (orgIds.length) {
-    doc.organizations = orgIds.map((id) => ({ _type: 'reference', _key: id, _ref: id }))
+    fields.organizations = orgIds.map((id) => ({ _type: 'reference', _key: id, _ref: id }))
   }
   if (photoAssetId) {
-    doc.photo = {
+    fields.photo = {
       _type: 'imageWithAlt',
       asset: { _type: 'reference', _ref: photoAssetId },
       alt: values.photoAlt || undefined,
     }
   }
 
+  const draftId = `drafts.${targetId}`
   try {
-    await client.create(doc)
+    if (isUpdate) {
+      // Seed the draft as a faithful copy of the live doc so publishing the
+      // edit never drops an untouched field, then set just the supplied ones.
+      // Identity (name/slug) is preserved — an update never renames.
+      const published = await client.fetch<Record<string, unknown> | null>(
+        `*[_id==$id][0]`,
+        { id: targetId },
+      )
+      const seed: Record<string, unknown> = published
+        ? { ...published, _id: draftId }
+        : { _id: draftId, _type: 'creator', name: target!.name, slug: { _type: 'slug', current: slug } }
+      delete seed._rev
+      delete seed._createdAt
+      delete seed._updatedAt
+
+      await client
+        .transaction()
+        .createIfNotExists(seed as { _id: string; _type: string })
+        .patch(draftId, (p) => p.set(fields))
+        .commit()
+    } else {
+      await client.create({
+        _id: draftId,
+        _type: 'creator',
+        name: values.name,
+        slug: { _type: 'slug', current: slug },
+        ...fields,
+      })
+    }
   } catch (cause) {
     console.error('[creator-intake] draft write failed', cause)
-    return { status: 'error', message: 'Something went wrong saving your submission — please try again.', values }
+    return {
+      status: 'error',
+      message: 'Something went wrong saving your submission — please try again.',
+      values,
+    }
   }
 
-  await notifyTeam({
-    name: values.name,
-    email: values.email,
-    slug,
-    note: values.anythingElse,
-    photoNote,
-  })
+  await Promise.all([
+    notifyTeam({ name: values.name, email: values.email, slug, isUpdate, note: values.anythingElse, photoNote }),
+    notifyCreator({ email: values.email, isUpdate }),
+  ])
 
   return { status: 'success' }
 }
 
 /**
- * Best-effort team notification — the arrival signal and the consent record in
- * one. Env-gated and non-blocking: the draft is already saved, so a mail
- * failure must never surface to the submitter. Reuses the contact channel's
- * Resend config.
+ * Best-effort team notification — the arrival signal and the consent record.
+ * Env-gated and non-blocking: the draft is saved regardless. Reuses the contact
+ * channel's Resend config.
  */
 async function notifyTeam(input: {
   name: string
   email: string
   slug: string
+  isUpdate: boolean
   note: string
   photoNote: string | null
 }): Promise<void> {
@@ -249,8 +288,9 @@ async function notifyTeam(input: {
   const to = process.env.CONTACT_INBOX
   if (!apiKey || !from || !to) return
 
+  const kind = input.isUpdate ? 'update to a creator' : 'new creator'
   const lines = [
-    `New creator draft: ${input.name}`,
+    input.isUpdate ? `Update to creator: ${input.name}` : `New creator draft: ${input.name}`,
     `Review + publish in the Studio (draft id: drafts.creator-${input.slug}).`,
     ``,
     `Consent on file — email not stored in Sanity: ${input.email}`,
@@ -266,11 +306,55 @@ async function notifyTeam(input: {
         from,
         to: [to],
         reply_to: input.email,
-        subject: `[ND Riot] New creator: ${input.name}`,
+        subject: `[ND Riot] ${kind}: ${input.name}`,
         text: lines.join('\n'),
       }),
     })
   } catch (cause) {
     console.error('[creator-intake] team notification failed', cause)
+  }
+}
+
+/**
+ * Confirmation to the submitter. Best-effort and env-gated like the team note.
+ * Replies route to submission@ndriot.com. The update copy invites them to flag
+ * a change they didn't make — a light touch, since real protection is the
+ * human review the draft still passes through.
+ */
+async function notifyCreator(input: { email: string; isUpdate: boolean }): Promise<void> {
+  const apiKey = process.env.RESEND_API_KEY
+  const from = process.env.CONTACT_FROM
+  if (!apiKey || !from) return
+
+  const subject = input.isUpdate
+    ? 'An update to your Creator account has been submitted to NDRiot.com'
+    : 'Your Creator Account has been submitted on NDRiot.com'
+
+  const text = input.isUpdate
+    ? [
+        'Thanks — your update has been received.',
+        '',
+        'A person reviews every change before it goes live, so your updated profile will appear shortly.',
+        '',
+        'If you didn’t request this change, just reply to this email and let us know.',
+        '',
+        '— ND Riot',
+      ].join('\n')
+    : [
+        'Thanks for submitting your creator profile to ND Riot.',
+        '',
+        'A person reviews every submission before it goes live, so your page will appear shortly. We’ll be in touch if anything needs a look.',
+        '',
+        '— ND Riot',
+      ].join('\n')
+
+  try {
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from, to: [input.email], reply_to: CREATOR_REPLY_TO, subject, text }),
+    })
+  } catch (cause) {
+    console.error('[creator-intake] creator confirmation failed', cause)
   }
 }

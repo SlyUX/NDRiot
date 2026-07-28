@@ -13,15 +13,15 @@ import type { CreatorIntakeSettings } from '@/lib/site-settings'
  * from Sanity (§2), and the write lives in the `submitCreator` Server Action.
  *
  * Built on a plain multipart <form action={…}> so it submits without
- * JavaScript; useActionState upgrades it with pending state and inline errors
- * once hydrated. The only thing JS adds beyond that is the live three-genre
- * cap — the server enforces the cap regardless, so no-JS just loses the visual
- * disabling, not the guarantee.
+ * JavaScript. Two modes:
+ *  - **New** — an empty form.
+ *  - **Update** — the page loads a creator's current values into `initial`;
+ *    the form prepopulates from them and carries a hidden `updateId`, so the
+ *    action patches that profile's draft instead of creating one. The picker
+ *    above sets the `?editing=<id>` param that drives the prepopulation.
  *
- * Organizations are a live list from Sanity (existing docs only). The form
- * never creates one — a "not listed" studio goes in the free-text note and the
- * team wires it up on review, which keeps every anonymous write a single
- * creator draft.
+ * Organizations are a live list from Sanity (existing docs only); the form
+ * never creates one, keeping every anonymous write a single creator draft.
  */
 
 const INITIAL: CreatorIntakeState = { status: 'idle' }
@@ -37,6 +37,24 @@ export interface CreatorIntakeOrg {
   name: string
 }
 
+/** The editable values used to prepopulate the form on an update. */
+export interface CreatorIntakeInitial {
+  updateId: string
+  name: string
+  slug: string
+  location: string
+  website: string
+  bio: string
+  socials: string
+  works: string
+  genres: string[]
+  formats: string[]
+  audience: string
+  collab: boolean
+  studioId: string | null
+  orgIds: string[]
+}
+
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
     <h2 className="border-primary/40 text-primary border-b pb-2 text-sm font-black tracking-widest uppercase">
@@ -45,7 +63,6 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
   )
 }
 
-/** Small "(optional)" marker beside a label. */
 function Optional({ label }: { label: string }) {
   return <span className="text-muted-foreground ml-2 text-[0.65rem] tracking-wider normal-case">({label})</span>
 }
@@ -53,23 +70,25 @@ function Optional({ label }: { label: string }) {
 export function CreatorIntakeForm({
   copy,
   organizations,
+  creators,
+  initial,
 }: {
   copy: CreatorIntakeSettings
   organizations: CreatorIntakeOrg[]
+  creators: CreatorIntakeOrg[]
+  initial?: CreatorIntakeInitial
 }) {
   const [state, action, pending] = useActionState(submitCreator, INITIAL)
+  const editing = Boolean(initial)
 
-  // Mount time → hidden field, the timing gate the action checks (see the
-  // contact form for the reasoning). Left empty without JS; the honeypot
-  // still applies.
   const timingRef = useRef<HTMLInputElement>(null)
   useEffect(() => {
     if (timingRef.current) timingRef.current.value = String(Date.now())
   }, [])
 
-  // Live three-genre cap. The server slices to three regardless; this just
-  // disables the rest once three are ticked so the limit is visible.
-  const [genres, setGenres] = useState<string[]>([])
+  // Live three-genre cap; the server enforces it regardless. Seeded from the
+  // loaded profile on an update.
+  const [genres, setGenres] = useState<string[]>(initial?.genres ?? [])
   const atGenreMax = genres.length >= 3
   const toggleGenre = (genre: string, checked: boolean) =>
     setGenres((prev) => (checked ? [...prev, genre] : prev.filter((g) => g !== genre)))
@@ -84,349 +103,460 @@ export function CreatorIntakeForm({
 
   const errors = state.fieldErrors ?? {}
   const values = state.values
+  // On a validation error, the echoed submission wins; otherwise the loaded
+  // profile (update) or empty (new).
+  const initialText = (
+    field: keyof NonNullable<CreatorIntakeState['values']>,
+    fromInitial?: string,
+  ) => values?.[field] ?? fromInitial ?? ''
 
   return (
-    <form action={action} encType="multipart/form-data" className="space-y-10" noValidate>
-      {/* Honeypot + timing gate, mirroring the contact form. */}
-      <div aria-hidden="true" className="absolute left-[-9999px] h-0 w-0 overflow-hidden">
-        <label htmlFor="company">Company</label>
-        <input id="company" name="company" type="text" tabIndex={-1} autoComplete="off" />
-      </div>
-      <input ref={timingRef} type="hidden" name="t" />
-
-      {/* — Who you are — */}
-      <fieldset className="space-y-5">
-        <SectionHeading>{copy.sectionYou}</SectionHeading>
-
-        <div className="space-y-1.5">
-          <label htmlFor="name" className={labelClass}>
-            {copy.nameLabel}
+    <>
+      {/* Update picker / editing banner — a sibling GET form so selecting a
+          profile just navigates to ?editing=<id>, no JavaScript required. */}
+      {creators.length > 0 && !editing && (
+        <form method="get" className="border-primary/20 mb-10 space-y-2 border-b pb-8">
+          <label htmlFor="editing" className={labelClass}>
+            {copy.updatePrompt}
           </label>
-          <input
-            id="name"
-            name="name"
-            type="text"
-            required
-            maxLength={120}
-            defaultValue={values?.name}
-            aria-invalid={Boolean(errors.name)}
-            aria-describedby={errors.name ? 'name-error' : undefined}
-            className={fieldClass}
-          />
-          {errors.name && (
-            <p id="name-error" className="text-destructive text-xs">
-              {errors.name}
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-1.5">
-          <label htmlFor="slug" className={labelClass}>
-            {copy.slugLabel}
-            <Optional label={copy.optionalLabel} />
-          </label>
-          <input id="slug" name="slug" type="text" defaultValue={values?.slug} className={fieldClass} />
-          <p className={hintClass}>{copy.slugHint}</p>
-        </div>
-
-        {organizations.length > 0 && (
-          <>
-            <div className="space-y-1.5">
-              <label htmlFor="studio" className={labelClass}>
-                {copy.studioLabel}
-                <Optional label={copy.optionalLabel} />
-              </label>
-              <select id="studio" name="studio" defaultValue="" className={cn(fieldClass, 'appearance-none')}>
-                <option value="">—</option>
-                {organizations.map((org) => (
-                  <option key={org._id} value={org._id}>
-                    {org.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <fieldset className="space-y-2">
-              <legend className={labelClass}>
-                {copy.orgsLabel}
-                <Optional label={copy.optionalLabel} />
-              </legend>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {organizations.map((org) => (
-                  <label key={org._id} className="flex items-center gap-2 text-sm">
-                    <input type="checkbox" name="orgs" value={org._id} className="size-4 accent-[var(--primary)]" />
-                    {org.name}
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-          </>
-        )}
-
-        <div className="space-y-1.5">
-          <label htmlFor="location" className={labelClass}>
-            {copy.locationLabel}
-            <Optional label={copy.optionalLabel} />
-          </label>
-          <input id="location" name="location" type="text" defaultValue={values?.location} className={fieldClass} />
-        </div>
-      </fieldset>
-
-      {/* — Your work — */}
-      <fieldset className="space-y-5">
-        <SectionHeading>{copy.sectionWork}</SectionHeading>
-
-        <div className="space-y-1.5">
-          <label htmlFor="bio" className={labelClass}>
-            {copy.bioLabel}
-          </label>
-          <textarea
-            id="bio"
-            name="bio"
-            required
-            rows={5}
-            maxLength={8000}
-            defaultValue={values?.bio}
-            aria-invalid={Boolean(errors.bio)}
-            aria-describedby={errors.bio ? 'bio-error' : undefined}
-            className={cn(fieldClass, 'resize-y')}
-          />
-          {errors.bio && (
-            <p id="bio-error" className="text-destructive text-xs">
-              {errors.bio}
-            </p>
-          )}
-        </div>
-
-        <fieldset className="space-y-2">
-          <legend className={labelClass}>
-            {copy.formatsLabel}
-            <Optional label={copy.optionalLabel} />
-          </legend>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {FORMATS.map((format) => (
-              <label key={format} className="flex items-center gap-2 text-sm">
-                <input type="checkbox" name="formats" value={format} className="size-4 accent-[var(--primary)]" />
-                {format}
-              </label>
-            ))}
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <select
+              id="editing"
+              name="editing"
+              defaultValue=""
+              className={cn(fieldClass, 'appearance-none sm:max-w-xs')}
+            >
+              <option value="">{copy.updateSelectLabel}</option>
+              {creators.map((c) => (
+                <option key={c._id} value={c._id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            <Button type="submit" variant="outline" className="tracking-wide uppercase">
+              {copy.updateLoadLabel}
+            </Button>
           </div>
-        </fieldset>
-
-        <fieldset className="space-y-2">
-          <legend className={labelClass}>
-            {copy.genresLabel}
-            <Optional label={copy.optionalLabel} />
-          </legend>
-          <p className={hintClass}>{copy.genresHint}</p>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {GENRES.map((genre) => {
-              const checked = genres.includes(genre)
-              return (
-                <label
-                  key={genre}
-                  className={cn('flex items-center gap-2 text-sm', !checked && atGenreMax && 'opacity-40')}
-                >
-                  <input
-                    type="checkbox"
-                    name="genres"
-                    value={genre}
-                    checked={checked}
-                    disabled={!checked && atGenreMax}
-                    onChange={(e) => toggleGenre(genre, e.target.checked)}
-                    className="size-4 accent-[var(--primary)]"
-                  />
-                  {genre}
-                </label>
-              )
-            })}
-          </div>
-        </fieldset>
-
-        <fieldset className="space-y-2">
-          <legend className={labelClass}>
-            {copy.audienceLabel}
-            <Optional label={copy.optionalLabel} />
-          </legend>
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm">
-              <input type="radio" name="audience" value="" defaultChecked className="size-4 accent-[var(--primary)]" />
-              {copy.audienceSkipLabel}
-            </label>
-            {MATURITY_RATINGS.map((rating) => (
-              <label key={rating} className="flex items-start gap-2 text-sm">
-                <input type="radio" name="audience" value={rating} className="mt-0.5 size-4 accent-[var(--primary)]" />
-                <span>
-                  <span className="font-semibold">{rating}</span>
-                  <span className="text-muted-foreground"> — {MATURITY_DESCRIPTIONS[rating]}</span>
-                </span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
-
-        <fieldset className="space-y-2">
-          <legend className={labelClass}>
-            {copy.collabLabel}
-            <Optional label={copy.optionalLabel} />
-          </legend>
-          <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm">
-              <input type="radio" name="collab" value="yes" className="size-4 accent-[var(--primary)]" />
-              {copy.collabYesLabel}
-            </label>
-            <label className="flex items-center gap-2 text-sm">
-              <input type="radio" name="collab" value="no" defaultChecked className="size-4 accent-[var(--primary)]" />
-              {copy.collabNoLabel}
-            </label>
-          </div>
-        </fieldset>
-      </fieldset>
-
-      {/* — Where to find you — */}
-      <fieldset className="space-y-5">
-        <SectionHeading>{copy.sectionFind}</SectionHeading>
-
-        <div className="space-y-1.5">
-          <label htmlFor="website" className={labelClass}>
-            {copy.websiteLabel}
-            <Optional label={copy.optionalLabel} />
-          </label>
-          <input id="website" name="website" type="text" defaultValue={values?.website} className={fieldClass} />
-        </div>
-
-        <div className="space-y-1.5">
-          <label htmlFor="socials" className={labelClass}>
-            {copy.socialsLabel}
-            <Optional label={copy.optionalLabel} />
-          </label>
-          <textarea
-            id="socials"
-            name="socials"
-            rows={3}
-            defaultValue={values?.socials}
-            className={cn(fieldClass, 'resize-y')}
-          />
-          <p className={hintClass}>{copy.socialsHint}</p>
-        </div>
-
-        <div className="space-y-1.5">
-          <label htmlFor="works" className={labelClass}>
-            {copy.worksLabel}
-            <Optional label={copy.optionalLabel} />
-          </label>
-          <textarea
-            id="works"
-            name="works"
-            rows={3}
-            defaultValue={values?.works}
-            className={cn(fieldClass, 'resize-y')}
-          />
-          <p className={hintClass}>{copy.worksHint}</p>
-        </div>
-      </fieldset>
-
-      {/* — Pictures — */}
-      <fieldset className="space-y-5">
-        <SectionHeading>{copy.sectionPictures}</SectionHeading>
-
-        <div className="space-y-1.5">
-          <label htmlFor="photo" className={labelClass}>
-            {copy.photoLabel}
-            <Optional label={copy.optionalLabel} />
-          </label>
-          <input
-            id="photo"
-            name="photo"
-            type="file"
-            accept="image/*"
-            className={cn(fieldClass, 'file:mr-3 file:border-0 file:bg-transparent file:text-xs file:uppercase file:text-primary')}
-          />
-          <p className={hintClass}>{copy.photoHint}</p>
-        </div>
-
-        <div className="space-y-1.5">
-          <label htmlFor="photoAlt" className={labelClass}>
-            {copy.photoAltLabel}
-            <Optional label={copy.optionalLabel} />
-          </label>
-          <input id="photoAlt" name="photoAlt" type="text" defaultValue={values?.photoAlt} className={fieldClass} />
-          <p className={hintClass}>{copy.photoAltHint}</p>
-        </div>
-      </fieldset>
-
-      {/* — Permission — */}
-      <fieldset className="space-y-5">
-        <SectionHeading>{copy.sectionPermission}</SectionHeading>
-
-        <div className="space-y-1.5">
-          <label htmlFor="email" className={labelClass}>
-            {copy.emailLabel}
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            autoComplete="email"
-            defaultValue={values?.email}
-            aria-invalid={Boolean(errors.email)}
-            aria-describedby={errors.email ? 'email-error' : undefined}
-            className={fieldClass}
-          />
-          <p className={hintClass}>{copy.emailHint}</p>
-          {errors.email && (
-            <p id="email-error" className="text-destructive text-xs">
-              {errors.email}
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-1.5">
-          <label className="flex items-start gap-3 text-sm">
-            <input
-              type="checkbox"
-              name="permission"
-              value="yes"
-              required
-              aria-invalid={Boolean(errors.permission)}
-              aria-describedby={errors.permission ? 'permission-error' : undefined}
-              className="mt-0.5 size-4 accent-[var(--primary)]"
-            />
-            <span>{copy.permissionStatement}</span>
-          </label>
-          {errors.permission && (
-            <p id="permission-error" className="text-destructive text-xs">
-              {errors.permission}
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-1.5">
-          <label htmlFor="anythingElse" className={labelClass}>
-            {copy.anythingElseLabel}
-            <Optional label={copy.optionalLabel} />
-          </label>
-          <textarea
-            id="anythingElse"
-            name="anythingElse"
-            rows={3}
-            defaultValue={values?.anythingElse}
-            className={cn(fieldClass, 'resize-y')}
-          />
-        </div>
-      </fieldset>
-
-      {/* A save-level failure (not a field problem) the reader can retry. */}
-      {state.status === 'error' && !state.fieldErrors && (
-        <p role="alert" className="text-destructive text-sm">
-          {state.message ?? copy.errorMessage}
-        </p>
+          <p className={hintClass}>{copy.updateSkipHint}</p>
+        </form>
       )}
 
-      <Button type="submit" size="lg" disabled={pending} className="font-black tracking-wide uppercase">
-        {copy.submitLabel}
-      </Button>
-    </form>
+      {editing && (
+        <div className="border-primary/40 mb-10 border-l-2 py-2 pl-4">
+          <p className="text-sm">{copy.editingNotice.replace('{name}', initial!.name)}</p>
+          <a href="/join" className="text-primary mt-1 inline-block text-xs underline underline-offset-4">
+            {copy.editingResetLabel}
+          </a>
+        </div>
+      )}
+
+      <form action={action} encType="multipart/form-data" className="space-y-10" noValidate>
+        {/* Honeypot + timing gate, mirroring the contact form. */}
+        <div aria-hidden="true" className="absolute left-[-9999px] h-0 w-0 overflow-hidden">
+          <label htmlFor="company">Company</label>
+          <input id="company" name="company" type="text" tabIndex={-1} autoComplete="off" />
+        </div>
+        <input ref={timingRef} type="hidden" name="t" />
+        {/* Present only on an update — the action keys off it to patch the right
+            profile's draft. */}
+        {editing && <input type="hidden" name="updateId" value={initial!.updateId} />}
+
+        {/* — Who you are — */}
+        <fieldset className="space-y-5">
+          <SectionHeading>{copy.sectionYou}</SectionHeading>
+
+          <div className="space-y-1.5">
+            <label htmlFor="name" className={labelClass}>
+              {copy.nameLabel}
+            </label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              required
+              maxLength={120}
+              defaultValue={initialText('name', initial?.name)}
+              aria-invalid={Boolean(errors.name)}
+              aria-describedby={errors.name ? 'name-error' : undefined}
+              className={fieldClass}
+            />
+            {errors.name && (
+              <p id="name-error" className="text-destructive text-xs">
+                {errors.name}
+              </p>
+            )}
+          </div>
+
+          {/* Web address is fixed once a profile exists — hidden on update so it
+              reads as unchangeable, which matches the action preserving it. */}
+          {!editing && (
+            <div className="space-y-1.5">
+              <label htmlFor="slug" className={labelClass}>
+                {copy.slugLabel}
+                <Optional label={copy.optionalLabel} />
+              </label>
+              <input id="slug" name="slug" type="text" defaultValue={initialText('slug')} className={fieldClass} />
+              <p className={hintClass}>{copy.slugHint}</p>
+            </div>
+          )}
+
+          {organizations.length > 0 && (
+            <>
+              <div className="space-y-1.5">
+                <label htmlFor="studio" className={labelClass}>
+                  {copy.studioLabel}
+                  <Optional label={copy.optionalLabel} />
+                </label>
+                <select
+                  id="studio"
+                  name="studio"
+                  defaultValue={initial?.studioId ?? ''}
+                  className={cn(fieldClass, 'appearance-none')}
+                >
+                  <option value="">—</option>
+                  {organizations.map((org) => (
+                    <option key={org._id} value={org._id}>
+                      {org.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <fieldset className="space-y-2">
+                <legend className={labelClass}>
+                  {copy.orgsLabel}
+                  <Optional label={copy.optionalLabel} />
+                </legend>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {organizations.map((org) => (
+                    <label key={org._id} className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        name="orgs"
+                        value={org._id}
+                        defaultChecked={initial?.orgIds.includes(org._id)}
+                        className="size-4 accent-[var(--primary)]"
+                      />
+                      {org.name}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            </>
+          )}
+
+          <div className="space-y-1.5">
+            <label htmlFor="location" className={labelClass}>
+              {copy.locationLabel}
+              <Optional label={copy.optionalLabel} />
+            </label>
+            <input
+              id="location"
+              name="location"
+              type="text"
+              defaultValue={initialText('location', initial?.location)}
+              className={fieldClass}
+            />
+          </div>
+        </fieldset>
+
+        {/* — Your work — */}
+        <fieldset className="space-y-5">
+          <SectionHeading>{copy.sectionWork}</SectionHeading>
+
+          <div className="space-y-1.5">
+            <label htmlFor="bio" className={labelClass}>
+              {copy.bioLabel}
+            </label>
+            <textarea
+              id="bio"
+              name="bio"
+              required
+              rows={5}
+              maxLength={8000}
+              defaultValue={initialText('bio', initial?.bio)}
+              aria-invalid={Boolean(errors.bio)}
+              aria-describedby={errors.bio ? 'bio-error' : undefined}
+              className={cn(fieldClass, 'resize-y')}
+            />
+            {errors.bio && (
+              <p id="bio-error" className="text-destructive text-xs">
+                {errors.bio}
+              </p>
+            )}
+          </div>
+
+          <fieldset className="space-y-2">
+            <legend className={labelClass}>
+              {copy.formatsLabel}
+              <Optional label={copy.optionalLabel} />
+            </legend>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {FORMATS.map((format) => (
+                <label key={format} className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    name="formats"
+                    value={format}
+                    defaultChecked={initial?.formats.includes(format)}
+                    className="size-4 accent-[var(--primary)]"
+                  />
+                  {format}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset className="space-y-2">
+            <legend className={labelClass}>
+              {copy.genresLabel}
+              <Optional label={copy.optionalLabel} />
+            </legend>
+            <p className={hintClass}>{copy.genresHint}</p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {GENRES.map((genre) => {
+                const checked = genres.includes(genre)
+                return (
+                  <label
+                    key={genre}
+                    className={cn('flex items-center gap-2 text-sm', !checked && atGenreMax && 'opacity-40')}
+                  >
+                    <input
+                      type="checkbox"
+                      name="genres"
+                      value={genre}
+                      checked={checked}
+                      disabled={!checked && atGenreMax}
+                      onChange={(e) => toggleGenre(genre, e.target.checked)}
+                      className="size-4 accent-[var(--primary)]"
+                    />
+                    {genre}
+                  </label>
+                )
+              })}
+            </div>
+          </fieldset>
+
+          <fieldset className="space-y-2">
+            <legend className={labelClass}>
+              {copy.audienceLabel}
+              <Optional label={copy.optionalLabel} />
+            </legend>
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="radio"
+                  name="audience"
+                  value=""
+                  defaultChecked={!initial?.audience}
+                  className="size-4 accent-[var(--primary)]"
+                />
+                {copy.audienceSkipLabel}
+              </label>
+              {MATURITY_RATINGS.map((rating) => (
+                <label key={rating} className="flex items-start gap-2 text-sm">
+                  <input
+                    type="radio"
+                    name="audience"
+                    value={rating}
+                    defaultChecked={initial?.audience === rating}
+                    className="mt-0.5 size-4 accent-[var(--primary)]"
+                  />
+                  <span>
+                    <span className="font-semibold">{rating}</span>
+                    <span className="text-muted-foreground"> — {MATURITY_DESCRIPTIONS[rating]}</span>
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset className="space-y-2">
+            <legend className={labelClass}>
+              {copy.collabLabel}
+              <Optional label={copy.optionalLabel} />
+            </legend>
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="radio"
+                  name="collab"
+                  value="yes"
+                  defaultChecked={initial?.collab === true}
+                  className="size-4 accent-[var(--primary)]"
+                />
+                {copy.collabYesLabel}
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="radio"
+                  name="collab"
+                  value="no"
+                  defaultChecked={!initial?.collab}
+                  className="size-4 accent-[var(--primary)]"
+                />
+                {copy.collabNoLabel}
+              </label>
+            </div>
+          </fieldset>
+        </fieldset>
+
+        {/* — Where to find you — */}
+        <fieldset className="space-y-5">
+          <SectionHeading>{copy.sectionFind}</SectionHeading>
+
+          <div className="space-y-1.5">
+            <label htmlFor="website" className={labelClass}>
+              {copy.websiteLabel}
+              <Optional label={copy.optionalLabel} />
+            </label>
+            <input
+              id="website"
+              name="website"
+              type="text"
+              defaultValue={initialText('website', initial?.website)}
+              className={fieldClass}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label htmlFor="socials" className={labelClass}>
+              {copy.socialsLabel}
+              <Optional label={copy.optionalLabel} />
+            </label>
+            <textarea
+              id="socials"
+              name="socials"
+              rows={3}
+              defaultValue={initialText('socials', initial?.socials)}
+              className={cn(fieldClass, 'resize-y')}
+            />
+            <p className={hintClass}>{copy.socialsHint}</p>
+          </div>
+
+          <div className="space-y-1.5">
+            <label htmlFor="works" className={labelClass}>
+              {copy.worksLabel}
+              <Optional label={copy.optionalLabel} />
+            </label>
+            <textarea
+              id="works"
+              name="works"
+              rows={3}
+              defaultValue={initialText('works', initial?.works)}
+              className={cn(fieldClass, 'resize-y')}
+            />
+            <p className={hintClass}>{copy.worksHint}</p>
+          </div>
+        </fieldset>
+
+        {/* — Pictures — */}
+        <fieldset className="space-y-5">
+          <SectionHeading>{copy.sectionPictures}</SectionHeading>
+
+          <div className="space-y-1.5">
+            <label htmlFor="photo" className={labelClass}>
+              {copy.photoLabel}
+              <Optional label={copy.optionalLabel} />
+            </label>
+            <input
+              id="photo"
+              name="photo"
+              type="file"
+              accept="image/*"
+              className={cn(fieldClass, 'file:mr-3 file:border-0 file:bg-transparent file:text-xs file:uppercase file:text-primary')}
+            />
+            <p className={hintClass}>{copy.photoHint}</p>
+          </div>
+
+          <div className="space-y-1.5">
+            <label htmlFor="photoAlt" className={labelClass}>
+              {copy.photoAltLabel}
+              <Optional label={copy.optionalLabel} />
+            </label>
+            <input
+              id="photoAlt"
+              name="photoAlt"
+              type="text"
+              defaultValue={initialText('photoAlt')}
+              className={fieldClass}
+            />
+            <p className={hintClass}>{copy.photoAltHint}</p>
+          </div>
+        </fieldset>
+
+        {/* — Permission — */}
+        <fieldset className="space-y-5">
+          <SectionHeading>{copy.sectionPermission}</SectionHeading>
+
+          <div className="space-y-1.5">
+            <label htmlFor="email" className={labelClass}>
+              {copy.emailLabel}
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              autoComplete="email"
+              defaultValue={initialText('email')}
+              aria-invalid={Boolean(errors.email)}
+              aria-describedby={errors.email ? 'email-error' : undefined}
+              className={fieldClass}
+            />
+            <p className={hintClass}>{copy.emailHint}</p>
+            {errors.email && (
+              <p id="email-error" className="text-destructive text-xs">
+                {errors.email}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="flex items-start gap-3 text-sm">
+              <input
+                type="checkbox"
+                name="permission"
+                value="yes"
+                required
+                aria-invalid={Boolean(errors.permission)}
+                aria-describedby={errors.permission ? 'permission-error' : undefined}
+                className="mt-0.5 size-4 accent-[var(--primary)]"
+              />
+              <span>{copy.permissionStatement}</span>
+            </label>
+            {errors.permission && (
+              <p id="permission-error" className="text-destructive text-xs">
+                {errors.permission}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-1.5">
+            <label htmlFor="anythingElse" className={labelClass}>
+              {copy.anythingElseLabel}
+              <Optional label={copy.optionalLabel} />
+            </label>
+            <textarea
+              id="anythingElse"
+              name="anythingElse"
+              rows={3}
+              defaultValue={initialText('anythingElse')}
+              className={cn(fieldClass, 'resize-y')}
+            />
+          </div>
+        </fieldset>
+
+        {state.status === 'error' && !state.fieldErrors && (
+          <p role="alert" className="text-destructive text-sm">
+            {state.message ?? copy.errorMessage}
+          </p>
+        )}
+
+        <Button type="submit" size="lg" disabled={pending} className="font-black tracking-wide uppercase">
+          {copy.submitLabel}
+        </Button>
+      </form>
+    </>
   )
 }

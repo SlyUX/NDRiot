@@ -483,6 +483,12 @@ export type SiteSettings = {
   creatorIntake?: {
     heading?: string;
     intro?: string;
+    updatePrompt?: string;
+    updateSelectLabel?: string;
+    updateLoadLabel?: string;
+    updateSkipHint?: string;
+    editingNotice?: string;
+    editingResetLabel?: string;
     sectionYou?: string;
     sectionWork?: string;
     sectionFind?: string;
@@ -1509,6 +1515,62 @@ export type INTAKE_ORGANIZATIONS_QUERY_RESULT = Array<{
 export type INTAKE_CREATOR_IDS_QUERY_RESULT = Array<string>;
 
 // Source: src/lib/queries.ts
+// Variable: INTAKE_CREATORS_QUERY
+// Query: *[_type=="creator" && defined(slug.current)]|order(name asc){_id,name}
+export type INTAKE_CREATORS_QUERY_RESULT = Array<{
+  _id: string;
+  name: string;
+}>;
+
+// Source: src/lib/queries.ts
+// Variable: INTAKE_CREATOR_EDIT_QUERY
+// Query: *[_type=="creator" && _id==$id][0]{  _id,name,"slug":slug.current,location,website,  "bioText":pt::text(bio),  "socialUrls":socials[].url,  works[]{label,url},  genres,formats,audience,openToCollaboration,  "studioId":studio._ref,  "orgIds":organizations[]._ref}
+export type INTAKE_CREATOR_EDIT_QUERY_RESULT = {
+  _id: string;
+  name: string;
+  slug: string;
+  location: string | null;
+  website: string | null;
+  bioText: string;
+  socialUrls: Array<string> | null;
+  works: Array<{
+    label: string;
+    url: string;
+  }> | null;
+  genres: Array<
+    | "Action & Adventure"
+    | "Crime & Noir"
+    | "Drama"
+    | "Fantasy"
+    | "Historical"
+    | "Horror"
+    | "Humor & Satire"
+    | "Memoir & Autobio"
+    | "Punk & Protest"
+    | "Queer"
+    | "Romance"
+    | "Sci-Fi"
+    | "Slice of Life"
+    | "Superhero"
+    | "Weird & Experimental"
+  > | null;
+  formats: Array<
+    | "Anthology"
+    | "Collected Edition"
+    | "Graphic Novel"
+    | "Minicomic"
+    | "One-Shot"
+    | "Single Issue"
+    | "Webcomic"
+    | "Zine"
+  > | null;
+  audience: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
+  openToCollaboration: boolean | null;
+  studioId: string | null;
+  orgIds: Array<string> | null;
+} | null;
+
+// Source: src/lib/queries.ts
 // Variable: GENRE_CREATORS_QUERY
 // Query: {  "items": *[_type=="creator" && $genre in genres]|order(name asc)[0...$limit]{    _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,    "bioText":pt::text(bio),    studio->{_id,name,"slug":slug.current,website,logo}  },  "total": count(*[_type=="creator" && $genre in genres])}
 export type GENRE_CREATORS_QUERY_RESULT = {
@@ -1573,6 +1635,8 @@ declare module "@sanity/client" {
     '{\n  "books": *[_type=="book" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "creators": *[_type=="creator" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "columns": *[_type=="column" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "interviews": *[_type=="interview" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "genres": array::unique(*[_type=="book" && defined(genres)].genres[])\n}': SITEMAP_QUERY_RESULT;
     '*[_type=="organization" && defined(name)]|order(name asc){_id,name}': INTAKE_ORGANIZATIONS_QUERY_RESULT;
     '*[_type=="creator"]._id': INTAKE_CREATOR_IDS_QUERY_RESULT;
+    '*[_type=="creator" && defined(slug.current)]|order(name asc){_id,name}': INTAKE_CREATORS_QUERY_RESULT;
+    '*[_type=="creator" && _id==$id][0]{\n  _id,name,"slug":slug.current,location,website,\n  "bioText":pt::text(bio),\n  "socialUrls":socials[].url,\n  works[]{label,url},\n  genres,formats,audience,openToCollaboration,\n  "studioId":studio._ref,\n  "orgIds":organizations[]._ref\n}': INTAKE_CREATOR_EDIT_QUERY_RESULT;
     '{\n  "items": *[_type=="creator" && $genre in genres]|order(name asc)[0...$limit]{\n    _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,\n    "bioText":pt::text(bio),\n    studio->{_id,name,"slug":slug.current,website,logo}\n  },\n  "total": count(*[_type=="creator" && $genre in genres])\n}': GENRE_CREATORS_QUERY_RESULT;
   }
 }

@@ -84,6 +84,12 @@ export interface JoinSettings {
 export type CreatorIntakeSettings = {
   heading: string
   intro: string
+  updatePrompt: string
+  updateSelectLabel: string
+  updateLoadLabel: string
+  updateSkipHint: string
+  editingNotice: string
+  editingResetLabel: string
   sectionYou: string
   sectionWork: string
   sectionFind: string
@@ -221,13 +227,21 @@ const DEFAULTS: SiteSettings = {
   },
   join: {
     heading: 'Get listed',
-    ctaLabel: 'Start your submission',
+    // Now labels the fallback link under the native form, not a primary CTA.
+    ctaLabel: 'Form not working? Submit via Google Forms',
     formUrl: 'https://forms.gle/STbaVMQ8a6Ap8rL1A',
   },
   creatorIntake: {
     heading: 'Add your details',
     intro:
       'Only a name, a note about your work, and permission to publish are required — skip anything else or add it later.',
+    updatePrompt: 'Already on ND Riot and updating your profile?',
+    updateSelectLabel: 'Find your profile',
+    updateLoadLabel: 'Load its details',
+    updateSkipHint: 'New here? Skip this and fill in the form below.',
+    editingNotice:
+      'You’re updating {name}. Change whatever you like — a change is reviewed before it goes live, and fields you leave blank keep what’s already there.',
+    editingResetLabel: 'Add a new profile instead',
     sectionYou: 'Who you are',
     sectionWork: 'Your work',
     sectionFind: 'Where to find you',

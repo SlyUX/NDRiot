@@ -199,6 +199,30 @@ export const INTAKE_ORGANIZATIONS_QUERY = defineQuery(
  */
 export const INTAKE_CREATOR_IDS_QUERY = defineQuery(`*[_type=="creator"]._id`)
 
+/**
+ * Published creators, for the intake form's "updating an existing profile?"
+ * dropdown. Published only (public read client, no token) — you can only update
+ * a profile that already exists live, matching the importer's update target.
+ */
+export const INTAKE_CREATORS_QUERY = defineQuery(
+  `*[_type=="creator" && defined(slug.current)]|order(name asc){_id,name}`,
+)
+
+/**
+ * One creator's editable values, to prepopulate the intake form on an update.
+ * Returns the raw shape the form needs — bio as plain text for a textarea,
+ * references as bare ids for the selects — not the display projection.
+ */
+export const INTAKE_CREATOR_EDIT_QUERY = defineQuery(`*[_type=="creator" && _id==$id][0]{
+  _id,name,"slug":slug.current,location,website,
+  "bioText":pt::text(bio),
+  "socialUrls":socials[].url,
+  works[]{label,url},
+  genres,formats,audience,openToCollaboration,
+  "studioId":studio._ref,
+  "orgIds":organizations[]._ref
+}`)
+
 /** Creators who list a genre, for the category pages. */
 export const GENRE_CREATORS_QUERY = defineQuery(`{
   "items": *[_type=="creator" && $genre in genres]|order(name asc)[0...$limit]{
