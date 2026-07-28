@@ -65,6 +65,7 @@ export interface CreatorIntakeInitial {
   studioId: string | null
   studioName: string
   studioWebsite: string
+  studioLogo: SanityImage | null
   orgIds: string[]
 }
 
@@ -611,6 +612,20 @@ export function CreatorIntakeForm({
                 <label htmlFor="studioLogo" className={labelClass}>
                   {copy.studioLogoLabel}
                 </label>
+                {/* Current studio logo on edit — object-contain, like the site,
+                    so a non-square mark isn't cropped. */}
+                {initial?.studioLogo && (
+                  <div className="mb-2 flex items-center gap-3">
+                    <Image
+                      src={urlFor(initial.studioLogo).width(128).url()}
+                      alt=""
+                      width={64}
+                      height={64}
+                      className="size-16 shrink-0 object-contain"
+                    />
+                    <p className={hintClass}>{copy.photoCurrentHint}</p>
+                  </div>
+                )}
                 <input
                   id="studioLogo"
                   name="studioLogo"

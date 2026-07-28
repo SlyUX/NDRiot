@@ -242,6 +242,7 @@ export const INTAKE_CREATOR_EDIT_QUERY = defineQuery(`*[_type=="creator" && _id=
   "studioId":studio._ref,
   "studioName":studio->name,
   "studioWebsite":studio->website,
+  "studioLogo":studio->logo,
   "orgIds":organizations[]._ref
 }`)
 
