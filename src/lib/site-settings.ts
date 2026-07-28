@@ -83,6 +83,7 @@ export interface JoinSettings {
  */
 export type CreatorIntakeSettings = {
   heading: string
+  editHeading: string
   intro: string
   updatePrompt: string
   updateSelectLabel: string
@@ -250,6 +251,7 @@ const DEFAULTS: SiteSettings = {
   },
   creatorIntake: {
     heading: 'Create a Creator Profile',
+    editHeading: 'Update your profile',
     intro:
       'Only a name, a note about your work, and permission to publish are required — skip anything else or add it later.',
     updatePrompt: 'Already on ND Riot and updating your profile?',

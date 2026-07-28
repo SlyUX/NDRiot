@@ -489,6 +489,7 @@ export type SiteSettings = {
   };
   creatorIntake?: {
     heading?: string;
+    editHeading?: string;
     intro?: string;
     updatePrompt?: string;
     updateSelectLabel?: string;

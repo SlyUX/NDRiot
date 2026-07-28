@@ -406,6 +406,12 @@ export default defineType({
           description: 'Above the form, under the Join page intro — e.g. "Add your details".',
         }),
         defineField({
+          name: 'editHeading',
+          title: 'Form heading — editing',
+          type: 'string',
+          description: 'Shown instead of the create heading when a signed-in creator is editing their own profile.',
+        }),
+        defineField({
           name: 'intro',
           title: 'Form intro line',
           type: 'string',

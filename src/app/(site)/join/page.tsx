@@ -83,10 +83,12 @@ function toInitial(p: EditProfile): CreatorIntakeInitial {
 export default async function JoinPage({
   searchParams,
 }: {
-  searchParams: Promise<{ editing?: string | string[] }>
+  searchParams: Promise<{ editing?: string | string[]; new?: string | string[] }>
 }) {
   const params = await searchParams
   const editingId = Array.isArray(params.editing) ? params.editing[0] : params.editing
+  // `?new` forces the create form even for a creator who owns a profile.
+  const wantsNew = params.new !== undefined
 
   const [settings, session] = await Promise.all([getSiteSettings(), auth()])
   const { heading, body, ctaLabel, formUrl } = settings.join
@@ -140,9 +142,14 @@ export default async function JoinPage({
   const studioIdSet = new Set(studioIds)
   const collectives = organizations.filter((o) => !studioIdSet.has(o._id))
 
-  const canEdit = Boolean(editingId && ownedIds.includes(editingId))
+  // Default a returning creator straight into editing their own profile — the
+  // expected "manage my listing" behaviour. Explicit ?editing wins; ?new opts
+  // out; a single owned profile auto-loads. Owning several still uses the picker.
+  const targetEditId =
+    editingId ?? (!wantsNew && ownedIds.length === 1 ? ownedIds[0] : undefined)
+  const canEdit = Boolean(targetEditId && ownedIds.includes(targetEditId))
   const editProfile = canEdit
-    ? await safeFetch<EditProfile | null>(INTAKE_CREATOR_EDIT_QUERY, { id: editingId }, null)
+    ? await safeFetch<EditProfile | null>(INTAKE_CREATOR_EDIT_QUERY, { id: targetEditId }, null)
     : null
   const initial = editProfile ? toInitial(editProfile) : undefined
 
@@ -166,8 +173,10 @@ export default async function JoinPage({
 
       <div className="mt-8 space-y-6">
         <div>
-          <h2 className="text-2xl font-black tracking-tighter uppercase">{intake.heading}</h2>
-          <p className="text-muted-foreground mt-2 text-sm">{intake.intro}</p>
+          <h2 className="text-2xl font-black tracking-tighter uppercase">
+            {initial ? intake.editHeading : intake.heading}
+          </h2>
+          {!initial && <p className="text-muted-foreground mt-2 text-sm">{intake.intro}</p>}
         </div>
         {/* Keyed so switching profiles (or back to new) remounts the form. */}
         <CreatorIntakeForm

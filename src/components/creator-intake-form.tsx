@@ -490,7 +490,7 @@ export function CreatorIntakeForm({
       {editing && (
         <div className="border-primary/40 mb-10 border-l-2 py-2 pl-4">
           <p className="text-sm">{copy.editingNotice.replace('{name}', initial!.name)}</p>
-          <a href="/join" className="text-primary mt-1 inline-block text-xs underline underline-offset-4">
+          <a href="/join?new" className="text-primary mt-1 inline-block text-xs underline underline-offset-4">
             {copy.editingResetLabel}
           </a>
         </div>
