@@ -180,6 +180,25 @@ export const SITEMAP_QUERY = defineQuery(`{
   "genres": array::unique(*[_type=="book" && defined(genres)].genres[])
 }`)
 
+/**
+ * Existing organizations, for the intake form's studio/collective dropdowns.
+ *
+ * The form submits the document `_id`, not a typed name — which is what closes
+ * the identity-matching gap the whole "Updates" section of content-intake.md
+ * was written to work around. Published orgs only (they carry no `drafts.`
+ * lifecycle here), so the public read client sees them without a token.
+ */
+export const INTAKE_ORGANIZATIONS_QUERY = defineQuery(
+  `*[_type=="organization" && defined(name)]|order(name asc){_id,name}`,
+)
+
+/**
+ * Every creator id, for slug-uniqueness at intake. Run through the WRITE client
+ * (token) so it includes `drafts.*` — two people must not be handed the same
+ * `creator-<slug>` id, and an unpublished draft already holds one.
+ */
+export const INTAKE_CREATOR_IDS_QUERY = defineQuery(`*[_type=="creator"]._id`)
+
 /** Creators who list a genre, for the category pages. */
 export const GENRE_CREATORS_QUERY = defineQuery(`{
   "items": *[_type=="creator" && $genre in genres]|order(name asc)[0...$limit]{
