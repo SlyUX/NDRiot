@@ -46,7 +46,7 @@ export interface CreatorIntakeInitial {
   website: string
   bio: string
   socials: string
-  works: string
+  works: { label: string; url: string }[]
   genres: string[]
   formats: string[]
   audience: string
@@ -65,6 +65,140 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
 
 function Optional({ label }: { label: string }) {
   return <span className="text-muted-foreground ml-2 text-[0.65rem] tracking-wider normal-case">({label})</span>
+}
+
+/**
+ * Searchable profile picker for the update flow. Each match is a plain link to
+ * ?editing=<id>, so selecting one just navigates and the server prepopulates —
+ * and without JavaScript the full list still renders and is clickable. The
+ * input filters client-side once hydrated.
+ */
+function CreatorSearchPicker({
+  creators,
+  copy,
+}: {
+  creators: CreatorIntakeOrg[]
+  copy: CreatorIntakeSettings
+}) {
+  const [query, setQuery] = useState('')
+  const q = query.trim().toLowerCase()
+  const matches = q ? creators.filter((c) => c.name.toLowerCase().includes(q)) : creators
+
+  return (
+    <div className="space-y-2">
+      <label htmlFor="creator-search" className={labelClass}>
+        {copy.updatePrompt}
+      </label>
+      <input
+        id="creator-search"
+        type="search"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder={copy.updateSelectLabel}
+        autoComplete="off"
+        className={cn(fieldClass, 'sm:max-w-sm')}
+      />
+      <ul className="border-primary/20 max-h-56 divide-y divide-white/10 overflow-y-auto border">
+        {matches.length === 0 ? (
+          <li className="text-muted-foreground px-3 py-2 text-sm">{copy.updateNoMatchLabel}</li>
+        ) : (
+          matches.map((c) => (
+            <li key={c._id}>
+              <a
+                href={`/join?editing=${encodeURIComponent(c._id)}`}
+                className="hover:bg-primary/10 hover:text-primary focus-visible:bg-primary/10 block px-3 py-2 text-sm focus-visible:outline-none"
+              >
+                {c.name}
+              </a>
+            </li>
+          ))
+        )}
+      </ul>
+      <p className={hintClass}>{copy.updateSkipHint}</p>
+    </div>
+  )
+}
+
+/**
+ * Repeatable "platform name + URL" rows for a creator's work links. Submits
+ * two parallel arrays (`workLabel`, `workUrl`) that the action zips by index.
+ * Prepopulated from the loaded profile on an update; falls back to one empty
+ * row. Without JS the rendered rows still submit — only add/remove need it.
+ */
+function WorkLinksField({
+  copy,
+  initial,
+}: {
+  copy: CreatorIntakeSettings
+  initial?: { label: string; url: string }[]
+}) {
+  const [rows, setRows] = useState<{ label: string; url: string; key: number }[]>(() =>
+    (initial && initial.length ? initial : [{ label: '', url: '' }]).map((r, i) => ({ ...r, key: i })),
+  )
+
+  // Key from the current max + 1 — unique without a render-time ref mutation.
+  const addRow = () =>
+    setRows((prev) => [
+      ...prev,
+      { label: '', url: '', key: prev.reduce((m, r) => Math.max(m, r.key), -1) + 1 },
+    ])
+  const removeRow = (key: number) =>
+    setRows((prev) => (prev.length > 1 ? prev.filter((r) => r.key !== key) : prev))
+  const update = (key: number, field: 'label' | 'url', value: string) =>
+    setRows((prev) => prev.map((r) => (r.key === key ? { ...r, [field]: value } : r)))
+
+  return (
+    <fieldset className="space-y-3">
+      <legend className={labelClass}>
+        {copy.worksLabel}
+        <Optional label={copy.optionalLabel} />
+      </legend>
+      <p className={hintClass}>{copy.worksHint}</p>
+      <div className="space-y-2">
+        {rows.map((row) => (
+          <div key={row.key} className="flex flex-col gap-2 sm:flex-row">
+            <input
+              type="text"
+              name="workLabel"
+              value={row.label}
+              onChange={(e) => update(row.key, 'label', e.target.value)}
+              placeholder={copy.workPlatformPlaceholder}
+              aria-label={copy.workPlatformPlaceholder}
+              className={cn(fieldClass, 'sm:w-1/3')}
+            />
+            <div className="flex gap-2 sm:flex-1">
+              <input
+                type="url"
+                name="workUrl"
+                value={row.url}
+                onChange={(e) => update(row.key, 'url', e.target.value)}
+                placeholder={copy.workUrlPlaceholder}
+                aria-label={copy.workUrlPlaceholder}
+                className={cn(fieldClass, 'flex-1')}
+              />
+              {rows.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeRow(row.key)}
+                  aria-label={copy.workRemoveLabel}
+                  className="text-muted-foreground hover:text-destructive focus-visible:ring-ring shrink-0 px-2 focus-visible:ring-2 focus-visible:outline-none"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+      <button
+        type="button"
+        onClick={addRow}
+        className="text-primary focus-visible:ring-ring text-xs font-semibold tracking-widest uppercase focus-visible:ring-2 focus-visible:outline-none"
+      >
+        + {copy.workAddLabel}
+      </button>
+    </fieldset>
+  )
 }
 
 export function CreatorIntakeForm({
@@ -112,33 +246,12 @@ export function CreatorIntakeForm({
 
   return (
     <>
-      {/* Update picker / editing banner — a sibling GET form so selecting a
-          profile just navigates to ?editing=<id>, no JavaScript required. */}
+      {/* Update picker / editing banner. Selecting a profile navigates to
+          ?editing=<id> and the server prepopulates. */}
       {creators.length > 0 && !editing && (
-        <form method="get" className="border-primary/20 mb-10 space-y-2 border-b pb-8">
-          <label htmlFor="editing" className={labelClass}>
-            {copy.updatePrompt}
-          </label>
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <select
-              id="editing"
-              name="editing"
-              defaultValue=""
-              className={cn(fieldClass, 'appearance-none sm:max-w-xs')}
-            >
-              <option value="">{copy.updateSelectLabel}</option>
-              {creators.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-            <Button type="submit" variant="outline" className="tracking-wide uppercase">
-              {copy.updateLoadLabel}
-            </Button>
-          </div>
-          <p className={hintClass}>{copy.updateSkipHint}</p>
-        </form>
+        <div className="border-primary/20 mb-10 border-b pb-8">
+          <CreatorSearchPicker creators={creators} copy={copy} />
+        </div>
       )}
 
       {editing && (
@@ -434,20 +547,7 @@ export function CreatorIntakeForm({
             <p className={hintClass}>{copy.socialsHint}</p>
           </div>
 
-          <div className="space-y-1.5">
-            <label htmlFor="works" className={labelClass}>
-              {copy.worksLabel}
-              <Optional label={copy.optionalLabel} />
-            </label>
-            <textarea
-              id="works"
-              name="works"
-              rows={3}
-              defaultValue={initialText('works', initial?.works)}
-              className={cn(fieldClass, 'resize-y')}
-            />
-            <p className={hintClass}>{copy.worksHint}</p>
-          </div>
+          <WorkLinksField copy={copy} initial={initial?.works} />
         </fieldset>
 
         {/* — Pictures — */}

@@ -3,10 +3,10 @@
 import { GENRES, FORMATS, MATURITY_RATINGS } from '@/lib/taxonomy'
 import { honeypotTripped, rateLimited, submittedTooFast } from '@/lib/intake/anti-spam'
 import {
+  buildWorks,
   isYes,
   matchTaxonomy,
   parseSocials,
-  parseWorks,
   slugify,
   toPortableText,
 } from '@/lib/intake/mapping'
@@ -50,7 +50,6 @@ export type CreatorIntakeState = {
     location: string
     website: string
     socials: string
-    works: string
     photoAlt: string
     anythingElse: string
   }
@@ -87,7 +86,6 @@ export async function submitCreator(
     location: String(formData.get('location') ?? '').trim(),
     website: String(formData.get('website') ?? '').trim(),
     socials: String(formData.get('socials') ?? '').trim(),
-    works: String(formData.get('works') ?? '').trim(),
     photoAlt: String(formData.get('photoAlt') ?? '').trim(),
     anythingElse: String(formData.get('anythingElse') ?? '').trim(),
   }
@@ -205,7 +203,10 @@ export async function submitCreator(
   if (values.bio) fields.bio = toPortableText(values.bio)
   const socials = parseSocials(values.socials)
   if (socials.length) fields.socials = socials
-  const works = parseWorks(values.works)
+  const works = buildWorks(
+    formData.getAll('workLabel').map(String),
+    formData.getAll('workUrl').map(String),
+  )
   if (works.length) fields.works = works
   if (genres.length) fields.genres = genres
   if (formats.length) fields.formats = formats

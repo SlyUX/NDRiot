@@ -485,7 +485,7 @@ export type SiteSettings = {
     intro?: string;
     updatePrompt?: string;
     updateSelectLabel?: string;
-    updateLoadLabel?: string;
+    updateNoMatchLabel?: string;
     updateSkipHint?: string;
     editingNotice?: string;
     editingResetLabel?: string;
@@ -514,6 +514,10 @@ export type SiteSettings = {
     socialsHint?: string;
     worksLabel?: string;
     worksHint?: string;
+    workPlatformPlaceholder?: string;
+    workUrlPlaceholder?: string;
+    workAddLabel?: string;
+    workRemoveLabel?: string;
     photoLabel?: string;
     photoHint?: string;
     photoAltLabel?: string;

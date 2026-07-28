@@ -3017,7 +3017,7 @@
               },
               "optional": true
             },
-            "updateLoadLabel": {
+            "updateNoMatchLabel": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"
@@ -3214,6 +3214,34 @@
               "optional": true
             },
             "worksHint": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "workPlatformPlaceholder": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "workUrlPlaceholder": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "workAddLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "workRemoveLabel": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

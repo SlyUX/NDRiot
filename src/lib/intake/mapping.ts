@@ -129,12 +129,21 @@ export function parseSocials(text: string): SocialLink[] {
 
 export type WorkLink = { _type: 'workLink'; _key: string; label: string; url: string }
 
-/** One "Title  https://url" per line; lines without a URL are dropped, and a
- *  line that is only a URL uses the URL as its own label. */
-export function parseWorks(text: string): WorkLink[] {
-  return (text ?? '')
-    .split(/\n+/)
-    .map((line) => line.match(/^(.*?)\s*(https?:\/\/\S+)\s*$/))
-    .filter((m): m is RegExpMatchArray => Boolean(m))
-    .map((m, i) => ({ _type: 'workLink' as const, _key: `w${i}`, label: m[1].trim() || m[2], url: m[2] }))
+/**
+ * Build work links from parallel "platform name" and "URL" columns — the two
+ * inputs the form now collects per row. A row is kept only if it has a URL
+ * (a scheme is added when missing); a blank platform name falls back to the URL
+ * as its own label. Rows are zipped by index, so the arrays stay aligned.
+ */
+export function buildWorks(labels: string[], urls: string[]): WorkLink[] {
+  const out: WorkLink[] = []
+  const rows = Math.max(labels.length, urls.length)
+  for (let r = 0; r < rows; r += 1) {
+    let url = (urls[r] ?? '').trim()
+    if (url && !/^https?:\/\//i.test(url)) url = `https://${url}`
+    if (!url) continue
+    const label = (labels[r] ?? '').trim()
+    out.push({ _type: 'workLink', _key: `w${out.length}`, label: label || url, url })
+  }
+  return out
 }

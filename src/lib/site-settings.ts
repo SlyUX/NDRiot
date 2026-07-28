@@ -86,7 +86,7 @@ export type CreatorIntakeSettings = {
   intro: string
   updatePrompt: string
   updateSelectLabel: string
-  updateLoadLabel: string
+  updateNoMatchLabel: string
   updateSkipHint: string
   editingNotice: string
   editingResetLabel: string
@@ -115,6 +115,10 @@ export type CreatorIntakeSettings = {
   socialsHint: string
   worksLabel: string
   worksHint: string
+  workPlatformPlaceholder: string
+  workUrlPlaceholder: string
+  workAddLabel: string
+  workRemoveLabel: string
   photoLabel: string
   photoHint: string
   photoAltLabel: string
@@ -236,8 +240,8 @@ const DEFAULTS: SiteSettings = {
     intro:
       'Only a name, a note about your work, and permission to publish are required — skip anything else or add it later.',
     updatePrompt: 'Already on ND Riot and updating your profile?',
-    updateSelectLabel: 'Find your profile',
-    updateLoadLabel: 'Load its details',
+    updateSelectLabel: 'Search your name…',
+    updateNoMatchLabel: 'No match — you might be new here.',
     updateSkipHint: 'New here? Skip this and fill in the form below.',
     editingNotice:
       'You’re updating {name}. Change whatever you like — a change is reviewed before it goes live, and fields you leave blank keep what’s already there.',
@@ -266,8 +270,13 @@ const DEFAULTS: SiteSettings = {
     websiteLabel: 'Your website',
     socialsLabel: 'Social links',
     socialsHint: 'One link per line.',
-    worksLabel: 'Where can people get your books?',
-    worksHint: 'One per line: a title, then its link.',
+    worksLabel: 'Where can readers find your work?',
+    worksHint:
+      'Add platform profile pages like Amazon Author pages, Webtoon Series pages, or similar. NOT individual book pages — those go on your book pages, which you’ll be able to create once your Creator page is published.',
+    workPlatformPlaceholder: 'Platform name',
+    workUrlPlaceholder: 'https://…',
+    workAddLabel: 'Add another',
+    workRemoveLabel: 'Remove',
     photoLabel: 'A photo or avatar of you',
     photoHint: 'PNG or JPG, up to 8MB.',
     photoAltLabel: 'Describe that image',

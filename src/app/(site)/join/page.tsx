@@ -54,10 +54,7 @@ function toInitial(p: EditProfile): CreatorIntakeInitial {
     website: p.website ?? '',
     bio: p.bioText ?? '',
     socials: (p.socialUrls ?? []).join('\n'),
-    works: (p.works ?? [])
-      .map((w) => `${w.label ?? ''}  ${w.url ?? ''}`.trim())
-      .filter(Boolean)
-      .join('\n'),
+    works: (p.works ?? []).map((w) => ({ label: w.label ?? '', url: w.url ?? '' })),
     genres: p.genres ?? [],
     formats: p.formats ?? [],
     audience: p.audience ?? '',
