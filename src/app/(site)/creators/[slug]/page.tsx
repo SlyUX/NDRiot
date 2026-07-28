@@ -9,6 +9,7 @@ import { SectionHeading } from '@/components/section-heading'
 import { GenreBadge } from '@/components/genre-badge'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { externalHref } from '@/lib/utils'
 import { Section } from '@/components/ui/section'
 import { bookToCard, favoriteToCard } from '@/lib/card-mappers'
 import { safeFetch, CREATOR_QUERY } from '@/lib/queries'
@@ -105,7 +106,7 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
             </div>
             {creator.website && (
               <a
-                href={creator.website}
+                href={externalHref(creator.website)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary mt-1 block text-sm hover:underline"
@@ -162,7 +163,7 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
           <div className="flex flex-wrap gap-2">
             {creator.works.map((work) => (
               <Button key={work.url} asChild variant="outline" size="sm">
-                <a href={work.url} target="_blank" rel="noopener noreferrer">
+                <a href={externalHref(work.url)} target="_blank" rel="noopener noreferrer">
                   {work.label}
                 </a>
               </Button>

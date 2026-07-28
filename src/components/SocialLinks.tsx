@@ -1,4 +1,5 @@
 import { SocialIcon } from '@/components/social-icon'
+import { externalHref } from '@/lib/utils'
 import type { SocialLink } from '@/lib/types'
 
 /**
@@ -38,7 +39,7 @@ export default function SocialLinks({ socials }: { socials?: SocialLink[] | null
         return (
           <li key={social.url}>
             <a
-              href={social.url}
+              href={externalHref(social.url)}
               target="_blank"
               rel="noopener noreferrer"
               aria-label={label}

@@ -4,7 +4,7 @@ import { GenreBadge } from '@/components/genre-badge'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { urlFor } from '@/sanity/image'
-import { cn } from '@/lib/utils'
+import { cn, externalHref } from '@/lib/utils'
 import { RESTRICTED_RATING } from '@/lib/taxonomy'
 import type { BookFormat, Genre, MaturityRating, SanityImage } from '@/lib/types'
 
@@ -134,7 +134,7 @@ export function MaturityOverlay({ maturity }: { maturity: MaturityRating }) {
 export function FundingBadge({ url, className }: { url: string; className?: string }) {
   return (
     <a
-      href={url}
+      href={externalHref(url)}
       target="_blank"
       rel="noopener noreferrer"
       className={cn(

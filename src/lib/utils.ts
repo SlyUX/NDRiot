@@ -6,6 +6,20 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
+ * Guard a stored URL before using it as a link `href`: only http(s) and mailto
+ * pass; anything else (e.g. a `javascript:` URL) returns undefined, so the
+ * anchor renders without an href rather than as an executable link.
+ *
+ * Defense-in-depth — on-site intake already validates URLs and Sanity's `url`
+ * type validates in the Studio, but every externally-supplied link the site
+ * renders goes through this so a bad value can never become a live link.
+ */
+export function externalHref(url: string | null | undefined): string | undefined {
+  const value = (url ?? '').trim()
+  return /^(https?:|mailto:)/i.test(value) ? value : undefined
+}
+
+/**
  * A plain-text preview capped at `max` characters, with an ellipsis when it
  * was actually cut — so the "…" means "there is more", not "this happens to
  * end here".

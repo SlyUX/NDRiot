@@ -2,7 +2,7 @@ import Image from 'next/image'
 import { cva, type VariantProps } from 'class-variance-authority'
 
 import { urlFor } from '@/sanity/image'
-import { cn } from '@/lib/utils'
+import { cn, externalHref } from '@/lib/utils'
 import type { Organization } from '@/lib/types'
 
 /**
@@ -104,7 +104,7 @@ export function OrganizationLink({
 
   return (
     <a
-      href={website}
+      href={externalHref(website)}
       target="_blank"
       rel="noopener noreferrer"
       className={cn(

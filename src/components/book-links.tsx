@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button'
 import { formatDate } from '@/lib/card-mappers'
 import { PROMINENT_LINK_KINDS } from '@/lib/taxonomy'
 import type { BookLink } from '@/lib/types'
-import { cn } from '@/lib/utils'
+import { cn, externalHref } from '@/lib/utils'
 
 /**
  * Every route to a book, ordered by what serves the reader.
@@ -59,7 +59,7 @@ export default function BookLinks({ links }: { links?: BookLink[] | null }) {
                     campaign && 'bg-funding text-black hover:bg-funding/90',
                   )}
                 >
-                  <a href={link.url} target="_blank" rel="noopener noreferrer">
+                  <a href={externalHref(link.url)} target="_blank" rel="noopener noreferrer">
                     {/* The kind is said aloud, not just implied by styling — a
                         prominent button is not self-explanatory to a screen
                         reader, and "free" is the part that matters. */}
@@ -82,7 +82,7 @@ export default function BookLinks({ links }: { links?: BookLink[] | null }) {
         <div className="flex flex-wrap gap-2">
           {rest.map((link) => (
             <Button key={link.url} asChild variant="outline" size="sm">
-              <a href={link.url} target="_blank" rel="noopener noreferrer">
+              <a href={externalHref(link.url)} target="_blank" rel="noopener noreferrer">
                 <span className="sr-only">{link.kind}: </span>
                 {labelFor(link)}
               </a>
