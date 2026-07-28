@@ -17,7 +17,7 @@
  * live behind the server-only boundary, in the action.
  */
 
-import { SOCIAL_PROFILE_PREFIX, type SocialPlatform } from '@/lib/taxonomy'
+import { SOCIAL_PROFILE_PREFIX, linkKindForHost, type SocialPlatform } from '@/lib/taxonomy'
 
 /** A Portable Text block, minimally shaped for a plain-text bio. */
 export type PortableTextBlock = {
@@ -158,6 +158,59 @@ export function buildSocials(
     }
     if (!url) continue
     out.push({ _type: 'socialLink', _key: `s${out.length}`, platform, url })
+  }
+  return out
+}
+
+export type BookLink = {
+  _type: 'bookLink'
+  _key: string
+  kind: string
+  label: string
+  url: string
+  endDate?: string
+}
+
+/**
+ * Build a book's links from parallel kind / label / URL / end-date columns —
+ * the rows the form collects. A row needs a valid URL; the kind falls back to a
+ * host guess then to "Buy" (the importer's rule) if the submitted one isn't in
+ * `allowedKinds`; a blank label becomes the host; an end date is kept only on a
+ * `Back` campaign and only if it's a real ISO date (what an <input type=date>
+ * yields).
+ */
+export function buildLinks(
+  kinds: string[],
+  labels: string[],
+  urls: string[],
+  endDates: string[],
+  allowedKinds: readonly string[],
+): BookLink[] {
+  const out: BookLink[] = []
+  const rows = Math.max(kinds.length, urls.length)
+  for (let r = 0; r < rows; r += 1) {
+    const url = normalizeUrl(urls[r])
+    if (!url) continue
+    const submitted = (kinds[r] ?? '').trim()
+    const kind = allowedKinds.includes(submitted) ? submitted : (linkKindForHost(url) ?? 'Buy')
+    let host = ''
+    try {
+      host = new URL(url).hostname.replace(/^www\./, '')
+    } catch {
+      /* url already validated by normalizeUrl */
+    }
+    const link: BookLink = {
+      _type: 'bookLink',
+      _key: `link${out.length}`,
+      kind,
+      label: (labels[r] ?? '').trim() || host,
+      url,
+    }
+    if (kind === 'Back') {
+      const d = (endDates[r] ?? '').trim()
+      if (/^\d{4}-\d{2}-\d{2}$/.test(d)) link.endDate = d
+    }
+    out.push(link)
   }
   return out
 }

@@ -554,6 +554,59 @@ export type SiteSettings = {
     errorMessage?: string;
     optionalLabel?: string;
   };
+  bookIntake?: {
+    heading?: string;
+    editHeading?: string;
+    intro?: string;
+    signInPrompt?: string;
+    signInBody?: string;
+    updatePrompt?: string;
+    updateSelectLabel?: string;
+    updateNoMatchLabel?: string;
+    updateSkipHint?: string;
+    editingNotice?: string;
+    editingResetLabel?: string;
+    sectionWhat?: string;
+    sectionClassification?: string;
+    sectionWords?: string;
+    sectionCover?: string;
+    sectionFind?: string;
+    sectionPermission?: string;
+    titleLabel?: string;
+    slugLabel?: string;
+    slugHint?: string;
+    creatorLabel?: string;
+    creatorHint?: string;
+    formatLabel?: string;
+    genresLabel?: string;
+    genresHint?: string;
+    maturityLabel?: string;
+    maturitySkipLabel?: string;
+    statusLabel?: string;
+    statusSkipLabel?: string;
+    issueCountLabel?: string;
+    issueCountHint?: string;
+    shortDescLabel?: string;
+    shortDescHint?: string;
+    fullDescLabel?: string;
+    fullDescHint?: string;
+    coverLabel?: string;
+    coverHint?: string;
+    coverAltLabel?: string;
+    coverAltHint?: string;
+    previewUrlLabel?: string;
+    previewUrlHint?: string;
+    linksLabel?: string;
+    linksHint?: string;
+    linkKindPlaceholder?: string;
+    linkLabelPlaceholder?: string;
+    linkEndDateLabel?: string;
+    permissionStatement?: string;
+    anythingElseLabel?: string;
+    submitLabel?: string;
+    successMessage?: string;
+    errorMessage?: string;
+  };
   contact?: {
     heading?: string;
     linkLabel?: string;
@@ -1626,6 +1679,71 @@ export type INTAKE_CREATOR_EDIT_QUERY_RESULT = {
 } | null;
 
 // Source: src/lib/queries.ts
+// Variable: INTAKE_BOOK_IDS_QUERY
+// Query: *[_type=="book"]._id
+export type INTAKE_BOOK_IDS_QUERY_RESULT = Array<string>;
+
+// Source: src/lib/queries.ts
+// Variable: INTAKE_OWNED_BOOKS_QUERY
+// Query: *[_type=="book" && creator._ref in $ids && defined(slug.current)]|order(title asc){    _id,title,"creatorName":creator->name  }
+export type INTAKE_OWNED_BOOKS_QUERY_RESULT = Array<{
+  _id: string;
+  title: string;
+  creatorName: string;
+}>;
+
+// Source: src/lib/queries.ts
+// Variable: INTAKE_BOOK_EDIT_QUERY
+// Query: *[_type=="book" && _id==$id][0]{  _id,title,"slug":slug.current,  "creatorId":creator._ref,  genres,format,maturity,status,issueCount,  shortDescription,  "descriptionText":pt::text(description),  cover,"coverAlt":cover.alt,  previewUrl,  links[]{kind,label,url,endDate}}
+export type INTAKE_BOOK_EDIT_QUERY_RESULT = {
+  _id: string;
+  title: string;
+  slug: string;
+  creatorId: string;
+  genres: Array<
+    | "Action & Adventure"
+    | "Crime & Noir"
+    | "Drama"
+    | "Fantasy"
+    | "Historical"
+    | "Horror"
+    | "Humor & Satire"
+    | "Memoir & Autobio"
+    | "Punk & Protest"
+    | "Queer"
+    | "Romance"
+    | "Sci-Fi"
+    | "Slice of Life"
+    | "Superhero"
+    | "Weird & Experimental"
+  > | null;
+  format:
+    | "Anthology"
+    | "Collected Edition"
+    | "Graphic Novel"
+    | "Minicomic"
+    | "One-Shot"
+    | "Single Issue"
+    | "Webcomic"
+    | "Zine"
+    | null;
+  maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
+  status: "Complete" | "Ongoing" | "Upcoming" | null;
+  issueCount: number | null;
+  shortDescription: string | null;
+  descriptionText: string;
+  cover: ImageWithAlt | null;
+  coverAlt: string | null;
+  previewUrl: string | null;
+  links: Array<{
+    kind: "Back" | "Buy" | "Read free" | "Support";
+    label: string | null;
+    url: string;
+    endDate: string | null;
+  }> | null;
+} | null;
+
+// Source: src/lib/queries.ts
 // Variable: GENRE_CREATORS_QUERY
 // Query: {  "items": *[_type=="creator" && $genre in genres]|order(name asc)[0...$limit]{    _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,    "bioText":pt::text(bio),    studio->{_id,name,"slug":slug.current,website,logo}  },  "total": count(*[_type=="creator" && $genre in genres])}
 export type GENRE_CREATORS_QUERY_RESULT = {
@@ -1694,6 +1812,9 @@ declare module "@sanity/client" {
     '*[_type=="creator" && defined(slug.current)]|order(name asc){_id,name}': INTAKE_CREATORS_QUERY_RESULT;
     '*[_type=="creator" && _id in $ids && defined(slug.current)]|order(name asc){_id,name}': INTAKE_OWNED_CREATORS_QUERY_RESULT;
     '*[_type=="creator" && _id==$id][0]{\n  _id,name,"slug":slug.current,location,website,\n  "bioText":pt::text(bio),\n  socials[]{platform,url},\n  works[]{label,url},\n  genres,formats,openToCollaboration,\n  photo,"photoAlt":photo.alt,\n  "studioId":studio._ref,\n  "studioName":studio->name,\n  "studioWebsite":studio->website,\n  "studioLogo":studio->logo,\n  "orgIds":organizations[]._ref\n}': INTAKE_CREATOR_EDIT_QUERY_RESULT;
+    '*[_type=="book"]._id': INTAKE_BOOK_IDS_QUERY_RESULT;
+    '*[_type=="book" && creator._ref in $ids && defined(slug.current)]|order(title asc){\n    _id,title,"creatorName":creator->name\n  }': INTAKE_OWNED_BOOKS_QUERY_RESULT;
+    '*[_type=="book" && _id==$id][0]{\n  _id,title,"slug":slug.current,\n  "creatorId":creator._ref,\n  genres,format,maturity,status,issueCount,\n  shortDescription,\n  "descriptionText":pt::text(description),\n  cover,"coverAlt":cover.alt,\n  previewUrl,\n  links[]{kind,label,url,endDate}\n}': INTAKE_BOOK_EDIT_QUERY_RESULT;
     '{\n  "items": *[_type=="creator" && $genre in genres]|order(name asc)[0...$limit]{\n    _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,\n    "bioText":pt::text(bio),\n    studio->{_id,name,"slug":slug.current,website,logo}\n  },\n  "total": count(*[_type=="creator" && $genre in genres])\n}': GENRE_CREATORS_QUERY_RESULT;
   }
 }

@@ -6,21 +6,11 @@ import {
   GENRES,
   MATURITY_DESCRIPTIONS,
   MATURITY_RATINGS,
+  SINGLE_VOLUME_FORMATS,
+  STATUSES,
+  type BookFormat,
 } from '@/lib/taxonomy'
 import { slugField } from './slugField'
-
-/**
- * Formats where counting issues means nothing.
- *
- * A graphic novel is one volume and a one-shot is one issue, so the count is
- * always 1 and tells a reader nothing they did not already learn from the
- * format. A webcomic has no fixed instalments to count at all.
- *
- * The rest keep the field: for a single issue or a collected edition, "how
- * many are out" is the track-record signal, and it is the whole reason the
- * field exists.
- */
-const SINGLE_VOLUME_FORMATS = ['Graphic Novel', 'One-Shot', 'Webcomic'] as const
 
 export default defineType({
   name: 'book',
@@ -86,7 +76,7 @@ export default defineType({
       name: 'status',
       title: 'Publication status',
       type: 'string',
-      options: { list: ['Ongoing', 'Complete', 'Upcoming'] },
+      options: { list: [...STATUSES] },
       initialValue: 'Ongoing',
       description: 'Tells readers what they are getting into before they buy.',
     }),
@@ -96,8 +86,7 @@ export default defineType({
       type: 'number',
       description:
         'How many are out right now, for a series. This is the honest signal a reader wants: "Ongoing, 7 issues" reassures where "Ongoing" alone does not, and "Ongoing, 1 issue" warns without anyone passing judgement. Only asked for serialised formats.',
-      hidden: ({ document }) =>
-        SINGLE_VOLUME_FORMATS.includes(document?.format as (typeof SINGLE_VOLUME_FORMATS)[number]),
+      hidden: ({ document }) => SINGLE_VOLUME_FORMATS.includes(document?.format as BookFormat),
       validation: (rule) =>
         rule
           .min(1)
@@ -109,7 +98,7 @@ export default defineType({
           .custom((value, context) => {
             if (value === undefined || value === null) return true
             const format = context.document?.format as string | undefined
-            if (format && SINGLE_VOLUME_FORMATS.includes(format as never)) {
+            if (format && SINGLE_VOLUME_FORMATS.includes(format as BookFormat)) {
               return `A ${format} is a single volume — clear this field, or change the format if it is serialised.`
             }
             return true

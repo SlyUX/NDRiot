@@ -246,6 +246,39 @@ export const INTAKE_CREATOR_EDIT_QUERY = defineQuery(`*[_type=="creator" && _id=
   "orgIds":organizations[]._ref
 }`)
 
+/* ------------------------------------------------------------ book intake */
+
+/**
+ * Every book id, for slug-uniqueness at book intake. Through the WRITE client
+ * (token) so it includes `drafts.*`.
+ */
+export const INTAKE_BOOK_IDS_QUERY = defineQuery(`*[_type=="book"]._id`)
+
+/**
+ * The signed-in user's books — those under a creator they own — for the book
+ * picker. `$ids` is the owned creator id set.
+ */
+export const INTAKE_OWNED_BOOKS_QUERY = defineQuery(
+  `*[_type=="book" && creator._ref in $ids && defined(slug.current)]|order(title asc){
+    _id,title,"creatorName":creator->name
+  }`,
+)
+
+/**
+ * One book's editable values, to prepopulate the book form on an update.
+ * References as bare ids, description as plain text, links in full.
+ */
+export const INTAKE_BOOK_EDIT_QUERY = defineQuery(`*[_type=="book" && _id==$id][0]{
+  _id,title,"slug":slug.current,
+  "creatorId":creator._ref,
+  genres,format,maturity,status,issueCount,
+  shortDescription,
+  "descriptionText":pt::text(description),
+  cover,"coverAlt":cover.alt,
+  previewUrl,
+  links[]{kind,label,url,endDate}
+}`)
+
 /** Creators who list a genre, for the category pages. */
 export const GENRE_CREATORS_QUERY = defineQuery(`{
   "items": *[_type=="creator" && $genre in genres]|order(name asc)[0...$limit]{

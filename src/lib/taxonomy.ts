@@ -115,6 +115,49 @@ export const LINK_KIND_DESCRIPTIONS: Record<LinkKind, string> = {
 /** Kinds shown most prominently: free to read, or time-limited. */
 export const PROMINENT_LINK_KINDS: LinkKind[] = ['Read free', 'Back']
 
+/**
+ * Host → link kind. Used to auto-suggest a link's kind from its URL at intake
+ * (the creator can override). Patreon/Ko-fi are Support, campaigns are Back,
+ * the free-read platforms are Read free; anything unmatched defaults to Buy.
+ * Shared with the CSV importer's KIND_BY_HOST — one source of truth.
+ */
+export const KIND_BY_HOST: [RegExp, LinkKind][] = [
+  [/(^|\.)patreon\.com$/, 'Support'],
+  [/(^|\.)ko-fi\.com$/, 'Support'],
+  [/(^|\.)buymeacoffee\.com$/, 'Support'],
+  [/(^|\.)kickstarter\.com$/, 'Back'],
+  [/(^|\.)indiegogo\.com$/, 'Back'],
+  [/(^|\.)backerkit\.com$/, 'Back'],
+  [/(^|\.)webtoons?\.com$/, 'Read free'],
+  [/(^|\.)tapas\.io$/, 'Read free'],
+  [/(^|\.)globalcomix\.com$/, 'Read free'],
+]
+
+/** Suggest a link kind from a URL's host, or null when nothing matches. */
+export function linkKindForHost(url: string): LinkKind | null {
+  let host = ''
+  try {
+    host = new URL(url).hostname.replace(/^www\./, '')
+  } catch {
+    return null
+  }
+  return KIND_BY_HOST.find(([pattern]) => pattern.test(host))?.[1] ?? null
+}
+
+/* --------------------------------------------------------------- statuses */
+
+/** A book's publication status. Ordered as the schema lists them. */
+export const STATUSES = ['Ongoing', 'Complete', 'Upcoming'] as const
+
+export type Status = (typeof STATUSES)[number]
+
+/**
+ * Formats where an issue count means nothing — a single volume or a
+ * screen-native run. The book form hides "issues available" for these, and the
+ * schema flags a stale value. Mirrors book.ts's SINGLE_VOLUME_FORMATS.
+ */
+export const SINGLE_VOLUME_FORMATS: readonly BookFormat[] = ['Graphic Novel', 'One-Shot', 'Webcomic']
+
 /* --------------------------------------------------------------- maturity */
 
 /**

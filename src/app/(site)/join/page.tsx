@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 
 import { auth } from '@/auth'
 import { SignInButton, SignOutButton } from '@/components/auth-controls'
@@ -176,6 +177,16 @@ export default async function JoinPage({
         </span>
         <SignOutButton label={intake.signOutLabel} />
       </div>
+
+      {/* Books live on their own page, scoped to the creators you own. */}
+      <p className="mt-4 text-xs">
+        <Link
+          href="/join/books"
+          className="text-primary tracking-widest uppercase underline underline-offset-4"
+        >
+          {settings.bookIntake.heading} →
+        </Link>
+      </p>
 
       <div className="mt-8 space-y-6">
         <div>

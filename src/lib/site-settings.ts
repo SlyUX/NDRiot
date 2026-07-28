@@ -149,6 +149,66 @@ export type CreatorIntakeSettings = {
   optionalLabel: string
 }
 
+/**
+ * Book-specific intake copy. Generic strings shared with the creator form
+ * (sign-in button, signed-in/out, optional marker, add/remove, URL placeholder,
+ * image errors, current-image hint) are reused from `creatorIntake` rather than
+ * duplicated — the book form receives both groups.
+ */
+export type BookIntakeSettings = {
+  heading: string
+  editHeading: string
+  intro: string
+  signInPrompt: string
+  signInBody: string
+  updatePrompt: string
+  updateSelectLabel: string
+  updateNoMatchLabel: string
+  updateSkipHint: string
+  editingNotice: string
+  editingResetLabel: string
+  sectionWhat: string
+  sectionClassification: string
+  sectionWords: string
+  sectionCover: string
+  sectionFind: string
+  sectionPermission: string
+  titleLabel: string
+  slugLabel: string
+  slugHint: string
+  creatorLabel: string
+  creatorHint: string
+  formatLabel: string
+  genresLabel: string
+  genresHint: string
+  maturityLabel: string
+  maturitySkipLabel: string
+  statusLabel: string
+  statusSkipLabel: string
+  issueCountLabel: string
+  issueCountHint: string
+  shortDescLabel: string
+  shortDescHint: string
+  fullDescLabel: string
+  fullDescHint: string
+  coverLabel: string
+  coverHint: string
+  coverAltLabel: string
+  coverAltHint: string
+  previewUrlLabel: string
+  previewUrlHint: string
+  linksLabel: string
+  linksHint: string
+  linkKindPlaceholder: string
+  linkLabelPlaceholder: string
+  linkEndDateLabel: string
+  permissionStatement: string
+  anythingElseLabel: string
+  submitLabel: string
+  successMessage: string
+  errorMessage: string
+}
+
 export interface ContactSettings {
   heading: string
   /** Footer link label — Contact lives in the footer, not the header nav. */
@@ -172,6 +232,7 @@ export interface SiteSettings {
   hero: HeroSettings
   join: JoinSettings
   creatorIntake: CreatorIntakeSettings
+  bookIntake: BookIntakeSettings
   contact: ContactSettings
   home: {
     genresHeading: string
@@ -326,6 +387,67 @@ const DEFAULTS: SiteSettings = {
     errorMessage: 'That didn’t save. Please try again in a moment.',
     optionalLabel: 'optional',
   },
+  bookIntake: {
+    heading: 'Add a comic',
+    editHeading: 'Update a comic',
+    intro: 'One form per book. Only a title, a creator you’ve added, and permission are required.',
+    signInPrompt: 'Sign in to add or manage your comics',
+    signInBody:
+      'ND Riot uses Google sign-in so a book stays with its creator — it only confirms it’s you. You can only add books under a creator you own, so add your creator profile first if you haven’t.',
+    updatePrompt: 'Editing a comic already on ND Riot?',
+    updateSelectLabel: 'Search your titles…',
+    updateNoMatchLabel: 'No match — this may be a new one.',
+    updateSkipHint: 'Adding a new one? Skip this and fill in the form below.',
+    editingNotice:
+      'You’re updating {name}. Change whatever you like — a change is reviewed before it goes live, and blanks keep what’s already there.',
+    editingResetLabel: 'Add a new comic instead',
+    sectionWhat: 'What it is',
+    sectionClassification: 'Classification',
+    sectionWords: 'Words',
+    sectionCover: 'Cover',
+    sectionFind: 'Where to find it',
+    sectionPermission: 'Permission',
+    titleLabel: 'Title',
+    slugLabel: 'Preferred ND Riot address',
+    slugHint:
+      'The end of the book’s link — ndriot.com/books/your-title. We suggest one from the title; edit if you like. Lowercase letters, numbers and hyphens only.',
+    creatorLabel: 'Creator',
+    creatorHint: 'One of your creators. Not listed? Add the creator profile first — a book needs a creator.',
+    formatLabel: 'Format',
+    genresLabel: 'Genres',
+    genresHint: 'What it’s ABOUT — up to three. Not format or audience; those are their own fields.',
+    maturityLabel: 'Who’s it for?',
+    maturitySkipLabel: 'Rather not say',
+    statusLabel: 'Publication status',
+    statusSkipLabel: 'Not sure',
+    issueCountLabel: 'Issues available',
+    issueCountHint: 'For a series — how many are out now. Skip it for a one-shot or single volume.',
+    shortDescLabel: 'Short description',
+    shortDescHint: 'One or two sentences — this shows on cards and gets clipped after about two lines.',
+    fullDescLabel: 'Full description',
+    fullDescHint: 'The full pitch, for the book’s own page. As long as you like.',
+    coverLabel: 'Cover image',
+    coverHint: 'Portrait works best — covers show at 2:3. Highest resolution you have.',
+    coverAltLabel: 'Describe the cover',
+    coverAltHint:
+      'For readers who can’t see it — describe what it SHOWS, not what the book is. Skip if it’s just the title on a colour.',
+    previewUrlLabel: 'Preview PDF link',
+    previewUrlHint:
+      'Optional. A direct, public link to a SHORT preview PDF — the first few pages — that opens with no sign-in.',
+    linksLabel: 'Where to find it',
+    linksHint:
+      'Every route to the work — free reads, shops, Patreon, a live campaign. The kind is guessed from the link; adjust it if needed. Free reads and live campaigns are shown most prominently.',
+    linkKindPlaceholder: 'Kind',
+    linkLabelPlaceholder: 'Label (optional)',
+    linkEndDateLabel: 'Campaign end date',
+    permissionStatement:
+      'I own or have permission to share this cover and description, and ND Riot can use them to list this book.',
+    anythingElseLabel: 'Anything else?',
+    submitLabel: 'Submit for review',
+    successMessage:
+      'Got it — your comic is in. A person reviews every submission before it goes live, so it’ll appear shortly. We’ll be in touch if anything needs a look.',
+    errorMessage: 'That didn’t save. Please try again in a moment.',
+  },
   contact: {
     heading: 'Get in touch',
     linkLabel: 'Contact',
@@ -423,7 +545,7 @@ const DEFAULTS: SiteSettings = {
 
 export const SITE_SETTINGS_QUERY = `*[_id=="siteSettings"][0]{
   siteTitle,siteDescription,footer,discordUrl,
-  home,sections,empty,creatorIntake,
+  home,sections,empty,creatorIntake,bookIntake,
   hero{background,headline,body,tagline,featureCtaLabel,featuredHeading,newHeading,ctas[]{label,href}},
   join{heading,body,ctaLabel,formUrl},
   contact{heading,linkLabel,body,nameLabel,emailLabel,subjectLabel,messageLabel,submitLabel,successMessage,errorMessage},
@@ -473,6 +595,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       formUrl: data.join?.formUrl?.trim() || DEFAULTS.join.formUrl,
     },
     creatorIntake: mergeGroup(DEFAULTS.creatorIntake, data.creatorIntake),
+    bookIntake: mergeGroup(DEFAULTS.bookIntake, data.bookIntake),
     contact: {
       // Field-by-field like `join` above: a blank string falls back to the
       // default, and the rich-text body passes through untouched.

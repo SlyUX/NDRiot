@@ -34,9 +34,7 @@ export const GENRES = readList('GENRES')
 export const FORMATS = readList('FORMATS')
 export const MATURITY = readList('MATURITY_RATINGS')
 export const LINK_KINDS = readList('LINK_KINDS')
-
-/** Not in taxonomy.ts — it lives on the book schema's status field. */
-export const STATUSES = ['Ongoing', 'Complete', 'Upcoming']
+export const STATUSES = readList('STATUSES')
 
 /**
  * Repairs UTF-8 that was decoded as Latin-1 somewhere upstream.
