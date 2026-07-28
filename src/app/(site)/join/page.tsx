@@ -14,6 +14,7 @@ import {
   INTAKE_OWNED_CREATORS_QUERY,
   INTAKE_CREATOR_EDIT_QUERY,
   INTAKE_ORGANIZATIONS_QUERY,
+  INTAKE_STUDIO_ORG_IDS_QUERY,
 } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
 import type { SanityImage } from '@/lib/types'
@@ -127,12 +128,17 @@ export default async function JoinPage({
 
   // Signed in: only this email's own profiles are editable.
   const ownedIds = await creatorsOwnedBy(email)
-  const [organizations, ownedCreators] = await Promise.all([
+  const [organizations, studioIds, ownedCreators] = await Promise.all([
     safeFetch<CreatorIntakeOrg[]>(INTAKE_ORGANIZATIONS_QUERY, {}, []),
+    safeFetch<string[]>(INTAKE_STUDIO_ORG_IDS_QUERY, {}, []),
     ownedIds.length
       ? safeFetch<CreatorIntakeOrg[]>(INTAKE_OWNED_CREATORS_QUERY, { ids: ownedIds }, [])
       : Promise.resolve<CreatorIntakeOrg[]>([]),
   ])
+  // Collectives excludes orgs used as any creator's studio (there is no
+  // studio/collective flag on the org itself — see INTAKE_STUDIO_ORG_IDS_QUERY).
+  const studioIdSet = new Set(studioIds)
+  const collectives = organizations.filter((o) => !studioIdSet.has(o._id))
 
   const canEdit = Boolean(editingId && ownedIds.includes(editingId))
   const editProfile = canEdit
@@ -168,6 +174,7 @@ export default async function JoinPage({
           key={initial?.updateId ?? 'new'}
           copy={intake}
           organizations={organizations}
+          collectives={collectives}
           creators={ownedCreators}
           initial={initial}
         />

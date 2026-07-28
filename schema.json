@@ -3119,6 +3119,27 @@
               },
               "optional": true
             },
+            "orgAddLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "orgAddHint": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "orgNamePlaceholder": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "locationLabel": {
               "type": "objectAttribute",
               "value": {

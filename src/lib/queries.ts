@@ -193,6 +193,16 @@ export const INTAKE_ORGANIZATIONS_QUERY = defineQuery(
 )
 
 /**
+ * Org ids used as some creator's `studio`. There is no studio-vs-collective
+ * flag on the org itself (they share one type), so "is a studio" is inferred
+ * from being referenced this way — used to keep studios out of the intake
+ * form's Collectives list.
+ */
+export const INTAKE_STUDIO_ORG_IDS_QUERY = defineQuery(
+  `*[_type=="creator" && defined(studio)].studio._ref`,
+)
+
+/**
  * Every creator id, for slug-uniqueness at intake. Run through the WRITE client
  * (token) so it includes `drafts.*` — two people must not be handed the same
  * `creator-<slug>` id, and an unpublished draft already holds one.

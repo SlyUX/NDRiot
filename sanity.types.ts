@@ -506,6 +506,9 @@ export type SiteSettings = {
     slugHint?: string;
     studioLabel?: string;
     orgsLabel?: string;
+    orgAddLabel?: string;
+    orgAddHint?: string;
+    orgNamePlaceholder?: string;
     locationLabel?: string;
     bioLabel?: string;
     formatsLabel?: string;
@@ -1524,6 +1527,11 @@ export type INTAKE_ORGANIZATIONS_QUERY_RESULT = Array<{
 }>;
 
 // Source: src/lib/queries.ts
+// Variable: INTAKE_STUDIO_ORG_IDS_QUERY
+// Query: *[_type=="creator" && defined(studio)].studio._ref
+export type INTAKE_STUDIO_ORG_IDS_QUERY_RESULT = Array<string>;
+
+// Source: src/lib/queries.ts
 // Variable: INTAKE_CREATOR_IDS_QUERY
 // Query: *[_type=="creator"]._id
 export type INTAKE_CREATOR_IDS_QUERY_RESULT = Array<string>;
@@ -1668,6 +1676,7 @@ declare module "@sanity/client" {
     '*[_type=="book" && _id in $ids]{\n  _id,title,"slug":slug.current,status,genres,format,maturity,cover,shortDescription,\n  "descriptionText": pt::text(description),\n  "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,\n  "creatorName":creator->name\n}': HERO_BOOKS_QUERY_RESULT;
     '{\n  "books": *[_type=="book" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "creators": *[_type=="creator" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "columns": *[_type=="column" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "interviews": *[_type=="interview" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "genres": array::unique(*[_type=="book" && defined(genres)].genres[])\n}': SITEMAP_QUERY_RESULT;
     '*[_type=="organization" && defined(name)]|order(name asc){_id,name}': INTAKE_ORGANIZATIONS_QUERY_RESULT;
+    '*[_type=="creator" && defined(studio)].studio._ref': INTAKE_STUDIO_ORG_IDS_QUERY_RESULT;
     '*[_type=="creator"]._id': INTAKE_CREATOR_IDS_QUERY_RESULT;
     '*[_type=="creator" && defined(slug.current)]|order(name asc){_id,name}': INTAKE_CREATORS_QUERY_RESULT;
     '*[_type=="creator" && _id in $ids && defined(slug.current)]|order(name asc){_id,name}': INTAKE_OWNED_CREATORS_QUERY_RESULT;

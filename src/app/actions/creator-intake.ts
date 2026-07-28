@@ -66,6 +66,53 @@ function uniqueSlug(base: string, takenIds: Set<string>): string {
   return slug
 }
 
+/**
+ * Resolve free-text "organization name + URL" rows to org ids: reuse an
+ * existing org matching by name (case-insensitive), else create it published
+ * so the reference resolves — the importer's rule. Blanks and the chosen studio
+ * are skipped; failures are logged, not fatal.
+ */
+async function resolveNewOrgs(
+  client: ReturnType<typeof getWriteClient>,
+  existing: { _id: string; name: string }[],
+  names: string[],
+  urls: string[],
+  studioId: string | null,
+): Promise<string[]> {
+  const byName = new Map(existing.map((o) => [o.name.trim().toLowerCase(), o._id]))
+  const out: string[] = []
+  const rows = Math.max(names.length, urls.length)
+  for (let r = 0; r < rows; r += 1) {
+    const name = (names[r] ?? '').trim()
+    if (!name) continue
+    let url = (urls[r] ?? '').trim()
+    if (url && !/^https?:\/\//i.test(url)) url = `https://${url}`
+
+    const existingId = byName.get(name.toLowerCase())
+    if (existingId) {
+      if (existingId !== studioId) out.push(existingId)
+      continue
+    }
+    const slug = slugify(name)
+    if (!slug) continue
+    const id = `organization-${slug}`
+    try {
+      await client.createIfNotExists({
+        _id: id,
+        _type: 'organization',
+        name,
+        slug: { _type: 'slug', current: slug },
+        ...(url ? { website: url } : {}),
+      })
+      byName.set(name.toLowerCase(), id) // dedupe repeats within one submission
+      if (id !== studioId) out.push(id)
+    } catch (cause) {
+      console.error('[creator-intake] org create failed', cause)
+    }
+  }
+  return out
+}
+
 export async function submitCreator(
   _prev: CreatorIntakeState,
   formData: FormData,
@@ -152,12 +199,14 @@ export async function submitCreator(
   // profile). Reads through the WRITE client so creator ids include drafts.
   let orgIdSet: Set<string>
   let takenIds: Set<string>
+  let orgs: { _id: string; name: string }[] = []
   try {
-    const [orgs, creatorIds] = await Promise.all([
+    const [orgList, creatorIds] = await Promise.all([
       client.fetch<{ _id: string; name: string }[]>(INTAKE_ORGANIZATIONS_QUERY),
       client.fetch<string[]>(INTAKE_CREATOR_IDS_QUERY),
     ])
-    orgIdSet = new Set((orgs ?? []).map((o) => o._id))
+    orgs = orgList ?? []
+    orgIdSet = new Set(orgs.map((o) => o._id))
     takenIds = new Set((creatorIds ?? []).map((id) => id.replace(/^drafts\./, '')))
   } catch (cause) {
     console.error('[creator-intake] reference read failed', cause)
@@ -166,9 +215,23 @@ export async function submitCreator(
 
   const submittedStudio = String(formData.get('studio') ?? '').trim()
   const studioId = orgIdSet.has(submittedStudio) ? submittedStudio : null
-  const orgIds = [...new Set(formData.getAll('orgs').map(String))]
-    .filter((id) => orgIdSet.has(id) && id !== studioId)
-    .slice(0, 3)
+
+  // Checkbox selections, plus any orgs added by name+URL. New orgs reuse an
+  // existing one that matches by name, else are created (published, so the
+  // reference resolves) — the importer's rule. The signed-in requirement is
+  // what makes creating an org here acceptable; the creator stays a review
+  // draft a human approves. Combined list is capped at three.
+  const selectedOrgIds = [...new Set(formData.getAll('orgs').map(String))].filter(
+    (id) => orgIdSet.has(id) && id !== studioId,
+  )
+  const newOrgIds = await resolveNewOrgs(
+    client,
+    orgs,
+    formData.getAll('newOrgName').map(String),
+    formData.getAll('newOrgUrl').map(String),
+    studioId,
+  )
+  const orgIds = [...new Set([...selectedOrgIds, ...newOrgIds])].slice(0, 3)
 
   const genres = matchTaxonomy(formData.getAll('genres').map(String), GENRES).matched.slice(0, 3)
   const formats = matchTaxonomy(formData.getAll('formats').map(String), FORMATS).matched

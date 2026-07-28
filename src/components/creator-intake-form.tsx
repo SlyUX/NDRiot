@@ -5,6 +5,7 @@ import { useActionState, useEffect, useRef, useState } from 'react'
 
 import { submitCreator, type CreatorIntakeState } from '@/app/actions/creator-intake'
 import { Button } from '@/components/ui/button'
+import { slugify } from '@/lib/intake/mapping'
 import { GENRES, FORMATS, SOCIAL_PLATFORMS } from '@/lib/taxonomy'
 import { urlFor } from '@/sanity/image'
 import { cn } from '@/lib/utils'
@@ -218,67 +219,84 @@ function SocialLinksField({
 }
 
 /**
- * Repeatable "platform name + URL" rows for a creator's work links. Submits
- * two parallel arrays (`workLabel`, `workUrl`) that the action zips by index.
- * Prepopulated from the loaded profile on an update; falls back to one empty
- * row. Without JS the rendered rows still submit — only add/remove need it.
+ * Repeatable "left text + right URL" rows. Submits two parallel arrays
+ * (`leftName`, `rightName`) the action zips by index. Used for both a creator's
+ * work links and adding an organization that isn't listed. Prepopulated from a
+ * loaded profile where relevant; falls back to one empty row. Without JS the
+ * rendered rows still submit — only add/remove need it.
  */
-function WorkLinksField({
-  copy,
+function PairedRowsField({
+  legend,
+  hint,
+  optionalLabel,
+  leftName,
+  leftPlaceholder,
+  rightName,
+  rightPlaceholder,
+  addLabel,
+  removeLabel,
   initial,
 }: {
-  copy: CreatorIntakeSettings
-  initial?: { label: string; url: string }[]
+  legend: string
+  hint?: string
+  optionalLabel: string
+  leftName: string
+  leftPlaceholder: string
+  rightName: string
+  rightPlaceholder: string
+  addLabel: string
+  removeLabel: string
+  initial?: { left: string; right: string }[]
 }) {
-  const [rows, setRows] = useState<{ label: string; url: string; key: number }[]>(() =>
-    (initial && initial.length ? initial : [{ label: '', url: '' }]).map((r, i) => ({ ...r, key: i })),
+  const [rows, setRows] = useState<{ left: string; right: string; key: number }[]>(() =>
+    (initial && initial.length ? initial : [{ left: '', right: '' }]).map((r, i) => ({ ...r, key: i })),
   )
 
   // Key from the current max + 1 — unique without a render-time ref mutation.
   const addRow = () =>
     setRows((prev) => [
       ...prev,
-      { label: '', url: '', key: prev.reduce((m, r) => Math.max(m, r.key), -1) + 1 },
+      { left: '', right: '', key: prev.reduce((m, r) => Math.max(m, r.key), -1) + 1 },
     ])
   const removeRow = (key: number) =>
     setRows((prev) => (prev.length > 1 ? prev.filter((r) => r.key !== key) : prev))
-  const update = (key: number, field: 'label' | 'url', value: string) =>
+  const update = (key: number, field: 'left' | 'right', value: string) =>
     setRows((prev) => prev.map((r) => (r.key === key ? { ...r, [field]: value } : r)))
 
   return (
     <fieldset className="space-y-3">
       <legend className={labelClass}>
-        {copy.worksLabel}
-        <Optional label={copy.optionalLabel} />
+        {legend}
+        <Optional label={optionalLabel} />
       </legend>
-      <p className={hintClass}>{copy.worksHint}</p>
+      {hint && <p className={hintClass}>{hint}</p>}
       <div className="space-y-2">
         {rows.map((row) => (
           <div key={row.key} className="flex flex-col gap-2 sm:flex-row">
             <input
               type="text"
-              name="workLabel"
-              value={row.label}
-              onChange={(e) => update(row.key, 'label', e.target.value)}
-              placeholder={copy.workPlatformPlaceholder}
-              aria-label={copy.workPlatformPlaceholder}
+              name={leftName}
+              value={row.left}
+              onChange={(e) => update(row.key, 'left', e.target.value)}
+              placeholder={leftPlaceholder}
+              aria-label={leftPlaceholder}
               className={cn(fieldClass, 'sm:w-1/3')}
             />
             <div className="flex gap-2 sm:flex-1">
               <input
                 type="url"
-                name="workUrl"
-                value={row.url}
-                onChange={(e) => update(row.key, 'url', e.target.value)}
-                placeholder={copy.workUrlPlaceholder}
-                aria-label={copy.workUrlPlaceholder}
+                name={rightName}
+                value={row.right}
+                onChange={(e) => update(row.key, 'right', e.target.value)}
+                placeholder={rightPlaceholder}
+                aria-label={rightPlaceholder}
                 className={cn(fieldClass, 'flex-1')}
               />
               {rows.length > 1 && (
                 <button
                   type="button"
                   onClick={() => removeRow(row.key)}
-                  aria-label={copy.workRemoveLabel}
+                  aria-label={removeLabel}
                   className="text-muted-foreground hover:text-destructive focus-visible:ring-ring shrink-0 px-2 focus-visible:ring-2 focus-visible:outline-none"
                 >
                   ✕
@@ -293,7 +311,7 @@ function WorkLinksField({
         onClick={addRow}
         className="text-primary focus-visible:ring-ring text-xs font-semibold tracking-widest uppercase focus-visible:ring-2 focus-visible:outline-none"
       >
-        + {copy.workAddLabel}
+        + {addLabel}
       </button>
     </fieldset>
   )
@@ -302,11 +320,15 @@ function WorkLinksField({
 export function CreatorIntakeForm({
   copy,
   organizations,
+  collectives,
   creators,
   initial,
 }: {
   copy: CreatorIntakeSettings
+  /** All orgs — the studio dropdown. */
   organizations: CreatorIntakeOrg[]
+  /** Orgs that are NOT used as a studio — the Collectives checkboxes. */
+  collectives: CreatorIntakeOrg[]
   creators: CreatorIntakeOrg[]
   initial?: CreatorIntakeInitial
 }) {
@@ -324,6 +346,29 @@ export function CreatorIntakeForm({
   const atGenreMax = genres.length >= 3
   const toggleGenre = (genre: string, checked: boolean) =>
     setGenres((prev) => (checked ? [...prev, genre] : prev.filter((g) => g !== genre)))
+
+  // Name + web address are controlled so the address can be suggested from the
+  // name (create only) and constrained to URL-safe characters as typed. The
+  // suggestion stops the moment the address is edited by hand. The server runs
+  // the same slugify on submit, so this is a live preview of that, not a
+  // second source of truth.
+  const [name, setName] = useState(state.values?.name ?? initial?.name ?? '')
+  const [slug, setSlug] = useState(state.values?.slug ?? '')
+  const [slugTouched, setSlugTouched] = useState(Boolean(state.values?.slug))
+  const sanitizeSlug = (v: string) =>
+    v
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '')
+      .replace(/-{2,}/g, '-')
+  const onNameChange = (v: string) => {
+    setName(v)
+    if (!editing && !slugTouched) setSlug(slugify(v))
+  }
+  const onSlugChange = (v: string) => {
+    setSlug(sanitizeSlug(v))
+    setSlugTouched(true)
+  }
 
   if (state.status === 'success') {
     return (
@@ -386,7 +431,8 @@ export function CreatorIntakeForm({
               type="text"
               required
               maxLength={120}
-              defaultValue={initialText('name', initial?.name)}
+              value={name}
+              onChange={(e) => onNameChange(e.target.value)}
               aria-invalid={Boolean(errors.name)}
               aria-describedby={errors.name ? 'name-error' : undefined}
               className={fieldClass}
@@ -398,63 +444,92 @@ export function CreatorIntakeForm({
             )}
           </div>
 
-          {/* Web address is fixed once a profile exists — hidden on update so it
-              reads as unchangeable, which matches the action preserving it. */}
+          {/* The address is fixed once a profile exists — hidden on update so it
+              reads as unchangeable, matching the action preserving it. Suggested
+              from the name, and constrained to URL-safe characters as typed. */}
           {!editing && (
             <div className="space-y-1.5">
               <label htmlFor="slug" className={labelClass}>
                 {copy.slugLabel}
                 <Optional label={copy.optionalLabel} />
               </label>
-              <input id="slug" name="slug" type="text" defaultValue={initialText('slug')} className={fieldClass} />
+              <input
+                id="slug"
+                name="slug"
+                type="text"
+                inputMode="url"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                pattern="[a-z0-9-]*"
+                value={slug}
+                onChange={(e) => onSlugChange(e.target.value)}
+                className={fieldClass}
+              />
               <p className={hintClass}>{copy.slugHint}</p>
             </div>
           )}
 
           {organizations.length > 0 && (
-            <>
-              <div className="space-y-1.5">
-                <label htmlFor="studio" className={labelClass}>
-                  {copy.studioLabel}
-                  <Optional label={copy.optionalLabel} />
-                </label>
-                <select
-                  id="studio"
-                  name="studio"
-                  defaultValue={initial?.studioId ?? ''}
-                  className={cn(fieldClass, 'appearance-none')}
-                >
-                  <option value="">—</option>
-                  {organizations.map((org) => (
-                    <option key={org._id} value={org._id}>
-                      {org.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <fieldset className="space-y-2">
-                <legend className={labelClass}>
-                  {copy.orgsLabel}
-                  <Optional label={copy.optionalLabel} />
-                </legend>
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {organizations.map((org) => (
-                    <label key={org._id} className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        name="orgs"
-                        value={org._id}
-                        defaultChecked={initial?.orgIds.includes(org._id)}
-                        className="size-4 accent-[var(--primary)]"
-                      />
-                      {org.name}
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
-            </>
+            <div className="space-y-1.5">
+              <label htmlFor="studio" className={labelClass}>
+                {copy.studioLabel}
+                <Optional label={copy.optionalLabel} />
+              </label>
+              <select
+                id="studio"
+                name="studio"
+                defaultValue={initial?.studioId ?? ''}
+                className={cn(fieldClass, 'appearance-none')}
+              >
+                <option value="">—</option>
+                {organizations.map((org) => (
+                  <option key={org._id} value={org._id}>
+                    {org.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           )}
+
+          {/* Collectives excludes studios (orgs used as someone's studio), so a
+              trading name doesn't show up as a group to join. */}
+          {collectives.length > 0 && (
+            <fieldset className="space-y-2">
+              <legend className={labelClass}>
+                {copy.orgsLabel}
+                <Optional label={copy.optionalLabel} />
+              </legend>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {collectives.map((org) => (
+                  <label key={org._id} className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      name="orgs"
+                      value={org._id}
+                      defaultChecked={initial?.orgIds.includes(org._id)}
+                      className="size-4 accent-[var(--primary)]"
+                    />
+                    {org.name}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          )}
+
+          {/* Not listed? Add an org by name + URL. The action reuses one that
+              already matches by name, or creates it. */}
+          <PairedRowsField
+            legend={copy.orgAddLabel}
+            hint={copy.orgAddHint}
+            optionalLabel={copy.optionalLabel}
+            leftName="newOrgName"
+            leftPlaceholder={copy.orgNamePlaceholder}
+            rightName="newOrgUrl"
+            rightPlaceholder={copy.workUrlPlaceholder}
+            addLabel={copy.workAddLabel}
+            removeLabel={copy.workRemoveLabel}
+          />
 
           <div className="space-y-1.5">
             <label htmlFor="location" className={labelClass}>
@@ -598,7 +673,18 @@ export function CreatorIntakeForm({
 
           <SocialLinksField copy={copy} initial={initial?.socials} />
 
-          <WorkLinksField copy={copy} initial={initial?.works} />
+          <PairedRowsField
+            legend={copy.worksLabel}
+            hint={copy.worksHint}
+            optionalLabel={copy.optionalLabel}
+            leftName="workLabel"
+            leftPlaceholder={copy.workPlatformPlaceholder}
+            rightName="workUrl"
+            rightPlaceholder={copy.workUrlPlaceholder}
+            addLabel={copy.workAddLabel}
+            removeLabel={copy.workRemoveLabel}
+            initial={initial?.works.map((w) => ({ left: w.label, right: w.url }))}
+          />
         </fieldset>
 
         {/* — Pictures — */}

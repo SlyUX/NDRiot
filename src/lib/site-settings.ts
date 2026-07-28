@@ -100,6 +100,9 @@ export type CreatorIntakeSettings = {
   slugHint: string
   studioLabel: string
   orgsLabel: string
+  orgAddLabel: string
+  orgAddHint: string
+  orgNamePlaceholder: string
   locationLabel: string
   bioLabel: string
   formatsLabel: string
@@ -255,11 +258,14 @@ const DEFAULTS: SiteSettings = {
     sectionPictures: 'Pictures',
     sectionPermission: 'Permission',
     nameLabel: 'Name you want to be credited by',
-    slugLabel: 'Preferred web address',
+    slugLabel: 'Preferred ND Riot address',
     slugHint:
-      'The end of your page’s link — ndriot.com/creators/your-name. Lowercase letters, numbers and hyphens. Leave blank and we’ll build one from your name.',
+      'The end of your ND Riot link — ndriot.com/creators/your-name. We suggest one from your name; edit it if you like. Lowercase letters, numbers and hyphens only.',
     studioLabel: 'Studio or trading name',
     orgsLabel: 'Collectives or organisations you belong to',
+    orgAddLabel: 'Not listed? Add an organisation',
+    orgAddHint: 'Give its name and link. We’ll add it to the directory when your profile is reviewed.',
+    orgNamePlaceholder: 'Organisation name',
     locationLabel: 'Where you’re based',
     bioLabel: 'Tell us about your work',
     formatsLabel: 'What do you make?',
