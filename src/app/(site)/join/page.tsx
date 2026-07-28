@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
-import { ExternalLink } from 'lucide-react'
 
+import { CreatorIntakeForm, type CreatorIntakeOrg } from '@/components/creator-intake-form'
 import PortableTextBody from '@/components/PortableTextBody'
-import { Button } from '@/components/ui/button'
 import { Section } from '@/components/ui/section'
+import { safeFetch, INTAKE_ORGANIZATIONS_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
 
 export const dynamic = 'force-dynamic'
@@ -23,14 +23,18 @@ export async function generateMetadata(): Promise<Metadata> {
  * The homepage makes an argument and then offers two browse links, so a
  * creator persuaded by it had nowhere to go. This is that destination.
  *
- * It is a page rather than a bare link to the form because a form on its own
- * answers none of the questions someone has before filling it in: what this
- * is, who it is for, and what happens next. The reply-time promise in the
- * body is the part that stops people wondering whether it worked.
+ * It leads with the intro copy — what this is, who it is for, what happens
+ * next — because a bare form answers none of that. The on-site form writes a
+ * review draft straight into Sanity (a human still publishes it). The original
+ * Google Form stays available as a fallback link while the native one beds in.
  */
 export default async function JoinPage() {
-  const settings = await getSiteSettings()
+  const [settings, organizations] = await Promise.all([
+    getSiteSettings(),
+    safeFetch<CreatorIntakeOrg[]>(INTAKE_ORGANIZATIONS_QUERY, {}, []),
+  ])
   const { heading, body, ctaLabel, formUrl } = settings.join
+  const intake = settings.creatorIntake
 
   return (
     <Section padding="md" maxWidth="3xl">
@@ -42,19 +46,27 @@ export default async function JoinPage() {
         </div>
       )}
 
-      {/* No button rather than a dead one if the link is ever cleared — a
-          button that goes nowhere is worse than an obviously unfinished page. */}
-      {formUrl && (
-        <div className="mt-8">
-          <Button asChild size="lg" className="font-black tracking-wide uppercase">
-            <a href={formUrl} target="_blank" rel="noopener noreferrer">
-              {ctaLabel}
-              {/* Marks the jump off-site. aria-hidden because the visible
-                  label already says what the button does. */}
-              <ExternalLink aria-hidden="true" className="ml-1 size-4" />
-            </a>
-          </Button>
+      <div className="mt-12 space-y-6">
+        <div>
+          <h2 className="text-2xl font-black tracking-tighter uppercase">{intake.heading}</h2>
+          <p className="text-muted-foreground mt-2 text-sm">{intake.intro}</p>
         </div>
+        <CreatorIntakeForm copy={intake} organizations={organizations} />
+      </div>
+
+      {/* Fallback to the original Google Form while the native form is proven.
+          The button label is the only copy here, so nothing is hardcoded. */}
+      {formUrl && (
+        <p className="border-primary/20 text-muted-foreground mt-14 border-t pt-6 text-xs">
+          <a
+            href={formUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-primary underline underline-offset-4"
+          >
+            {ctaLabel}
+          </a>
+        </p>
       )}
     </Section>
   )

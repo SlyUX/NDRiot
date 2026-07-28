@@ -75,6 +75,54 @@ export interface JoinSettings {
   formUrl?: string
 }
 
+/**
+ * Every reader-facing label on the on-site creator intake form (§2). Flat
+ * strings so `mergeGroup` restores any field an editor clears. The controlled
+ * vocabularies (genres/formats/audience) are NOT here — they come from the
+ * taxonomy so the form's options can never drift from the schema.
+ */
+export type CreatorIntakeSettings = {
+  heading: string
+  intro: string
+  sectionYou: string
+  sectionWork: string
+  sectionFind: string
+  sectionPictures: string
+  sectionPermission: string
+  nameLabel: string
+  slugLabel: string
+  slugHint: string
+  studioLabel: string
+  orgsLabel: string
+  locationLabel: string
+  bioLabel: string
+  formatsLabel: string
+  genresLabel: string
+  genresHint: string
+  audienceLabel: string
+  audienceSkipLabel: string
+  collabLabel: string
+  collabYesLabel: string
+  collabNoLabel: string
+  websiteLabel: string
+  socialsLabel: string
+  socialsHint: string
+  worksLabel: string
+  worksHint: string
+  photoLabel: string
+  photoHint: string
+  photoAltLabel: string
+  photoAltHint: string
+  emailLabel: string
+  emailHint: string
+  permissionStatement: string
+  anythingElseLabel: string
+  submitLabel: string
+  successMessage: string
+  errorMessage: string
+  optionalLabel: string
+}
+
 export interface ContactSettings {
   heading: string
   /** Footer link label — Contact lives in the footer, not the header nav. */
@@ -97,6 +145,7 @@ export interface SiteSettings {
   discordUrl?: string
   hero: HeroSettings
   join: JoinSettings
+  creatorIntake: CreatorIntakeSettings
   contact: ContactSettings
   home: {
     genresHeading: string
@@ -174,6 +223,52 @@ const DEFAULTS: SiteSettings = {
     heading: 'Get listed',
     ctaLabel: 'Start your submission',
     formUrl: 'https://forms.gle/STbaVMQ8a6Ap8rL1A',
+  },
+  creatorIntake: {
+    heading: 'Add your details',
+    intro:
+      'Only a name, a note about your work, and permission to publish are required — skip anything else or add it later.',
+    sectionYou: 'Who you are',
+    sectionWork: 'Your work',
+    sectionFind: 'Where to find you',
+    sectionPictures: 'Pictures',
+    sectionPermission: 'Permission',
+    nameLabel: 'Name you want to be credited by',
+    slugLabel: 'Preferred web address',
+    slugHint:
+      'The end of your page’s link — ndriot.com/creators/your-name. Lowercase letters, numbers and hyphens. Leave blank and we’ll build one from your name.',
+    studioLabel: 'Studio or trading name',
+    orgsLabel: 'Collectives or organisations you belong to',
+    locationLabel: 'Where you’re based',
+    bioLabel: 'Tell us about your work',
+    formatsLabel: 'What do you make?',
+    genresLabel: 'What genres do you work in?',
+    genresHint: 'Pick up to three.',
+    audienceLabel: 'Who’s it for?',
+    audienceSkipLabel: 'Rather not say',
+    collabLabel: 'Are you open to collaboration?',
+    collabYesLabel: 'Yes — I’m looking for collaborators',
+    collabNoLabel: 'Not right now',
+    websiteLabel: 'Your website',
+    socialsLabel: 'Social links',
+    socialsHint: 'One link per line.',
+    worksLabel: 'Where can people get your books?',
+    worksHint: 'One per line: a title, then its link.',
+    photoLabel: 'A photo or avatar of you',
+    photoHint: 'PNG or JPG, up to 8MB.',
+    photoAltLabel: 'Describe that image',
+    photoAltHint:
+      'For readers who can’t see it — describe what it shows, not who it is. Skip for a plain headshot.',
+    emailLabel: 'Your email',
+    emailHint: 'So we can reach you about your listing. Never shown on the site.',
+    permissionStatement:
+      'I own or have permission to share everything I’ve linked here, and ND Riot can use it to build my profile.',
+    anythingElseLabel: 'Anything else?',
+    submitLabel: 'Submit for review',
+    successMessage:
+      'Thanks — your details are in. A person reviews every submission before it goes live, so your page will appear shortly. We’ll be in touch if anything needs a look.',
+    errorMessage: 'That didn’t save. Please try again in a moment.',
+    optionalLabel: 'optional',
   },
   contact: {
     heading: 'Get in touch',
@@ -272,7 +367,7 @@ const DEFAULTS: SiteSettings = {
 
 export const SITE_SETTINGS_QUERY = `*[_id=="siteSettings"][0]{
   siteTitle,siteDescription,footer,discordUrl,
-  home,sections,empty,
+  home,sections,empty,creatorIntake,
   hero{background,headline,body,tagline,featureCtaLabel,featuredHeading,newHeading,ctas[]{label,href}},
   join{heading,body,ctaLabel,formUrl},
   contact{heading,linkLabel,body,nameLabel,emailLabel,subjectLabel,messageLabel,submitLabel,successMessage,errorMessage},
@@ -321,6 +416,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       ctaLabel: data.join?.ctaLabel?.trim() || DEFAULTS.join.ctaLabel,
       formUrl: data.join?.formUrl?.trim() || DEFAULTS.join.formUrl,
     },
+    creatorIntake: mergeGroup(DEFAULTS.creatorIntake, data.creatorIntake),
     contact: {
       // Field-by-field like `join` above: a blank string falls back to the
       // default, and the rich-text body passes through untouched.

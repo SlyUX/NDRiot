@@ -480,6 +480,47 @@ export type SiteSettings = {
     ctaLabel?: string;
     formUrl?: string;
   };
+  creatorIntake?: {
+    heading?: string;
+    intro?: string;
+    sectionYou?: string;
+    sectionWork?: string;
+    sectionFind?: string;
+    sectionPictures?: string;
+    sectionPermission?: string;
+    nameLabel?: string;
+    slugLabel?: string;
+    slugHint?: string;
+    studioLabel?: string;
+    orgsLabel?: string;
+    locationLabel?: string;
+    bioLabel?: string;
+    formatsLabel?: string;
+    genresLabel?: string;
+    genresHint?: string;
+    audienceLabel?: string;
+    audienceSkipLabel?: string;
+    collabLabel?: string;
+    collabYesLabel?: string;
+    collabNoLabel?: string;
+    websiteLabel?: string;
+    socialsLabel?: string;
+    socialsHint?: string;
+    worksLabel?: string;
+    worksHint?: string;
+    photoLabel?: string;
+    photoHint?: string;
+    photoAltLabel?: string;
+    photoAltHint?: string;
+    emailLabel?: string;
+    emailHint?: string;
+    permissionStatement?: string;
+    anythingElseLabel?: string;
+    submitLabel?: string;
+    successMessage?: string;
+    errorMessage?: string;
+    optionalLabel?: string;
+  };
   contact?: {
     heading?: string;
     linkLabel?: string;
@@ -1455,6 +1496,19 @@ export type SITEMAP_QUERY_RESULT = {
 };
 
 // Source: src/lib/queries.ts
+// Variable: INTAKE_ORGANIZATIONS_QUERY
+// Query: *[_type=="organization" && defined(name)]|order(name asc){_id,name}
+export type INTAKE_ORGANIZATIONS_QUERY_RESULT = Array<{
+  _id: string;
+  name: string;
+}>;
+
+// Source: src/lib/queries.ts
+// Variable: INTAKE_CREATOR_IDS_QUERY
+// Query: *[_type=="creator"]._id
+export type INTAKE_CREATOR_IDS_QUERY_RESULT = Array<string>;
+
+// Source: src/lib/queries.ts
 // Variable: GENRE_CREATORS_QUERY
 // Query: {  "items": *[_type=="creator" && $genre in genres]|order(name asc)[0...$limit]{    _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,    "bioText":pt::text(bio),    studio->{_id,name,"slug":slug.current,website,logo}  },  "total": count(*[_type=="creator" && $genre in genres])}
 export type GENRE_CREATORS_QUERY_RESULT = {
@@ -1517,6 +1571,8 @@ declare module "@sanity/client" {
     '*[_type=="book" && defined(slug.current)]._id': BOOK_IDS_QUERY_RESULT;
     '*[_type=="book" && _id in $ids]{\n  _id,title,"slug":slug.current,status,genres,format,maturity,cover,shortDescription,\n  "descriptionText": pt::text(description),\n  "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,\n  "creatorName":creator->name\n}': HERO_BOOKS_QUERY_RESULT;
     '{\n  "books": *[_type=="book" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "creators": *[_type=="creator" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "columns": *[_type=="column" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "interviews": *[_type=="interview" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "genres": array::unique(*[_type=="book" && defined(genres)].genres[])\n}': SITEMAP_QUERY_RESULT;
+    '*[_type=="organization" && defined(name)]|order(name asc){_id,name}': INTAKE_ORGANIZATIONS_QUERY_RESULT;
+    '*[_type=="creator"]._id': INTAKE_CREATOR_IDS_QUERY_RESULT;
     '{\n  "items": *[_type=="creator" && $genre in genres]|order(name asc)[0...$limit]{\n    _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,\n    "bioText":pt::text(bio),\n    studio->{_id,name,"slug":slug.current,website,logo}\n  },\n  "total": count(*[_type=="creator" && $genre in genres])\n}': GENRE_CREATORS_QUERY_RESULT;
   }
 }
