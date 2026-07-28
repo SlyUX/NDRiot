@@ -82,30 +82,46 @@ async function resolveStudio(
 ): Promise<string | null> {
   const clean = name.trim()
   if (!clean) return null
-  const existingId = existing.find((o) => o.name.trim().toLowerCase() === clean.toLowerCase())?._id
-  if (existingId) return existingId // reuse; don't overwrite its logo/site
+
+  // Upload a new logo up front — used whether we update an existing studio or
+  // create one.
+  let logoAssetId: string | null = null
+  if (logo && logo.size > 0) {
+    const result = await uploadImageFile(logo, `${slugify(clean) || 'studio'}-logo`)
+    if ('assetId' in result) logoAssetId = result.assetId
+  }
+  const logoField = logoAssetId
+    ? { logo: { _type: 'imageWithAlt', asset: { _type: 'reference', _ref: logoAssetId } } }
+    : {}
+
+  const match = existing.find((o) => o.name.trim().toLowerCase() === clean.toLowerCase())
+  if (match) {
+    // Update the existing studio's website/logo when the creator supplies them.
+    // A live edit to a shared org, consistent with how studios are created here.
+    const patch: Record<string, unknown> = { ...(url ? { website: url } : {}), ...logoField }
+    if (Object.keys(patch).length) {
+      try {
+        await client.patch(match._id).set(patch).commit()
+      } catch (cause) {
+        console.error('[creator-intake] studio update failed', cause)
+      }
+    }
+    return match._id
+  }
 
   const slug = slugify(clean)
   if (!slug) return null
   const id = `organization-${slug}`
-
-  let logoAssetId: string | null = null
-  if (logo && logo.size > 0) {
-    const result = await uploadImageFile(logo, `${slug}-logo`)
-    if ('assetId' in result) logoAssetId = result.assetId
+  const doc: { _id: string; _type: string; [key: string]: unknown } = {
+    _id: id,
+    _type: 'organization',
+    name: clean,
+    slug: { _type: 'slug', current: slug },
+    ...(url ? { website: url } : {}),
+    ...logoField,
   }
-
   try {
-    await client.createIfNotExists({
-      _id: id,
-      _type: 'organization',
-      name: clean,
-      slug: { _type: 'slug', current: slug },
-      ...(url ? { website: url } : {}),
-      ...(logoAssetId
-        ? { logo: { _type: 'imageWithAlt', asset: { _type: 'reference', _ref: logoAssetId } } }
-        : {}),
-    })
+    await client.createIfNotExists(doc)
     return id
   } catch (cause) {
     console.error('[creator-intake] studio create failed', cause)

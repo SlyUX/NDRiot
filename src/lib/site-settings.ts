@@ -272,7 +272,7 @@ const DEFAULTS: SiteSettings = {
       'The end of your ND Riot link — ndriot.com/creators/your-name. We suggest one from your name; edit it if you like. Lowercase letters, numbers and hyphens only.',
     studioLabel: 'Studio or trading name',
     studioSelectPlaceholder: 'Choose your studio, if it’s listed',
-    studioCreateLabel: 'Not listed? Create it — most new creators do.',
+    studioCreateLabel: 'Not listed, or updating yours? Add or edit its name, website, and logo.',
     studioNamePlaceholder: 'Studio name',
     studioUrlPlaceholder: 'Studio website (https://…)',
     studioLogoLabel: 'Studio logo or avatar',

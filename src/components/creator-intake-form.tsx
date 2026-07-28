@@ -63,6 +63,8 @@ export interface CreatorIntakeInitial {
   photo: SanityImage | null
   photoAlt: string
   studioId: string | null
+  studioName: string
+  studioWebsite: string
   orgIds: string[]
 }
 
@@ -560,14 +562,15 @@ export function CreatorIntakeForm({
             </div>
           )}
 
-          {/* Studio: pick an existing one, or create yours (name + URL + logo)
-              alongside the creator — what most new creators need. */}
+          {/* Studio: pick an existing one (create only), or enter your studio's
+              name + URL + logo. On an update the fields prefill with your current
+              studio so you can edit its website or logo. */}
           <fieldset className="space-y-3">
             <legend className={labelClass}>
               {copy.studioLabel}
               <Optional label={copy.optionalLabel} />
             </legend>
-            {organizations.length > 0 && (
+            {!editing && organizations.length > 0 && (
               <select
                 id="studio"
                 name="studio"
@@ -588,6 +591,7 @@ export function CreatorIntakeForm({
               <input
                 type="text"
                 name="studioName"
+                defaultValue={initial?.studioName ?? ''}
                 placeholder={copy.studioNamePlaceholder}
                 aria-label={copy.studioNamePlaceholder}
                 className={fieldClass}
@@ -595,7 +599,7 @@ export function CreatorIntakeForm({
               <input
                 type="url"
                 name="studioUrl"
-                defaultValue="https://www."
+                defaultValue={initial?.studioWebsite || 'https://www.'}
                 placeholder={copy.studioUrlPlaceholder}
                 aria-label={copy.studioUrlPlaceholder}
                 className={fieldClass}

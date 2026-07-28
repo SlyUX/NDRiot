@@ -240,6 +240,8 @@ export const INTAKE_CREATOR_EDIT_QUERY = defineQuery(`*[_type=="creator" && _id=
   genres,formats,openToCollaboration,
   photo,"photoAlt":photo.alt,
   "studioId":studio._ref,
+  "studioName":studio->name,
+  "studioWebsite":studio->website,
   "orgIds":organizations[]._ref
 }`)
 

@@ -47,6 +47,8 @@ type EditProfile = {
   photo: SanityImage | null
   photoAlt: string | null
   studioId: string | null
+  studioName: string | null
+  studioWebsite: string | null
   orgIds: string[] | null
 }
 
@@ -67,6 +69,8 @@ function toInitial(p: EditProfile): CreatorIntakeInitial {
     photo: p.photo ?? null,
     photoAlt: p.photoAlt ?? '',
     studioId: p.studioId ?? null,
+    studioName: p.studioName ?? '',
+    studioWebsite: p.studioWebsite ?? '',
     orgIds: p.orgIds ?? [],
   }
 }
