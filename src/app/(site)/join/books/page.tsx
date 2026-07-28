@@ -18,6 +18,7 @@ import {
 } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
 import type { SanityImage } from '@/lib/types'
+import { editableDraftPreferred } from '@/sanity/intake-reads'
 import { creatorsOwnedBy } from '@/sanity/ownership-client'
 
 export const dynamic = 'force-dynamic'
@@ -138,8 +139,9 @@ export default async function BooksIntakePage({
   // is already creator-scoped); the action re-checks regardless.
   const ownedBookIds = new Set(books.map((b) => b._id))
   const canEdit = Boolean(editingId && ownedBookIds.has(editingId))
+  // Prefer the draft so pending (unreviewed) edits prepopulate.
   const editBook = canEdit
-    ? await safeFetch<EditBook | null>(INTAKE_BOOK_EDIT_QUERY, { id: editingId }, null)
+    ? await editableDraftPreferred<EditBook>(INTAKE_BOOK_EDIT_QUERY, editingId!)
     : null
   const initial = editBook ? toInitial(editBook) : undefined
 

@@ -19,6 +19,7 @@ import {
 } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
 import type { SanityImage } from '@/lib/types'
+import { editableDraftPreferred } from '@/sanity/intake-reads'
 import { creatorsOwnedBy } from '@/sanity/ownership-client'
 
 export const dynamic = 'force-dynamic'
@@ -155,8 +156,9 @@ export default async function JoinPage({
   const targetEditId =
     editingId ?? (!wantsNew && ownedIds.length === 1 ? ownedIds[0] : undefined)
   const canEdit = Boolean(targetEditId && ownedIds.includes(targetEditId))
+  // Prefer the draft so a creator's pending (unreviewed) edits prepopulate.
   const editProfile = canEdit
-    ? await safeFetch<EditProfile | null>(INTAKE_CREATOR_EDIT_QUERY, { id: targetEditId }, null)
+    ? await editableDraftPreferred<EditProfile>(INTAKE_CREATOR_EDIT_QUERY, targetEditId!)
     : null
   const initial = editProfile ? toInitial(editProfile) : undefined
 
