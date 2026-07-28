@@ -3357,6 +3357,20 @@
               },
               "optional": true
             },
+            "imageTypeError": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "imageSizeError": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "signInPrompt": {
               "type": "objectAttribute",
               "value": {

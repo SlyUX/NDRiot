@@ -149,7 +149,9 @@ export function buildSocials(
       let handle = raw.replace(/^@+/, '').replace(/\/+$/, '')
       const slash = handle.lastIndexOf('/')
       if (slash >= 0) handle = handle.slice(slash + 1)
-      handle = handle.trim()
+      // Restrict to characters real handles use, so nothing odd ends up in the
+      // constructed URL. Covers Bluesky's dotted handles too.
+      handle = handle.trim().replace(/[^A-Za-z0-9._-]/g, '')
       url = handle ? `${prefix}${handle}` : null
     } else {
       url = normalizeUrl(raw)

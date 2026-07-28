@@ -7,6 +7,10 @@ import { getWriteClient } from '@/sanity/write-client'
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024
 const MIN_IMAGE_BYTES = 1024
 
+// Raster only, on purpose. SVG is excluded because it can carry embedded
+// scripts; the client downscaler also emits JPEG, so this is the real set.
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+
 export type UploadResult = { assetId: string } | { error: string }
 
 /**
@@ -24,8 +28,8 @@ export async function uploadImageFile(file: File, filename: string): Promise<Upl
   if (!file || typeof file.arrayBuffer !== 'function' || file.size === 0) {
     return { error: 'no file supplied' }
   }
-  if (!file.type.startsWith('image/')) {
-    return { error: `expected an image, got ${file.type || 'an unknown type'}` }
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    return { error: `use a JPG, PNG, or WebP image (got ${file.type || 'an unknown type'})` }
   }
   if (file.size < MIN_IMAGE_BYTES) return { error: 'the file looks empty or truncated' }
   if (file.size > MAX_IMAGE_BYTES) {

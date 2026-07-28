@@ -110,18 +110,8 @@ async function downscaleImage(file: File, maxDim = 1600, quality = 0.85): Promis
   return new File([blob], `${base}.jpg`, { type: 'image/jpeg' })
 }
 
-/** Resize the picked image in place, so the (smaller) file is what submits. */
-async function onImagePick(e: React.ChangeEvent<HTMLInputElement>) {
-  const input = e.currentTarget
-  const file = input.files?.[0]
-  if (!file) return
-  const resized = await downscaleImage(file)
-  if (resized !== file) {
-    const dt = new DataTransfer()
-    dt.items.add(resized)
-    input.files = dt.files
-  }
-}
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+const MAX_PICK_BYTES = 20 * 1024 * 1024
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
@@ -466,6 +456,34 @@ export function CreatorIntakeForm({
     setSlugTouched(true)
   }
 
+  // Validate a picked image (type + a hard size cap) with a visible message,
+  // then downscale it in place so a smaller file is what submits. Keyed by
+  // input name so the photo and studio-logo fields show their own error.
+  const [imageErrors, setImageErrors] = useState<Record<string, string>>({})
+  const onImagePick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.currentTarget
+    const name = input.name
+    const file = input.files?.[0]
+    setImageErrors((prev) => ({ ...prev, [name]: '' }))
+    if (!file) return
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      input.value = ''
+      setImageErrors((prev) => ({ ...prev, [name]: copy.imageTypeError }))
+      return
+    }
+    if (file.size > MAX_PICK_BYTES) {
+      input.value = ''
+      setImageErrors((prev) => ({ ...prev, [name]: copy.imageSizeError }))
+      return
+    }
+    const resized = await downscaleImage(file)
+    if (resized !== file) {
+      const dt = new DataTransfer()
+      dt.items.add(resized)
+      input.files = dt.files
+    }
+  }
+
   if (state.status === 'success') {
     return (
       <p role="status" className="border-primary text-foreground border-l-2 py-2 pl-4 text-sm">
@@ -634,6 +652,9 @@ export function CreatorIntakeForm({
                   onChange={onImagePick}
                   className={cn(fieldClass, 'file:mr-3 file:border-0 file:bg-transparent file:text-xs file:uppercase file:text-primary')}
                 />
+                {imageErrors.studioLogo && (
+                  <p className="text-destructive text-xs">{imageErrors.studioLogo}</p>
+                )}
                 <p className={hintClass}>{copy.studioLogoHint}</p>
               </div>
             </div>
@@ -868,6 +889,7 @@ export function CreatorIntakeForm({
               onChange={onImagePick}
               className={cn(fieldClass, 'file:mr-3 file:border-0 file:bg-transparent file:text-xs file:uppercase file:text-primary')}
             />
+            {imageErrors.photo && <p className="text-destructive text-xs">{imageErrors.photo}</p>}
             <p className={hintClass}>{copy.photoHint}</p>
           </div>
 

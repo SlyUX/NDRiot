@@ -540,6 +540,8 @@ export type SiteSettings = {
     photoCurrentHint?: string;
     photoAltLabel?: string;
     photoAltHint?: string;
+    imageTypeError?: string;
+    imageSizeError?: string;
     signInPrompt?: string;
     signInBody?: string;
     signInButton?: string;

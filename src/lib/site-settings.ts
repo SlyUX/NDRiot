@@ -134,6 +134,8 @@ export type CreatorIntakeSettings = {
   photoCurrentHint: string
   photoAltLabel: string
   photoAltHint: string
+  imageTypeError: string
+  imageSizeError: string
   signInPrompt: string
   signInBody: string
   signInButton: string
@@ -276,7 +278,7 @@ const DEFAULTS: SiteSettings = {
     studioNamePlaceholder: 'Studio name',
     studioUrlPlaceholder: 'Studio website (https://…)',
     studioLogoLabel: 'Studio logo or avatar',
-    studioLogoHint: 'Optional. PNG or SVG that reads on a near-black background.',
+    studioLogoHint: 'Optional. PNG or JPG that reads on a near-black background.',
     orgsLabel: 'Collectives or organizations you belong to',
     orgAddLabel: 'Not listed? Add an organization',
     orgAddHint: 'Give its name and link. We’ll add it to the directory when your profile is reviewed.',
@@ -307,6 +309,8 @@ const DEFAULTS: SiteSettings = {
     photoAltLabel: 'Describe that image',
     photoAltHint:
       'For readers who can’t see it — describe what it shows, not who it is. Skip for a plain headshot.',
+    imageTypeError: 'Please use a JPG, PNG, or WebP image.',
+    imageSizeError: 'That image is very large — please use one under 20MB (a normal avatar is well under that).',
     signInPrompt: 'Sign in to create or manage your profile',
     signInBody:
       'ND Riot uses Google sign-in so a profile stays in its owner’s hands — it only confirms it’s you, and we manage no passwords. Prefer not to? The Google Form below still works.',

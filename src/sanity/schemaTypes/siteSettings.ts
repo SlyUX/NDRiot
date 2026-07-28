@@ -535,6 +535,8 @@ export default defineType({
           type: 'string',
           description: 'The alt text prompt — describe what the image shows, for readers who can’t see it.',
         }),
+        defineField({ name: 'imageTypeError', title: 'Image — wrong-type error', type: 'string' }),
+        defineField({ name: 'imageSizeError', title: 'Image — too-large error', type: 'string' }),
         defineField({
           name: 'signInPrompt',
           title: 'Sign-in — heading',
