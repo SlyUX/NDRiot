@@ -143,9 +143,10 @@ export function buildSocials(
     const prefix = SOCIAL_PROFILE_PREFIX[platform as SocialPlatform]
     let url: string | null
     if (prefix) {
-      // Keep just the handle: drop a leading @ and anything up to a last slash
-      // (so a pasted profile URL still resolves to the account name).
-      let handle = raw.replace(/^@+/, '')
+      // Keep just the handle: drop a leading @, drop trailing slashes (canonical
+      // profile URLs like instagram.com/name/ carry one), then anything up to a
+      // last slash so a pasted profile URL still resolves to the account name.
+      let handle = raw.replace(/^@+/, '').replace(/\/+$/, '')
       const slash = handle.lastIndexOf('/')
       if (slash >= 0) handle = handle.slice(slash + 1)
       handle = handle.trim()

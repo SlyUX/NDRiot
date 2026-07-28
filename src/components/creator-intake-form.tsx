@@ -205,7 +205,10 @@ function SocialLinksField({
   // a prefix, so editing stays account-name based.
   const toRow = (s: { platform: string; url: string }) => {
     const prefix = SOCIAL_PROFILE_PREFIX[s.platform as SocialPlatform]
-    const value = prefix && s.url.startsWith(prefix) ? s.url.slice(prefix.length) : s.url
+    // Strip the prefix AND a trailing slash so the shown handle is clean.
+    const value = prefix && s.url.startsWith(prefix)
+      ? s.url.slice(prefix.length).replace(/\/+$/, '')
+      : s.url
     return { platform: s.platform, value }
   }
   const [rows, setRows] = useState<{ platform: string; value: string; key: number }[]>(() =>
