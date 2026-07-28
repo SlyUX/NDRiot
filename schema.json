@@ -3154,20 +3154,6 @@
               },
               "optional": true
             },
-            "audienceLabel": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
-            "audienceSkipLabel": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
             "collabLabel": {
               "type": "objectAttribute",
               "value": {
@@ -3267,6 +3253,13 @@
               "optional": true
             },
             "photoHint": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "photoCurrentHint": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

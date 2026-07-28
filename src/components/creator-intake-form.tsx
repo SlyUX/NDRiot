@@ -1,18 +1,15 @@
 'use client'
 
+import Image from 'next/image'
 import { useActionState, useEffect, useRef, useState } from 'react'
 
 import { submitCreator, type CreatorIntakeState } from '@/app/actions/creator-intake'
 import { Button } from '@/components/ui/button'
-import {
-  GENRES,
-  FORMATS,
-  MATURITY_RATINGS,
-  MATURITY_DESCRIPTIONS,
-  SOCIAL_PLATFORMS,
-} from '@/lib/taxonomy'
+import { GENRES, FORMATS, SOCIAL_PLATFORMS } from '@/lib/taxonomy'
+import { urlFor } from '@/sanity/image'
 import { cn } from '@/lib/utils'
 import type { CreatorIntakeSettings } from '@/lib/site-settings'
+import type { SanityImage } from '@/lib/types'
 
 /**
  * On-site creator intake — Stage 3. Presentational: every label is passed in
@@ -55,8 +52,9 @@ export interface CreatorIntakeInitial {
   works: { label: string; url: string }[]
   genres: string[]
   formats: string[]
-  audience: string
   collab: boolean
+  photo: SanityImage | null
+  photoAlt: string
   studioId: string | null
   orgIds: string[]
 }
@@ -552,40 +550,6 @@ export function CreatorIntakeForm({
 
           <fieldset className="space-y-2">
             <legend className={labelClass}>
-              {copy.audienceLabel}
-              <Optional label={copy.optionalLabel} />
-            </legend>
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="radio"
-                  name="audience"
-                  value=""
-                  defaultChecked={!initial?.audience}
-                  className="size-4 accent-[var(--primary)]"
-                />
-                {copy.audienceSkipLabel}
-              </label>
-              {MATURITY_RATINGS.map((rating) => (
-                <label key={rating} className="flex items-start gap-2 text-sm">
-                  <input
-                    type="radio"
-                    name="audience"
-                    value={rating}
-                    defaultChecked={initial?.audience === rating}
-                    className="mt-0.5 size-4 accent-[var(--primary)]"
-                  />
-                  <span>
-                    <span className="font-semibold">{rating}</span>
-                    <span className="text-muted-foreground"> — {MATURITY_DESCRIPTIONS[rating]}</span>
-                  </span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-
-          <fieldset className="space-y-2">
-            <legend className={labelClass}>
               {copy.collabLabel}
               <Optional label={copy.optionalLabel} />
             </legend>
@@ -646,6 +610,21 @@ export function CreatorIntakeForm({
               {copy.photoLabel}
               <Optional label={copy.optionalLabel} />
             </label>
+            {/* On an update, show the existing avatar so the creator knows a
+                re-upload is optional. alt is their own image's alt, or empty
+                (decorative) — the note beside it carries the meaning. */}
+            {initial?.photo && (
+              <div className="mb-2 flex items-center gap-3">
+                <Image
+                  src={urlFor(initial.photo).width(128).height(128).fit('crop').url()}
+                  alt={initial.photoAlt || ''}
+                  width={64}
+                  height={64}
+                  className="size-16 shrink-0 object-cover"
+                />
+                <p className={hintClass}>{copy.photoCurrentHint}</p>
+              </div>
+            )}
             <input
               id="photo"
               name="photo"
@@ -665,7 +644,7 @@ export function CreatorIntakeForm({
               id="photoAlt"
               name="photoAlt"
               type="text"
-              defaultValue={initialText('photoAlt')}
+              defaultValue={initialText('photoAlt', initial?.photoAlt)}
               className={fieldClass}
             />
             <p className={hintClass}>{copy.photoAltHint}</p>

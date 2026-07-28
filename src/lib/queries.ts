@@ -218,7 +218,8 @@ export const INTAKE_CREATOR_EDIT_QUERY = defineQuery(`*[_type=="creator" && _id=
   "bioText":pt::text(bio),
   socials[]{platform,url},
   works[]{label,url},
-  genres,formats,audience,openToCollaboration,
+  genres,formats,openToCollaboration,
+  photo,"photoAlt":photo.alt,
   "studioId":studio._ref,
   "orgIds":organizations[]._ref
 }`)

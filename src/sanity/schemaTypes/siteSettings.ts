@@ -454,8 +454,6 @@ export default defineType({
           type: 'string',
           description: 'e.g. "Pick up to three." The three-genre limit is enforced either way.',
         }),
-        defineField({ name: 'audienceLabel', title: 'Audience label', type: 'string' }),
-        defineField({ name: 'audienceSkipLabel', title: 'Audience "rather not say" option', type: 'string' }),
         defineField({ name: 'collabLabel', title: 'Collaboration label', type: 'string' }),
         defineField({ name: 'collabYesLabel', title: 'Collaboration — yes option', type: 'string' }),
         defineField({ name: 'collabNoLabel', title: 'Collaboration — no option', type: 'string' }),
@@ -493,6 +491,12 @@ export default defineType({
         defineField({ name: 'workRemoveLabel', title: 'Work links — remove-row label', type: 'string' }),
         defineField({ name: 'photoLabel', title: 'Photo upload label', type: 'string' }),
         defineField({ name: 'photoHint', title: 'Photo upload hint', type: 'string', description: 'e.g. "PNG or JPG, up to 8MB."' }),
+        defineField({
+          name: 'photoCurrentHint',
+          title: 'Photo — current-image note',
+          type: 'string',
+          description: 'Shown beside the existing avatar when a creator is editing, so they know a re-upload is optional.',
+        }),
         defineField({ name: 'photoAltLabel', title: 'Photo description label', type: 'string' }),
         defineField({
           name: 'photoAltHint',

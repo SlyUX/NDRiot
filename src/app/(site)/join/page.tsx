@@ -14,6 +14,7 @@ import {
   INTAKE_ORGANIZATIONS_QUERY,
 } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
+import type { SanityImage } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,8 +39,9 @@ type EditProfile = {
   works: { label: string | null; url: string | null }[] | null
   genres: string[] | null
   formats: string[] | null
-  audience: string | null
   openToCollaboration: boolean | null
+  photo: SanityImage | null
+  photoAlt: string | null
   studioId: string | null
   orgIds: string[] | null
 }
@@ -57,8 +59,9 @@ function toInitial(p: EditProfile): CreatorIntakeInitial {
     works: (p.works ?? []).map((w) => ({ label: w.label ?? '', url: w.url ?? '' })),
     genres: p.genres ?? [],
     formats: p.formats ?? [],
-    audience: p.audience ?? '',
     collab: p.openToCollaboration ?? false,
+    photo: p.photo ?? null,
+    photoAlt: p.photoAlt ?? '',
     studioId: p.studioId ?? null,
     orgIds: p.orgIds ?? [],
   }

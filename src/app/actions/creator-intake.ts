@@ -1,6 +1,6 @@
 'use server'
 
-import { GENRES, FORMATS, MATURITY_RATINGS, SOCIAL_PLATFORMS } from '@/lib/taxonomy'
+import { GENRES, FORMATS, SOCIAL_PLATFORMS } from '@/lib/taxonomy'
 import { honeypotTripped, rateLimited, submittedTooFast } from '@/lib/intake/anti-spam'
 import {
   buildSocials,
@@ -164,9 +164,6 @@ export async function submitCreator(
 
   const genres = matchTaxonomy(formData.getAll('genres').map(String), GENRES).matched.slice(0, 3)
   const formats = matchTaxonomy(formData.getAll('formats').map(String), FORMATS).matched
-  const audience = matchTaxonomy(String(formData.get('audience') ?? ''), MATURITY_RATINGS, {
-    single: true,
-  }).matched[0]
 
   // On update the slug and id are the target's; a new profile gets a free one.
   const slug = isUpdate
@@ -212,7 +209,6 @@ export async function submitCreator(
   if (works.length) fields.works = works
   if (genres.length) fields.genres = genres
   if (formats.length) fields.formats = formats
-  if (audience) fields.audience = audience
   if (studioId) fields.studio = { _type: 'reference', _ref: studioId }
   if (orgIds.length) {
     fields.organizations = orgIds.map((id) => ({ _type: 'reference', _key: id, _ref: id }))

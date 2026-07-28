@@ -105,8 +105,6 @@ export type CreatorIntakeSettings = {
   formatsLabel: string
   genresLabel: string
   genresHint: string
-  audienceLabel: string
-  audienceSkipLabel: string
   collabLabel: string
   collabYesLabel: string
   collabNoLabel: string
@@ -122,6 +120,7 @@ export type CreatorIntakeSettings = {
   workRemoveLabel: string
   photoLabel: string
   photoHint: string
+  photoCurrentHint: string
   photoAltLabel: string
   photoAltHint: string
   emailLabel: string
@@ -237,7 +236,7 @@ const DEFAULTS: SiteSettings = {
     formUrl: 'https://forms.gle/STbaVMQ8a6Ap8rL1A',
   },
   creatorIntake: {
-    heading: 'Add your details',
+    heading: 'Create a Creator Profile',
     intro:
       'Only a name, a note about your work, and permission to publish are required — skip anything else or add it later.',
     updatePrompt: 'Already on ND Riot and updating your profile?',
@@ -263,8 +262,6 @@ const DEFAULTS: SiteSettings = {
     formatsLabel: 'What do you make?',
     genresLabel: 'What genres do you work in?',
     genresHint: 'Pick up to three.',
-    audienceLabel: 'Who’s it for?',
-    audienceSkipLabel: 'Rather not say',
     collabLabel: 'Are you open to collaboration?',
     collabYesLabel: 'Yes — I’m looking for collaborators',
     collabNoLabel: 'Not right now',
@@ -281,6 +278,7 @@ const DEFAULTS: SiteSettings = {
     workRemoveLabel: 'Remove',
     photoLabel: 'A photo or avatar of you',
     photoHint: 'PNG or JPG, up to 8MB.',
+    photoCurrentHint: 'This is your current image — upload a new one only if you want to replace it.',
     photoAltLabel: 'Describe that image',
     photoAltHint:
       'For readers who can’t see it — describe what it shows, not who it is. Skip for a plain headshot.',
