@@ -6,7 +6,13 @@ import { useActionState, useEffect, useRef, useState } from 'react'
 import { submitCreator, type CreatorIntakeState } from '@/app/actions/creator-intake'
 import { Button } from '@/components/ui/button'
 import { slugify } from '@/lib/intake/mapping'
-import { GENRES, FORMATS, SOCIAL_PLATFORMS } from '@/lib/taxonomy'
+import {
+  GENRES,
+  FORMATS,
+  SOCIAL_PLATFORMS,
+  SOCIAL_PROFILE_PREFIX,
+  type SocialPlatform,
+} from '@/lib/taxonomy'
 import { urlFor } from '@/sanity/image'
 import { cn } from '@/lib/utils'
 import type { CreatorIntakeSettings } from '@/lib/site-settings'
@@ -179,11 +185,12 @@ function CreatorSearchPicker({
 }
 
 /**
- * Repeatable "platform + URL" rows for a creator's social links. Each row's
- * dropdown offers only platforms not already chosen by another row (plus its
- * own current pick), so a platform disappears from the rest as it's used.
- * Submits parallel `socialPlatform` / `socialUrl` arrays the action zips.
- * Prepopulated on an update; capped at one row per platform.
+ * Repeatable social rows: platform + account name. For a platform with a known
+ * profile prefix the input is a handle, shown after a read-only prefix
+ * adornment (e.g. "instagram.com/"), and the action stores prefix + handle; the
+ * rest (Discord/Website/Other) take a full URL. Each dropdown offers only
+ * platforms not already used by another row. Submits parallel
+ * `socialPlatform` / `socialValue` arrays; prepopulated on an update.
  */
 function SocialLinksField({
   copy,
@@ -192,8 +199,15 @@ function SocialLinksField({
   copy: CreatorIntakeSettings
   initial?: { platform: string; url: string }[]
 }) {
-  const [rows, setRows] = useState<{ platform: string; url: string; key: number }[]>(() =>
-    (initial && initial.length ? initial : [{ platform: '', url: '' }]).map((r, i) => ({
+  // Stored socials hold a full URL; show just the handle where the platform has
+  // a prefix, so editing stays account-name based.
+  const toRow = (s: { platform: string; url: string }) => {
+    const prefix = SOCIAL_PROFILE_PREFIX[s.platform as SocialPlatform]
+    const value = prefix && s.url.startsWith(prefix) ? s.url.slice(prefix.length) : s.url
+    return { platform: s.platform, value }
+  }
+  const [rows, setRows] = useState<{ platform: string; value: string; key: number }[]>(() =>
+    (initial && initial.length ? initial.map(toRow) : [{ platform: '', value: '' }]).map((r, i) => ({
       ...r,
       key: i,
     })),
@@ -202,11 +216,11 @@ function SocialLinksField({
   const addRow = () =>
     setRows((prev) => [
       ...prev,
-      { platform: '', url: '', key: prev.reduce((m, r) => Math.max(m, r.key), -1) + 1 },
+      { platform: '', value: '', key: prev.reduce((m, r) => Math.max(m, r.key), -1) + 1 },
     ])
   const removeRow = (key: number) =>
     setRows((prev) => (prev.length > 1 ? prev.filter((r) => r.key !== key) : prev))
-  const update = (key: number, field: 'platform' | 'url', value: string) =>
+  const update = (key: number, field: 'platform' | 'value', value: string) =>
     setRows((prev) => prev.map((r) => (r.key === key ? { ...r, [field]: value } : r)))
 
   const used = new Set(rows.map((r) => r.platform).filter(Boolean))
@@ -219,45 +233,61 @@ function SocialLinksField({
       </legend>
       <p className={hintClass}>{copy.socialsHint}</p>
       <div className="space-y-2">
-        {rows.map((row) => (
-          <div key={row.key} className="flex flex-col gap-2 sm:flex-row">
-            <select
-              name="socialPlatform"
-              value={row.platform}
-              onChange={(e) => update(row.key, 'platform', e.target.value)}
-              aria-label={copy.socialPlatformPlaceholder}
-              className={cn(fieldClass, 'appearance-none sm:w-1/3')}
-            >
-              <option value="">{copy.socialPlatformPlaceholder}</option>
-              {SOCIAL_PLATFORMS.filter((p) => p === row.platform || !used.has(p)).map((p) => (
-                <option key={p} value={p}>
-                  {p}
-                </option>
-              ))}
-            </select>
-            <div className="flex gap-2 sm:flex-1">
-              <input
-                type="url"
-                name="socialUrl"
-                value={row.url}
-                onChange={(e) => update(row.key, 'url', e.target.value)}
-                placeholder={copy.workUrlPlaceholder}
-                aria-label={copy.socialsLabel}
-                className={cn(fieldClass, 'flex-1')}
-              />
-              {rows.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeRow(row.key)}
-                  aria-label={copy.workRemoveLabel}
-                  className="text-muted-foreground hover:text-destructive focus-visible:ring-ring shrink-0 px-2 focus-visible:ring-2 focus-visible:outline-none"
-                >
-                  ✕
-                </button>
-              )}
+        {rows.map((row) => {
+          const prefix = SOCIAL_PROFILE_PREFIX[row.platform as SocialPlatform]
+          const shownPrefix = prefix ? prefix.replace(/^https?:\/\/(www\.)?/, '') : null
+          return (
+            <div key={row.key} className="flex flex-col gap-2 sm:flex-row">
+              <select
+                name="socialPlatform"
+                value={row.platform}
+                onChange={(e) => update(row.key, 'platform', e.target.value)}
+                aria-label={copy.socialPlatformPlaceholder}
+                className={cn(fieldClass, 'appearance-none sm:w-1/3')}
+              >
+                <option value="">{copy.socialPlatformPlaceholder}</option>
+                {SOCIAL_PLATFORMS.filter((p) => p === row.platform || !used.has(p)).map((p) => (
+                  <option key={p} value={p}>
+                    {p}
+                  </option>
+                ))}
+              </select>
+              <div className="flex gap-2 sm:flex-1">
+                {/* Prefix adornment + handle for known platforms; a bare URL
+                    field for the rest. */}
+                <div className="focus-within:ring-ring flex flex-1 items-center border border-white/20 focus-within:ring-2">
+                  {shownPrefix && (
+                    <span className="text-muted-foreground border-r border-white/20 px-2 py-2 text-sm whitespace-nowrap">
+                      {shownPrefix}
+                    </span>
+                  )}
+                  <input
+                    type="text"
+                    name="socialValue"
+                    value={row.value}
+                    onChange={(e) => update(row.key, 'value', e.target.value)}
+                    placeholder={prefix ? copy.socialHandlePlaceholder : copy.workUrlPlaceholder}
+                    aria-label={copy.socialsLabel}
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    className="placeholder:text-muted-foreground min-w-0 flex-1 bg-transparent px-3 py-2 text-sm focus:outline-none"
+                  />
+                </div>
+                {rows.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeRow(row.key)}
+                    aria-label={copy.workRemoveLabel}
+                    className="text-muted-foreground hover:text-destructive focus-visible:ring-ring shrink-0 px-2 focus-visible:ring-2 focus-visible:outline-none"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
       {rows.length < SOCIAL_PLATFORMS.length && (
         <button
@@ -287,6 +317,7 @@ function PairedRowsField({
   leftPlaceholder,
   rightName,
   rightPlaceholder,
+  rightDefault = '',
   addLabel,
   removeLabel,
   initial,
@@ -298,19 +329,24 @@ function PairedRowsField({
   leftPlaceholder: string
   rightName: string
   rightPlaceholder: string
+  /** Prefill for the right (URL) column of a blank row, e.g. "https://www.". */
+  rightDefault?: string
   addLabel: string
   removeLabel: string
   initial?: { left: string; right: string }[]
 }) {
   const [rows, setRows] = useState<{ left: string; right: string; key: number }[]>(() =>
-    (initial && initial.length ? initial : [{ left: '', right: '' }]).map((r, i) => ({ ...r, key: i })),
+    (initial && initial.length ? initial : [{ left: '', right: rightDefault }]).map((r, i) => ({
+      ...r,
+      key: i,
+    })),
   )
 
   // Key from the current max + 1 — unique without a render-time ref mutation.
   const addRow = () =>
     setRows((prev) => [
       ...prev,
-      { left: '', right: '', key: prev.reduce((m, r) => Math.max(m, r.key), -1) + 1 },
+      { left: '', right: rightDefault, key: prev.reduce((m, r) => Math.max(m, r.key), -1) + 1 },
     ])
   const removeRow = (key: number) =>
     setRows((prev) => (prev.length > 1 ? prev.filter((r) => r.key !== key) : prev))
@@ -559,6 +595,7 @@ export function CreatorIntakeForm({
               <input
                 type="url"
                 name="studioUrl"
+                defaultValue="https://www."
                 placeholder={copy.studioUrlPlaceholder}
                 aria-label={copy.studioUrlPlaceholder}
                 className={fieldClass}
@@ -615,6 +652,7 @@ export function CreatorIntakeForm({
             leftPlaceholder={copy.orgNamePlaceholder}
             rightName="newOrgUrl"
             rightPlaceholder={copy.workUrlPlaceholder}
+            rightDefault="https://www."
             addLabel={copy.workAddLabel}
             removeLabel={copy.workRemoveLabel}
           />
@@ -753,8 +791,8 @@ export function CreatorIntakeForm({
             <input
               id="website"
               name="website"
-              type="text"
-              defaultValue={initialText('website', initial?.website)}
+              type="url"
+              defaultValue={initialText('website', initial?.website) || 'https://www.'}
               className={fieldClass}
             />
           </div>
@@ -769,6 +807,7 @@ export function CreatorIntakeForm({
             leftPlaceholder={copy.workPlatformPlaceholder}
             rightName="workUrl"
             rightPlaceholder={copy.workUrlPlaceholder}
+            rightDefault="https://www."
             addLabel={copy.workAddLabel}
             removeLabel={copy.workRemoveLabel}
             initial={initial?.works.map((w) => ({ left: w.label, right: w.url }))}

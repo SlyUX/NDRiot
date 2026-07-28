@@ -491,6 +491,12 @@ export default defineType({
           description: 'The unselected option in each row’s platform dropdown, e.g. "Choose a platform". The platform list itself comes from the site taxonomy.',
         }),
         defineField({
+          name: 'socialHandlePlaceholder',
+          title: 'Socials — handle placeholder',
+          type: 'string',
+          description: 'Placeholder for the account-name field shown after the platform prefix, e.g. "yourname".',
+        }),
+        defineField({
           name: 'worksLabel',
           title: 'Work links — label',
           type: 'string',

@@ -172,3 +172,17 @@ export const SOCIAL_PLATFORMS = [
 ] as const
 
 export type SocialPlatform = (typeof SOCIAL_PLATFORMS)[number]
+
+/**
+ * The profile-URL prefix per platform — scheme, domain, extension, and the
+ * site-specific syntax that sits before the handle (e.g. TikTok's `@`, Bluesky's
+ * `profile/`). Intake collects just the account name and stores prefix + handle.
+ * Platforms with no entry here (Discord, Website, Other) take a full URL.
+ */
+export const SOCIAL_PROFILE_PREFIX: Partial<Record<SocialPlatform, string>> = {
+  Instagram: 'https://www.instagram.com/',
+  X: 'https://x.com/',
+  Bluesky: 'https://bsky.app/profile/',
+  TikTok: 'https://www.tiktok.com/@',
+  YouTube: 'https://www.youtube.com/@',
+}

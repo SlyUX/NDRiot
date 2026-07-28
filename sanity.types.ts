@@ -527,6 +527,7 @@ export type SiteSettings = {
     socialsLabel?: string;
     socialsHint?: string;
     socialPlatformPlaceholder?: string;
+    socialHandlePlaceholder?: string;
     worksLabel?: string;
     worksHint?: string;
     workPlatformPlaceholder?: string;

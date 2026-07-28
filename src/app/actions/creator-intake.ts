@@ -7,6 +7,7 @@ import {
   buildWorks,
   isYes,
   matchTaxonomy,
+  normalizeUrl,
   slugify,
   toPortableText,
 } from '@/lib/intake/mapping'
@@ -131,8 +132,7 @@ async function resolveNewOrgs(
   for (let r = 0; r < rows; r += 1) {
     const name = (names[r] ?? '').trim()
     if (!name) continue
-    let url = (urls[r] ?? '').trim()
-    if (url && !/^https?:\/\//i.test(url)) url = `https://${url}`
+    const url = normalizeUrl(urls[r]) ?? ''
 
     const existingId = byName.get(name.toLowerCase())
     if (existingId) {
@@ -263,8 +263,7 @@ export async function submitCreator(
   // creator) wins over the dropdown selection.
   const submittedStudio = String(formData.get('studio') ?? '').trim()
   const newStudioName = String(formData.get('studioName') ?? '').trim()
-  let studioUrl = String(formData.get('studioUrl') ?? '').trim()
-  if (studioUrl && !/^https?:\/\//i.test(studioUrl)) studioUrl = `https://${studioUrl}`
+  const studioUrl = normalizeUrl(String(formData.get('studioUrl') ?? '')) ?? ''
   const studioLogo = formData.get('studioLogo')
   const studioId = newStudioName
     ? await resolveStudio(
@@ -315,10 +314,7 @@ export async function submitCreator(
     else photoNote = result.error
   }
 
-  const website =
-    values.website && !/^https?:\/\//i.test(values.website)
-      ? `https://${values.website}`
-      : values.website
+  const website = normalizeUrl(values.website)
 
   // The editable fields, each included only when it has a value — so a blank
   // never overwrites a filled field (matches the importer). Shared by both the
@@ -331,7 +327,7 @@ export async function submitCreator(
   if (values.bio) fields.bio = toPortableText(values.bio)
   const socials = buildSocials(
     formData.getAll('socialPlatform').map(String),
-    formData.getAll('socialUrl').map(String),
+    formData.getAll('socialValue').map(String),
     SOCIAL_PLATFORMS,
   )
   if (socials.length) fields.socials = socials

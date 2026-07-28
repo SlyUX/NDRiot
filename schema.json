@@ -3266,6 +3266,13 @@
               },
               "optional": true
             },
+            "socialHandlePlaceholder": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "worksLabel": {
               "type": "objectAttribute",
               "value": {
