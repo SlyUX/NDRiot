@@ -12,31 +12,29 @@ import {
 } from '@/lib/intake/mapping'
 import { uploadImageFile } from '@/lib/intake/uploads'
 import { INTAKE_CREATOR_IDS_QUERY, INTAKE_ORGANIZATIONS_QUERY } from '@/lib/queries'
+import { auth } from '@/auth'
+import { ownsCreator, recordOwnership } from '@/sanity/ownership-client'
 import { getWriteClient } from '@/sanity/write-client'
 
 /**
  * Creator intake — Stage 3 of the content-intake strategy.
  *
- * A public form (like today's Google Form) that writes a single creator
- * **review draft** straight into Sanity — never live content, never a published
- * document. The draft/publish split IS the approval queue (content-intake.md);
- * a human publishes in the Studio. The only writes are one `drafts.creator-*`
- * document and its uploaded photo; organizations are referenced, never created,
- * so nothing anonymous reaches a published document.
+ * Google sign-in is required (Layer 2 ownership): the verified email is the
+ * consent record and the ownership key, and is never stored in the public
+ * dataset (it lives only in the private ownership map). Writes a single creator
+ * **review draft** — never live content, never a published document. The
+ * draft/publish split IS the approval queue (content-intake.md); a human
+ * publishes in the Studio. Organizations are referenced, never created.
  *
  * Two modes:
- *  - **New**: creates a fresh draft at a unique `creator-<slug>` id.
- *  - **Update**: seeds a draft from the chosen published profile, then patches
- *    only the fields the submitter supplied — matching the importer's update
- *    path (content-intake.md "Updates"), so publishing never drops a field and
- *    identity (name/slug) is preserved. Anonymous for now: contained by
- *    drafts-only + human review, with Google-auth gating as the follow-up.
- *
- * The email is a consent + confirmation record, not content. It rides the team
- * and creator notifications and is never stored in the public dataset (no PII).
+ *  - **New**: creates a fresh draft at a unique `creator-<slug>` id and records
+ *    the signed-in email as its owner.
+ *  - **Update**: allowed ONLY if the signed-in email owns the target. Seeds a
+ *    draft from the published profile, then patches the supplied fields —
+ *    matching the importer's update path, preserving identity (name/slug).
  */
 
-type FieldName = 'name' | 'email' | 'bio' | 'permission'
+type FieldName = 'name' | 'bio' | 'permission'
 
 export type CreatorIntakeState = {
   status: 'idle' | 'success' | 'error'
@@ -44,7 +42,6 @@ export type CreatorIntakeState = {
   fieldErrors?: Partial<Record<FieldName, string>>
   values?: {
     name: string
-    email: string
     bio: string
     slug: string
     location: string
@@ -55,7 +52,6 @@ export type CreatorIntakeState = {
 }
 
 const LIMITS = { name: 120, bio: 8000 }
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const CREATOR_REPLY_TO = 'submission@ndriot.com'
 
 /** A `creator-<slug>` id nobody holds yet — published or draft. */
@@ -79,7 +75,6 @@ export async function submitCreator(
 
   const values = {
     name: String(formData.get('name') ?? '').trim(),
-    email: String(formData.get('email') ?? '').trim(),
     bio: String(formData.get('bio') ?? '').trim(),
     slug: String(formData.get('slug') ?? '').trim(),
     location: String(formData.get('location') ?? '').trim(),
@@ -88,12 +83,18 @@ export async function submitCreator(
     anythingElse: String(formData.get('anythingElse') ?? '').trim(),
   }
 
+  // Identity comes from the verified session, never the form — re-checked here
+  // even though /join hides the form when signed out (never trust the client).
+  const session = await auth()
+  const email = session?.user?.email?.trim()
+  if (!email) {
+    return { status: 'error', message: 'Your session expired — please sign in again.', values }
+  }
+
   const fieldErrors: NonNullable<CreatorIntakeState['fieldErrors']> = {}
   if (!values.name) fieldErrors.name = 'Please add the name you want to be credited by.'
   else if (values.name.length > LIMITS.name)
     fieldErrors.name = 'That name is very long — please shorten it.'
-  if (!values.email) fieldErrors.email = 'Please add an email so we can reach you about your listing.'
-  else if (!EMAIL.test(values.email)) fieldErrors.email = 'That email doesn’t look right.'
   if (!values.bio) fieldErrors.bio = 'Please tell us a little about your work.'
   else if (values.bio.length > LIMITS.bio)
     fieldErrors.bio = 'That’s longer than we can store — please trim it.'
@@ -139,6 +140,13 @@ export async function submitCreator(
     }
   }
   const isUpdate = Boolean(target)
+
+  // Ownership gate: you may only update a profile the ownership map says this
+  // verified email owns. A crafted updateId for someone else's profile is
+  // refused here, not silently downgraded to a new submission.
+  if (isUpdate && !(await ownsCreator(email, target!._id))) {
+    return { status: 'error', message: 'You can only edit a profile you own.', values }
+  }
 
   // Reference validation + slug uniqueness (uniqueness only matters for a new
   // profile). Reads through the WRITE client so creator ids include drafts.
@@ -251,6 +259,15 @@ export async function submitCreator(
         slug: { _type: 'slug', current: slug },
         ...fields,
       })
+      // A new profile's creator owns it: record the verified email → creatorId
+      // in the private ownership map so they can edit it later. Best-effort — a
+      // store hiccup must not fail an already-written draft; the claim flow can
+      // repair a missing link.
+      try {
+        await recordOwnership(email, targetId)
+      } catch (cause) {
+        console.error('[creator-intake] ownership seed failed', cause)
+      }
     }
   } catch (cause) {
     console.error('[creator-intake] draft write failed', cause)
@@ -262,8 +279,8 @@ export async function submitCreator(
   }
 
   await Promise.all([
-    notifyTeam({ name: values.name, email: values.email, slug, isUpdate, note: values.anythingElse, photoNote }),
-    notifyCreator({ email: values.email, isUpdate }),
+    notifyTeam({ name: values.name, email, slug, isUpdate, note: values.anythingElse, photoNote }),
+    notifyCreator({ email, isUpdate }),
   ])
 
   return { status: 'success' }

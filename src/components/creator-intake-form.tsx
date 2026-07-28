@@ -656,29 +656,6 @@ export function CreatorIntakeForm({
           <SectionHeading>{copy.sectionPermission}</SectionHeading>
 
           <div className="space-y-1.5">
-            <label htmlFor="email" className={labelClass}>
-              {copy.emailLabel}
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              autoComplete="email"
-              defaultValue={initialText('email')}
-              aria-invalid={Boolean(errors.email)}
-              aria-describedby={errors.email ? 'email-error' : undefined}
-              className={fieldClass}
-            />
-            <p className={hintClass}>{copy.emailHint}</p>
-            {errors.email && (
-              <p id="email-error" className="text-destructive text-xs">
-                {errors.email}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-1.5">
             <label className="flex items-start gap-3 text-sm">
               <input
                 type="checkbox"

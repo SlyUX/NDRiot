@@ -57,24 +57,41 @@ export async function recordOwnership(email: string, creatorId: string): Promise
   })
 }
 
-/** The creator ids this verified email is allowed to edit. */
+/**
+ * The creator ids this verified email is allowed to edit. Resilient: a missing
+ * or unreachable ownership dataset returns none rather than crashing the page
+ * that renders the picker (the store isn't provisioned until launch).
+ */
 export async function creatorsOwnedBy(email: string): Promise<string[]> {
   const owner = normalizeEmail(email)
   if (!owner) return []
-  return (
-    (await client().fetch<string[]>(`*[_type=="ownership" && email==$email].creatorId`, {
-      email: owner,
-    })) ?? []
-  )
+  try {
+    return (
+      (await client().fetch<string[]>(`*[_type=="ownership" && email==$email].creatorId`, {
+        email: owner,
+      })) ?? []
+    )
+  } catch (cause) {
+    console.error('[ownership] creatorsOwnedBy failed', cause)
+    return []
+  }
 }
 
-/** Whether this verified email owns this specific creator — the update gate. */
+/**
+ * Whether this verified email owns this creator — the update gate. Fail-CLOSED:
+ * any error denies the edit rather than allowing it.
+ */
 export async function ownsCreator(email: string, creatorId: string): Promise<boolean> {
   const owner = normalizeEmail(email)
   if (!owner || !creatorId) return false
-  const onFile = await client().fetch<string | null>(
-    `*[_type=="ownership" && _id==$id][0].email`,
-    { id: `ownership-${creatorId}` },
-  )
-  return onFile === owner
+  try {
+    const onFile = await client().fetch<string | null>(
+      `*[_type=="ownership" && _id==$id][0].email`,
+      { id: `ownership-${creatorId}` },
+    )
+    return onFile === owner
+  } catch (cause) {
+    console.error('[ownership] ownsCreator failed', cause)
+    return false
+  }
 }

@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 
+import { auth } from '@/auth'
+import { SignInButton, SignOutButton } from '@/components/auth-controls'
 import {
   CreatorIntakeForm,
   type CreatorIntakeInitial,
@@ -9,12 +11,13 @@ import PortableTextBody from '@/components/PortableTextBody'
 import { Section } from '@/components/ui/section'
 import {
   safeFetch,
-  INTAKE_CREATORS_QUERY,
+  INTAKE_OWNED_CREATORS_QUERY,
   INTAKE_CREATOR_EDIT_QUERY,
   INTAKE_ORGANIZATIONS_QUERY,
 } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
 import type { SanityImage } from '@/lib/types'
+import { creatorsOwnedBy } from '@/sanity/ownership-client'
 
 export const dynamic = 'force-dynamic'
 
@@ -70,11 +73,11 @@ function toInitial(p: EditProfile): CreatorIntakeInitial {
 /**
  * The way in.
  *
- * Leads with the intro copy — what this is, who it is for, what happens next —
- * because a bare form answers none of that. The on-site form writes a review
- * draft straight into Sanity (a human still publishes it). A creator already
- * listed can pick their profile to update it; the form then prepopulates from
- * their live values. The original Google Form stays as a fallback link.
+ * Google sign-in is required to create or manage a profile — it establishes
+ * ownership so a profile stays in its owner's hands (the reputational point).
+ * Signed out, the page shows the sign-in prompt and the Google Form fallback.
+ * Signed in, the update picker lists only the profiles this email owns, and the
+ * form writes a review draft a human still publishes.
  */
 export default async function JoinPage({
   searchParams,
@@ -84,17 +87,57 @@ export default async function JoinPage({
   const params = await searchParams
   const editingId = Array.isArray(params.editing) ? params.editing[0] : params.editing
 
-  const [settings, organizations, creators, editProfile] = await Promise.all([
-    getSiteSettings(),
-    safeFetch<CreatorIntakeOrg[]>(INTAKE_ORGANIZATIONS_QUERY, {}, []),
-    safeFetch<CreatorIntakeOrg[]>(INTAKE_CREATORS_QUERY, {}, []),
-    editingId
-      ? safeFetch<EditProfile | null>(INTAKE_CREATOR_EDIT_QUERY, { id: editingId }, null)
-      : Promise.resolve(null),
-  ])
-
+  const [settings, session] = await Promise.all([getSiteSettings(), auth()])
   const { heading, body, ctaLabel, formUrl } = settings.join
   const intake = settings.creatorIntake
+  const email = session?.user?.email ?? null
+
+  const fallback = formUrl ? (
+    <p className="border-primary/20 text-muted-foreground mt-14 border-t pt-6 text-xs">
+      <a
+        href={formUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="hover:text-primary underline underline-offset-4"
+      >
+        {ctaLabel}
+      </a>
+    </p>
+  ) : null
+
+  // Signed out: prompt to sign in, keep the Google Form as a no-login fallback.
+  if (!email) {
+    return (
+      <Section padding="md" maxWidth="3xl">
+        <h1 className="text-4xl font-black tracking-tighter uppercase sm:text-5xl">{heading}</h1>
+        {body && (
+          <div className="mt-6">
+            <PortableTextBody value={body} />
+          </div>
+        )}
+        <div className="mt-12 space-y-4">
+          <h2 className="text-2xl font-black tracking-tighter uppercase">{intake.signInPrompt}</h2>
+          <p className="text-muted-foreground max-w-prose text-sm">{intake.signInBody}</p>
+          <SignInButton label={intake.signInButton} />
+        </div>
+        {fallback}
+      </Section>
+    )
+  }
+
+  // Signed in: only this email's own profiles are editable.
+  const ownedIds = await creatorsOwnedBy(email)
+  const [organizations, ownedCreators] = await Promise.all([
+    safeFetch<CreatorIntakeOrg[]>(INTAKE_ORGANIZATIONS_QUERY, {}, []),
+    ownedIds.length
+      ? safeFetch<CreatorIntakeOrg[]>(INTAKE_OWNED_CREATORS_QUERY, { ids: ownedIds }, [])
+      : Promise.resolve<CreatorIntakeOrg[]>([]),
+  ])
+
+  const canEdit = Boolean(editingId && ownedIds.includes(editingId))
+  const editProfile = canEdit
+    ? await safeFetch<EditProfile | null>(INTAKE_CREATOR_EDIT_QUERY, { id: editingId }, null)
+    : null
   const initial = editProfile ? toInitial(editProfile) : undefined
 
   return (
@@ -107,36 +150,30 @@ export default async function JoinPage({
         </div>
       )}
 
-      <div className="mt-12 space-y-6">
+      {/* Which account is signed in, and the way out. */}
+      <div className="border-primary/20 mt-8 flex flex-wrap items-center justify-between gap-3 border-b pb-4 text-xs">
+        <span className="text-muted-foreground tracking-widest uppercase">
+          {intake.signedInLabel} <span className="text-foreground">{email}</span>
+        </span>
+        <SignOutButton label={intake.signOutLabel} />
+      </div>
+
+      <div className="mt-8 space-y-6">
         <div>
           <h2 className="text-2xl font-black tracking-tighter uppercase">{intake.heading}</h2>
           <p className="text-muted-foreground mt-2 text-sm">{intake.intro}</p>
         </div>
-        {/* Keyed so switching profiles (or back to new) remounts the form and
-            its uncontrolled defaults pick up the new values. */}
+        {/* Keyed so switching profiles (or back to new) remounts the form. */}
         <CreatorIntakeForm
           key={initial?.updateId ?? 'new'}
           copy={intake}
           organizations={organizations}
-          creators={creators}
+          creators={ownedCreators}
           initial={initial}
         />
       </div>
 
-      {/* Fallback to the original Google Form while the native form is proven.
-          The button label is the only copy here, so nothing is hardcoded. */}
-      {formUrl && (
-        <p className="border-primary/20 text-muted-foreground mt-14 border-t pt-6 text-xs">
-          <a
-            href={formUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-primary underline underline-offset-4"
-          >
-            {ctaLabel}
-          </a>
-        </p>
-      )}
+      {fallback}
     </Section>
   )
 }

@@ -209,6 +209,15 @@ export const INTAKE_CREATORS_QUERY = defineQuery(
 )
 
 /**
+ * The signed-in user's own profiles, for the update picker. Restricted to the
+ * creator ids the ownership map says this email may edit — so the picker only
+ * ever lists profiles the person actually owns.
+ */
+export const INTAKE_OWNED_CREATORS_QUERY = defineQuery(
+  `*[_type=="creator" && _id in $ids && defined(slug.current)]|order(name asc){_id,name}`,
+)
+
+/**
  * One creator's editable values, to prepopulate the intake form on an update.
  * Returns the raw shape the form needs — bio as plain text for a textarea,
  * references as bare ids for the selects — not the display projection.

@@ -529,8 +529,11 @@ export type SiteSettings = {
     photoCurrentHint?: string;
     photoAltLabel?: string;
     photoAltHint?: string;
-    emailLabel?: string;
-    emailHint?: string;
+    signInPrompt?: string;
+    signInBody?: string;
+    signInButton?: string;
+    signedInLabel?: string;
+    signOutLabel?: string;
     permissionStatement?: string;
     anythingElseLabel?: string;
     submitLabel?: string;
@@ -1534,6 +1537,14 @@ export type INTAKE_CREATORS_QUERY_RESULT = Array<{
 }>;
 
 // Source: src/lib/queries.ts
+// Variable: INTAKE_OWNED_CREATORS_QUERY
+// Query: *[_type=="creator" && _id in $ids && defined(slug.current)]|order(name asc){_id,name}
+export type INTAKE_OWNED_CREATORS_QUERY_RESULT = Array<{
+  _id: string;
+  name: string;
+}>;
+
+// Source: src/lib/queries.ts
 // Variable: INTAKE_CREATOR_EDIT_QUERY
 // Query: *[_type=="creator" && _id==$id][0]{  _id,name,"slug":slug.current,location,website,  "bioText":pt::text(bio),  socials[]{platform,url},  works[]{label,url},  genres,formats,openToCollaboration,  photo,"photoAlt":photo.alt,  "studioId":studio._ref,  "orgIds":organizations[]._ref}
 export type INTAKE_CREATOR_EDIT_QUERY_RESULT = {
@@ -1659,6 +1670,7 @@ declare module "@sanity/client" {
     '*[_type=="organization" && defined(name)]|order(name asc){_id,name}': INTAKE_ORGANIZATIONS_QUERY_RESULT;
     '*[_type=="creator"]._id': INTAKE_CREATOR_IDS_QUERY_RESULT;
     '*[_type=="creator" && defined(slug.current)]|order(name asc){_id,name}': INTAKE_CREATORS_QUERY_RESULT;
+    '*[_type=="creator" && _id in $ids && defined(slug.current)]|order(name asc){_id,name}': INTAKE_OWNED_CREATORS_QUERY_RESULT;
     '*[_type=="creator" && _id==$id][0]{\n  _id,name,"slug":slug.current,location,website,\n  "bioText":pt::text(bio),\n  socials[]{platform,url},\n  works[]{label,url},\n  genres,formats,openToCollaboration,\n  photo,"photoAlt":photo.alt,\n  "studioId":studio._ref,\n  "orgIds":organizations[]._ref\n}': INTAKE_CREATOR_EDIT_QUERY_RESULT;
     '{\n  "items": *[_type=="creator" && $genre in genres]|order(name asc)[0...$limit]{\n    _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,\n    "bioText":pt::text(bio),\n    studio->{_id,name,"slug":slug.current,website,logo}\n  },\n  "total": count(*[_type=="creator" && $genre in genres])\n}': GENRE_CREATORS_QUERY_RESULT;
   }

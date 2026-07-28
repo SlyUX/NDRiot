@@ -123,8 +123,11 @@ export type CreatorIntakeSettings = {
   photoCurrentHint: string
   photoAltLabel: string
   photoAltHint: string
-  emailLabel: string
-  emailHint: string
+  signInPrompt: string
+  signInBody: string
+  signInButton: string
+  signedInLabel: string
+  signOutLabel: string
   permissionStatement: string
   anythingElseLabel: string
   submitLabel: string
@@ -282,8 +285,12 @@ const DEFAULTS: SiteSettings = {
     photoAltLabel: 'Describe that image',
     photoAltHint:
       'For readers who can’t see it — describe what it shows, not who it is. Skip for a plain headshot.',
-    emailLabel: 'Your email',
-    emailHint: 'So we can reach you about your listing. Never shown on the site.',
+    signInPrompt: 'Sign in to create or manage your profile',
+    signInBody:
+      'ND Riot uses Google sign-in so a profile stays in its owner’s hands — it only confirms it’s you, and we manage no passwords. Prefer not to? The Google Form below still works.',
+    signInButton: 'Sign in with Google',
+    signedInLabel: 'Signed in as',
+    signOutLabel: 'Sign out',
     permissionStatement:
       'I own or have permission to share everything I’ve linked here, and ND Riot can use it to build my profile.',
     anythingElseLabel: 'Anything else?',

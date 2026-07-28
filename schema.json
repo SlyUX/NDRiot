@@ -3280,14 +3280,35 @@
               },
               "optional": true
             },
-            "emailLabel": {
+            "signInPrompt": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"
               },
               "optional": true
             },
-            "emailHint": {
+            "signInBody": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "signInButton": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "signedInLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "signOutLabel": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"
