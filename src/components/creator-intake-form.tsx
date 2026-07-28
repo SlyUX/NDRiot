@@ -60,6 +60,60 @@ export interface CreatorIntakeInitial {
   orgIds: string[]
 }
 
+/**
+ * Downscale a chosen image in the browser before upload, so avatars and logos
+ * arrive small — under the Server Action body limit and any hosting body cap,
+ * and no larger than a directory needs. SVGs and GIFs pass through untouched
+ * (vector / animation would be lost). Any failure falls back to the original
+ * file rather than blocking the submission.
+ */
+async function downscaleImage(file: File, maxDim = 1600, quality = 0.85): Promise<File> {
+  if (!file.type.startsWith('image/') || file.type === 'image/svg+xml' || file.type === 'image/gif') {
+    return file
+  }
+  let bitmap: ImageBitmap
+  try {
+    // Respect EXIF orientation so a phone photo isn't rotated on resize.
+    bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' })
+  } catch {
+    return file
+  }
+  const scale = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height))
+  if (scale === 1 && file.size < 1_000_000) {
+    bitmap.close()
+    return file
+  }
+  const width = Math.round(bitmap.width * scale)
+  const height = Math.round(bitmap.height * scale)
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+  const ctx = canvas.getContext('2d')
+  if (!ctx) {
+    bitmap.close()
+    return file
+  }
+  ctx.drawImage(bitmap, 0, 0, width, height)
+  bitmap.close()
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', quality))
+  if (!blob || blob.size >= file.size) return file
+  const base = file.name.replace(/\.[^.]+$/, '') || 'image'
+  return new File([blob], `${base}.jpg`, { type: 'image/jpeg' })
+}
+
+/** Resize the picked image in place, so the (smaller) file is what submits. */
+async function onImagePick(e: React.ChangeEvent<HTMLInputElement>) {
+  const input = e.currentTarget
+  const file = input.files?.[0]
+  if (!file) return
+  const resized = await downscaleImage(file)
+  if (resized !== file) {
+    const dt = new DataTransfer()
+    dt.items.add(resized)
+    input.files = dt.files
+  }
+}
+
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
     <h2 className="border-primary/40 text-primary border-b pb-2 text-sm font-black tracking-widest uppercase">
@@ -518,6 +572,7 @@ export function CreatorIntakeForm({
                   name="studioLogo"
                   type="file"
                   accept="image/*"
+                  onChange={onImagePick}
                   className={cn(fieldClass, 'file:mr-3 file:border-0 file:bg-transparent file:text-xs file:uppercase file:text-primary')}
                 />
                 <p className={hintClass}>{copy.studioLogoHint}</p>
@@ -749,6 +804,7 @@ export function CreatorIntakeForm({
               name="photo"
               type="file"
               accept="image/*"
+              onChange={onImagePick}
               className={cn(fieldClass, 'file:mr-3 file:border-0 file:bg-transparent file:text-xs file:uppercase file:text-primary')}
             />
             <p className={hintClass}>{copy.photoHint}</p>
