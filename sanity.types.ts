@@ -505,6 +505,12 @@ export type SiteSettings = {
     slugLabel?: string;
     slugHint?: string;
     studioLabel?: string;
+    studioSelectPlaceholder?: string;
+    studioCreateLabel?: string;
+    studioNamePlaceholder?: string;
+    studioUrlPlaceholder?: string;
+    studioLogoLabel?: string;
+    studioLogoHint?: string;
     orgsLabel?: string;
     orgAddLabel?: string;
     orgAddHint?: string;

@@ -99,6 +99,12 @@ export type CreatorIntakeSettings = {
   slugLabel: string
   slugHint: string
   studioLabel: string
+  studioSelectPlaceholder: string
+  studioCreateLabel: string
+  studioNamePlaceholder: string
+  studioUrlPlaceholder: string
+  studioLogoLabel: string
+  studioLogoHint: string
   orgsLabel: string
   orgAddLabel: string
   orgAddHint: string
@@ -262,10 +268,16 @@ const DEFAULTS: SiteSettings = {
     slugHint:
       'The end of your ND Riot link — ndriot.com/creators/your-name. We suggest one from your name; edit it if you like. Lowercase letters, numbers and hyphens only.',
     studioLabel: 'Studio or trading name',
-    orgsLabel: 'Collectives or organisations you belong to',
-    orgAddLabel: 'Not listed? Add an organisation',
+    studioSelectPlaceholder: 'Choose your studio, if it’s listed',
+    studioCreateLabel: 'Not listed? Create it — most new creators do.',
+    studioNamePlaceholder: 'Studio name',
+    studioUrlPlaceholder: 'Studio website (https://…)',
+    studioLogoLabel: 'Studio logo or avatar',
+    studioLogoHint: 'Optional. PNG or SVG that reads on a near-black background.',
+    orgsLabel: 'Collectives or organizations you belong to',
+    orgAddLabel: 'Not listed? Add an organization',
     orgAddHint: 'Give its name and link. We’ll add it to the directory when your profile is reviewed.',
-    orgNamePlaceholder: 'Organisation name',
+    orgNamePlaceholder: 'Organization name',
     locationLabel: 'Where you’re based',
     bioLabel: 'Tell us about your work',
     formatsLabel: 'What do you make?',

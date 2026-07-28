@@ -470,27 +470,60 @@ export function CreatorIntakeForm({
             </div>
           )}
 
-          {organizations.length > 0 && (
-            <div className="space-y-1.5">
-              <label htmlFor="studio" className={labelClass}>
-                {copy.studioLabel}
-                <Optional label={copy.optionalLabel} />
-              </label>
+          {/* Studio: pick an existing one, or create yours (name + URL + logo)
+              alongside the creator — what most new creators need. */}
+          <fieldset className="space-y-3">
+            <legend className={labelClass}>
+              {copy.studioLabel}
+              <Optional label={copy.optionalLabel} />
+            </legend>
+            {organizations.length > 0 && (
               <select
                 id="studio"
                 name="studio"
                 defaultValue={initial?.studioId ?? ''}
+                aria-label={copy.studioLabel}
                 className={cn(fieldClass, 'appearance-none')}
               >
-                <option value="">—</option>
+                <option value="">{copy.studioSelectPlaceholder}</option>
                 {organizations.map((org) => (
                   <option key={org._id} value={org._id}>
                     {org.name}
                   </option>
                 ))}
               </select>
+            )}
+            <div className="border-primary/20 space-y-2 border-l-2 pl-4">
+              <p className={hintClass}>{copy.studioCreateLabel}</p>
+              <input
+                type="text"
+                name="studioName"
+                placeholder={copy.studioNamePlaceholder}
+                aria-label={copy.studioNamePlaceholder}
+                className={fieldClass}
+              />
+              <input
+                type="url"
+                name="studioUrl"
+                placeholder={copy.studioUrlPlaceholder}
+                aria-label={copy.studioUrlPlaceholder}
+                className={fieldClass}
+              />
+              <div className="space-y-1.5 pt-1">
+                <label htmlFor="studioLogo" className={labelClass}>
+                  {copy.studioLogoLabel}
+                </label>
+                <input
+                  id="studioLogo"
+                  name="studioLogo"
+                  type="file"
+                  accept="image/*"
+                  className={cn(fieldClass, 'file:mr-3 file:border-0 file:bg-transparent file:text-xs file:uppercase file:text-primary')}
+                />
+                <p className={hintClass}>{copy.studioLogoHint}</p>
+              </div>
             </div>
-          )}
+          </fieldset>
 
           {/* Collectives excludes studios (orgs used as someone's studio), so a
               trading name doesn't show up as a group to join. */}

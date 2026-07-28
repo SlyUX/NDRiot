@@ -67,6 +67,52 @@ function uniqueSlug(base: string, takenIds: Set<string>): string {
 }
 
 /**
+ * Resolve a named studio to an org id: reuse an existing org matching by name
+ * (case-insensitive), else create it published — with its logo and website —
+ * so the creator's `studio` reference resolves. Mirrors the importer's
+ * resolveOrganization. Logo upload is non-fatal.
+ */
+async function resolveStudio(
+  client: ReturnType<typeof getWriteClient>,
+  existing: { _id: string; name: string }[],
+  name: string,
+  url: string,
+  logo: File | null,
+): Promise<string | null> {
+  const clean = name.trim()
+  if (!clean) return null
+  const existingId = existing.find((o) => o.name.trim().toLowerCase() === clean.toLowerCase())?._id
+  if (existingId) return existingId // reuse; don't overwrite its logo/site
+
+  const slug = slugify(clean)
+  if (!slug) return null
+  const id = `organization-${slug}`
+
+  let logoAssetId: string | null = null
+  if (logo && logo.size > 0) {
+    const result = await uploadImageFile(logo, `${slug}-logo`)
+    if ('assetId' in result) logoAssetId = result.assetId
+  }
+
+  try {
+    await client.createIfNotExists({
+      _id: id,
+      _type: 'organization',
+      name: clean,
+      slug: { _type: 'slug', current: slug },
+      ...(url ? { website: url } : {}),
+      ...(logoAssetId
+        ? { logo: { _type: 'imageWithAlt', asset: { _type: 'reference', _ref: logoAssetId } } }
+        : {}),
+    })
+    return id
+  } catch (cause) {
+    console.error('[creator-intake] studio create failed', cause)
+    return null
+  }
+}
+
+/**
  * Resolve free-text "organization name + URL" rows to org ids: reuse an
  * existing org matching by name (case-insensitive), else create it published
  * so the reference resolves — the importer's rule. Blanks and the chosen studio
@@ -213,8 +259,24 @@ export async function submitCreator(
     return { status: 'error', message: 'Something went wrong — please try again.', values }
   }
 
+  // Studio: a newly-named studio (name + URL + logo, created alongside the
+  // creator) wins over the dropdown selection.
   const submittedStudio = String(formData.get('studio') ?? '').trim()
-  const studioId = orgIdSet.has(submittedStudio) ? submittedStudio : null
+  const newStudioName = String(formData.get('studioName') ?? '').trim()
+  let studioUrl = String(formData.get('studioUrl') ?? '').trim()
+  if (studioUrl && !/^https?:\/\//i.test(studioUrl)) studioUrl = `https://${studioUrl}`
+  const studioLogo = formData.get('studioLogo')
+  const studioId = newStudioName
+    ? await resolveStudio(
+        client,
+        orgs,
+        newStudioName,
+        studioUrl,
+        studioLogo instanceof File ? studioLogo : null,
+      )
+    : orgIdSet.has(submittedStudio)
+      ? submittedStudio
+      : null
 
   // Checkbox selections, plus any orgs added by name+URL. New orgs reuse an
   // existing one that matches by name, else are created (published, so the
