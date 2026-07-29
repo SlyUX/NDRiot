@@ -14,7 +14,9 @@ import { slugField } from './slugField'
 
 export default defineType({
   name: 'book',
-  title: 'Book',
+  // Kept the internal type name `book` (routes, refs, ownership all key off it);
+  // the reader-facing label is "Comic" across the site.
+  title: 'Comic',
   type: 'document',
   fields: [
     defineField({

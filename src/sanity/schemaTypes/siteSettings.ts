@@ -26,7 +26,7 @@ export default defineType({
     { name: 'empty', title: 'Empty states' },
     { name: 'join', title: 'Join the Riot' },
     { name: 'creatorIntake', title: 'Comic Maker intake form' },
-    { name: 'bookIntake', title: 'Book intake form' },
+    { name: 'bookIntake', title: 'Comic intake form' },
     { name: 'mediaIntake', title: 'Media intake form' },
     { name: 'contact', title: 'Contact page' },
     { name: 'nav', title: 'Navigation' },
@@ -667,7 +667,7 @@ export default defineType({
 
     defineField({
       name: 'bookIntake',
-      title: 'Book intake form',
+      title: 'Comic intake form',
       type: 'object',
       group: 'bookIntake',
       options: { collapsible: true, collapsed: true },

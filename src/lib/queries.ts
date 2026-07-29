@@ -25,9 +25,10 @@ export const BOOKS_QUERY = defineQuery(`*[_type=="book"]|order(title asc){_id,ti
 /**
  * Books, filtered.
  *
- * `$q` searches the title AND the creator's name, so looking up a person
- * finds their work — which is what someone typing a name into a book listing
- * almost always means.
+ * `$q` searches the title, the creator's name, and the description (short and
+ * long), so looking up a person finds their work — which is what someone typing
+ * a name into a comics listing almost always means — and a phrase from a
+ * synopsis finds the comic even when the title doesn't contain it.
  *
  * One static query with null-tolerant conditions rather than a string built
  * at runtime: typegen can only derive a result type from a literal, and an
@@ -45,7 +46,7 @@ export const FILTERED_BOOKS_QUERY = defineQuery(`{
     && (!defined($maturity) || maturity == $maturity)
     && (!defined($status) || status == $status)
     && (!defined($funding) || count(links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))]) > 0)
-    && (!defined($q) || title match $q || creator->name match $q)
+    && (!defined($q) || title match $q || creator->name match $q || shortDescription match $q || pt::text(description) match $q)
   ]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturity,issueCount,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},
   "total": count(*[
     _type=="book"
@@ -54,7 +55,7 @@ export const FILTERED_BOOKS_QUERY = defineQuery(`{
     && (!defined($maturity) || maturity == $maturity)
     && (!defined($status) || status == $status)
     && (!defined($funding) || count(links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))]) > 0)
-    && (!defined($q) || title match $q || creator->name match $q)
+    && (!defined($q) || title match $q || creator->name match $q || shortDescription match $q || pt::text(description) match $q)
   ])
 }`)
 
@@ -72,7 +73,7 @@ export const FILTERED_CREATORS_QUERY = defineQuery(`{
     && (!defined($format) || $format in formats)
     && (!defined($audience) || audience == $audience)
     && (!defined($collaborating) || openToCollaboration == true)
-    && (!defined($q) || name match $q || studio->name match $q)
+    && (!defined($q) || name match $q || studio->name match $q || pt::text(bio) match $q)
   ]|order(name asc)[0...$limit]{
     _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,
     "bioText":pt::text(bio),
@@ -84,7 +85,7 @@ export const FILTERED_CREATORS_QUERY = defineQuery(`{
     && (!defined($format) || $format in formats)
     && (!defined($audience) || audience == $audience)
     && (!defined($collaborating) || openToCollaboration == true)
-    && (!defined($q) || name match $q || studio->name match $q)
+    && (!defined($q) || name match $q || studio->name match $q || pt::text(bio) match $q)
   ])
 }`)
 export const BOOK_QUERY = defineQuery(`*[_type=="book" && slug.current==$slug][0]{

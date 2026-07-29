@@ -59,7 +59,7 @@ export function genreOptions(present: readonly string[]): string[] {
  */
 export function bookFacets(genres: readonly string[]): Facet[] {
   return [
-    { param: 'genre', label: 'Genre', options: genres, multi: true },
+    { param: 'genre', label: 'Genre', options: genres },
     { param: 'format', label: 'Format', options: FORMATS },
     { param: 'audience', label: 'Audience', options: MATURITY_RATINGS },
     { param: 'status', label: 'Status', options: ['Ongoing', 'Complete', 'Upcoming'] },
@@ -106,7 +106,7 @@ export function homeCreatorFacets(genres: readonly string[]): Facet[] {
  */
 export function creatorFacets(genres: readonly string[]): Facet[] {
   return [
-    { param: 'genre', label: 'Genre', options: genres, multi: true },
+    { param: 'genre', label: 'Genre', options: genres },
     { param: 'audience', label: 'Audience', options: MATURITY_RATINGS },
     { param: 'collaborating', label: 'Open to collaboration', options: [], toggle: true },
   ]

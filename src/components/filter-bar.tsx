@@ -30,7 +30,11 @@ export interface Facet {
   param: string
   label: string
   options: readonly string[]
-  /** Several values at once. Genre is; format and audience are not. */
+  /**
+   * Several values at once. Currently unused — every facet is single-select
+   * (see filters.ts) — but kept because single-select is a deliberate "for now"
+   * choice and this is the switch that brings multi back per facet.
+   */
   multi?: boolean
   /** A flag rather than a value — present or absent, no options. */
   toggle?: boolean
