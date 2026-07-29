@@ -18,7 +18,7 @@ import { createClient } from '@sanity/client'
 import { API_VERSION, PROJECT_ID, loadToken, query } from './lib/sanity.mjs'
 import { slugify } from './lib/shared.mjs'
 
-const MEDIA_KINDS = ['Podcast', 'YouTube', 'Review Site', 'Newsletter']
+const MEDIA_KINDS = ['Podcast', 'YouTube', 'Review Site', 'Newsletter', 'Comics Journalism']
 const OWNERSHIP_DATASET = process.env.SANITY_OWNERSHIP_DATASET ?? 'ndriot_auth'
 
 async function main() {

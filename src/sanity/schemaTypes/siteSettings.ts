@@ -305,7 +305,7 @@ export default defineType({
         }),
         defineField({ name: 'mediaPitchHeading', title: 'Media detail — "how to get covered" heading', type: 'string' }),
         defineField({ name: 'mediaLinksHeading', title: 'Media detail — links heading', type: 'string' }),
-        defineField({ name: 'mediaKindLabel', title: 'Media card — kind prefix', type: 'string' }),
+        defineField({ name: 'mediaGenresHeading', title: 'Media page — covered-genres heading', type: 'string' }),
         defineField({
           name: 'creatorFavoritesHeading',
           title: 'Creator page — favorite creators heading',

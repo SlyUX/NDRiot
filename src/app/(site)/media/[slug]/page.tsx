@@ -62,16 +62,25 @@ export default async function MediaDetailPage({ params }: { params: Promise<{ sl
         <div>
           <h1 className="text-4xl font-black tracking-tighter uppercase">{media.name}</h1>
           {media.kinds && media.kinds.length > 0 && (
-            <p className="text-muted-foreground mt-1 text-xs tracking-widest uppercase">
-              {sections.mediaKindLabel} {media.kinds.join(', ')}
-            </p>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {media.kinds.map((k) => (
+                <Badge key={k} variant="outline" className="tracking-wider uppercase">
+                  {k}
+                </Badge>
+              ))}
+            </div>
           )}
           {media.about && <p className="mt-4 max-w-prose text-sm">{media.about}</p>}
           {media.genresCovered && media.genresCovered.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-1.5">
-              {media.genresCovered.map((g) => (
-                <GenreBadge key={g} genre={g as Genre} size="md" />
-              ))}
+            <div className="mt-6">
+              <h2 className="text-muted-foreground text-xs font-black tracking-widest uppercase">
+                {sections.mediaGenresHeading}
+              </h2>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {media.genresCovered.map((g) => (
+                  <GenreBadge key={g} genre={g as Genre} size="md" />
+                ))}
+              </div>
             </div>
           )}
         </div>

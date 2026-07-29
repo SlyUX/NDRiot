@@ -1314,6 +1314,10 @@
               {
                 "type": "string",
                 "value": "Newsletter"
+              },
+              {
+                "type": "string",
+                "value": "Comics Journalism"
               }
             ]
           }
@@ -3005,7 +3009,7 @@
               },
               "optional": true
             },
-            "mediaKindLabel": {
+            "mediaGenresHeading": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

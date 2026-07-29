@@ -151,7 +151,13 @@ export function linkKindForHost(url: string): LinkKind | null {
  * comics — a separate `media` type. YouTube is its own kind even though many
  * treat it as podcasting, because the platform is the useful distinction.
  */
-export const MEDIA_KINDS = ['Podcast', 'YouTube', 'Review Site', 'Newsletter'] as const
+export const MEDIA_KINDS = [
+  'Podcast',
+  'YouTube',
+  'Review Site',
+  'Newsletter',
+  'Comics Journalism',
+] as const
 
 export type MediaKind = (typeof MEDIA_KINDS)[number]
 

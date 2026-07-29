@@ -324,7 +324,7 @@ export interface SiteSettings {
     mediaDisclaimer: string
     mediaPitchHeading: string
     mediaLinksHeading: string
-    mediaKindLabel: string
+    mediaGenresHeading: string
   }
   empty: {
     books: string
@@ -614,7 +614,7 @@ const DEFAULTS: SiteSettings = {
       'An independent, unaffiliated list. A listing here is a resource, not an ND Riot endorsement or partnership.',
     mediaPitchHeading: 'How to get covered',
     mediaLinksHeading: 'Where to find them',
-    mediaKindLabel: 'Covers indie comics via',
+    mediaGenresHeading: 'Covered Genres',
   },
   empty: {
     books: 'No books yet — add comic makers and books in the Studio.',

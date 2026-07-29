@@ -233,7 +233,9 @@ export type Media = {
   _rev: string;
   name: string;
   slug: Slug;
-  kinds: Array<"Podcast" | "YouTube" | "Review Site" | "Newsletter">;
+  kinds: Array<
+    "Podcast" | "YouTube" | "Review Site" | "Newsletter" | "Comics Journalism"
+  >;
   logo?: ImageWithAlt;
   about?: string;
   genresCovered?: Array<
@@ -500,7 +502,7 @@ export type SiteSettings = {
     mediaDisclaimer?: string;
     mediaPitchHeading?: string;
     mediaLinksHeading?: string;
-    mediaKindLabel?: string;
+    mediaGenresHeading?: string;
     creatorFavoritesHeading?: string;
     otherBooksHeading?: string;
     bookCreatorsHeading?: string;
@@ -1850,7 +1852,9 @@ export type MEDIA_QUERY_RESULT = Array<{
   _id: string;
   name: string;
   slug: string;
-  kinds: Array<"Newsletter" | "Podcast" | "Review Site" | "YouTube">;
+  kinds: Array<
+    "Comics Journalism" | "Newsletter" | "Podcast" | "Review Site" | "YouTube"
+  >;
   logo: ImageWithAlt | null;
   about: string | null;
   genresCovered: Array<
@@ -1879,7 +1883,9 @@ export type MEDIA_HOME_QUERY_RESULT = Array<{
   _id: string;
   name: string;
   slug: string;
-  kinds: Array<"Newsletter" | "Podcast" | "Review Site" | "YouTube">;
+  kinds: Array<
+    "Comics Journalism" | "Newsletter" | "Podcast" | "Review Site" | "YouTube"
+  >;
   logo: ImageWithAlt | null;
   about: string | null;
   genresCovered: Array<
@@ -1907,7 +1913,9 @@ export type MEDIA_HOME_QUERY_RESULT = Array<{
 export type MEDIA_DETAIL_QUERY_RESULT = {
   _id: string;
   name: string;
-  kinds: Array<"Newsletter" | "Podcast" | "Review Site" | "YouTube">;
+  kinds: Array<
+    "Comics Journalism" | "Newsletter" | "Podcast" | "Review Site" | "YouTube"
+  >;
   logo: ImageWithAlt | null;
   about: string | null;
   genresCovered: Array<
@@ -1954,7 +1962,9 @@ export type INTAKE_MEDIA_EDIT_QUERY_RESULT = {
   _id: string;
   name: string;
   slug: string;
-  kinds: Array<"Newsletter" | "Podcast" | "Review Site" | "YouTube">;
+  kinds: Array<
+    "Comics Journalism" | "Newsletter" | "Podcast" | "Review Site" | "YouTube"
+  >;
   aboutText: string | null;
   genresCovered: Array<
     | "Action & Adventure"
