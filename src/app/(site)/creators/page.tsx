@@ -57,6 +57,7 @@ export default async function CreatorsPage({
         <Suspense fallback={null}>
           <FilterBar facets={creatorFacets(genreOptions(genresWithBooks))} resultCount={result.total}
             searchLabel={settings.sections.searchCreatorsLabel}
+            control="select"
             collapsible
             className="mt-8" />
         </Suspense>
@@ -80,6 +81,7 @@ export default async function CreatorsPage({
         emptyMessage={
           filtering ? settings.empty.filteredCreators : settings.empty.creators
         }
+        emptyEmphasis={filtering}
       />
 
       {fallback.length > 0 && (

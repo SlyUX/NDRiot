@@ -61,6 +61,7 @@ export default async function BooksPage({
         <Suspense fallback={null}>
           <FilterBar facets={bookFacets(genreOptions(genresWithBooks))} resultCount={result.total}
             searchLabel={settings.sections.searchBooksLabel}
+            control="select"
             collapsible
             className="mt-8" />
         </Suspense>
@@ -82,6 +83,7 @@ export default async function BooksPage({
         emptyMessage={
           filtering ? settings.empty.filteredBooks : settings.empty.books
         }
+        emptyEmphasis={filtering}
       />
 
       {fallback.length > 0 && (

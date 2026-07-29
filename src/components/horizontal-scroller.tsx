@@ -6,7 +6,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 /**
- * A single horizontally-scrolling row, with snap and hover-revealed arrows.
+ * A single horizontally-scrolling row, with snap and persistent (hover-
+ * brightened) arrows.
  *
  * The cards render on the server and are handed in as children; this owns only
  * the scroll behaviour, so nothing about the content ships as client logic. The
@@ -59,7 +60,10 @@ export function HorizontalScroller({
           aria-label={direction === -1 ? 'Scroll left' : 'Scroll right'}
           onClick={() => nudge(direction)}
           className={cn(
-            'focus-visible:ring-ring border-border bg-background/90 text-foreground absolute top-1/2 z-10 hidden size-9 -translate-y-1/2 items-center justify-center border opacity-0 backdrop-blur transition-opacity group-hover/scroller:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:outline-none md:flex',
+            // Pink fill with black icon (§9 — white on pink fails AA). Persistent
+            // at half opacity so the row reads as scrollable at a glance, then
+            // full strength when the reader is over the row (or tabs to it).
+            'focus-visible:ring-ring bg-primary text-primary-foreground absolute top-1/2 z-10 hidden size-9 -translate-y-1/2 items-center justify-center opacity-50 transition-opacity group-hover/scroller:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:outline-none md:flex',
             direction === -1 ? 'left-0' : 'right-0',
           )}
         >

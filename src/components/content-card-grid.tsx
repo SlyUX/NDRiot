@@ -64,6 +64,13 @@ export interface ContentCardGridProps {
    */
   emptyMessage: string
   /**
+   * Emphasise the empty state — pink, larger, bold — for the filtered
+   * no-match case. A reader who narrowed themselves into a dead end should
+   * notice the way out ("try loosening one"), where a "nothing here yet" note
+   * on an unfiltered page wants the quiet muted treatment.
+   */
+  emptyEmphasis?: boolean
+  /**
    * Optional controls between the heading and the cards — the homepage puts a
    * filter row here so each row's control sits directly above the row it
    * governs. Rendered above the empty state too, so the filter that emptied a
@@ -101,6 +108,7 @@ export function ContentCardGrid({
   viewAllHref,
   viewAllLabel,
   emptyMessage,
+  emptyEmphasis = false,
   toolbar,
   footer,
   scroll = false,
@@ -133,7 +141,16 @@ export function ContentCardGrid({
       {toolbar && <div className="mb-6">{toolbar}</div>}
 
       {cards.length === 0 ? (
-        <p className="text-muted-foreground py-8 text-sm">{emptyMessage}</p>
+        <p
+          className={cn(
+            'py-8',
+            emptyEmphasis
+              ? 'text-primary text-base font-bold sm:text-lg'
+              : 'text-muted-foreground text-sm',
+          )}
+        >
+          {emptyMessage}
+        </p>
       ) : (
         (() => {
           const gridClassName = cn(
