@@ -276,8 +276,10 @@ export default async function Home({
         <ContentCardGrid
           heading={settings.home.mediaHeading}
           cards={mediaItems.map(mediaToCard)}
+          layout="horizontal"
           columns={4}
           aspectRatio="square"
+          summaryLines={3}
           scroll
           padding="md"
           background="charcoal"

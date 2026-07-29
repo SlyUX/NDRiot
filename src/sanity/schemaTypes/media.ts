@@ -1,6 +1,7 @@
 import { defineType, defineField } from 'sanity'
 
 import { GENRES, MEDIA_KINDS } from '@/lib/taxonomy'
+import { CheckboxSelectAllInput } from '@/sanity/components/CheckboxSelectAllInput'
 import { slugField } from './slugField'
 
 /**
@@ -56,9 +57,11 @@ export default defineType({
       title: 'Genres covered',
       type: 'array',
       of: [{ type: 'string', options: { list: [...GENRES] } }],
-      options: { layout: 'grid' },
+      // No `layout: 'grid'` — the default renders as checkboxes, which the
+      // custom input augments with a Select all / Clear all toggle.
+      components: { input: CheckboxSelectAllInput },
       description:
-        'What they tend to cover, so a creator can find media aligned with their project. To add a genre, edit src/lib/taxonomy.ts.',
+        'What they tend to cover, so a comic maker can find media aligned with their project. To add a genre, edit src/lib/taxonomy.ts.',
       validation: (rule) => rule.unique(),
     }),
     defineField({
