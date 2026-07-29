@@ -359,9 +359,9 @@ const DEFAULTS: SiteSettings = {
     tagline: 'Elevating Independent Comics',
     featureCtaLabel: 'Read more',
     featuredHeading: 'Featured',
-    newHeading: 'New Books & Creators',
+    newHeading: 'New Books & Comic Makers',
     ctas: [
-      { label: 'All Creators', href: '/creators' },
+      { label: 'All Comic Makers', href: '/creators' },
       { label: 'All Comics', href: '/books' },
     ],
   },
@@ -372,18 +372,18 @@ const DEFAULTS: SiteSettings = {
     formUrl: 'https://forms.gle/STbaVMQ8a6Ap8rL1A',
     funnelHeading: 'Join the Riot',
     funnelIntro: 'Whether you make comics, cover them, or just love them — here’s the way in.',
-    creatorsLabel: 'Creators',
+    creatorsLabel: 'Comic Makers',
     creatorsDesc: 'Make comics? Add your profile and your books.',
     contactLabel: 'Contact us',
     contactDesc: 'A question, a correction, or just to say hi.',
     mediaLabel: 'Media',
     mediaDesc: 'Cover indie comics — a podcast, channel, review site, or newsletter? List your outlet.',
     readersLabel: 'Reader profiles',
-    readersDesc: 'Save and follow the creators and books you love.',
+    readersDesc: 'Save and follow the comic makers and books you love.',
     readersBadge: 'Coming soon',
   },
   creatorIntake: {
-    heading: 'Create a Creator Profile',
+    heading: 'Create a Comic Maker Profile',
     editHeading: 'Update your profile',
     intro:
       'Only a name, a note about your work, and permission to publish are required — skip anything else or add it later.',
@@ -429,7 +429,7 @@ const DEFAULTS: SiteSettings = {
     socialHandlePlaceholder: 'yourname',
     worksLabel: 'Where can readers find your work?',
     worksHint:
-      'Add platform profile pages like Amazon Author pages, Webtoon Series pages, or similar. NOT individual book pages — those go on your book pages, which you’ll be able to create once your Creator page is published.',
+      'Add platform profile pages like Amazon Author pages, Webtoon Series pages, or similar. NOT individual book pages — those go on your book pages, which you’ll be able to create once your Comic Maker page is published.',
     workPlatformPlaceholder: 'Platform name',
     workUrlPlaceholder: 'https://…',
     workAddLabel: 'Add another',
@@ -460,10 +460,10 @@ const DEFAULTS: SiteSettings = {
   bookIntake: {
     heading: 'Add a comic',
     editHeading: 'Update a comic',
-    intro: 'One form per book. Only a title, a creator you’ve added, and permission are required.',
+    intro: 'One form per book. Only a title, a comic maker you’ve added, and permission are required.',
     signInPrompt: 'Sign in to add or manage your comics',
     signInBody:
-      'ND Riot uses Google sign-in so a book stays with its creator — it only confirms it’s you. You can only add books under a creator you own, so add your creator profile first if you haven’t.',
+      'ND Riot uses Google sign-in so a book stays with its comic maker — it only confirms it’s you. You can only add books under a comic maker you own, so add your comic maker profile first if you haven’t.',
     updatePrompt: 'Editing a comic already on ND Riot?',
     updateSelectLabel: 'Search your titles…',
     updateNoMatchLabel: 'No match — this may be a new one.',
@@ -481,8 +481,8 @@ const DEFAULTS: SiteSettings = {
     slugLabel: 'Preferred ND Riot address',
     slugHint:
       'The end of the book’s link — ndriot.com/books/your-title. We suggest one from the title; edit if you like. Lowercase letters, numbers and hyphens only.',
-    creatorLabel: 'Creator',
-    creatorHint: 'One of your creators. Not listed? Add the creator profile first — a book needs a creator.',
+    creatorLabel: 'Comic Maker',
+    creatorHint: 'One of your comic makers. Not listed? Add the comic maker profile first — a book needs a comic maker.',
     formatLabel: 'Format',
     genresLabel: 'Genres',
     genresHint: 'What it’s ABOUT — up to three. Not format or audience; those are their own fields.',
@@ -522,7 +522,7 @@ const DEFAULTS: SiteSettings = {
     heading: 'List your outlet',
     editHeading: 'Update your listing',
     intro:
-      'For podcasts, channels, review sites, and newsletters covering independent comics — so creators making aligned work can find you. Only a name, a kind, and permission are required.',
+      'For podcasts, channels, review sites, and newsletters covering independent comics — so comic makers making aligned work can find you. Only a name, a kind, and permission are required.',
     signInPrompt: 'Sign in to list or manage your outlet',
     signInBody:
       'ND Riot uses Google sign-in so a listing stays with whoever manages it — it only confirms it’s you.',
@@ -543,8 +543,8 @@ const DEFAULTS: SiteSettings = {
     aboutLabel: 'About',
     aboutHint: 'A sentence or two — who you are and what you cover.',
     genresLabel: 'Genres you cover',
-    genresHint: 'So a creator can find media aligned with their project. Pick any that apply.',
-    pitchLabel: 'How can creators get covered?',
+    genresHint: 'So a comic maker can find media aligned with their project. Pick any that apply.',
+    pitchLabel: 'How can comic makers get covered?',
     pitchHint:
       'Optional but the most useful thing here — a submission form, an email, “open to review copies”, or your policy.',
     logoLabel: 'Logo or artwork',
@@ -575,7 +575,7 @@ const DEFAULTS: SiteSettings = {
   home: {
     genresHeading: 'Browse by genre',
     booksHeading: 'Books',
-    creatorsHeading: 'Creators',
+    creatorsHeading: 'Comic Makers',
     editorialHeading: 'Editorial',
     mediaHeading: 'Media & Podcasts',
     viewAllLabel: 'View all',
@@ -586,28 +586,28 @@ const DEFAULTS: SiteSettings = {
     columnsHeading: 'Columns',
     interviewsHeading: 'Interviews',
     booksHeading: 'Books',
-    creatorsHeading: 'Creators',
+    creatorsHeading: 'Comic Makers',
     downloadsHeading: 'Free Downloads',
     genreBooksHeading: 'Comics',
-    genreCreatorsHeading: 'Creators working in this genre',
+    genreCreatorsHeading: 'Comic Makers working in this genre',
     everythingElseHeading: 'While you are here',
     discoverLabel: 'Discover',
-    searchHomeLabel: 'Search comics and creators',
-    searchBooksLabel: 'Search titles and creators',
-    searchCreatorsLabel: 'Search creators and studios',
+    searchHomeLabel: 'Search comics and comic makers',
+    searchBooksLabel: 'Search titles and comic makers',
+    searchCreatorsLabel: 'Search comic makers and studios',
     downloadCta: 'Download',
     previewCta: 'Read a preview (PDF)',
     creatorBooksHeading: '{name}’s Books',
     creatorWorksHeading: 'Where to find {name}’s work',
     creatorOrganizationsHeading: 'Member of',
-    creatorFavoritesHeading: '{name}’s Favorite Creators',
+    creatorFavoritesHeading: '{name}’s Favorite Comic Makers',
     otherBooksHeading: 'Other books by {name}',
-    bookCreatorsHeading: 'Creators:',
+    bookCreatorsHeading: 'Comic Makers:',
     editorialAuthorHeading: 'Author:',
     openToCollaborationLabel: 'Open to collaboration',
     mediaPageHeading: 'Media covering indie comics',
     mediaIntro:
-      'A starting point for creators seeking coverage, and readers seeking shows. Listed alphabetically — no rankings.',
+      'A starting point for comic makers seeking coverage, and readers seeking shows. Listed alphabetically — no rankings.',
     mediaDisclaimer:
       'An independent, unaffiliated list. A listing here is a resource, not an ND Riot endorsement or partnership.',
     mediaPitchHeading: 'How to get covered',
@@ -615,12 +615,12 @@ const DEFAULTS: SiteSettings = {
     mediaKindLabel: 'Covers indie comics via',
   },
   empty: {
-    books: 'No books yet — add creators and books in the Studio.',
-    creators: 'No creators yet.',
+    books: 'No books yet — add comic makers and books in the Studio.',
+    creators: 'No comic makers yet.',
     genreBooks: 'No books in this genre yet.',
-    genreCreators: 'No creators list this genre yet.',
+    genreCreators: 'No comic makers list this genre yet.',
     filteredBooks: 'Nothing matches all of those at once. Try loosening one.',
-    filteredCreators: 'No creators match all of those at once. Try loosening one.',
+    filteredCreators: 'No comic makers match all of those at once. Try loosening one.',
     columns: 'No columns yet.',
     interviews: 'No interviews yet.',
     downloads: 'No downloads yet.',
@@ -628,8 +628,8 @@ const DEFAULTS: SiteSettings = {
   },
   // Books opens a dropdown gathering the ways into the catalogue — genres,
   // downloads, and the magazine — with "All Books" for the full listing.
-  // Creators stays a plain top-level link; Editorial is its own dropdown; Join
-  // is the CTA; Contact lives in the footer.
+  // Creators stays a plain top-level link; Editorial and Join the Riot are each
+  // their own dropdown; Contact lives in the footer (and under Join).
   nav: [
     {
       _type: 'navPanel',
@@ -646,7 +646,7 @@ const DEFAULTS: SiteSettings = {
         },
       ],
     },
-    { _type: 'navLink', label: 'Creators', href: '/creators' },
+    { _type: 'navLink', label: 'Comic Makers', href: '/creators' },
     {
       _type: 'navPanel',
       label: 'Editorial',
@@ -662,7 +662,22 @@ const DEFAULTS: SiteSettings = {
         },
       ],
     },
-    { _type: 'navLink', label: 'Join the Riot', href: '/join' },
+    {
+      _type: 'navPanel',
+      label: 'Join the Riot',
+      href: '/join',
+      groups: [
+        {
+          // The hub's paths, minus the coming-soon reader card (no destination
+          // yet); the top-level link still lands on the full /join hub.
+          links: [
+            { label: 'Comic Makers', href: '/join/creators' },
+            { label: 'Media', href: '/join/media' },
+            { label: 'Contact us', href: '/contact' },
+          ],
+        },
+      ],
+    },
   ],
 }
 

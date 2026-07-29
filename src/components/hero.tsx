@@ -123,9 +123,9 @@ function NewRow({ item }: { item: HomeNewItem }) {
   const subtitle = isBook ? item.creatorName : (item.studioName ?? item.location)
   const image = isBook ? item.cover : item.photo
   const Icon = isBook ? Book : User
-  const typeLabel = isBook ? 'Comic' : 'Creator'
-  // A creator's portrait needs describing; a cover sits beside its own title.
-  const alt = isBook ? '' : `Portrait of ${item.name ?? 'creator'}`
+  const typeLabel = isBook ? 'Comic' : 'Comic Maker'
+  // A comic maker's portrait needs describing; a cover sits beside its own title.
+  const alt = isBook ? '' : `Portrait of ${item.name ?? 'comic maker'}`
 
   return (
     <li>
