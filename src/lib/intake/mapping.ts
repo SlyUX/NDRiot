@@ -215,6 +215,27 @@ export function buildLinks(
   return out
 }
 
+export type MediaLink = { _type: 'mediaLink'; _key: string; label: string; url: string }
+
+/** Build a media outlet's links from parallel label / URL columns; blank label
+ *  becomes the host. Same shape as buildWorks, different `_type`. */
+export function buildMediaLinks(labels: string[], urls: string[]): MediaLink[] {
+  const out: MediaLink[] = []
+  const rows = Math.max(labels.length, urls.length)
+  for (let r = 0; r < rows; r += 1) {
+    const url = normalizeUrl(urls[r])
+    if (!url) continue
+    let host = ''
+    try {
+      host = new URL(url).hostname.replace(/^www\./, '')
+    } catch {
+      /* validated */
+    }
+    out.push({ _type: 'mediaLink', _key: `link${out.length}`, label: (labels[r] ?? '').trim() || host, url })
+  }
+  return out
+}
+
 export type WorkLink = { _type: 'workLink'; _key: string; label: string; url: string }
 
 /**

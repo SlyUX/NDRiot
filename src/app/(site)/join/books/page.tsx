@@ -104,7 +104,7 @@ export default async function BooksIntakePage({
         <div className="mt-12 space-y-4">
           <h2 className="text-2xl font-black tracking-tighter uppercase">{copy.signInPrompt}</h2>
           <p className="text-muted-foreground max-w-prose text-sm">{copy.signInBody}</p>
-          <SignInButton label={common.signInButton} />
+          <SignInButton label={common.signInButton} redirectTo="/join/books" />
         </div>
       </Section>
     )
@@ -120,7 +120,7 @@ export default async function BooksIntakePage({
         <p className="text-muted-foreground mt-6 max-w-prose text-sm">{copy.creatorHint}</p>
         <div className="mt-6">
           <Link
-            href="/join"
+            href="/join/creators"
             className="text-primary text-sm font-semibold tracking-widest uppercase underline underline-offset-4"
           >
             {settings.creatorIntake.heading}
@@ -153,7 +153,7 @@ export default async function BooksIntakePage({
         <span className="text-muted-foreground tracking-widest uppercase">
           {common.signedInLabel} <span className="text-foreground">{email}</span>
         </span>
-        <SignOutButton label={common.signOutLabel} />
+        <SignOutButton label={common.signOutLabel} redirectTo="/join/books" />
       </div>
 
       <div className="mt-8 space-y-6">

@@ -6,16 +6,16 @@ import { Button } from '@/components/ui/button'
  *
  * Server components wrapping Auth.js's `signIn` / `signOut` in tiny inline
  * Server Actions, so they submit as plain forms and work without client JS.
- * Both return to /join, where the flow lives. Labels are passed in from Sanity
- * (§2).
+ * `redirectTo` returns to the form that rendered the control (creator, book,
+ * media). Labels are passed in from Sanity (§2).
  */
 
-export function SignInButton({ label }: { label: string }) {
+export function SignInButton({ label, redirectTo = '/join' }: { label: string; redirectTo?: string }) {
   return (
     <form
       action={async () => {
         'use server'
-        await signIn('google', { redirectTo: '/join' })
+        await signIn('google', { redirectTo })
       }}
     >
       <Button type="submit" size="lg" className="font-black tracking-wide uppercase">
@@ -25,12 +25,12 @@ export function SignInButton({ label }: { label: string }) {
   )
 }
 
-export function SignOutButton({ label }: { label: string }) {
+export function SignOutButton({ label, redirectTo = '/join' }: { label: string; redirectTo?: string }) {
   return (
     <form
       action={async () => {
         'use server'
-        await signOut({ redirectTo: '/join' })
+        await signOut({ redirectTo })
       }}
     >
       <button

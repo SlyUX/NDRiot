@@ -4,7 +4,7 @@ import { ContentCardGrid } from '@/components/content-card-grid'
 import { FilterBar } from '@/components/filter-bar'
 import { Hero } from '@/components/hero'
 import { LoadMore } from '@/components/load-more'
-import { bookToCard, creatorToCard, editorialToCard } from '@/lib/card-mappers'
+import { bookToCard, creatorToCard, editorialToCard, mediaToCard } from '@/lib/card-mappers'
 import {
   HOME_ROW_LIMIT,
   bookFilters,
@@ -25,6 +25,7 @@ import {
   HERO_BOOKS_QUERY,
   HOME_EDITORIAL_QUERY,
   HOME_NEW_QUERY,
+  MEDIA_HOME_QUERY,
   FILTERED_BOOKS_QUERY,
   FILTERED_CREATORS_QUERY,
 } from '@/lib/queries'
@@ -35,6 +36,7 @@ import type {
   HeroBook,
   HomeEditorial,
   HomeNewItem,
+  MediaSummary,
   Paginated,
 } from '@/lib/types'
 
@@ -104,7 +106,7 @@ export default async function Home({
   // The book the hero last showed, so "Discover" re-rolls to a different one.
   const notFeature = Array.isArray(params.notf) ? params.notf[0] : params.notf
 
-  const [feature, booksResult, creatorsResult, genresWithBooks, newItems, homeEditorial, settings] =
+  const [feature, booksResult, creatorsResult, genresWithBooks, newItems, homeEditorial, mediaItems, settings] =
     await Promise.all([
       // Deliberately unfiltered. The hero is the guaranteed route to work
       // nobody went looking for (AGENTS.md §3), so narrowing the page must
@@ -123,6 +125,7 @@ export default async function Home({
       safeFetch<string[]>(GENRES_WITH_BOOKS_QUERY, {}, []),
       safeFetch<HomeNewItem[]>(HOME_NEW_QUERY, {}, []),
       safeFetch<HomeEditorial[]>(HOME_EDITORIAL_QUERY, {}, []),
+      safeFetch<MediaSummary[]>(MEDIA_HOME_QUERY, {}, []),
       getSiteSettings(),
     ])
   const books = booksResult.items
@@ -261,6 +264,24 @@ export default async function Home({
           scroll
           padding="md"
           viewAllHref="/editorial"
+          viewAllLabel={settings.home.viewAllLabel}
+          emptyMessage=""
+        />
+      )}
+
+      {/* Media: independent outlets covering indie comics. Bottom row, a
+          scrolling taste; the full list (and the disclaimer) is on /media.
+          Hidden when there is none, like editorial. */}
+      {mediaItems.length > 0 && (
+        <ContentCardGrid
+          heading={settings.home.mediaHeading}
+          cards={mediaItems.map(mediaToCard)}
+          columns={4}
+          aspectRatio="square"
+          scroll
+          padding="md"
+          background="charcoal"
+          viewAllHref="/media"
           viewAllLabel={settings.home.viewAllLabel}
           emptyMessage=""
         />

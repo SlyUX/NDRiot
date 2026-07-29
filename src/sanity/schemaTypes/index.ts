@@ -1,10 +1,12 @@
 import creator from './creator'
 import book from './book'
+import media from './media'
 import column from './column'
 import interview from './interview'
 import freeDownload from './freeDownload'
 import homepageFeature from './homepageFeature'
 import bookLink from './bookLink'
+import mediaLink from './mediaLink'
 import socialLink from './socialLink'
 import favoriteCreator from './favoriteCreator'
 import imageWithAlt from './imageWithAlt'
@@ -13,6 +15,6 @@ import siteSettings from './siteSettings'
 
 export const schemaTypes = [
   siteSettings,
-  creator, book, column, interview, freeDownload, homepageFeature, organization,
-  bookLink, socialLink, favoriteCreator, imageWithAlt,
+  creator, book, media, column, interview, freeDownload, homepageFeature, organization,
+  bookLink, mediaLink, socialLink, favoriteCreator, imageWithAlt,
 ]

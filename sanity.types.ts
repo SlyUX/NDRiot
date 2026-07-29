@@ -65,6 +65,12 @@ export type SocialLink = {
   url: string;
 };
 
+export type MediaLink = {
+  _type: "mediaLink";
+  label?: string;
+  url: string;
+};
+
 export type BookLink = {
   _type: "bookLink";
   kind: "Read free" | "Buy" | "Support" | "Back";
@@ -217,6 +223,42 @@ export type Column = {
       } & ImageWithAlt)
   >;
   publishedAt: string;
+};
+
+export type Media = {
+  _id: string;
+  _type: "media";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  name: string;
+  slug: Slug;
+  kind: "Podcast" | "YouTube" | "Review Site" | "Newsletter";
+  logo?: ImageWithAlt;
+  about?: string;
+  genresCovered?: Array<
+    | "Action & Adventure"
+    | "Sci-Fi"
+    | "Fantasy"
+    | "Horror"
+    | "Crime & Noir"
+    | "Romance"
+    | "Drama"
+    | "Slice of Life"
+    | "Historical"
+    | "Superhero"
+    | "Humor & Satire"
+    | "Memoir & Autobio"
+    | "Queer"
+    | "Weird & Experimental"
+    | "Punk & Protest"
+  >;
+  pitchInfo?: string;
+  links?: Array<
+    {
+      _key: string;
+    } & MediaLink
+  >;
 };
 
 export type Book = {
@@ -429,6 +471,7 @@ export type SiteSettings = {
     booksHeading?: string;
     creatorsHeading?: string;
     editorialHeading?: string;
+    mediaHeading?: string;
     viewAllLabel?: string;
     viewMoreLabel?: string;
   };
@@ -452,6 +495,12 @@ export type SiteSettings = {
     creatorWorksHeading?: string;
     creatorOrganizationsHeading?: string;
     openToCollaborationLabel?: string;
+    mediaPageHeading?: string;
+    mediaIntro?: string;
+    mediaDisclaimer?: string;
+    mediaPitchHeading?: string;
+    mediaLinksHeading?: string;
+    mediaKindLabel?: string;
     creatorFavoritesHeading?: string;
     otherBooksHeading?: string;
     bookCreatorsHeading?: string;
@@ -467,8 +516,20 @@ export type SiteSettings = {
     columns?: string;
     interviews?: string;
     downloads?: string;
+    media?: string;
   };
   join?: {
+    funnelHeading?: string;
+    funnelIntro?: string;
+    creatorsLabel?: string;
+    creatorsDesc?: string;
+    contactLabel?: string;
+    contactDesc?: string;
+    mediaLabel?: string;
+    mediaDesc?: string;
+    readersLabel?: string;
+    readersDesc?: string;
+    readersBadge?: string;
     heading?: string;
     body?: Array<{
       children?: Array<{
@@ -601,6 +662,42 @@ export type SiteSettings = {
     linkKindPlaceholder?: string;
     linkLabelPlaceholder?: string;
     linkEndDateLabel?: string;
+    permissionStatement?: string;
+    anythingElseLabel?: string;
+    submitLabel?: string;
+    successMessage?: string;
+    errorMessage?: string;
+  };
+  mediaIntake?: {
+    heading?: string;
+    editHeading?: string;
+    intro?: string;
+    signInPrompt?: string;
+    signInBody?: string;
+    updatePrompt?: string;
+    updateSelectLabel?: string;
+    updateNoMatchLabel?: string;
+    updateSkipHint?: string;
+    editingNotice?: string;
+    editingResetLabel?: string;
+    sectionAbout?: string;
+    sectionReach?: string;
+    nameLabel?: string;
+    slugLabel?: string;
+    slugHint?: string;
+    kindLabel?: string;
+    aboutLabel?: string;
+    aboutHint?: string;
+    genresLabel?: string;
+    genresHint?: string;
+    pitchLabel?: string;
+    pitchHint?: string;
+    logoLabel?: string;
+    logoHint?: string;
+    logoAltLabel?: string;
+    logoAltHint?: string;
+    linksLabel?: string;
+    linksHint?: string;
     permissionStatement?: string;
     anythingElseLabel?: string;
     submitLabel?: string;
@@ -779,6 +876,7 @@ export type AllSanitySchemaTypes =
   | CreatorReference
   | FavoriteCreator
   | SocialLink
+  | MediaLink
   | BookLink
   | BookReference
   | ColumnReference
@@ -789,6 +887,7 @@ export type AllSanitySchemaTypes =
   | Slug
   | Interview
   | Column
+  | Media
   | Book
   | OrganizationReference
   | Creator
@@ -1744,6 +1843,145 @@ export type INTAKE_BOOK_EDIT_QUERY_RESULT = {
 } | null;
 
 // Source: src/lib/queries.ts
+// Variable: MEDIA_QUERY
+// Query: *[_type=="media" && defined(slug.current)]|order(name asc){    _id,name,"slug":slug.current,kind,logo,about,genresCovered  }
+export type MEDIA_QUERY_RESULT = Array<{
+  _id: string;
+  name: string;
+  slug: string;
+  kind: "Newsletter" | "Podcast" | "Review Site" | "YouTube";
+  logo: ImageWithAlt | null;
+  about: string | null;
+  genresCovered: Array<
+    | "Action & Adventure"
+    | "Crime & Noir"
+    | "Drama"
+    | "Fantasy"
+    | "Historical"
+    | "Horror"
+    | "Humor & Satire"
+    | "Memoir & Autobio"
+    | "Punk & Protest"
+    | "Queer"
+    | "Romance"
+    | "Sci-Fi"
+    | "Slice of Life"
+    | "Superhero"
+    | "Weird & Experimental"
+  > | null;
+}>;
+
+// Source: src/lib/queries.ts
+// Variable: MEDIA_HOME_QUERY
+// Query: *[_type=="media" && defined(slug.current)]|order(_createdAt desc)[0...8]{    _id,name,"slug":slug.current,kind,logo,about,genresCovered  }
+export type MEDIA_HOME_QUERY_RESULT = Array<{
+  _id: string;
+  name: string;
+  slug: string;
+  kind: "Newsletter" | "Podcast" | "Review Site" | "YouTube";
+  logo: ImageWithAlt | null;
+  about: string | null;
+  genresCovered: Array<
+    | "Action & Adventure"
+    | "Crime & Noir"
+    | "Drama"
+    | "Fantasy"
+    | "Historical"
+    | "Horror"
+    | "Humor & Satire"
+    | "Memoir & Autobio"
+    | "Punk & Protest"
+    | "Queer"
+    | "Romance"
+    | "Sci-Fi"
+    | "Slice of Life"
+    | "Superhero"
+    | "Weird & Experimental"
+  > | null;
+}>;
+
+// Source: src/lib/queries.ts
+// Variable: MEDIA_DETAIL_QUERY
+// Query: *[_type=="media" && slug.current==$slug][0]{  _id,name,kind,logo,about,genresCovered,pitchInfo,  links[]{label,url}}
+export type MEDIA_DETAIL_QUERY_RESULT = {
+  _id: string;
+  name: string;
+  kind: "Newsletter" | "Podcast" | "Review Site" | "YouTube";
+  logo: ImageWithAlt | null;
+  about: string | null;
+  genresCovered: Array<
+    | "Action & Adventure"
+    | "Crime & Noir"
+    | "Drama"
+    | "Fantasy"
+    | "Historical"
+    | "Horror"
+    | "Humor & Satire"
+    | "Memoir & Autobio"
+    | "Punk & Protest"
+    | "Queer"
+    | "Romance"
+    | "Sci-Fi"
+    | "Slice of Life"
+    | "Superhero"
+    | "Weird & Experimental"
+  > | null;
+  pitchInfo: string | null;
+  links: Array<{
+    label: string | null;
+    url: string;
+  }> | null;
+} | null;
+
+// Source: src/lib/queries.ts
+// Variable: INTAKE_MEDIA_IDS_QUERY
+// Query: *[_type=="media"]._id
+export type INTAKE_MEDIA_IDS_QUERY_RESULT = Array<string>;
+
+// Source: src/lib/queries.ts
+// Variable: INTAKE_OWNED_MEDIA_QUERY
+// Query: *[_type=="media" && _id in $ids && defined(slug.current)]|order(name asc){_id,name}
+export type INTAKE_OWNED_MEDIA_QUERY_RESULT = Array<{
+  _id: string;
+  name: string;
+}>;
+
+// Source: src/lib/queries.ts
+// Variable: INTAKE_MEDIA_EDIT_QUERY
+// Query: *[_type=="media" && _id==$id][0]{  _id,name,"slug":slug.current,kind,  "aboutText":about,  genresCovered,pitchInfo,  logo,"logoAlt":logo.alt,  links[]{label,url}}
+export type INTAKE_MEDIA_EDIT_QUERY_RESULT = {
+  _id: string;
+  name: string;
+  slug: string;
+  kind: "Newsletter" | "Podcast" | "Review Site" | "YouTube";
+  aboutText: string | null;
+  genresCovered: Array<
+    | "Action & Adventure"
+    | "Crime & Noir"
+    | "Drama"
+    | "Fantasy"
+    | "Historical"
+    | "Horror"
+    | "Humor & Satire"
+    | "Memoir & Autobio"
+    | "Punk & Protest"
+    | "Queer"
+    | "Romance"
+    | "Sci-Fi"
+    | "Slice of Life"
+    | "Superhero"
+    | "Weird & Experimental"
+  > | null;
+  pitchInfo: string | null;
+  logo: ImageWithAlt | null;
+  logoAlt: string | null;
+  links: Array<{
+    label: string | null;
+    url: string;
+  }> | null;
+} | null;
+
+// Source: src/lib/queries.ts
 // Variable: GENRE_CREATORS_QUERY
 // Query: {  "items": *[_type=="creator" && $genre in genres]|order(name asc)[0...$limit]{    _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,    "bioText":pt::text(bio),    studio->{_id,name,"slug":slug.current,website,logo}  },  "total": count(*[_type=="creator" && $genre in genres])}
 export type GENRE_CREATORS_QUERY_RESULT = {
@@ -1815,6 +2053,12 @@ declare module "@sanity/client" {
     '*[_type=="book"]._id': INTAKE_BOOK_IDS_QUERY_RESULT;
     '*[_type=="book" && creator._ref in $ids && defined(slug.current)]|order(title asc){\n    _id,title,"creatorName":creator->name\n  }': INTAKE_OWNED_BOOKS_QUERY_RESULT;
     '*[_type=="book" && _id==$id][0]{\n  _id,title,"slug":slug.current,\n  "creatorId":creator._ref,\n  genres,format,maturity,status,issueCount,\n  shortDescription,\n  "descriptionText":pt::text(description),\n  cover,"coverAlt":cover.alt,\n  previewUrl,\n  links[]{kind,label,url,endDate}\n}': INTAKE_BOOK_EDIT_QUERY_RESULT;
+    '*[_type=="media" && defined(slug.current)]|order(name asc){\n    _id,name,"slug":slug.current,kind,logo,about,genresCovered\n  }': MEDIA_QUERY_RESULT;
+    '*[_type=="media" && defined(slug.current)]|order(_createdAt desc)[0...8]{\n    _id,name,"slug":slug.current,kind,logo,about,genresCovered\n  }': MEDIA_HOME_QUERY_RESULT;
+    '*[_type=="media" && slug.current==$slug][0]{\n  _id,name,kind,logo,about,genresCovered,pitchInfo,\n  links[]{label,url}\n}': MEDIA_DETAIL_QUERY_RESULT;
+    '*[_type=="media"]._id': INTAKE_MEDIA_IDS_QUERY_RESULT;
+    '*[_type=="media" && _id in $ids && defined(slug.current)]|order(name asc){_id,name}': INTAKE_OWNED_MEDIA_QUERY_RESULT;
+    '*[_type=="media" && _id==$id][0]{\n  _id,name,"slug":slug.current,kind,\n  "aboutText":about,\n  genresCovered,pitchInfo,\n  logo,"logoAlt":logo.alt,\n  links[]{label,url}\n}': INTAKE_MEDIA_EDIT_QUERY_RESULT;
     '{\n  "items": *[_type=="creator" && $genre in genres]|order(name asc)[0...$limit]{\n    _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,\n    "bioText":pt::text(bio),\n    studio->{_id,name,"slug":slug.current,website,logo}\n  },\n  "total": count(*[_type=="creator" && $genre in genres])\n}': GENRE_CREATORS_QUERY_RESULT;
   }
 }

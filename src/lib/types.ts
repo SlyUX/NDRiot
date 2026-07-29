@@ -12,6 +12,8 @@ import type {
   HOME_NEW_QUERY_RESULT,
   INTERVIEWS_QUERY_RESULT,
   INTERVIEW_QUERY_RESULT,
+  MEDIA_QUERY_RESULT,
+  MEDIA_DETAIL_QUERY_RESULT,
   ImageWithAlt,
 } from '../../sanity.types'
 
@@ -28,6 +30,8 @@ export type CreatorSummary = CREATORS_QUERY_RESULT[number]
 export type ColumnSummary = COLUMNS_QUERY_RESULT[number]
 export type InterviewSummary = INTERVIEWS_QUERY_RESULT[number]
 export type DownloadSummary = DOWNLOADS_QUERY_RESULT[number]
+export type MediaSummary = MEDIA_QUERY_RESULT[number]
+export type MediaDetail = NonNullable<MEDIA_DETAIL_QUERY_RESULT>
 export type HeroBook = HERO_BOOKS_QUERY_RESULT[number]
 export type HomeEditorial = HOME_EDITORIAL_QUERY_RESULT[number]
 export type HomeNewItem = HOME_NEW_QUERY_RESULT[number]

@@ -7,6 +7,7 @@ import type {
   FavoriteCreator,
   HomeEditorial,
   InterviewSummary,
+  MediaSummary,
   SanityImage,
 } from '@/lib/types'
 import { truncate } from '@/lib/utils'
@@ -177,6 +178,20 @@ export function editorialToCard(item: HomeEditorial): ContentCardProps {
     summary: item.excerpt,
     date: formatDate(item.publishedAt),
     aspectRatio: 'landscape',
+  }
+}
+
+export function mediaToCard(media: MediaSummary): ContentCardProps {
+  return {
+    title: media.name,
+    href: `/media/${media.slug}`,
+    image: media.logo,
+    // Decorative — the name sits right beside it; a missing logo falls back to
+    // a plain box (CardImage), which is fine here.
+    imageAlt: '',
+    eyebrow: media.kind,
+    summary: truncate(media.about, 160),
+    aspectRatio: 'square',
   }
 }
 

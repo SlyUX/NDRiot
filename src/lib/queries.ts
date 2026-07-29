@@ -279,6 +279,46 @@ export const INTAKE_BOOK_EDIT_QUERY = defineQuery(`*[_type=="book" && _id==$id][
   links[]{kind,label,url,endDate}
 }`)
 
+/* ----------------------------------------------------------------- media */
+
+/** Media outlets, for the /media card listing — alphabetical, unranked (§3). */
+export const MEDIA_QUERY = defineQuery(
+  `*[_type=="media" && defined(slug.current)]|order(name asc){
+    _id,name,"slug":slug.current,kind,logo,about,genresCovered
+  }`,
+)
+
+/** A sample of media for the home page row — newest first, so new additions surface. */
+export const MEDIA_HOME_QUERY = defineQuery(
+  `*[_type=="media" && defined(slug.current)]|order(_createdAt desc)[0...8]{
+    _id,name,"slug":slug.current,kind,logo,about,genresCovered
+  }`,
+)
+
+/** One media outlet's detail page. */
+export const MEDIA_DETAIL_QUERY = defineQuery(`*[_type=="media" && slug.current==$slug][0]{
+  _id,name,kind,logo,about,genresCovered,pitchInfo,
+  links[]{label,url}
+}`)
+
+/* ---------------------------------------------------- media intake */
+
+export const INTAKE_MEDIA_IDS_QUERY = defineQuery(`*[_type=="media"]._id`)
+
+/** The signed-in user's media outlets, for the picker. `$ids` is owned doc ids. */
+export const INTAKE_OWNED_MEDIA_QUERY = defineQuery(
+  `*[_type=="media" && _id in $ids && defined(slug.current)]|order(name asc){_id,name}`,
+)
+
+/** One media outlet's editable values, to prepopulate the form on an update. */
+export const INTAKE_MEDIA_EDIT_QUERY = defineQuery(`*[_type=="media" && _id==$id][0]{
+  _id,name,"slug":slug.current,kind,
+  "aboutText":about,
+  genresCovered,pitchInfo,
+  logo,"logoAlt":logo.alt,
+  links[]{label,url}
+}`)
+
 /** Creators who list a genre, for the category pages. */
 export const GENRE_CREATORS_QUERY = defineQuery(`{
   "items": *[_type=="creator" && $genre in genres]|order(name asc)[0...$limit]{

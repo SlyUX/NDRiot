@@ -73,6 +73,18 @@ export interface JoinSettings {
   ctaLabel: string
   /** Absent means the page renders without a button rather than a dead link. */
   formUrl?: string
+  /* The /join funnel hub — cards to each path. */
+  funnelHeading: string
+  funnelIntro: string
+  creatorsLabel: string
+  creatorsDesc: string
+  contactLabel: string
+  contactDesc: string
+  mediaLabel: string
+  mediaDesc: string
+  readersLabel: string
+  readersDesc: string
+  readersBadge: string
 }
 
 /**
@@ -209,6 +221,44 @@ export type BookIntakeSettings = {
   errorMessage: string
 }
 
+/** Media-specific intake copy. Generic strings reused from `creatorIntake`. */
+export type MediaIntakeSettings = {
+  heading: string
+  editHeading: string
+  intro: string
+  signInPrompt: string
+  signInBody: string
+  updatePrompt: string
+  updateSelectLabel: string
+  updateNoMatchLabel: string
+  updateSkipHint: string
+  editingNotice: string
+  editingResetLabel: string
+  sectionAbout: string
+  sectionReach: string
+  nameLabel: string
+  slugLabel: string
+  slugHint: string
+  kindLabel: string
+  aboutLabel: string
+  aboutHint: string
+  genresLabel: string
+  genresHint: string
+  pitchLabel: string
+  pitchHint: string
+  logoLabel: string
+  logoHint: string
+  logoAltLabel: string
+  logoAltHint: string
+  linksLabel: string
+  linksHint: string
+  permissionStatement: string
+  anythingElseLabel: string
+  submitLabel: string
+  successMessage: string
+  errorMessage: string
+}
+
 export interface ContactSettings {
   heading: string
   /** Footer link label — Contact lives in the footer, not the header nav. */
@@ -233,12 +283,14 @@ export interface SiteSettings {
   join: JoinSettings
   creatorIntake: CreatorIntakeSettings
   bookIntake: BookIntakeSettings
+  mediaIntake: MediaIntakeSettings
   contact: ContactSettings
   home: {
     genresHeading: string
     booksHeading: string
     creatorsHeading: string
     editorialHeading: string
+    mediaHeading: string
     viewAllLabel: string
     viewMoreLabel: string
   }
@@ -266,6 +318,12 @@ export interface SiteSettings {
     bookCreatorsHeading: string
     editorialAuthorHeading: string
     openToCollaborationLabel: string
+    mediaPageHeading: string
+    mediaIntro: string
+    mediaDisclaimer: string
+    mediaPitchHeading: string
+    mediaLinksHeading: string
+    mediaKindLabel: string
   }
   empty: {
     books: string
@@ -277,6 +335,7 @@ export interface SiteSettings {
     columns: string
     interviews: string
     downloads: string
+    media: string
   }
   nav: NavItem[]
 }
@@ -311,6 +370,17 @@ const DEFAULTS: SiteSettings = {
     // Now labels the fallback link under the native form, not a primary CTA.
     ctaLabel: 'Form not working? Submit via Google Forms',
     formUrl: 'https://forms.gle/STbaVMQ8a6Ap8rL1A',
+    funnelHeading: 'Join the Riot',
+    funnelIntro: 'Whether you make comics, cover them, or just love them — here’s the way in.',
+    creatorsLabel: 'Creators',
+    creatorsDesc: 'Make comics? Add your profile and your books.',
+    contactLabel: 'Contact us',
+    contactDesc: 'A question, a correction, or just to say hi.',
+    mediaLabel: 'Media',
+    mediaDesc: 'Cover indie comics — a podcast, channel, review site, or newsletter? List your outlet.',
+    readersLabel: 'Reader profiles',
+    readersDesc: 'Save and follow the creators and books you love.',
+    readersBadge: 'Coming soon',
   },
   creatorIntake: {
     heading: 'Create a Creator Profile',
@@ -448,6 +518,49 @@ const DEFAULTS: SiteSettings = {
       'Got it — your comic is in. A person reviews every submission before it goes live, so it’ll appear shortly. We’ll be in touch if anything needs a look.',
     errorMessage: 'That didn’t save. Please try again in a moment.',
   },
+  mediaIntake: {
+    heading: 'List your outlet',
+    editHeading: 'Update your listing',
+    intro:
+      'For podcasts, channels, review sites, and newsletters covering independent comics — so creators making aligned work can find you. Only a name, a kind, and permission are required.',
+    signInPrompt: 'Sign in to list or manage your outlet',
+    signInBody:
+      'ND Riot uses Google sign-in so a listing stays with whoever manages it — it only confirms it’s you.',
+    updatePrompt: 'Already listed and updating?',
+    updateSelectLabel: 'Search your outlet…',
+    updateNoMatchLabel: 'No match — this may be a new one.',
+    updateSkipHint: 'New here? Skip this and fill in the form below.',
+    editingNotice:
+      'You’re updating {name}. Change whatever you like — a change is reviewed before it goes live, and blanks keep what’s already there.',
+    editingResetLabel: 'Add a new listing instead',
+    sectionAbout: 'About the outlet',
+    sectionReach: 'Where to find it',
+    nameLabel: 'Name',
+    slugLabel: 'Preferred ND Riot address',
+    slugHint:
+      'The end of your link — ndriot.com/media/your-name. We suggest one from the name; edit if you like. Lowercase letters, numbers and hyphens only.',
+    kindLabel: 'What kind of media is it?',
+    aboutLabel: 'About',
+    aboutHint: 'A sentence or two — who you are and what you cover.',
+    genresLabel: 'Genres you cover',
+    genresHint: 'So a creator can find media aligned with their project. Pick any that apply.',
+    pitchLabel: 'How can creators get covered?',
+    pitchHint:
+      'Optional but the most useful thing here — a submission form, an email, “open to review copies”, or your policy.',
+    logoLabel: 'Logo or artwork',
+    logoHint: 'Optional. PNG or JPG that reads on a near-black background.',
+    logoAltLabel: 'Describe the logo',
+    logoAltHint: 'For readers who can’t see it. Skip for a plain wordmark.',
+    linksLabel: 'Where to find it',
+    linksHint: 'Links to the show, channel, or site. One per row: a label, then its link.',
+    permissionStatement:
+      'I represent this outlet and consent to it being listed on ND Riot as an independent resource.',
+    anythingElseLabel: 'Anything else?',
+    submitLabel: 'Submit for review',
+    successMessage:
+      'Thanks — your listing is in. A person reviews every submission before it goes live, so it’ll appear shortly.',
+    errorMessage: 'That didn’t save. Please try again in a moment.',
+  },
   contact: {
     heading: 'Get in touch',
     linkLabel: 'Contact',
@@ -464,6 +577,7 @@ const DEFAULTS: SiteSettings = {
     booksHeading: 'Books',
     creatorsHeading: 'Creators',
     editorialHeading: 'Editorial',
+    mediaHeading: 'Media & Podcasts',
     viewAllLabel: 'View all',
     viewMoreLabel: 'View more',
   },
@@ -491,6 +605,14 @@ const DEFAULTS: SiteSettings = {
     bookCreatorsHeading: 'Creators:',
     editorialAuthorHeading: 'Author:',
     openToCollaborationLabel: 'Open to collaboration',
+    mediaPageHeading: 'Media covering indie comics',
+    mediaIntro:
+      'A starting point for creators seeking coverage, and readers seeking shows. Listed alphabetically — no rankings.',
+    mediaDisclaimer:
+      'An independent, unaffiliated list. A listing here is a resource, not an ND Riot endorsement or partnership.',
+    mediaPitchHeading: 'How to get covered',
+    mediaLinksHeading: 'Where to find them',
+    mediaKindLabel: 'Covers indie comics via',
   },
   empty: {
     books: 'No books yet — add creators and books in the Studio.',
@@ -502,6 +624,7 @@ const DEFAULTS: SiteSettings = {
     columns: 'No columns yet.',
     interviews: 'No interviews yet.',
     downloads: 'No downloads yet.',
+    media: 'No media listed yet.',
   },
   // Books opens a dropdown gathering the ways into the catalogue — genres,
   // downloads, and the magazine — with "All Books" for the full listing.
@@ -539,15 +662,15 @@ const DEFAULTS: SiteSettings = {
         },
       ],
     },
-    { _type: 'navLink', label: 'Join', href: '/join' },
+    { _type: 'navLink', label: 'Join the Riot', href: '/join' },
   ],
 }
 
 export const SITE_SETTINGS_QUERY = `*[_id=="siteSettings"][0]{
   siteTitle,siteDescription,footer,discordUrl,
-  home,sections,empty,creatorIntake,bookIntake,
+  home,sections,empty,creatorIntake,bookIntake,mediaIntake,
   hero{background,headline,body,tagline,featureCtaLabel,featuredHeading,newHeading,ctas[]{label,href}},
-  join{heading,body,ctaLabel,formUrl},
+  join{heading,body,ctaLabel,formUrl,funnelHeading,funnelIntro,creatorsLabel,creatorsDesc,contactLabel,contactDesc,mediaLabel,mediaDesc,readersLabel,readersDesc,readersBadge},
   contact{heading,linkLabel,body,nameLabel,emailLabel,subjectLabel,messageLabel,submitLabel,successMessage,errorMessage},
   nav[]{_type,label,href,groups[]{heading,useGenres,links[]{label,href}}}
 }`
@@ -593,9 +716,21 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       body: data.join?.body?.length ? data.join.body : undefined,
       ctaLabel: data.join?.ctaLabel?.trim() || DEFAULTS.join.ctaLabel,
       formUrl: data.join?.formUrl?.trim() || DEFAULTS.join.formUrl,
+      funnelHeading: data.join?.funnelHeading?.trim() || DEFAULTS.join.funnelHeading,
+      funnelIntro: data.join?.funnelIntro?.trim() || DEFAULTS.join.funnelIntro,
+      creatorsLabel: data.join?.creatorsLabel?.trim() || DEFAULTS.join.creatorsLabel,
+      creatorsDesc: data.join?.creatorsDesc?.trim() || DEFAULTS.join.creatorsDesc,
+      contactLabel: data.join?.contactLabel?.trim() || DEFAULTS.join.contactLabel,
+      contactDesc: data.join?.contactDesc?.trim() || DEFAULTS.join.contactDesc,
+      mediaLabel: data.join?.mediaLabel?.trim() || DEFAULTS.join.mediaLabel,
+      mediaDesc: data.join?.mediaDesc?.trim() || DEFAULTS.join.mediaDesc,
+      readersLabel: data.join?.readersLabel?.trim() || DEFAULTS.join.readersLabel,
+      readersDesc: data.join?.readersDesc?.trim() || DEFAULTS.join.readersDesc,
+      readersBadge: data.join?.readersBadge?.trim() || DEFAULTS.join.readersBadge,
     },
     creatorIntake: mergeGroup(DEFAULTS.creatorIntake, data.creatorIntake),
     bookIntake: mergeGroup(DEFAULTS.bookIntake, data.bookIntake),
+    mediaIntake: mergeGroup(DEFAULTS.mediaIntake, data.mediaIntake),
     contact: {
       // Field-by-field like `join` above: a blank string falls back to the
       // default, and the rich-text body passes through untouched.

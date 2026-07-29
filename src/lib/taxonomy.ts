@@ -144,6 +144,17 @@ export function linkKindForHost(url: string): LinkKind | null {
   return KIND_BY_HOST.find(([pattern]) => pattern.test(host))?.[1] ?? null
 }
 
+/* ----------------------------------------------------------------- media */
+
+/**
+ * Kinds of media outlet that cover independent comics. Not creators and not
+ * comics — a separate `media` type. YouTube is its own kind even though many
+ * treat it as podcasting, because the platform is the useful distinction.
+ */
+export const MEDIA_KINDS = ['Podcast', 'YouTube', 'Review Site', 'Newsletter'] as const
+
+export type MediaKind = (typeof MEDIA_KINDS)[number]
+
 /* --------------------------------------------------------------- statuses */
 
 /** A book's publication status. Ordered as the schema lists them. */

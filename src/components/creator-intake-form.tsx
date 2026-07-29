@@ -5,6 +5,7 @@ import { useActionState, useEffect, useRef, useState } from 'react'
 
 import { submitCreator, type CreatorIntakeState } from '@/app/actions/creator-intake'
 import { Button } from '@/components/ui/button'
+import { PairedRowsField } from '@/components/paired-rows-field'
 import { ALLOWED_IMAGE_TYPES, MAX_PICK_BYTES, downscaleImage } from '@/lib/intake/downscale'
 import { slugify } from '@/lib/intake/mapping'
 import {
@@ -120,7 +121,7 @@ function CreatorSearchPicker({
           matches.map((c) => (
             <li key={c._id}>
               <a
-                href={`/join?editing=${encodeURIComponent(c._id)}`}
+                href={`/join/creators?editing=${encodeURIComponent(c._id)}`}
                 className="hover:bg-primary/10 hover:text-primary focus-visible:bg-primary/10 block px-3 py-2 text-sm focus-visible:outline-none"
               >
                 {c.name}
@@ -255,111 +256,6 @@ function SocialLinksField({
   )
 }
 
-/**
- * Repeatable "left text + right URL" rows. Submits two parallel arrays
- * (`leftName`, `rightName`) the action zips by index. Used for both a creator's
- * work links and adding an organization that isn't listed. Prepopulated from a
- * loaded profile where relevant; falls back to one empty row. Without JS the
- * rendered rows still submit — only add/remove need it.
- */
-function PairedRowsField({
-  legend,
-  hint,
-  optionalLabel,
-  leftName,
-  leftPlaceholder,
-  rightName,
-  rightPlaceholder,
-  rightDefault = '',
-  addLabel,
-  removeLabel,
-  initial,
-}: {
-  legend: string
-  hint?: string
-  optionalLabel: string
-  leftName: string
-  leftPlaceholder: string
-  rightName: string
-  rightPlaceholder: string
-  /** Prefill for the right (URL) column of a blank row, e.g. "https://www.". */
-  rightDefault?: string
-  addLabel: string
-  removeLabel: string
-  initial?: { left: string; right: string }[]
-}) {
-  const [rows, setRows] = useState<{ left: string; right: string; key: number }[]>(() =>
-    (initial && initial.length ? initial : [{ left: '', right: rightDefault }]).map((r, i) => ({
-      ...r,
-      key: i,
-    })),
-  )
-
-  // Key from the current max + 1 — unique without a render-time ref mutation.
-  const addRow = () =>
-    setRows((prev) => [
-      ...prev,
-      { left: '', right: rightDefault, key: prev.reduce((m, r) => Math.max(m, r.key), -1) + 1 },
-    ])
-  const removeRow = (key: number) =>
-    setRows((prev) => (prev.length > 1 ? prev.filter((r) => r.key !== key) : prev))
-  const update = (key: number, field: 'left' | 'right', value: string) =>
-    setRows((prev) => prev.map((r) => (r.key === key ? { ...r, [field]: value } : r)))
-
-  return (
-    <fieldset className="space-y-3">
-      <legend className={labelClass}>
-        {legend}
-        <Optional label={optionalLabel} />
-      </legend>
-      {hint && <p className={hintClass}>{hint}</p>}
-      <div className="space-y-2">
-        {rows.map((row) => (
-          <div key={row.key} className="flex flex-col gap-2 sm:flex-row">
-            <input
-              type="text"
-              name={leftName}
-              value={row.left}
-              onChange={(e) => update(row.key, 'left', e.target.value)}
-              placeholder={leftPlaceholder}
-              aria-label={leftPlaceholder}
-              className={cn(fieldClass, 'sm:w-1/3')}
-            />
-            <div className="flex gap-2 sm:flex-1">
-              <input
-                type="url"
-                name={rightName}
-                value={row.right}
-                onChange={(e) => update(row.key, 'right', e.target.value)}
-                placeholder={rightPlaceholder}
-                aria-label={rightPlaceholder}
-                className={cn(fieldClass, 'flex-1')}
-              />
-              {rows.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeRow(row.key)}
-                  aria-label={removeLabel}
-                  className="text-muted-foreground hover:text-destructive focus-visible:ring-ring shrink-0 px-2 focus-visible:ring-2 focus-visible:outline-none"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-      <button
-        type="button"
-        onClick={addRow}
-        className="text-primary focus-visible:ring-ring text-xs font-semibold tracking-widest uppercase focus-visible:ring-2 focus-visible:outline-none"
-      >
-        + {addLabel}
-      </button>
-    </fieldset>
-  )
-}
-
 export function CreatorIntakeForm({
   copy,
   organizations,
@@ -471,7 +367,7 @@ export function CreatorIntakeForm({
       {editing && (
         <div className="border-primary/40 mb-10 border-l-2 py-2 pl-4">
           <p className="text-sm">{copy.editingNotice.replace('{name}', initial!.name)}</p>
-          <a href="/join?new" className="text-primary mt-1 inline-block text-xs underline underline-offset-4">
+          <a href="/join/creators?new" className="text-primary mt-1 inline-block text-xs underline underline-offset-4">
             {copy.editingResetLabel}
           </a>
         </div>

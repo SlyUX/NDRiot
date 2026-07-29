@@ -97,3 +97,9 @@ export async function ownsCreator(email: string, creatorId: string): Promise<boo
     return false
   }
 }
+
+// The ownership map is keyed by document id, so these generic aliases work for
+// any top-level owned type. Books inherit their creator's ownership; media owns
+// its own record.
+export const ownedDocIds = creatorsOwnedBy
+export const ownsDoc = ownsCreator
