@@ -28,12 +28,14 @@ export default defineType({
     }),
     slugField('name', '/media/their-slug'),
     defineField({
-      name: 'kind',
-      title: 'Kind',
-      type: 'string',
-      options: { list: [...MEDIA_KINDS] },
-      description: 'What form the coverage takes.',
-      validation: (rule) => rule.required(),
+      name: 'kinds',
+      title: 'Kinds',
+      type: 'array',
+      of: [{ type: 'string', options: { list: [...MEDIA_KINDS] } }],
+      options: { layout: 'grid' },
+      description:
+        'What forms the coverage takes — an outlet can be more than one (a podcast that is also on YouTube). At least one. To add a kind, edit src/lib/taxonomy.ts.',
+      validation: (rule) => rule.required().min(1).unique(),
     }),
     defineField({
       name: 'logo',
@@ -75,5 +77,12 @@ export default defineType({
       description: 'Links to the show, channel, or site.',
     }),
   ],
-  preview: { select: { title: 'name', subtitle: 'kind', media: 'logo' } },
+  preview: {
+    select: { title: 'name', kinds: 'kinds', media: 'logo' },
+    prepare: ({ title, kinds, media }) => ({
+      title,
+      subtitle: Array.isArray(kinds) ? kinds.join(' · ') : undefined,
+      media,
+    }),
+  },
 })

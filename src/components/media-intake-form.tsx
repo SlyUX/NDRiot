@@ -35,7 +35,7 @@ export interface MediaIntakeInitial {
   updateId: string
   name: string
   slug: string
-  kind: string
+  kinds: string[]
   about: string
   genresCovered: string[]
   pitchInfo: string
@@ -232,27 +232,26 @@ export function MediaIntakeForm({
             </div>
           )}
 
-          <div className="space-y-1.5">
-            <label htmlFor="kind" className={labelClass}>
-              {copy.kindLabel}
-            </label>
-            <select
-              id="kind"
-              name="kind"
-              required
-              defaultValue={initial?.kind ?? ''}
-              aria-invalid={Boolean(errors.kind)}
-              className={cn(fieldClass, 'appearance-none')}
-            >
-              <option value="">—</option>
+          <fieldset className="space-y-2">
+            <legend className={labelClass}>{copy.kindLabel}</legend>
+            <p className={hintClass}>{copy.kindHint}</p>
+            <div className="grid gap-2 sm:grid-cols-2">
               {MEDIA_KINDS.map((k) => (
-                <option key={k} value={k}>
+                <label key={k} className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    name="kinds"
+                    value={k}
+                    defaultChecked={initial?.kinds.includes(k)}
+                    aria-invalid={Boolean(errors.kinds)}
+                    className="size-4 accent-[var(--primary)]"
+                  />
                   {k}
-                </option>
+                </label>
               ))}
-            </select>
-            {errors.kind && <p className="text-destructive text-xs">{errors.kind}</p>}
-          </div>
+            </div>
+            {errors.kinds && <p className="text-destructive text-xs">{errors.kinds}</p>}
+          </fieldset>
 
           <div className="space-y-1.5">
             <label htmlFor="about" className={labelClass}>

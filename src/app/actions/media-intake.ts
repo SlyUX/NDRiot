@@ -16,7 +16,7 @@ import { getWriteClient } from '@/sanity/write-client'
  * its own record (recorded on create, re-checked fail-closed on edit).
  */
 
-type FieldName = 'name' | 'kind' | 'permission'
+type FieldName = 'name' | 'kinds' | 'permission'
 
 export type MediaIntakeState = {
   status: 'idle' | 'success' | 'error'
@@ -68,12 +68,12 @@ export async function submitMedia(
     return { status: 'error', message: 'Your session expired — please sign in again.', values }
   }
 
-  const kind = matchTaxonomy(String(formData.get('kind') ?? ''), MEDIA_KINDS, { single: true }).matched[0]
+  const kinds = [...new Set(matchTaxonomy(formData.getAll('kinds').map(String), MEDIA_KINDS).matched)]
 
   const fieldErrors: NonNullable<MediaIntakeState['fieldErrors']> = {}
   if (!values.name) fieldErrors.name = 'Please add the outlet’s name.'
   else if (values.name.length > LIMITS.name) fieldErrors.name = 'That name is very long — please shorten it.'
-  if (!kind) fieldErrors.kind = 'Please choose what kind of media this is.'
+  if (!kinds.length) fieldErrors.kinds = 'Please choose at least one kind of media.'
   if (!isYes(String(formData.get('permission') ?? '')))
     fieldErrors.permission = 'Please confirm you represent this outlet and consent to being listed.'
 
@@ -141,7 +141,7 @@ export async function submitMedia(
     else logoNote = result.error
   }
 
-  const fields: Record<string, unknown> = { name: values.name, kind }
+  const fields: Record<string, unknown> = { name: values.name, kinds }
   if (values.about) fields.about = values.about.slice(0, LIMITS.about)
   if (values.pitchInfo) fields.pitchInfo = values.pitchInfo.slice(0, LIMITS.pitch)
   if (genresCovered.length) fields.genresCovered = genresCovered

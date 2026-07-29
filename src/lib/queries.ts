@@ -284,20 +284,20 @@ export const INTAKE_BOOK_EDIT_QUERY = defineQuery(`*[_type=="book" && _id==$id][
 /** Media outlets, for the /media card listing — alphabetical, unranked (§3). */
 export const MEDIA_QUERY = defineQuery(
   `*[_type=="media" && defined(slug.current)]|order(name asc){
-    _id,name,"slug":slug.current,kind,logo,about,genresCovered
+    _id,name,"slug":slug.current,kinds,logo,about,genresCovered
   }`,
 )
 
 /** A sample of media for the home page row — newest first, so new additions surface. */
 export const MEDIA_HOME_QUERY = defineQuery(
   `*[_type=="media" && defined(slug.current)]|order(_createdAt desc)[0...8]{
-    _id,name,"slug":slug.current,kind,logo,about,genresCovered
+    _id,name,"slug":slug.current,kinds,logo,about,genresCovered
   }`,
 )
 
 /** One media outlet's detail page. */
 export const MEDIA_DETAIL_QUERY = defineQuery(`*[_type=="media" && slug.current==$slug][0]{
-  _id,name,kind,logo,about,genresCovered,pitchInfo,
+  _id,name,kinds,logo,about,genresCovered,pitchInfo,
   links[]{label,url}
 }`)
 
@@ -312,7 +312,7 @@ export const INTAKE_OWNED_MEDIA_QUERY = defineQuery(
 
 /** One media outlet's editable values, to prepopulate the form on an update. */
 export const INTAKE_MEDIA_EDIT_QUERY = defineQuery(`*[_type=="media" && _id==$id][0]{
-  _id,name,"slug":slug.current,kind,
+  _id,name,"slug":slug.current,kinds,
   "aboutText":about,
   genresCovered,pitchInfo,
   logo,"logoAlt":logo.alt,

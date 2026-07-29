@@ -1292,28 +1292,31 @@
         },
         "optional": false
       },
-      "kind": {
+      "kinds": {
         "type": "objectAttribute",
         "value": {
-          "type": "union",
-          "of": [
-            {
-              "type": "string",
-              "value": "Podcast"
-            },
-            {
-              "type": "string",
-              "value": "YouTube"
-            },
-            {
-              "type": "string",
-              "value": "Review Site"
-            },
-            {
-              "type": "string",
-              "value": "Newsletter"
-            }
-          ]
+          "type": "array",
+          "of": {
+            "type": "union",
+            "of": [
+              {
+                "type": "string",
+                "value": "Podcast"
+              },
+              {
+                "type": "string",
+                "value": "YouTube"
+              },
+              {
+                "type": "string",
+                "value": "Review Site"
+              },
+              {
+                "type": "string",
+                "value": "Newsletter"
+              }
+            ]
+          }
         },
         "optional": false
       },
@@ -4292,6 +4295,13 @@
               "optional": true
             },
             "kindLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "kindHint": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

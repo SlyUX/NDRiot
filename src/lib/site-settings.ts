@@ -240,6 +240,7 @@ export type MediaIntakeSettings = {
   slugLabel: string
   slugHint: string
   kindLabel: string
+  kindHint: string
   aboutLabel: string
   aboutHint: string
   genresLabel: string
@@ -540,6 +541,7 @@ const DEFAULTS: SiteSettings = {
     slugHint:
       'The end of your link — ndriot.com/media/your-name. We suggest one from the name; edit if you like. Lowercase letters, numbers and hyphens only.',
     kindLabel: 'What kind of media is it?',
+    kindHint: 'Pick all that apply — an outlet can be more than one.',
     aboutLabel: 'About',
     aboutHint: 'A sentence or two — who you are and what you cover.',
     genresLabel: 'Genres you cover',

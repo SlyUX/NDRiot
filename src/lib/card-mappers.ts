@@ -189,7 +189,7 @@ export function mediaToCard(media: MediaSummary): ContentCardProps {
     // Decorative — the name sits right beside it; a missing logo falls back to
     // a plain box (CardImage), which is fine here.
     imageAlt: '',
-    eyebrow: media.kind,
+    eyebrow: media.kinds?.length ? media.kinds.join(' · ') : undefined,
     summary: truncate(media.about, 160),
     aspectRatio: 'square',
   }

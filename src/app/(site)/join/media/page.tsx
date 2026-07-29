@@ -28,7 +28,7 @@ type EditMedia = {
   _id: string
   name: string | null
   slug: string | null
-  kind: string | null
+  kinds: string[] | null
   aboutText: string | null
   genresCovered: string[] | null
   pitchInfo: string | null
@@ -42,7 +42,7 @@ function toInitial(m: EditMedia): MediaIntakeInitial {
     updateId: m._id,
     name: m.name ?? '',
     slug: m.slug ?? '',
-    kind: m.kind ?? '',
+    kinds: m.kinds ?? [],
     about: m.aboutText ?? '',
     genresCovered: m.genresCovered ?? [],
     pitchInfo: m.pitchInfo ?? '',

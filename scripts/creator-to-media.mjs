@@ -9,8 +9,9 @@
  * still manage it.
  *
  * Usage:
- *   node scripts/creator-to-media.mjs <creator-slug-or-id> --kind Podcast            # dry run
- *   node scripts/creator-to-media.mjs <creator-slug-or-id> --kind Podcast --commit   # writes
+ *   node scripts/creator-to-media.mjs <creator-slug-or-id> --kind Podcast              # dry run
+ *   node scripts/creator-to-media.mjs <creator-slug-or-id> --kind "Podcast,YouTube"    # multiple
+ *   node scripts/creator-to-media.mjs <creator-slug-or-id> --kind Podcast --commit     # writes
  */
 import { createClient } from '@sanity/client'
 
@@ -23,15 +24,18 @@ const OWNERSHIP_DATASET = process.env.SANITY_OWNERSHIP_DATASET ?? 'ndriot_auth'
 async function main() {
   const [, , ident, ...flags] = process.argv
   const commit = flags.includes('--commit')
-  const kind = flags.includes('--kind') ? flags[flags.indexOf('--kind') + 1] : null
+  const kindArg = flags.includes('--kind') ? flags[flags.indexOf('--kind') + 1] : null
 
-  if (!ident || !kind) {
-    console.error('Usage: node scripts/creator-to-media.mjs <creator-slug-or-id> --kind <Kind> [--commit]')
-    console.error(`  --kind must be one of: ${MEDIA_KINDS.join(', ')}`)
+  if (!ident || !kindArg) {
+    console.error('Usage: node scripts/creator-to-media.mjs <creator-slug-or-id> --kind <Kind[,Kind]> [--commit]')
+    console.error(`  --kind is one or more (comma-separated) of: ${MEDIA_KINDS.join(', ')}`)
     process.exit(1)
   }
-  if (!MEDIA_KINDS.includes(kind)) {
-    console.error(`Unknown kind "${kind}". One of: ${MEDIA_KINDS.join(', ')}`)
+  // An outlet can be more than one kind; accept a comma-separated list, deduped.
+  const kinds = [...new Set(kindArg.split(',').map((k) => k.trim()).filter(Boolean))]
+  const bad = kinds.filter((k) => !MEDIA_KINDS.includes(k))
+  if (bad.length) {
+    console.error(`Unknown kind(s) "${bad.join(', ')}". One of: ${MEDIA_KINDS.join(', ')}`)
     process.exit(1)
   }
 
@@ -72,7 +76,7 @@ async function main() {
     _type: 'media',
     name: creator.name,
     slug: { _type: 'slug', current: mslug },
-    kind,
+    kinds,
     ...(creator.bioText ? { about: creator.bioText } : {}),
     ...(creator.photo ? { logo: creator.photo } : {}),
     ...(creator.genres?.length ? { genresCovered: creator.genres } : {}),
@@ -80,7 +84,7 @@ async function main() {
   }
 
   console.log(`\n${commit ? 'Reclassifying' : 'Would reclassify'}: ${creator.name}`)
-  console.log(`  creator ${creator._id} (/creators/${creator.slug})  →  media ${mediaId} (/media/${mslug}), kind "${kind}"`)
+  console.log(`  creator ${creator._id} (/creators/${creator.slug})  →  media ${mediaId} (/media/${mslug}), kinds "${kinds.join(', ')}"`)
   console.log(`  carried: about ${media.about ? '✓' : '—'}, logo ${media.logo ? '✓' : '—'}, genres ${(creator.genres ?? []).length}, links ${links.length}`)
 
   if (!commit) {

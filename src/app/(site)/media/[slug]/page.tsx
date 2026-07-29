@@ -61,9 +61,9 @@ export default async function MediaDetailPage({ params }: { params: Promise<{ sl
         )}
         <div>
           <h1 className="text-4xl font-black tracking-tighter uppercase">{media.name}</h1>
-          {media.kind && (
+          {media.kinds && media.kinds.length > 0 && (
             <p className="text-muted-foreground mt-1 text-xs tracking-widest uppercase">
-              {sections.mediaKindLabel} {media.kind}
+              {sections.mediaKindLabel} {media.kinds.join(', ')}
             </p>
           )}
           {media.about && <p className="mt-4 max-w-prose text-sm">{media.about}</p>}
