@@ -170,6 +170,31 @@ export function collectionPageSchema(input: {
   })
 }
 
+/** The /about page as an AboutPage tied to the ND Riot organization. */
+export function aboutPageSchema(input: { name: string; url: string; description?: string | null }) {
+  return compact({
+    '@type': 'AboutPage',
+    '@id': `${input.url}#about`,
+    name: input.name,
+    url: input.url,
+    description: clip(input.description, 300),
+    isPartOf: { '@id': WEBSITE_ID },
+    about: { '@id': ORG_ID },
+  })
+}
+
+/** FAQ as an FAQPage — the highest-value structured data for AI answer engines. */
+export function faqPageSchema(items: { question: string; answer: string }[]) {
+  return {
+    '@type': 'FAQPage',
+    mainEntity: items.map((it) => ({
+      '@type': 'Question',
+      name: it.question,
+      acceptedAnswer: { '@type': 'Answer', text: it.answer },
+    })),
+  }
+}
+
 /** A trail of {name, path} from Home to the current page. */
 export function breadcrumbSchema(items: { name: string; path: string }[]) {
   return {

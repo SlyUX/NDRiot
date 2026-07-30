@@ -36,6 +36,7 @@ const STATIC_ROUTES: SitemapEntry[] = [
   // because it is the one we most want found.
   { url: absoluteUrl('/join'), changeFrequency: 'monthly', priority: 0.9 },
   { url: absoluteUrl('/editorial'), changeFrequency: 'weekly', priority: 0.7 },
+  { url: absoluteUrl('/about'), changeFrequency: 'monthly', priority: 0.6 },
   { url: absoluteUrl('/downloads'), changeFrequency: 'weekly', priority: 0.7 },
   { url: absoluteUrl('/magazine'), changeFrequency: 'monthly', priority: 0.4 },
 ]

@@ -29,6 +29,7 @@ export default defineType({
     { name: 'bookIntake', title: 'Comic intake form' },
     { name: 'mediaIntake', title: 'Media intake form' },
     { name: 'contact', title: 'Contact page' },
+    { name: 'about', title: 'About & AI letter' },
     { name: 'nav', title: 'Navigation' },
   ],
   fields: [
@@ -72,6 +73,63 @@ export default defineType({
       group: 'general',
       description:
         'ND Riot’s own social accounts — Instagram, Threads, YouTube, etc. Shown as a quiet icon row in the footer, kept less prominent than Discord (which is the community hub). Add a row per account.',
+    }),
+
+    defineField({
+      name: 'about',
+      title: 'About page',
+      type: 'object',
+      group: 'about',
+      options: { collapsible: true, collapsed: false },
+      description: 'The /about page — the mission, and the FAQ beneath it.',
+      fields: [
+        defineField({ name: 'heading', title: 'Heading', type: 'string', description: 'The h1.' }),
+        defineField({
+          name: 'body',
+          title: 'Mission / body',
+          type: 'array',
+          of: [
+            {
+              type: 'block',
+              styles: [{ title: 'Paragraph', value: 'normal' }],
+              lists: [{ title: 'Bullet', value: 'bullet' }],
+              marks: { decorators: [{ title: 'Bold', value: 'strong' }], annotations: [] },
+            },
+          ],
+          description:
+            'What ND Riot is and what “real independent comics” means. The opening should stand alone as a plain definition — search and AI engines quote it directly.',
+        }),
+        defineField({ name: 'faqHeading', title: 'FAQ heading', type: 'string' }),
+        defineField({
+          name: 'faq',
+          title: 'FAQ',
+          type: 'array',
+          description: 'Question / answer pairs. Rendered on /about and emitted as FAQPage structured data.',
+          of: [
+            defineField({
+              name: 'faqItem',
+              title: 'Q&A',
+              type: 'object',
+              fields: [
+                defineField({ name: 'question', title: 'Question', type: 'string', validation: (r) => r.required() }),
+                defineField({ name: 'answer', title: 'Answer', type: 'text', rows: 3, validation: (r) => r.required() }),
+              ],
+              preview: { select: { title: 'question' } },
+            }),
+          ],
+        }),
+        defineField({ name: 'seoTitle', title: 'SEO title', type: 'string' }),
+        defineField({ name: 'seoDescription', title: 'SEO description', type: 'text', rows: 2 }),
+      ],
+    }),
+    defineField({
+      name: 'aiLetter',
+      title: 'Letter to AI agents (/llms.txt)',
+      type: 'text',
+      rows: 6,
+      group: 'about',
+      description:
+        'Served at /llms.txt — a short note addressed to AI agents (ChatGPT, Perplexity, etc.) that crawl the site: a greeting, what ND Riot is in plain terms, and a thank-you. A generated index of key sections is appended automatically.',
     }),
 
     defineField({

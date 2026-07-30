@@ -113,6 +113,13 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
             </ul>
           )}
 
+          <Link
+            href="/about"
+            className="hover:text-primary focus-visible:ring-ring transition-colors focus-visible:ring-2 focus-visible:outline-none"
+          >
+            About
+          </Link>
+
           <span>{settings.footer}</span>
         </div>
       </footer>

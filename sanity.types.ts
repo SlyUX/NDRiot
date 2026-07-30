@@ -495,6 +495,33 @@ export type SiteSettings = {
       _key: string;
     } & SocialLink
   >;
+  about?: {
+    heading?: string;
+    body?: Array<{
+      children?: Array<{
+        marks?: Array<string>;
+        text?: string;
+        _type: "span";
+        _key: string;
+      }>;
+      style?: "normal";
+      listItem?: "bullet";
+      markDefs?: null;
+      level?: number;
+      _type: "block";
+      _key: string;
+    }>;
+    faqHeading?: string;
+    faq?: Array<{
+      question: string;
+      answer: string;
+      _type: "faqItem";
+      _key: string;
+    }>;
+    seoTitle?: string;
+    seoDescription?: string;
+  };
+  aiLetter?: string;
   hero?: {
     background?: ImageWithAlt;
     headline?: string;
