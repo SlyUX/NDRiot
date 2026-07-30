@@ -334,6 +334,7 @@ export interface SiteSettings {
     books: string
     creators: string
     genreBooks: string
+    formatBooks: string
     genreCreators: string
     filteredBooks: string
     filteredCreators: string
@@ -633,6 +634,7 @@ const DEFAULTS: SiteSettings = {
     books: 'No comics yet — add comic makers and comics in the Studio.',
     creators: 'No comic makers yet.',
     genreBooks: 'No comics in this genre yet.',
+    formatBooks: 'No comics in this format yet.',
     genreCreators: 'No comic makers list this genre yet.',
     filteredBooks: 'Nothing matches all of those at once. Try loosening one.',
     filteredCreators: 'No comic makers match all of those at once. Try loosening one.',

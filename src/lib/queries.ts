@@ -103,6 +103,17 @@ export const GENRE_BOOKS_QUERY = defineQuery(`{
   "total": count(*[_type=="book" && $genre in genres])
 }`)
 
+/** Comics of one format, for the /formats/[format] hub. Alphabetical, neutral. */
+export const FORMAT_BOOKS_QUERY = defineQuery(`{
+  "items": *[_type=="book" && format==$format]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},
+  "total": count(*[_type=="book" && format==$format])
+}`)
+
+/** Editor-written intro + SEO copy for a genre/format hub. Absent → generated fallback. */
+export const HUB_PAGE_QUERY = defineQuery(`*[_type=="hubPage" && kind==$kind && value==$value][0]{
+  intro, seoTitle, seoDescription
+}`)
+
 /**
  * Every genre that at least one book actually uses — the source for every
  * genre list a reader sees (filter facets, the Browse nav). A genre nobody has
@@ -178,7 +189,8 @@ export const SITEMAP_QUERY = defineQuery(`{
   "columns": *[_type=="column" && defined(slug.current)]{"slug":slug.current,_updatedAt},
   "interviews": *[_type=="interview" && defined(slug.current)]{"slug":slug.current,_updatedAt},
   "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},
-  "genres": array::unique(*[_type=="book" && defined(genres)].genres[])
+  "genres": array::unique(*[_type=="book" && defined(genres)].genres[]),
+  "formats": array::unique(*[_type=="book" && defined(format)].format)
 }`)
 
 /**

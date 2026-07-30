@@ -358,6 +358,7 @@ export default defineType({
         defineField({ name: 'books', title: 'No books', type: 'string' }),
         defineField({ name: 'creators', title: 'No creators', type: 'string' }),
         defineField({ name: 'genreBooks', title: 'No books in a genre', type: 'string' }),
+        defineField({ name: 'formatBooks', title: 'No books in a format', type: 'string' }),
         defineField({ name: 'genreCreators', title: 'No creators in a genre', type: 'string' }),
         defineField({
           name: 'filteredBooks',

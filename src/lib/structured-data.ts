@@ -138,6 +138,38 @@ export function articleSchema(input: {
   })
 }
 
+/**
+ * A genre/format hub: the page as a CollectionPage whose main entity is an
+ * ItemList of the comics on it. Marked **unordered** on purpose — this is a
+ * neutral set, never a ranking (AGENTS.md §3).
+ */
+export function collectionPageSchema(input: {
+  name: string
+  url: string
+  description?: string | null
+  items: { name: string; url: string }[]
+}) {
+  return compact({
+    '@type': 'CollectionPage',
+    '@id': `${input.url}#collection`,
+    name: input.name,
+    url: input.url,
+    description: clip(input.description, 300),
+    isPartOf: { '@id': WEBSITE_ID },
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListOrder: 'https://schema.org/ItemListUnordered',
+      numberOfItems: input.items.length,
+      itemListElement: input.items.map((it, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        url: it.url,
+        name: it.name,
+      })),
+    },
+  })
+}
+
 /** A trail of {name, path} from Home to the current page. */
 export function breadcrumbSchema(items: { name: string; path: string }[]) {
   return {

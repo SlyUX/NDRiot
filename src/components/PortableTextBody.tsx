@@ -1,8 +1,9 @@
 import Image from 'next/image'
 import { PortableText, type PortableTextComponents } from '@portabletext/react'
+import type { TypedObject } from '@portabletext/types'
 
 import { urlFor } from '@/sanity/image'
-import type { RichText, SanityImage } from '@/lib/types'
+import type { SanityImage } from '@/lib/types'
 
 /**
  * Renders Portable Text from `book.description`, `column.body`,
@@ -73,7 +74,11 @@ const components: PortableTextComponents = {
   },
 }
 
-export default function PortableTextBody({ value }: { value?: RichText }) {
+// TypedObject[] rather than a specific query's block type: this renders any
+// Portable Text — column/interview bodies, book descriptions, hub intros — and
+// each of those is a distinct generated type. PortableText itself is generic,
+// so nothing is lost by accepting the loose block shape here.
+export default function PortableTextBody({ value }: { value?: TypedObject[] | null }) {
   if (!value?.length) return null
 
   return (

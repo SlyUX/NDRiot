@@ -14,6 +14,7 @@ import type {
   INTERVIEW_QUERY_RESULT,
   MEDIA_QUERY_RESULT,
   MEDIA_DETAIL_QUERY_RESULT,
+  HUB_PAGE_QUERY_RESULT,
   ImageWithAlt,
 } from '../../sanity.types'
 
@@ -21,6 +22,9 @@ export type { BookFormat, Genre, MaturityRating } from '@/lib/taxonomy'
 
 export type SanityImage = ImageWithAlt
 export type RichText = NonNullable<COLUMN_QUERY_RESULT>['body']
+
+/** Editor copy for a genre/format hub (intro + SEO overrides). Nullable — a hub can lack a doc. */
+export type HubCopy = HUB_PAGE_QUERY_RESULT
 
 /** A page of results plus the full count, from a `{items,total}` query. */
 export type Paginated<T> = { items: T[]; total: number }

@@ -1,13 +1,45 @@
+import type { Metadata } from 'next'
+
 import { ContentCardGrid } from '@/components/content-card-grid'
+import { HubIntro } from '@/components/hub-intro'
+import { JsonLd } from '@/components/json-ld'
 import { LoadMore } from '@/components/load-more'
 import { Section } from '@/components/ui/section'
 import { bookToCard, creatorToCard } from '@/lib/card-mappers'
 import { PAGE_SIZE, pageLimit, type SearchParams } from '@/lib/filters'
-import { safeFetch, GENRE_BOOKS_QUERY, GENRE_CREATORS_QUERY } from '@/lib/queries'
+import { hubFallbackDescription, hubFallbackIntro, hubTitle } from '@/lib/hub-copy'
+import { pageMetadata } from '@/lib/page-metadata'
+import {
+  safeFetch,
+  GENRE_BOOKS_QUERY,
+  GENRE_CREATORS_QUERY,
+  HUB_PAGE_QUERY,
+} from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
-import type { BookSummary, CreatorSummary, Paginated } from '@/lib/types'
+import { absoluteUrl } from '@/lib/site-url'
+import { breadcrumbSchema, collectionPageSchema, jsonLdGraph } from '@/lib/structured-data'
+import type { BookSummary, CreatorSummary, HubCopy, Paginated } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ genre: string }>
+}): Promise<Metadata> {
+  const { genre } = await params
+  const value = decodeURIComponent(genre)
+  const [hub, settings] = await Promise.all([
+    safeFetch<HubCopy>(HUB_PAGE_QUERY, { kind: 'genre', value }, null),
+    getSiteSettings(),
+  ])
+  return pageMetadata({
+    title: hub?.seoTitle?.trim() || hubTitle('genre', value),
+    description: hub?.seoDescription?.trim() || hubFallbackDescription(value),
+    path: `/categories/${encodeURIComponent(value)}`,
+    siteTitle: settings.siteTitle,
+  })
+}
 
 /**
  * A genre, from both directions: the comics in it and the people who work in
@@ -18,8 +50,8 @@ export const dynamic = 'force-dynamic'
  * most of the roster early on. It also makes the genre badge on a creator
  * profile lead somewhere, instead of being a label that does nothing.
  *
- * Each grid paginates on its own key (blimit / climit) so loading more comics
- * never disturbs the creators below, and neither pulls the whole genre at once.
+ * The list is neutral and alphabetical (AGENTS.md §3); the intro + schema make
+ * it a real doorway for search and AI engines without ranking anyone.
  */
 export default async function GenrePage({
   params,
@@ -34,7 +66,7 @@ export default async function GenrePage({
   const bookLimit = pageLimit(sp, 'blimit')
   const creatorLimit = pageLimit(sp, 'climit')
 
-  const [bookResult, creatorResult, settings] = await Promise.all([
+  const [bookResult, creatorResult, hub, settings] = await Promise.all([
     safeFetch<Paginated<BookSummary>>(
       GENRE_BOOKS_QUERY,
       { genre: decoded, limit: bookLimit },
@@ -45,15 +77,37 @@ export default async function GenrePage({
       { genre: decoded, limit: creatorLimit },
       { items: [], total: 0 },
     ),
+    safeFetch<HubCopy>(HUB_PAGE_QUERY, { kind: 'genre', value: decoded }, null),
     getSiteSettings(),
   ])
   const books = bookResult.items
   const creators = creatorResult.items
 
+  const url = absoluteUrl(`/categories/${encodeURIComponent(decoded)}`)
+
   return (
     <div>
+      <JsonLd
+        data={jsonLdGraph(
+          collectionPageSchema({
+            name: hub?.seoTitle?.trim() || hubTitle('genre', decoded),
+            url,
+            description: hub?.seoDescription ?? hubFallbackDescription(decoded),
+            items: books
+              .filter((b) => b.slug)
+              .map((b) => ({ name: b.title, url: absoluteUrl(`/books/${b.slug}`) })),
+          }),
+          breadcrumbSchema([
+            { name: 'Home', path: '/' },
+            { name: 'Comics', path: '/books' },
+            { name: decoded, path: `/categories/${encodeURIComponent(decoded)}` },
+          ]),
+        )}
+      />
+
       <Section as="header" padding="md">
         <h1 className="text-3xl font-black tracking-tighter uppercase md:text-4xl">{decoded}</h1>
+        <HubIntro intro={hub?.intro} fallback={hubFallbackIntro(decoded)} />
       </Section>
 
       <ContentCardGrid

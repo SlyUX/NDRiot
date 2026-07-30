@@ -75,6 +75,22 @@ export const FORMATS = [
 
 export type BookFormat = (typeof FORMATS)[number]
 
+/**
+ * Format ↔ URL slug for the /formats/[format] hubs. Genres go in their URL raw
+ * (encoded); formats have spaces ("Graphic Novel"), so they get a clean slug
+ * ("graphic-novel") that maps back to the canonical value.
+ */
+export function formatSlug(format: string): string {
+  return format
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
+export function formatFromSlug(slug: string): BookFormat | null {
+  return FORMATS.find((f) => formatSlug(f) === slug) ?? null
+}
+
 /** Studio-facing help, so editors do not have to guess the boundaries. */
 export const FORMAT_DESCRIPTIONS: Record<BookFormat, string> = {
   'Graphic Novel': 'A complete standalone story in one volume.',

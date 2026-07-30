@@ -80,6 +80,55 @@ export type BookLink = {
   endDate?: string;
 };
 
+export type HubPage = {
+  _id: string;
+  _type: "hubPage";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  kind: "genre" | "format";
+  value:
+    | "Action & Adventure"
+    | "Sci-Fi"
+    | "Fantasy"
+    | "Horror"
+    | "Crime & Noir"
+    | "Romance"
+    | "Drama"
+    | "Slice of Life"
+    | "Historical"
+    | "Superhero"
+    | "Humor & Satire"
+    | "Memoir & Autobio"
+    | "Queer"
+    | "Weird & Experimental"
+    | "Punk & Protest"
+    | "Graphic Novel"
+    | "One-Shot"
+    | "Single Issue"
+    | "Collected Edition"
+    | "Anthology"
+    | "Minicomic"
+    | "Zine"
+    | "Webcomic";
+  intro?: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: "span";
+      _key: string;
+    }>;
+    style?: "normal";
+    listItem?: never;
+    markDefs?: null;
+    level?: number;
+    _type: "block";
+    _key: string;
+  }>;
+  seoTitle?: string;
+  seoDescription?: string;
+};
+
 export type BookReference = {
   _ref: string;
   _type: "reference";
@@ -520,6 +569,7 @@ export type SiteSettings = {
     books?: string;
     creators?: string;
     genreBooks?: string;
+    formatBooks?: string;
     genreCreators?: string;
     filteredBooks?: string;
     filteredCreators?: string;
@@ -889,6 +939,7 @@ export type AllSanitySchemaTypes =
   | SocialLink
   | MediaLink
   | BookLink
+  | HubPage
   | BookReference
   | ColumnReference
   | InterviewReference
@@ -1375,6 +1426,73 @@ export type GENRE_BOOKS_QUERY_RESULT = {
 };
 
 // Source: src/lib/queries.ts
+// Variable: FORMAT_BOOKS_QUERY
+// Query: {  "items": *[_type=="book" && format==$format]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},  "total": count(*[_type=="book" && format==$format])}
+export type FORMAT_BOOKS_QUERY_RESULT = {
+  items: Array<{
+    _id: string;
+    title: string;
+    slug: string;
+    status: "Complete" | "Ongoing" | "Upcoming" | null;
+    genres: Array<
+      | "Action & Adventure"
+      | "Crime & Noir"
+      | "Drama"
+      | "Fantasy"
+      | "Historical"
+      | "Horror"
+      | "Humor & Satire"
+      | "Memoir & Autobio"
+      | "Punk & Protest"
+      | "Queer"
+      | "Romance"
+      | "Sci-Fi"
+      | "Slice of Life"
+      | "Superhero"
+      | "Weird & Experimental"
+    > | null;
+    format:
+      | "Anthology"
+      | "Collected Edition"
+      | "Graphic Novel"
+      | "Minicomic"
+      | "One-Shot"
+      | "Single Issue"
+      | "Webcomic"
+      | "Zine"
+      | null;
+    maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
+    cover: ImageWithAlt | null;
+    descriptionText: string;
+    fundingUrl: string | null;
+    creatorName: string;
+  }>;
+  total: number;
+};
+
+// Source: src/lib/queries.ts
+// Variable: HUB_PAGE_QUERY
+// Query: *[_type=="hubPage" && kind==$kind && value==$value][0]{  intro, seoTitle, seoDescription}
+export type HUB_PAGE_QUERY_RESULT = {
+  intro: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: "span";
+      _key: string;
+    }>;
+    style?: "normal";
+    listItem?: never;
+    markDefs?: null;
+    level?: number;
+    _type: "block";
+    _key: string;
+  }> | null;
+  seoTitle: string | null;
+  seoDescription: string | null;
+} | null;
+
+// Source: src/lib/queries.ts
 // Variable: GENRES_WITH_BOOKS_QUERY
 // Query: array::unique(*[_type=="book" && defined(genres)].genres[])
 export type GENRES_WITH_BOOKS_QUERY_RESULT = Array<
@@ -1654,7 +1772,7 @@ export type HERO_BOOKS_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: SITEMAP_QUERY
-// Query: {  "books": *[_type=="book" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "creators": *[_type=="creator" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "columns": *[_type=="column" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "interviews": *[_type=="interview" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "genres": array::unique(*[_type=="book" && defined(genres)].genres[])}
+// Query: {  "books": *[_type=="book" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "creators": *[_type=="creator" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "columns": *[_type=="column" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "interviews": *[_type=="interview" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "genres": array::unique(*[_type=="book" && defined(genres)].genres[]),  "formats": array::unique(*[_type=="book" && defined(format)].format)}
 export type SITEMAP_QUERY_RESULT = {
   books: Array<{
     slug: string;
@@ -1692,6 +1810,16 @@ export type SITEMAP_QUERY_RESULT = {
     | "Slice of Life"
     | "Superhero"
     | "Weird & Experimental"
+  >;
+  formats: Array<
+    | "Anthology"
+    | "Collected Edition"
+    | "Graphic Novel"
+    | "Minicomic"
+    | "One-Shot"
+    | "Single Issue"
+    | "Webcomic"
+    | "Zine"
   >;
 };
 
@@ -2056,6 +2184,8 @@ declare module "@sanity/client" {
     '{\n  "items": *[\n    _type=="creator"\n    && (!defined($genres) || count(genres[@ in $genres]) > 0)\n    && (!defined($format) || $format in formats)\n    && (!defined($audience) || audience == $audience)\n    && (!defined($collaborating) || openToCollaboration == true)\n    && (!defined($q) || name match $q || studio->name match $q || pt::text(bio) match $q)\n  ]|order(name asc)[0...$limit]{\n    _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,\n    "bioText":pt::text(bio),\n    studio->{_id,name,"slug":slug.current,website,logo}\n  },\n  "total": count(*[\n    _type=="creator"\n    && (!defined($genres) || count(genres[@ in $genres]) > 0)\n    && (!defined($format) || $format in formats)\n    && (!defined($audience) || audience == $audience)\n    && (!defined($collaborating) || openToCollaboration == true)\n    && (!defined($q) || name match $q || studio->name match $q || pt::text(bio) match $q)\n  ])\n}': FILTERED_CREATORS_QUERY_RESULT;
     '*[_type=="book" && slug.current==$slug][0]{\n  _id,title,status,genres,format,maturity,issueCount,description,"descriptionText":pt::text(description),cover,previewUrl,\n  links[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},\n  "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,\n  creator->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}},\n  "otherBooks": *[_type=="book" && _id != ^._id && creator._ref == ^.creator._ref]|order(title asc){\n    _id,title,"slug":slug.current,status,genres,format,maturity,cover,\n    "descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name\n  }\n}': BOOK_QUERY_RESULT;
     '{\n  "items": *[_type=="book" && $genre in genres]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},\n  "total": count(*[_type=="book" && $genre in genres])\n}': GENRE_BOOKS_QUERY_RESULT;
+    '{\n  "items": *[_type=="book" && format==$format]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},\n  "total": count(*[_type=="book" && format==$format])\n}': FORMAT_BOOKS_QUERY_RESULT;
+    '*[_type=="hubPage" && kind==$kind && value==$value][0]{\n  intro, seoTitle, seoDescription\n}': HUB_PAGE_QUERY_RESULT;
     'array::unique(*[_type=="book" && defined(genres)].genres[])': GENRES_WITH_BOOKS_QUERY_RESULT;
     '*[_type=="column"]|order(publishedAt desc){_id,title,"slug":slug.current,excerpt,cover,thumbnail,publishedAt,"authorName":author->name}': COLUMNS_QUERY_RESULT;
     '*[_type=="column" && slug.current==$slug][0]{_id,title,excerpt,body,publishedAt,cover,"authorName":author->name,"author":author->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}}}': COLUMN_QUERY_RESULT;
@@ -2067,7 +2197,7 @@ declare module "@sanity/client" {
     '*[_type=="freeDownload" && slug.current==$slug][0]{_id,title,description,cover,"creatorName":creator->name,"fileUrl":file.asset->url}': DOWNLOAD_QUERY_RESULT;
     '*[_type=="book" && defined(slug.current)]._id': BOOK_IDS_QUERY_RESULT;
     '*[_type=="book" && _id in $ids]{\n  _id,title,"slug":slug.current,status,genres,format,maturity,cover,shortDescription,\n  "descriptionText": pt::text(description),\n  "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,\n  "creatorName":creator->name\n}': HERO_BOOKS_QUERY_RESULT;
-    '{\n  "books": *[_type=="book" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "creators": *[_type=="creator" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "columns": *[_type=="column" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "interviews": *[_type=="interview" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "genres": array::unique(*[_type=="book" && defined(genres)].genres[])\n}': SITEMAP_QUERY_RESULT;
+    '{\n  "books": *[_type=="book" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "creators": *[_type=="creator" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "columns": *[_type=="column" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "interviews": *[_type=="interview" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "genres": array::unique(*[_type=="book" && defined(genres)].genres[]),\n  "formats": array::unique(*[_type=="book" && defined(format)].format)\n}': SITEMAP_QUERY_RESULT;
     '*[_type=="organization" && defined(name)]|order(name asc){_id,name}': INTAKE_ORGANIZATIONS_QUERY_RESULT;
     '*[_type=="creator" && defined(studio)].studio._ref': INTAKE_STUDIO_ORG_IDS_QUERY_RESULT;
     '*[_type=="creator"]._id': INTAKE_CREATOR_IDS_QUERY_RESULT;

@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next'
 
 import { safeFetch, SITEMAP_QUERY } from '@/lib/queries'
 import { absoluteUrl } from '@/lib/site-url'
+import { formatSlug } from '@/lib/taxonomy'
 import type { SITEMAP_QUERY_RESULT } from '../../sanity.types'
 
 /**
@@ -23,6 +24,7 @@ const EMPTY: SITEMAP_QUERY_RESULT = {
   interviews: [],
   downloads: [],
   genres: [],
+  formats: [],
 }
 
 /** Static routes, with the homepage weighted above the listings. */
@@ -73,5 +75,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }))
 
-  return [...STATIC_ROUTES, ...documents, ...genres]
+  // Format hubs, likewise derived from the formats comics actually use. Slugged
+  // (spaces → hyphens) for clean URLs — the head-term pages (graphic novels,
+  // webcomics) live here.
+  const formats: SitemapEntry[] = data.formats.filter(Boolean).map((format) => ({
+    url: absoluteUrl(`/formats/${formatSlug(format as string)}`),
+    changeFrequency: 'weekly',
+    priority: 0.5,
+  }))
+
+  return [...STATIC_ROUTES, ...documents, ...genres, ...formats]
 }
