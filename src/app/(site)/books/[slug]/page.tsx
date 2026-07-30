@@ -103,6 +103,12 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
             )}
           </div>
 
+          <ShareBar
+            title={book.title}
+            url={absoluteUrl(`/books/${slug}`)}
+            label={settings.sections.shareLabel}
+            copiedLabel={settings.sections.linkCopiedLabel}
+          />
           <PortableTextBody value={book.description} />
           <BookLinks links={book.links} />
           {book.previewUrl && (
@@ -129,14 +135,6 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
               </div>
             </div>
           )}
-
-          <ShareBar
-            title={book.title}
-            url={absoluteUrl(`/books/${slug}`)}
-            label={settings.sections.shareLabel}
-            copiedLabel={settings.sections.linkCopiedLabel}
-            className="border-primary/20 border-t pt-5"
-          />
         </div>
       </Section>
 
