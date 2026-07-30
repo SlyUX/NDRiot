@@ -56,7 +56,10 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
   return (
     <div>
       <Section padding="md" innerClassName="grid gap-8 sm:grid-cols-[300px_1fr]">
-        <div className="bg-muted relative aspect-[2/3] overflow-hidden">
+        {/* Capped on mobile so the cover doesn't fill the first screen — some
+            title/description shows above the fold. The sm grid column (300px)
+            takes over from there, so the cap is lifted. */}
+        <div className="bg-muted relative aspect-[2/3] max-w-[250px] overflow-hidden sm:max-w-none">
           {book.cover && (
             <Image
               src={urlFor(book.cover).width(600).url()}
