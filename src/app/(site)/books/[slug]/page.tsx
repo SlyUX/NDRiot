@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { ExternalLink } from 'lucide-react'
 
 import BookLinks from '@/components/book-links'
-import { ContentCard, FundingBadge } from '@/components/content-card'
+import { ContentCard, FundingBadge, FUNDING_BAR_OFFSET } from '@/components/content-card'
 import { ContentCardGrid } from '@/components/content-card-grid'
 import PortableTextBody from '@/components/PortableTextBody'
 import { GenreBadge } from '@/components/genre-badge'
@@ -60,17 +60,21 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
             title/description shows above the fold. The sm grid column (300px)
             takes over from there, so the cap is lifted. */}
         <div className="bg-muted relative aspect-[2/3] max-w-[250px] overflow-hidden sm:max-w-none">
-          {book.cover && (
-            <Image
-              src={urlFor(book.cover).width(600).url()}
-              // Decorative by default — the title sits immediately beside it.
-              alt={book.cover.alt ?? ''}
-              fill
-              sizes="(max-width: 640px) 100vw, 300px"
-              className="object-cover"
-              priority
-            />
-          )}
+          {/* Art drops below the funding bar when one is showing, so the banner
+              never covers the cover (offset matches the bar's height). */}
+          <div className={`absolute ${book.fundingUrl ? FUNDING_BAR_OFFSET : 'inset-0'}`}>
+            {book.cover && (
+              <Image
+                src={urlFor(book.cover).width(600).url()}
+                // Decorative by default — the title sits immediately beside it.
+                alt={book.cover.alt ?? ''}
+                fill
+                sizes="(max-width: 640px) 100vw, 300px"
+                className="object-cover"
+                priority
+              />
+            )}
+          </div>
           {book.fundingUrl && <FundingBadge url={book.fundingUrl} />}
         </div>
 

@@ -120,16 +120,26 @@ export function MaturityOverlay({ maturity }: { maturity: MaturityRating }) {
 }
 
 /**
- * "Currently Funding" — top-left of the cover, opposite the maturity badge,
+ * Positioning for the cover art WHEN a funding bar is present: flush to both
+ * sides and the bottom, dropped from the top by the bar's height (`top-6` ===
+ * the bar's `h-6`) so the banner never covers the art. Explicit edges rather
+ * than `inset-0 top-6`, whose `top` override is Tailwind source-order-fragile.
+ */
+export const FUNDING_BAR_OFFSET = 'inset-x-0 bottom-0 top-6'
+
+/**
+ * "Currently Funding" — a full-width bar flush to the top of the cover, centered,
  * linking to the live campaign. Only shown while a `Back` campaign is active
- * (the query resolves `fundingUrl` to null once it expires).
+ * (the query resolves `fundingUrl` to null once it expires); the maturity mark
+ * is suppressed while it shows, and the art drops below it (FUNDING_BAR_OFFSET).
  *
  * A LINK, so on a card it must be a sibling of the card's own link rather than
  * nested inside it — the caller positions it over a `relative` container.
  *
  * "Currently Funding" is a fixed status label, in the same family as the
  * maturity and genre indicators (code, not CMS): a state the site reports, not
- * editorial copy an editor tunes.
+ * editorial copy an editor tunes. Funding green with black text (§9 — white
+ * fails on this green).
  */
 export function FundingBadge({ url, className }: { url: string; className?: string }) {
   return (
@@ -138,7 +148,7 @@ export function FundingBadge({ url, className }: { url: string; className?: stri
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        'bg-funding focus-visible:ring-ring absolute top-2 left-2 z-20 px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-black uppercase transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:outline-none',
+        'bg-funding focus-visible:ring-ring absolute inset-x-0 top-0 z-20 flex h-6 items-center justify-center text-[10px] font-bold tracking-wider whitespace-nowrap text-black uppercase transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:outline-none',
         className,
       )}
     >
@@ -314,13 +324,19 @@ export function ContentCard({
         className="focus-visible:ring-ring flex h-full flex-col focus-visible:ring-2 focus-visible:outline-none"
       >
         <div className={cn('bg-muted relative overflow-hidden', ASPECT[aspectRatio])}>
-          <CardImage
-            image={image}
-            alt={imageAlt}
-            width={400}
-            className="transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none"
-          />
-          {maturity && <MaturityOverlay maturity={maturity} />}
+          {/* When a funding bar tops the cover, drop the art below it so the
+              banner never covers the artwork (FUNDING_BAR_OFFSET === bar h-6). */}
+          <div className={cn('absolute', fundingUrl ? FUNDING_BAR_OFFSET : 'inset-0')}>
+            <CardImage
+              image={image}
+              alt={imageAlt}
+              width={400}
+              className="transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none"
+            />
+          </div>
+          {/* Maturity is suppressed while funding shows — both live at the top,
+              and the campaign is the more time-sensitive thing to surface. */}
+          {maturity && !fundingUrl && <MaturityOverlay maturity={maturity} />}
           {/* Description preview, revealed on hover. Slides up from the bottom.
               group-hover is gated behind @media (hover) in Tailwind, so touch
               devices never trigger it — this is a desktop affordance. */}
