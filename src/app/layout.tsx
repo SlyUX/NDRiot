@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
+import { Analytics } from '@vercel/analytics/next'
 import { Geist } from 'next/font/google'
 
 import { cn } from '@/lib/utils'
@@ -52,7 +53,11 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={cn('font-sans', geist.variable)}>
-      <body className="min-h-screen antialiased">{children}</body>
+      <body className="min-h-screen antialiased">
+        {children}
+        {/* Cookieless, aggregate traffic analytics — no per-user tracking. */}
+        <Analytics />
+      </body>
     </html>
   )
 }

@@ -1,19 +1,42 @@
+import type { Metadata } from 'next'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 
 import { ContentCard } from '@/components/content-card'
+import { JsonLd } from '@/components/json-ld'
 import PortableTextBody from '@/components/PortableTextBody'
 import { SectionHeading } from '@/components/section-heading'
 import { ShareBar } from '@/components/share-bar'
 import { Section } from '@/components/ui/section'
 import { creatorRefToCard, formatDate } from '@/lib/card-mappers'
+import { pageMetadata } from '@/lib/page-metadata'
 import { safeFetch, COLUMN_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
 import { absoluteUrl } from '@/lib/site-url'
+import { articleSchema, breadcrumbSchema, jsonLdGraph } from '@/lib/structured-data'
 import type { ColumnDetail } from '@/lib/types'
 import { urlFor } from '@/sanity/image'
 
 export const dynamic = 'force-dynamic'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  const { slug } = await params
+  const [column, settings] = await Promise.all([
+    safeFetch<ColumnDetail | null>(COLUMN_QUERY, { slug }, null),
+    getSiteSettings(),
+  ])
+  if (!column) return {}
+  return pageMetadata({
+    title: column.title,
+    description: column.excerpt,
+    path: `/editorial/columns/${slug}`,
+    siteTitle: settings.siteTitle,
+  })
+}
 
 export default async function ColumnPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -29,6 +52,22 @@ export default async function ColumnPage({ params }: { params: Promise<{ slug: s
 
   return (
     <Section as="article" padding="md" maxWidth="3xl" innerClassName="space-y-6">
+      <JsonLd
+        data={jsonLdGraph(
+          articleSchema({
+            title: column.title,
+            url: absoluteUrl(`/editorial/columns/${slug}`),
+            authorName: column.authorName,
+            datePublished: column.publishedAt,
+            cover: column.cover,
+          }),
+          breadcrumbSchema([
+            { name: 'Home', path: '/' },
+            { name: 'Editorial', path: '/editorial' },
+            { name: column.title, path: `/editorial/columns/${slug}` },
+          ]),
+        )}
+      />
       {/* Header image, when the piece has one — 16:9 to match the card thumbnail
           it shares. Decorative here: the title sits right below it. */}
       {column.cover && (

@@ -1,15 +1,36 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
 import { ShareBar } from '@/components/share-bar'
 import { Section } from '@/components/ui/section'
 
 import { Button } from '@/components/ui/button'
+import { pageMetadata } from '@/lib/page-metadata'
 import { safeFetch, DOWNLOAD_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
 import { absoluteUrl } from '@/lib/site-url'
 import type { DownloadDetail } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  const { slug } = await params
+  const [download, settings] = await Promise.all([
+    safeFetch<DownloadDetail | null>(DOWNLOAD_QUERY, { slug }, null),
+    getSiteSettings(),
+  ])
+  if (!download) return {}
+  return pageMetadata({
+    title: download.title,
+    description: download.description,
+    path: `/downloads/${slug}`,
+    siteTitle: settings.siteTitle,
+  })
+}
 
 export default async function DownloadPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params

@@ -1,11 +1,23 @@
+import type { Metadata } from 'next'
+
 import { ContentCardGrid } from '@/components/content-card-grid'
 import { Section } from '@/components/ui/section'
 import { columnToCard, interviewToCard } from '@/lib/card-mappers'
+import { pageMetadata } from '@/lib/page-metadata'
 import { safeFetch, COLUMNS_QUERY, INTERVIEWS_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
 import type { ColumnSummary, InterviewSummary } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings()
+  return pageMetadata({
+    title: settings.sections.editorialHeading,
+    path: '/editorial',
+    siteTitle: settings.siteTitle,
+  })
+}
 
 export default async function EditorialPage() {
   const [columns, interviews, settings] = await Promise.all([

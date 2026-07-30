@@ -1,19 +1,42 @@
+import type { Metadata } from 'next'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 
 import { ContentCard } from '@/components/content-card'
+import { JsonLd } from '@/components/json-ld'
 import PortableTextBody from '@/components/PortableTextBody'
 import { SectionHeading } from '@/components/section-heading'
 import { ShareBar } from '@/components/share-bar'
 import { Section } from '@/components/ui/section'
 import { creatorRefToCard, formatDate } from '@/lib/card-mappers'
+import { pageMetadata } from '@/lib/page-metadata'
 import { safeFetch, INTERVIEW_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
 import { absoluteUrl } from '@/lib/site-url'
+import { articleSchema, breadcrumbSchema, jsonLdGraph } from '@/lib/structured-data'
 import type { InterviewDetail } from '@/lib/types'
 import { urlFor } from '@/sanity/image'
 
 export const dynamic = 'force-dynamic'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  const { slug } = await params
+  const [interview, settings] = await Promise.all([
+    safeFetch<InterviewDetail | null>(INTERVIEW_QUERY, { slug }, null),
+    getSiteSettings(),
+  ])
+  if (!interview) return {}
+  return pageMetadata({
+    title: interview.title,
+    description: interview.excerpt,
+    path: `/editorial/interviews/${slug}`,
+    siteTitle: settings.siteTitle,
+  })
+}
 
 export default async function InterviewPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -31,6 +54,22 @@ export default async function InterviewPage({ params }: { params: Promise<{ slug
 
   return (
     <Section as="article" padding="md" maxWidth="3xl" innerClassName="space-y-6">
+      <JsonLd
+        data={jsonLdGraph(
+          articleSchema({
+            title: interview.title,
+            url: absoluteUrl(`/editorial/interviews/${slug}`),
+            authorName: interview.interviewerName,
+            datePublished: interview.publishedAt,
+            cover: interview.cover,
+          }),
+          breadcrumbSchema([
+            { name: 'Home', path: '/' },
+            { name: 'Editorial', path: '/editorial' },
+            { name: interview.title, path: `/editorial/interviews/${slug}` },
+          ]),
+        )}
+      />
       {/* Header image, when the piece has one — 16:9 to match the card thumbnail
           it shares. Decorative here: the title sits right below it. */}
       {interview.cover && (

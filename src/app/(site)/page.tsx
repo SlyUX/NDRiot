@@ -1,9 +1,12 @@
+import type { Metadata } from 'next'
 import { Suspense } from 'react'
 
 import { ContentCardGrid } from '@/components/content-card-grid'
 import { FilterBar } from '@/components/filter-bar'
 import { Hero } from '@/components/hero'
+import { JsonLd } from '@/components/json-ld'
 import { LoadMore } from '@/components/load-more'
+import { organizationSchema, jsonLdGraph, websiteSchema } from '@/lib/structured-data'
 import { bookToCard, creatorToCard, editorialToCard, mediaToCard } from '@/lib/card-mappers'
 import {
   HOME_ROW_LIMIT,
@@ -30,6 +33,7 @@ import {
   FILTERED_CREATORS_QUERY,
 } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
+import { SITE_URL } from '@/lib/site-url'
 import type {
   BookSummary,
   CreatorSummary,
@@ -41,6 +45,12 @@ import type {
 } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
+
+export async function generateMetadata(): Promise<Metadata> {
+  // Title/description are inherited from the root layout; the homepage only
+  // needs its self-canonical (the origin).
+  return { alternates: { canonical: SITE_URL } }
+}
 
 /**
  * One random book for the hero spotlight.
@@ -188,6 +198,7 @@ export default async function Home({
 
   return (
     <div>
+      <JsonLd data={jsonLdGraph(organizationSchema(settings), websiteSchema(settings))} />
       <Hero
         hero={settings.hero}
         feature={feature}

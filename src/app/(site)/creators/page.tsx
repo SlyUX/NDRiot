@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { Suspense } from 'react'
 
 import { ContentCardGrid } from '@/components/content-card-grid'
@@ -14,11 +15,21 @@ import {
   pageLimit,
   type SearchParams,
 } from '@/lib/filters'
+import { pageMetadata } from '@/lib/page-metadata'
 import { safeFetch, CREATORS_QUERY, FILTERED_CREATORS_QUERY, GENRES_WITH_BOOKS_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
 import type { CreatorSummary, Paginated } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings()
+  return pageMetadata({
+    title: settings.sections.creatorsHeading,
+    path: '/creators',
+    siteTitle: settings.siteTitle,
+  })
+}
 
 export default async function CreatorsPage({
   searchParams,

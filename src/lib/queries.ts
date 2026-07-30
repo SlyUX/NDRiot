@@ -12,7 +12,7 @@ export async function safeFetch<T>(query: string, params: Record<string, unknown
 
 export const CREATORS_QUERY = defineQuery(`*[_type=="creator"]|order(name asc){_id,name,"slug":slug.current,location,photo,genres,openToCollaboration,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}`)
 export const CREATOR_QUERY = defineQuery(`*[_type=="creator" && slug.current==$slug][0]{
-  _id,name,location,website,bio,photo,socials,openToCollaboration,genres,formats,audience,
+  _id,name,location,website,bio,"bioText":pt::text(bio),photo,socials,openToCollaboration,genres,formats,audience,
   works[]{label,url},
   studio->{_id,name,"slug":slug.current,website,logo},
   organizations[]->{_id,name,"slug":slug.current,website,logo},
@@ -89,7 +89,7 @@ export const FILTERED_CREATORS_QUERY = defineQuery(`{
   ])
 }`)
 export const BOOK_QUERY = defineQuery(`*[_type=="book" && slug.current==$slug][0]{
-  _id,title,status,genres,format,maturity,issueCount,description,cover,previewUrl,
+  _id,title,status,genres,format,maturity,issueCount,description,"descriptionText":pt::text(description),cover,previewUrl,
   links[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},
   "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,
   creator->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}},
@@ -113,9 +113,9 @@ export const GENRE_BOOKS_QUERY = defineQuery(`{
 export const GENRES_WITH_BOOKS_QUERY = defineQuery(`array::unique(*[_type=="book" && defined(genres)].genres[])`)
 
 export const COLUMNS_QUERY = defineQuery(`*[_type=="column"]|order(publishedAt desc){_id,title,"slug":slug.current,excerpt,cover,thumbnail,publishedAt,"authorName":author->name}`)
-export const COLUMN_QUERY = defineQuery(`*[_type=="column" && slug.current==$slug][0]{_id,title,body,publishedAt,cover,"authorName":author->name,"author":author->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}}}`)
+export const COLUMN_QUERY = defineQuery(`*[_type=="column" && slug.current==$slug][0]{_id,title,excerpt,body,publishedAt,cover,"authorName":author->name,"author":author->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}}}`)
 export const INTERVIEWS_QUERY = defineQuery(`*[_type=="interview"]|order(publishedAt desc){_id,title,"slug":slug.current,excerpt,cover,thumbnail,publishedAt,"interviewerName":interviewer->name,"subjectName":subject->name}`)
-export const INTERVIEW_QUERY = defineQuery(`*[_type=="interview" && slug.current==$slug][0]{_id,title,body,publishedAt,cover,"interviewerName":interviewer->name,"subjectName":subject->name,"interviewer":interviewer->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}}}`)
+export const INTERVIEW_QUERY = defineQuery(`*[_type=="interview" && slug.current==$slug][0]{_id,title,excerpt,body,publishedAt,cover,"interviewerName":interviewer->name,"subjectName":subject->name,"interviewer":interviewer->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}}}`)
 
 /**
  * Recent editorial — columns and interviews interleaved by date — for the

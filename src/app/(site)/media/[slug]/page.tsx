@@ -6,6 +6,7 @@ import { GenreBadge } from '@/components/genre-badge'
 import { ShareBar } from '@/components/share-bar'
 import { Badge } from '@/components/ui/badge'
 import { Section } from '@/components/ui/section'
+import { pageMetadata } from '@/lib/page-metadata'
 import { safeFetch, MEDIA_DETAIL_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
 import { absoluteUrl } from '@/lib/site-url'
@@ -26,10 +27,12 @@ export async function generateMetadata({
     safeFetch<MediaDetail | null>(MEDIA_DETAIL_QUERY, { slug }, null),
   ])
   if (!media) return {}
-  return {
-    title: `${media.name} · ${settings.siteTitle}`,
-    description: media.about ?? settings.siteDescription,
-  }
+  return pageMetadata({
+    title: media.name,
+    description: media.about,
+    path: `/media/${slug}`,
+    siteTitle: settings.siteTitle,
+  })
 }
 
 /**

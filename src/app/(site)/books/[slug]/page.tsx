@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { ExternalLink } from 'lucide-react'
@@ -5,6 +6,7 @@ import { ExternalLink } from 'lucide-react'
 import BookLinks from '@/components/book-links'
 import { ContentCard, FundingBadge, FUNDING_BAR_OFFSET } from '@/components/content-card'
 import { ContentCardGrid } from '@/components/content-card-grid'
+import { JsonLd } from '@/components/json-ld'
 import PortableTextBody from '@/components/PortableTextBody'
 import { GenreBadge } from '@/components/genre-badge'
 import { SectionHeading } from '@/components/section-heading'
@@ -13,15 +15,36 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Section } from '@/components/ui/section'
 import { bookToCard } from '@/lib/card-mappers'
+import { pageMetadata } from '@/lib/page-metadata'
 import { safeFetch, BOOK_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
 import { absoluteUrl } from '@/lib/site-url'
+import { breadcrumbSchema, comicSchema, jsonLdGraph } from '@/lib/structured-data'
 import { RESTRICTED_RATING } from '@/lib/taxonomy'
 import type { BookDetail } from '@/lib/types'
 import { truncate } from '@/lib/utils'
 import { urlFor } from '@/sanity/image'
 
 export const dynamic = 'force-dynamic'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  const { slug } = await params
+  const [book, settings] = await Promise.all([
+    safeFetch<BookDetail | null>(BOOK_QUERY, { slug }, null),
+    getSiteSettings(),
+  ])
+  if (!book) return {}
+  return pageMetadata({
+    title: book.title,
+    description: book.descriptionText,
+    path: `/books/${slug}`,
+    siteTitle: settings.siteTitle,
+  })
+}
 
 export default async function BookPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -55,6 +78,23 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
 
   return (
     <div>
+      <JsonLd
+        data={jsonLdGraph(
+          comicSchema({
+            title: book.title,
+            url: absoluteUrl(`/books/${slug}`),
+            cover: book.cover,
+            authorName: creator?.name,
+            genres: book.genres,
+            description: book.descriptionText,
+          }),
+          breadcrumbSchema([
+            { name: 'Home', path: '/' },
+            { name: 'Comics', path: '/books' },
+            { name: book.title, path: `/books/${slug}` },
+          ]),
+        )}
+      />
       <Section padding="md" innerClassName="grid gap-8 sm:grid-cols-[300px_1fr]">
         {/* Capped on mobile so the cover doesn't fill the first screen — some
             title/description shows above the fold. The sm grid column (300px)

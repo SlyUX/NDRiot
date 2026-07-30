@@ -1,7 +1,9 @@
+import type { Metadata } from 'next'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 
 import { ContentCardGrid } from '@/components/content-card-grid'
+import { JsonLd } from '@/components/json-ld'
 import { OrganizationLink } from '@/components/organization-link'
 import PortableTextBody from '@/components/PortableTextBody'
 import SocialLinks from '@/components/SocialLinks'
@@ -13,13 +15,34 @@ import { Button } from '@/components/ui/button'
 import { externalHref } from '@/lib/utils'
 import { Section } from '@/components/ui/section'
 import { bookToCard, favoriteToCard } from '@/lib/card-mappers'
+import { pageMetadata } from '@/lib/page-metadata'
 import { safeFetch, CREATOR_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
 import { absoluteUrl } from '@/lib/site-url'
+import { breadcrumbSchema, comicMakerSchema, jsonLdGraph } from '@/lib/structured-data'
 import type { CreatorDetail } from '@/lib/types'
 import { urlFor } from '@/sanity/image'
 
 export const dynamic = 'force-dynamic'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  const { slug } = await params
+  const [creator, settings] = await Promise.all([
+    safeFetch<CreatorDetail | null>(CREATOR_QUERY, { slug }, null),
+    getSiteSettings(),
+  ])
+  if (!creator) return {}
+  return pageMetadata({
+    title: creator.name ?? 'Comic Maker',
+    description: creator.bioText,
+    path: `/creators/${slug}`,
+    siteTitle: settings.siteTitle,
+  })
+}
 
 export default async function CreatorPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -47,6 +70,22 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
 
   return (
     <div>
+      <JsonLd
+        data={jsonLdGraph(
+          comicMakerSchema({
+            name: creator.name ?? 'Comic Maker',
+            url: absoluteUrl(`/creators/${slug}`),
+            photo: creator.photo,
+            bio: creator.bioText,
+            socials: creator.socials,
+          }),
+          breadcrumbSchema([
+            { name: 'Home', path: '/' },
+            { name: 'Comic Makers', path: '/creators' },
+            { name: creator.name ?? 'Comic Maker', path: `/creators/${slug}` },
+          ]),
+        )}
+      />
       {/* pb-4, not the full md bottom padding: the bio sits close beneath. */}
       <Section as="header" padding="md" className="pb-4">
         {/* items-start so the portrait's top aligns with the creator name,

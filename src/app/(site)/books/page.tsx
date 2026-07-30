@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { Suspense } from 'react'
 
 import { ContentCardGrid } from '@/components/content-card-grid'
@@ -14,11 +15,23 @@ import {
   pageLimit,
   type SearchParams,
 } from '@/lib/filters'
+import { pageMetadata } from '@/lib/page-metadata'
 import { safeFetch, BOOKS_QUERY, FILTERED_BOOKS_QUERY, GENRES_WITH_BOOKS_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
 import type { BookSummary, Paginated } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings()
+  // Canonical is the bare /books — so the filter permutations (?genre=…&sort=…)
+  // all fold into one ranking target rather than splitting it.
+  return pageMetadata({
+    title: settings.sections.booksHeading,
+    path: '/books',
+    siteTitle: settings.siteTitle,
+  })
+}
 
 export default async function BooksPage({
   searchParams,
