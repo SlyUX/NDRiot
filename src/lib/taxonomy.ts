@@ -222,6 +222,7 @@ export const RESTRICTED_RATING: MaturityRating = 'Mature'
  */
 export const SOCIAL_PLATFORMS = [
   'Instagram',
+  'Threads',
   'X',
   'Bluesky',
   'TikTok',

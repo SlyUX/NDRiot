@@ -1,10 +1,12 @@
 import { notFound } from 'next/navigation'
 
+import { ShareBar } from '@/components/share-bar'
 import { Section } from '@/components/ui/section'
 
 import { Button } from '@/components/ui/button'
 import { safeFetch, DOWNLOAD_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
+import { absoluteUrl } from '@/lib/site-url'
 import type { DownloadDetail } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
@@ -34,6 +36,13 @@ export default async function DownloadPage({ params }: { params: Promise<{ slug:
           </a>
         </Button>
       )}
+      <ShareBar
+        title={download.title}
+        url={absoluteUrl(`/downloads/${slug}`)}
+        label={settings.sections.shareLabel}
+        copiedLabel={settings.sections.linkCopiedLabel}
+        className="pt-2"
+      />
     </Section>
   )
 }

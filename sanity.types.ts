@@ -55,6 +55,7 @@ export type SocialLink = {
   _type: "socialLink";
   platform:
     | "Instagram"
+    | "Threads"
     | "X"
     | "Bluesky"
     | "TikTok"
@@ -440,6 +441,11 @@ export type SiteSettings = {
   siteDescription?: string;
   footer?: string;
   discordUrl?: string;
+  socialLinks?: Array<
+    {
+      _key: string;
+    } & SocialLink
+  >;
   hero?: {
     background?: ImageWithAlt;
     headline?: string;
@@ -503,6 +509,8 @@ export type SiteSettings = {
     mediaPitchHeading?: string;
     mediaLinksHeading?: string;
     mediaGenresHeading?: string;
+    shareLabel?: string;
+    linkCopiedLabel?: string;
     creatorFavoritesHeading?: string;
     otherBooksHeading?: string;
     bookCreatorsHeading?: string;
@@ -1733,6 +1741,7 @@ export type INTAKE_CREATOR_EDIT_QUERY_RESULT = {
       | "Discord"
       | "Instagram"
       | "Other"
+      | "Threads"
       | "TikTok"
       | "Website"
       | "X"

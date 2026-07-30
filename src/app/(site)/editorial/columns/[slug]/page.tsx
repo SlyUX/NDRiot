@@ -4,10 +4,12 @@ import { notFound } from 'next/navigation'
 import { ContentCard } from '@/components/content-card'
 import PortableTextBody from '@/components/PortableTextBody'
 import { SectionHeading } from '@/components/section-heading'
+import { ShareBar } from '@/components/share-bar'
 import { Section } from '@/components/ui/section'
 import { creatorRefToCard, formatDate } from '@/lib/card-mappers'
 import { safeFetch, COLUMN_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
+import { absoluteUrl } from '@/lib/site-url'
 import type { ColumnDetail } from '@/lib/types'
 import { urlFor } from '@/sanity/image'
 
@@ -68,6 +70,14 @@ export default async function ColumnPage({ params }: { params: Promise<{ slug: s
           </div>
         </div>
       )}
+
+      <ShareBar
+        title={column.title}
+        url={absoluteUrl(`/editorial/columns/${slug}`)}
+        label={settings.sections.shareLabel}
+        copiedLabel={settings.sections.linkCopiedLabel}
+        className="border-primary/20 border-t pt-6"
+      />
     </Section>
   )
 }

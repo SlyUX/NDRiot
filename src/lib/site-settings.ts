@@ -280,6 +280,8 @@ export interface SiteSettings {
   footer: string
   /** Invite to the ND Riot Discord — shown in the nav and footer. Absent hides them. */
   discordUrl?: string
+  /** ND Riot's own social accounts, shown as a quiet follow row in the footer. */
+  socialLinks: { platform: string; url: string }[]
   hero: HeroSettings
   join: JoinSettings
   creatorIntake: CreatorIntakeSettings
@@ -325,6 +327,8 @@ export interface SiteSettings {
     mediaPitchHeading: string
     mediaLinksHeading: string
     mediaGenresHeading: string
+    shareLabel: string
+    linkCopiedLabel: string
   }
   empty: {
     books: string
@@ -355,6 +359,13 @@ const DEFAULTS: SiteSettings = {
   siteDescription: 'Independent comics discovery. Support indie comics.',
   footer: 'Support indie comics. · ND Riot',
   discordUrl: 'https://discord.gg/fSSMjE5dw',
+  // Discord (community) stays prominent up top; these are the traditional
+  // social accounts, shown quietly in the footer. YouTube is a row away when
+  // the channel is live.
+  socialLinks: [
+    { platform: 'Instagram', url: 'https://www.instagram.com/ndriotrag/' },
+    { platform: 'Threads', url: 'https://www.threads.com/@ndriotrag' },
+  ],
   hero: {
     headline: '“The Big Two”',
     tagline: 'Elevating Independent Comics',
@@ -615,6 +626,8 @@ const DEFAULTS: SiteSettings = {
     mediaPitchHeading: 'How to get covered',
     mediaLinksHeading: 'Where to find them',
     mediaGenresHeading: 'Covered Genres',
+    shareLabel: 'Share',
+    linkCopiedLabel: 'Link copied',
   },
   empty: {
     books: 'No comics yet — add comic makers and comics in the Studio.',
@@ -675,7 +688,7 @@ const DEFAULTS: SiteSettings = {
 }
 
 export const SITE_SETTINGS_QUERY = `*[_id=="siteSettings"][0]{
-  siteTitle,siteDescription,footer,discordUrl,
+  siteTitle,siteDescription,footer,discordUrl,socialLinks[]{platform,url},
   home,sections,empty,creatorIntake,bookIntake,mediaIntake,
   hero{background,headline,body,tagline,featureCtaLabel,featuredHeading,newHeading,ctas[]{label,href}},
   join{heading,body,ctaLabel,formUrl,funnelHeading,funnelIntro,creatorsLabel,creatorsDesc,contactLabel,contactDesc,mediaLabel,mediaDesc,readersLabel,readersDesc,readersBadge},
@@ -706,6 +719,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     siteDescription: data.siteDescription?.trim() || DEFAULTS.siteDescription,
     footer: data.footer?.trim() || DEFAULTS.footer,
     discordUrl: data.discordUrl?.trim() || DEFAULTS.discordUrl,
+    socialLinks: data.socialLinks?.length ? data.socialLinks : DEFAULTS.socialLinks,
     hero: {
       // Image and rich text pass through untouched — there is nothing
       // sensible to merge them with.

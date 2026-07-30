@@ -90,6 +90,29 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
               </a>
             )}
           </div>
+
+          {/* Follow row — ND Riot's traditional social accounts. Deliberately
+              quieter than Discord above: footer-only and a size smaller, since
+              Discord is the community hub, not just another feed. */}
+          {settings.socialLinks.length > 0 && (
+            <ul className="flex items-center gap-1">
+              {settings.socialLinks.map((social) => (
+                <li key={social.url}>
+                  <a
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`ND Riot on ${social.platform}`}
+                    title={`ND Riot on ${social.platform}`}
+                    className="hover:text-primary focus-visible:ring-ring flex size-9 items-center justify-center transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                  >
+                    <SocialIcon platform={social.platform} className="size-4" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+
           <span>{settings.footer}</span>
         </div>
       </footer>

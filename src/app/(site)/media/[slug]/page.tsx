@@ -3,10 +3,12 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 
 import { GenreBadge } from '@/components/genre-badge'
+import { ShareBar } from '@/components/share-bar'
 import { Badge } from '@/components/ui/badge'
 import { Section } from '@/components/ui/section'
 import { safeFetch, MEDIA_DETAIL_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
+import { absoluteUrl } from '@/lib/site-url'
 import type { Genre, MediaDetail } from '@/lib/types'
 import { externalHref } from '@/lib/utils'
 import { urlFor } from '@/sanity/image'
@@ -108,7 +110,15 @@ export default async function MediaDetailPage({ params }: { params: Promise<{ sl
         </div>
       )}
 
-      <p className="text-muted-foreground/70 border-primary/20 mt-12 max-w-prose border-l-2 pl-3 text-xs">
+      <ShareBar
+        title={media.name}
+        url={absoluteUrl(`/media/${slug}`)}
+        label={sections.shareLabel}
+        copiedLabel={sections.linkCopiedLabel}
+        className="mt-12"
+      />
+
+      <p className="text-muted-foreground/70 border-primary/20 mt-8 max-w-prose border-l-2 pl-3 text-xs">
         {sections.mediaDisclaimer}
       </p>
     </Section>

@@ -175,6 +175,10 @@
               },
               {
                 "type": "string",
+                "value": "Threads"
+              },
+              {
+                "type": "string",
                 "value": "X"
               },
               {
@@ -2570,6 +2574,28 @@
         },
         "optional": true
       },
+      "socialLinks": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "array",
+          "of": {
+            "type": "object",
+            "attributes": {
+              "_key": {
+                "type": "objectAttribute",
+                "value": {
+                  "type": "string"
+                }
+              }
+            },
+            "rest": {
+              "type": "inline",
+              "name": "socialLink"
+            }
+          }
+        },
+        "optional": true
+      },
       "hero": {
         "type": "objectAttribute",
         "value": {
@@ -3010,6 +3036,20 @@
               "optional": true
             },
             "mediaGenresHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "shareLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "linkCopiedLabel": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

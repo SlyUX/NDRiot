@@ -8,12 +8,14 @@ import { ContentCardGrid } from '@/components/content-card-grid'
 import PortableTextBody from '@/components/PortableTextBody'
 import { GenreBadge } from '@/components/genre-badge'
 import { SectionHeading } from '@/components/section-heading'
+import { ShareBar } from '@/components/share-bar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Section } from '@/components/ui/section'
 import { bookToCard } from '@/lib/card-mappers'
 import { safeFetch, BOOK_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
+import { absoluteUrl } from '@/lib/site-url'
 import { RESTRICTED_RATING } from '@/lib/taxonomy'
 import type { BookDetail } from '@/lib/types'
 import { truncate } from '@/lib/utils'
@@ -127,6 +129,14 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
               </div>
             </div>
           )}
+
+          <ShareBar
+            title={book.title}
+            url={absoluteUrl(`/books/${slug}`)}
+            label={settings.sections.shareLabel}
+            copiedLabel={settings.sections.linkCopiedLabel}
+            className="border-primary/20 border-t pt-5"
+          />
         </div>
       </Section>
 

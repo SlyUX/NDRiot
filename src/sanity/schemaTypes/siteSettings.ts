@@ -64,6 +64,15 @@ export default defineType({
       group: 'general',
       description: 'The ND Riot Discord invite — shown as an icon in the nav and footer. Blank hides it.',
     }),
+    defineField({
+      name: 'socialLinks',
+      title: 'Follow links (ND Riot social accounts)',
+      type: 'array',
+      of: [{ type: 'socialLink' }],
+      group: 'general',
+      description:
+        'ND Riot’s own social accounts — Instagram, Threads, YouTube, etc. Shown as a quiet icon row in the footer, kept less prominent than Discord (which is the community hub). Add a row per account.',
+    }),
 
     defineField({
       name: 'hero',
@@ -306,6 +315,8 @@ export default defineType({
         defineField({ name: 'mediaPitchHeading', title: 'Media detail — "how to get covered" heading', type: 'string' }),
         defineField({ name: 'mediaLinksHeading', title: 'Media detail — links heading', type: 'string' }),
         defineField({ name: 'mediaGenresHeading', title: 'Media page — covered-genres heading', type: 'string' }),
+        defineField({ name: 'shareLabel', title: 'Share bar — label', type: 'string' }),
+        defineField({ name: 'linkCopiedLabel', title: 'Share bar — "link copied" confirmation', type: 'string' }),
         defineField({
           name: 'creatorFavoritesHeading',
           title: 'Creator page — favorite creators heading',

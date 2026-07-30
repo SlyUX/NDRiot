@@ -6,6 +6,7 @@ import { OrganizationLink } from '@/components/organization-link'
 import PortableTextBody from '@/components/PortableTextBody'
 import SocialLinks from '@/components/SocialLinks'
 import { SectionHeading } from '@/components/section-heading'
+import { ShareBar } from '@/components/share-bar'
 import { GenreBadge } from '@/components/genre-badge'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -14,6 +15,7 @@ import { Section } from '@/components/ui/section'
 import { bookToCard, favoriteToCard } from '@/lib/card-mappers'
 import { safeFetch, CREATOR_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
+import { absoluteUrl } from '@/lib/site-url'
 import type { CreatorDetail } from '@/lib/types'
 import { urlFor } from '@/sanity/image'
 
@@ -131,6 +133,14 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
                 </Badge>
               </div>
             )}
+
+            <ShareBar
+              title={creator.name ?? ''}
+              url={absoluteUrl(`/creators/${slug}`)}
+              label={settings.sections.shareLabel}
+              copiedLabel={settings.sections.linkCopiedLabel}
+              className="mt-5"
+            />
           </div>
         </div>
       </Section>
