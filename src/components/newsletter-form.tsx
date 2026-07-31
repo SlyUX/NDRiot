@@ -115,7 +115,7 @@ export function NewsletterForm({
         </p>
       )}
 
-      <p id={consentId} className={cn('mt-2 text-xs', onPink ? 'text-black/70' : 'text-muted-foreground')}>
+      <p id={consentId} className={cn('mt-2 text-xs', onPink ? 'text-black' : 'text-muted-foreground')}>
         {copy.consent}
       </p>
     </form>

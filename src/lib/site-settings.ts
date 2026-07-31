@@ -394,7 +394,7 @@ const DEFAULTS: SiteSettings = {
   footer: 'Support indie comics. · ND Riot',
   newsletter: {
     heading: 'Get the ND Riot newsletter',
-    description: 'Real independent comics in your inbox — new work, the creators behind it, and nothing else.',
+    description: 'Monthly updates about indie comics, creators, campaigns, and community.',
     placeholder: 'you@email.com',
     buttonLabel: 'Subscribe',
     consent: 'We’ll only email you about ND Riot. Unsubscribe any time.',
