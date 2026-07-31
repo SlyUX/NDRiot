@@ -28,6 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
   // all fold into one ranking target rather than splitting it.
   return pageMetadata({
     title: settings.sections.booksHeading,
+    description: settings.sections.booksDescription,
     path: '/books',
     siteTitle: settings.siteTitle,
   })

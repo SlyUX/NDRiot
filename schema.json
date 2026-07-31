@@ -3388,6 +3388,27 @@
               },
               "optional": true
             },
+            "booksDescription": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "creatorsDescription": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "editorialDescription": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "downloadsHeading": {
               "type": "objectAttribute",
               "value": {

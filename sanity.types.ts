@@ -565,6 +565,9 @@ export type SiteSettings = {
     interviewsHeading?: string;
     booksHeading?: string;
     creatorsHeading?: string;
+    booksDescription?: string;
+    creatorsDescription?: string;
+    editorialDescription?: string;
     downloadsHeading?: string;
     genreBooksHeading?: string;
     discoverLabel?: string;

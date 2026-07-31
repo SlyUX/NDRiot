@@ -14,6 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings()
   return pageMetadata({
     title: settings.sections.editorialHeading,
+    description: settings.sections.editorialDescription,
     path: '/editorial',
     siteTitle: settings.siteTitle,
   })

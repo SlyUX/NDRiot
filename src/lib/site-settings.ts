@@ -321,6 +321,10 @@ export interface SiteSettings {
     interviewsHeading: string
     booksHeading: string
     creatorsHeading: string
+    /** Meta descriptions for the listing pages — SEO copy, §2. */
+    booksDescription: string
+    creatorsDescription: string
+    editorialDescription: string
     downloadsHeading: string
     genreBooksHeading: string
     genreCreatorsHeading: string
@@ -647,6 +651,12 @@ const DEFAULTS: SiteSettings = {
     interviewsHeading: 'Interviews',
     booksHeading: 'Comics',
     creatorsHeading: 'Comic Makers',
+    booksDescription:
+      'Browse independent comics on ND Riot — graphic novels, single issues, and webcomics from real indie creators, across every genre. Filter by genre, format, and audience.',
+    creatorsDescription:
+      'Discover the comic makers behind independent comics on ND Riot — indie writers, artists, and studios. Browse by genre, or find creators open to collaboration.',
+    editorialDescription:
+      'Columns and interviews on independent comics from ND Riot — the people, the craft, and the scene behind real indie work.',
     downloadsHeading: 'Free Downloads',
     genreBooksHeading: 'Comics',
     genreCreatorsHeading: 'Comic Makers working in this genre',

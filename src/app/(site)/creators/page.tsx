@@ -26,6 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings()
   return pageMetadata({
     title: settings.sections.creatorsHeading,
+    description: settings.sections.creatorsDescription,
     path: '/creators',
     siteTitle: settings.siteTitle,
   })

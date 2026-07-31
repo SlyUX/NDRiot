@@ -273,6 +273,9 @@ export default defineType({
         defineField({ name: 'interviewsHeading', title: 'Interviews heading', type: 'string' }),
         defineField({ name: 'booksHeading', title: 'Books page title', type: 'string' }),
         defineField({ name: 'creatorsHeading', title: 'Creators page title', type: 'string' }),
+        defineField({ name: 'booksDescription', title: 'Comics page — meta description', type: 'text', rows: 2 }),
+        defineField({ name: 'creatorsDescription', title: 'Comic Makers page — meta description', type: 'text', rows: 2 }),
+        defineField({ name: 'editorialDescription', title: 'Editorial page — meta description', type: 'text', rows: 2 }),
         defineField({ name: 'downloadsHeading', title: 'Downloads page title', type: 'string' }),
         defineField({
           name: 'genreBooksHeading',
