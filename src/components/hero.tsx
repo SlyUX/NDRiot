@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ArrowRight, Book, Shuffle, User } from 'lucide-react'
 
 import { TaxonomyRow } from '@/components/content-card'
+import PortableTextBody from '@/components/PortableTextBody'
 import { Button } from '@/components/ui/button'
 import type { HeroSettings } from '@/lib/site-settings'
 import type { HeroBook, HomeNewItem } from '@/lib/types'
@@ -181,9 +182,24 @@ export function Hero({ hero, feature, newItems, discoverHref, discoverLabel }: H
         {/* Identity strip — the site's line and its calls to action. Outward
             evangelism, so it leads the page. */}
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-          <h1 className="text-3xl leading-none font-black tracking-tight text-white uppercase sm:text-4xl lg:text-5xl">
-            {hero.tagline}
-          </h1>
+          <div className="space-y-3">
+            <h1 className="text-3xl leading-none font-black tracking-tight text-white uppercase sm:text-4xl lg:text-5xl">
+              {hero.tagline}
+            </h1>
+            {/* Subhead — supporting copy under the H1. The editor writes
+                hero.body; until then this fallback carries the head terms
+                (graphic novels, webcomics) that the H1 keeps out of its punch. */}
+            {hero.body?.length ? (
+              <div className="max-w-xl text-sm leading-relaxed text-white/85 sm:text-base">
+                <PortableTextBody value={hero.body} />
+              </div>
+            ) : (
+              <p className="max-w-xl text-sm leading-relaxed text-white/85 sm:text-base">
+                Graphic novels, single issues, and webcomics from real indie creators — across
+                every genre.
+              </p>
+            )}
+          </div>
           {hero.ctas.length > 0 && (
             <div className="flex flex-wrap gap-3">
               {hero.ctas.map((cta, i) => (
