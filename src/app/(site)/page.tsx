@@ -6,6 +6,7 @@ import { FilterBar } from '@/components/filter-bar'
 import { Hero } from '@/components/hero'
 import { JsonLd } from '@/components/json-ld'
 import { LoadMore } from '@/components/load-more'
+import { NewsletterForm } from '@/components/newsletter-form'
 import { organizationSchema, jsonLdGraph, websiteSchema } from '@/lib/structured-data'
 import { bookToCard, creatorToCard, editorialToCard, mediaToCard } from '@/lib/card-mappers'
 import {
@@ -206,6 +207,22 @@ export default async function Home({
         discoverHref={feature ? `?${discoverParams.toString()}` : undefined}
         discoverLabel={settings.sections.discoverLabel}
       />
+
+      {/* Newsletter — a full-width pink band directly beneath the hero.
+          Black text on the pink (§9); the signup goes straight to MailerLite. */}
+      <section className="bg-primary text-primary-foreground">
+        <div className="mx-auto flex max-w-[90rem] flex-col gap-5 px-6 py-10 sm:flex-row sm:items-center sm:justify-between lg:px-0">
+          <div className="max-w-xl">
+            <h2 className="text-2xl font-black tracking-tighter uppercase sm:text-3xl">
+              {settings.newsletter.heading}
+            </h2>
+            <p className="mt-1 text-sm text-black/80">{settings.newsletter.description}</p>
+          </div>
+          <div className="w-full sm:max-w-md">
+            <NewsletterForm copy={settings.newsletter} variant="band" />
+          </div>
+        </div>
+      </section>
 
       {/* Books: one scrolling row while browsing; a two-row grid with "Load
           more" once a search narrows it. "View all" links to the full listing. */}

@@ -522,6 +522,15 @@ export type SiteSettings = {
     seoDescription?: string;
   };
   aiLetter?: string;
+  newsletter?: {
+    heading?: string;
+    description?: string;
+    placeholder?: string;
+    buttonLabel?: string;
+    consent?: string;
+    successMessage?: string;
+    errorMessage?: string;
+  };
   hero?: {
     background?: ImageWithAlt;
     headline?: string;

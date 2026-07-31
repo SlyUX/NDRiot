@@ -30,6 +30,7 @@ export default defineType({
     { name: 'mediaIntake', title: 'Media intake form' },
     { name: 'contact', title: 'Contact page' },
     { name: 'about', title: 'About & AI letter' },
+    { name: 'newsletter', title: 'Newsletter' },
     { name: 'nav', title: 'Navigation' },
   ],
   fields: [
@@ -130,6 +131,23 @@ export default defineType({
       group: 'about',
       description:
         'Served at /llms.txt — a short note addressed to AI agents (ChatGPT, Perplexity, etc.) that crawl the site: a greeting, what ND Riot is in plain terms, and a thank-you. A generated index of key sections is appended automatically.',
+    }),
+    defineField({
+      name: 'newsletter',
+      title: 'Newsletter signup',
+      type: 'object',
+      group: 'newsletter',
+      options: { collapsible: true, collapsed: false },
+      description: 'Copy for the newsletter form — the pink band under the hero and the small footer form. Subscribing goes straight to MailerLite (double opt-in); no email is stored in Sanity.',
+      fields: [
+        defineField({ name: 'heading', title: 'Heading', type: 'string' }),
+        defineField({ name: 'description', title: 'Description', type: 'text', rows: 2 }),
+        defineField({ name: 'placeholder', title: 'Email field placeholder', type: 'string' }),
+        defineField({ name: 'buttonLabel', title: 'Button label', type: 'string' }),
+        defineField({ name: 'consent', title: 'Consent line', type: 'string', description: 'Small print beneath the form.' }),
+        defineField({ name: 'successMessage', title: 'Success message', type: 'string', description: 'Shown after submit. With double opt-in, this should tell them to check their inbox.' }),
+        defineField({ name: 'errorMessage', title: 'Error message', type: 'string' }),
+      ],
     }),
 
     defineField({

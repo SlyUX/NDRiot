@@ -3,6 +3,7 @@ import { Mail } from 'lucide-react'
 
 import { Logo } from '@/components/logo'
 import { MainNav } from '@/components/main-nav'
+import { NewsletterForm } from '@/components/newsletter-form'
 import { SocialIcon } from '@/components/social-icon'
 import { genreOptions } from '@/lib/filters'
 import { safeFetch, GENRES_WITH_BOOKS_QUERY } from '@/lib/queries'
@@ -67,6 +68,12 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
 
       <footer className="border-primary/40 border-t">
         <div className="text-muted-foreground mx-auto flex max-w-[90rem] flex-col items-center gap-3 px-6 py-8 text-center text-xs tracking-widest uppercase">
+          {/* Newsletter — a small form; the prominent one is the pink band up top. */}
+          <div className="w-full max-w-xs pb-2">
+            <p className="text-foreground mb-2 font-bold">{settings.newsletter.heading}</p>
+            <NewsletterForm copy={settings.newsletter} variant="compact" className="normal-case tracking-normal" />
+          </div>
+
           {/* Utility corner. Contact is a glyph rather than a text link, matched
               to the Discord mark beside it. Both keep Join the single worded CTA
               up top. */}

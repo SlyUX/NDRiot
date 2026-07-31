@@ -289,10 +289,21 @@ export interface AboutSettings {
   seoDescription: string
 }
 
+export type NewsletterSettings = {
+  heading: string
+  description: string
+  placeholder: string
+  buttonLabel: string
+  consent: string
+  successMessage: string
+  errorMessage: string
+}
+
 export interface SiteSettings {
   siteTitle: string
   siteDescription: string
   footer: string
+  newsletter: NewsletterSettings
   /** Invite to the ND Riot Discord — shown in the nav and footer. Absent hides them. */
   discordUrl?: string
   /** ND Riot's own social accounts, shown as a quiet follow row in the footer. */
@@ -381,6 +392,16 @@ const DEFAULTS: SiteSettings = {
   siteTitle: 'ND Riot',
   siteDescription: 'Independent comics discovery. Support indie comics.',
   footer: 'Support indie comics. · ND Riot',
+  newsletter: {
+    heading: 'Get the ND Riot newsletter',
+    description: 'Real independent comics in your inbox — new work, the creators behind it, and nothing else.',
+    placeholder: 'you@email.com',
+    buttonLabel: 'Subscribe',
+    consent: 'We’ll only email you about ND Riot. Unsubscribe any time.',
+    // Double opt-in: nobody is on the list until they confirm.
+    successMessage: 'Almost there — check your inbox and confirm to finish subscribing.',
+    errorMessage: 'That didn’t go through. Please try again in a moment.',
+  },
   discordUrl: 'https://discord.gg/fSSMjE5dw',
   // Discord (community) stays prominent up top; these are the traditional
   // social accounts, shown quietly in the footer. YouTube is a row away when
@@ -747,6 +768,7 @@ const DEFAULTS: SiteSettings = {
 
 export const SITE_SETTINGS_QUERY = `*[_id=="siteSettings"][0]{
   siteTitle,siteDescription,footer,discordUrl,socialLinks[]{platform,url},
+  newsletter{heading,description,placeholder,buttonLabel,consent,successMessage,errorMessage},
   about{heading,body,faqHeading,faq[]{question,answer},seoTitle,seoDescription},aiLetter,
   home,sections,empty,creatorIntake,bookIntake,mediaIntake,
   hero{background,headline,body,tagline,featureCtaLabel,featuredHeading,newHeading,ctas[]{label,href}},
@@ -777,6 +799,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     siteTitle: data.siteTitle?.trim() || DEFAULTS.siteTitle,
     siteDescription: data.siteDescription?.trim() || DEFAULTS.siteDescription,
     footer: data.footer?.trim() || DEFAULTS.footer,
+    newsletter: mergeGroup(DEFAULTS.newsletter, data.newsletter),
     discordUrl: data.discordUrl?.trim() || DEFAULTS.discordUrl,
     socialLinks: data.socialLinks?.length ? data.socialLinks : DEFAULTS.socialLinks,
     about: {
