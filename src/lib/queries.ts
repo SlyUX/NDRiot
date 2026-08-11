@@ -167,6 +167,12 @@ export const SAVED_CREATORS_QUERY = defineQuery(`*[_type=="creator" && _id in $i
 /** The docs a signed-in owner can manage — creators and media they own. */
 export const OWNED_DOCS_QUERY = defineQuery(`*[_id in $ids && defined(slug.current)]{_id,_type,name,"slug":slug.current}|order(name asc)`)
 
+/** An owner's comics — books whose creator is one they own ($ids = creator ids). */
+export const OWNED_BOOKS_QUERY = defineQuery(`*[_type=="book" && creator._ref in $ids && defined(slug.current)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}`)
+
+/** An owner's media outlets, by id. */
+export const OWNED_MEDIA_QUERY = defineQuery(`*[_type=="media" && _id in $ids && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,kinds,logo,about,genresCovered}`)
+
 /* ---------------------------------------------------- RSS feeds
  * Item projections for ND Riot's own feeds (src/app/feeds/*.xml). Each is
  * newest-first and capped at 30, so a growing roster never bloats a feed.

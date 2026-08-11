@@ -2,16 +2,25 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { SignInButton, SignOutButton } from '@/components/auth-controls'
+import { ContentCard } from '@/components/content-card'
 import { ContentCardGrid } from '@/components/content-card-grid'
 import { SectionHeading } from '@/components/section-heading'
+import { Button } from '@/components/ui/button'
 import { Section } from '@/components/ui/section'
 import { auth } from '@/auth'
-import { bookToCard, creatorToCard } from '@/lib/card-mappers'
-import { safeFetch, OWNED_DOCS_QUERY, SAVED_BOOKS_QUERY, SAVED_CREATORS_QUERY } from '@/lib/queries'
+import { bookToCard, creatorToCard, mediaToCard } from '@/lib/card-mappers'
+import {
+  safeFetch,
+  OWNED_BOOKS_QUERY,
+  OWNED_DOCS_QUERY,
+  OWNED_MEDIA_QUERY,
+  SAVED_BOOKS_QUERY,
+  SAVED_CREATORS_QUERY,
+} from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
 import { ownedDocIds } from '@/sanity/ownership-client'
 import { savedItems } from '@/sanity/reader-client'
-import type { BookSummary, CreatorSummary } from '@/lib/types'
+import type { BookSummary, CreatorSummary, MediaSummary } from '@/lib/types'
 
 /**
  * The signed-in reader's home.
@@ -55,21 +64,36 @@ export default async function AccountPage() {
   const saves = await savedItems(email)
   const bookIds = saves.filter((x) => x.itemType === 'book').map((x) => x.itemId)
   const creatorIds = saves.filter((x) => x.itemType === 'creator').map((x) => x.itemId)
-  const ownedIds = await ownedDocIds(email)
 
-  const [savedBooks, savedCreators, owned] = await Promise.all([
+  // Owned docs resolve to their type first, so comics can be looked up by the
+  // creator ids they belong to and media by their own ids.
+  const ownedIds = await ownedDocIds(email)
+  const ownedDocs = ownedIds.length
+    ? await safeFetch<OwnedDoc[]>(OWNED_DOCS_QUERY, { ids: ownedIds }, [])
+    : []
+  const ownedCreatorIds = ownedDocs.filter((d) => d._type === 'creator').map((d) => d._id)
+  const ownedMediaIds = ownedDocs.filter((d) => d._type === 'media').map((d) => d._id)
+
+  const [savedBooks, savedCreators, ownedCreators, ownedBooks, ownedMedia] = await Promise.all([
     bookIds.length
       ? safeFetch<BookSummary[]>(SAVED_BOOKS_QUERY, { ids: bookIds }, [])
       : Promise.resolve<BookSummary[]>([]),
     creatorIds.length
       ? safeFetch<CreatorSummary[]>(SAVED_CREATORS_QUERY, { ids: creatorIds }, [])
       : Promise.resolve<CreatorSummary[]>([]),
-    ownedIds.length
-      ? safeFetch<OwnedDoc[]>(OWNED_DOCS_QUERY, { ids: ownedIds }, [])
-      : Promise.resolve<OwnedDoc[]>([]),
+    ownedCreatorIds.length
+      ? safeFetch<CreatorSummary[]>(SAVED_CREATORS_QUERY, { ids: ownedCreatorIds }, [])
+      : Promise.resolve<CreatorSummary[]>([]),
+    ownedCreatorIds.length
+      ? safeFetch<BookSummary[]>(OWNED_BOOKS_QUERY, { ids: ownedCreatorIds }, [])
+      : Promise.resolve<BookSummary[]>([]),
+    ownedMediaIds.length
+      ? safeFetch<MediaSummary[]>(OWNED_MEDIA_QUERY, { ids: ownedMediaIds }, [])
+      : Promise.resolve<MediaSummary[]>([]),
   ])
 
   const hasSaves = savedBooks.length > 0 || savedCreators.length > 0
+  const editLabel = s.accountEditLabel
 
   return (
     <div>
@@ -118,26 +142,63 @@ export default async function AccountPage() {
         </Section>
       )}
 
-      {owned.length > 0 && (
-        <Section padding="md" background="charcoal">
+      {/* Your Creator Profile — the profile shown, with a way into its form.
+          A top divider sets this owner area apart on the near-black surface. */}
+      {ownedCreators.length > 0 && (
+        <Section padding="md" className="border-primary/25 border-t">
           <SectionHeading as="h2" size="sm">
-            {s.accountListingsHeading}
+            {s.accountCreatorHeading}
           </SectionHeading>
-          <ul className="flex flex-col gap-2">
-            {owned.map((doc) => {
-              const base = doc._type === 'media' ? '/join/media' : '/join/creators'
-              return (
-                <li key={doc._id}>
-                  <Link
-                    href={`${base}?editing=${encodeURIComponent(doc._id)}`}
-                    className="focus-visible:ring-ring hover:text-primary text-sm font-bold transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                  >
-                    {doc.name ?? doc._id} →
+          <div className="grid gap-4 sm:grid-cols-2">
+            {ownedCreators.map((creator) => (
+              <div key={creator._id} className="space-y-2">
+                <ContentCard {...creatorToCard(creator)} layout="horizontal" summaryLines={3} />
+                <Button asChild variant="outline" size="sm">
+                  <Link href={`/join/creators?editing=${encodeURIComponent(creator._id)}`}>
+                    {editLabel}
                   </Link>
-                </li>
-              )
-            })}
-          </ul>
+                </Button>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* Your Comics — each with its own edit route. */}
+      {ownedBooks.length > 0 && (
+        <Section padding="md">
+          <SectionHeading as="h2" size="sm">
+            {s.accountComicsHeading}
+          </SectionHeading>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-5">
+            {ownedBooks.map((book) => (
+              <div key={book._id} className="space-y-2">
+                <ContentCard {...bookToCard(book)} />
+                <Button asChild variant="outline" size="sm" className="w-full">
+                  <Link href={`/join/books?editing=${encodeURIComponent(book._id)}`}>{editLabel}</Link>
+                </Button>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* Your Media — same treatment for owned outlets. */}
+      {ownedMedia.length > 0 && (
+        <Section padding="md">
+          <SectionHeading as="h2" size="sm">
+            {s.accountMediaHeading}
+          </SectionHeading>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {ownedMedia.map((outlet) => (
+              <div key={outlet._id} className="space-y-2">
+                <ContentCard {...mediaToCard(outlet)} />
+                <Button asChild variant="outline" size="sm" className="w-full">
+                  <Link href={`/join/media?editing=${encodeURIComponent(outlet._id)}`}>{editLabel}</Link>
+                </Button>
+              </div>
+            ))}
+          </div>
         </Section>
       )}
     </div>

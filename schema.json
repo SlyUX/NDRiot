@@ -3600,7 +3600,28 @@
               },
               "optional": true
             },
-            "accountListingsHeading": {
+            "accountCreatorHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "accountComicsHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "accountMediaHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "accountEditLabel": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"
