@@ -182,8 +182,14 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
               itemType="book"
               itemId={book._id}
               initialSaved={saved}
+              signedIn={Boolean(email)}
               saveLabel={settings.sections.saveLabel}
               savedLabel={settings.sections.savedLabel}
+              signInCopy={{
+                title: settings.sections.accountSignInTitle,
+                body: settings.sections.accountSignInBody,
+                cta: settings.sections.accountSignInCta,
+              }}
             />
             <ShareBar
               title={book.title}

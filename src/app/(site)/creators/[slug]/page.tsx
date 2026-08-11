@@ -192,8 +192,14 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
                 itemType="creator"
                 itemId={creator._id}
                 initialSaved={saved}
+                signedIn={Boolean(email)}
                 saveLabel={settings.sections.saveLabel}
                 savedLabel={settings.sections.savedLabel}
+                signInCopy={{
+                  title: settings.sections.accountSignInTitle,
+                  body: settings.sections.accountSignInBody,
+                  cta: settings.sections.accountSignInCta,
+                }}
               />
               <ShareBar
                 title={creator.name ?? ''}

@@ -36,3 +36,13 @@ export async function toggleSaveAction(
     return { saved: false, error: true }
   }
 }
+
+/**
+ * Start Google sign-in from the sign-in modal, returning to `returnTo`. Bound to
+ * `returnTo` and used as a <form action>; the FormData React passes is ignored.
+ * Redirects (throws NEXT_REDIRECT) on success.
+ */
+export async function startSignIn(returnTo: string): Promise<void> {
+  const safe = returnTo.startsWith('/') ? returnTo : '/'
+  await signIn('google', { redirectTo: safe })
+}

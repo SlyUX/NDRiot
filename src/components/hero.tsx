@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowRight, Book, Shuffle, User } from 'lucide-react'
@@ -32,6 +33,9 @@ export interface HeroProps {
   discoverHref?: string
   /** Label for that button — CMS copy (AGENTS.md §2). */
   discoverLabel?: string
+  /** Save control for the featured comic — a client component passed as a slot
+   *  so the server hero doesn't import it. Rendered over the cover. */
+  saveSlot?: ReactNode
 }
 
 /**
@@ -160,7 +164,7 @@ function NewRow({ item }: { item: HomeNewItem }) {
   )
 }
 
-export function Hero({ hero, feature, newItems, discoverHref, discoverLabel }: HeroProps) {
+export function Hero({ hero, feature, newItems, discoverHref, discoverLabel, saveSlot }: HeroProps) {
   return (
     // Hand-rolled rather than <Section> so the background layers can span the
     // full bleed while the content stays at the site width.
@@ -237,6 +241,9 @@ export function Hero({ hero, feature, newItems, discoverHref, discoverLabel }: H
                     top-right. */}
                 <div className="relative flex-1">
                   <FeatureBook book={feature} ctaLabel={hero.featureCtaLabel} />
+                  {/* Save sits over the cover's lower-left, clear of the Discover
+                      control (top-right) and the funding badge (top-left). */}
+                  {saveSlot && <div className="absolute bottom-3 left-3 z-10">{saveSlot}</div>}
                   {discoverHref && (
                     <Link
                       href={discoverHref}

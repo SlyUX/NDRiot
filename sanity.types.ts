@@ -596,10 +596,14 @@ export type SiteSettings = {
     saveLabel?: string;
     savedLabel?: string;
     accountTitle?: string;
-    accountCreatorHeading?: string;
+    accountUserHeading?: string;
+    accountUserCreatorHeading?: string;
     accountComicsHeading?: string;
     accountMediaHeading?: string;
     accountEditLabel?: string;
+    accountViewCreatorLabel?: string;
+    accountViewBookLabel?: string;
+    accountViewMediaLabel?: string;
     accountSignInTitle?: string;
     accountSignInBody?: string;
     accountSignInCta?: string;

@@ -363,10 +363,14 @@ export interface SiteSettings {
     savedLabel: string
     /** The signed-in reader home (/me). */
     accountTitle: string
-    accountCreatorHeading: string
+    accountUserHeading: string
+    accountUserCreatorHeading: string
     accountComicsHeading: string
     accountMediaHeading: string
     accountEditLabel: string
+    accountViewCreatorLabel: string
+    accountViewBookLabel: string
+    accountViewMediaLabel: string
     accountSignInTitle: string
     accountSignInBody: string
     accountSignInCta: string
@@ -726,10 +730,14 @@ const DEFAULTS: SiteSettings = {
     saveLabel: 'Save',
     savedLabel: 'Saved',
     accountTitle: 'Your ND Riot',
-    accountCreatorHeading: 'Your Creator Profile',
+    accountUserHeading: 'User Profile',
+    accountUserCreatorHeading: 'User + Creator Profile',
     accountComicsHeading: 'Your Comics',
     accountMediaHeading: 'Your Media',
     accountEditLabel: 'Edit',
+    accountViewCreatorLabel: 'Creator Profile',
+    accountViewBookLabel: 'Book Page',
+    accountViewMediaLabel: 'Media Page',
     accountSignInTitle: 'Sign in to save comics and makers',
     accountSignInBody:
       'ND Riot uses Google sign-in — it only confirms it’s you, and your saves stay private.',

@@ -5,63 +5,80 @@ import { usePathname } from 'next/navigation'
 import { Bookmark } from 'lucide-react'
 
 import { toggleSaveAction } from '@/app/actions/saves'
+import { SignInDialog } from '@/components/sign-in-dialog'
 import type { SavedItemType } from '@/sanity/reader-client'
 import { cn } from '@/lib/utils'
 
 /**
  * Save/bookmark toggle for a comic or maker — the reader's one explicit signal
- * (AGENTS.md §3). Optimistic: the fill flips on click and reconciles with the
- * server. A signed-out tap routes through the server action into Google sign-in
- * and back to this page, so nothing is lost.
- *
- * Labels come from Sanity (§2); the icon is decorative, the label is the name.
+ * (AGENTS.md §3). White button, black text (21:1) — deliberately neutral, not
+ * the funding green, so it never reads as "campaign." Optimistic: the bookmark
+ * fills on click and reconciles with the server. Signed out, it opens the
+ * sign-in modal instead of acting. Labels come from Sanity (§2).
  */
 export function SaveButton({
   itemType,
   itemId,
   initialSaved,
+  signedIn,
   saveLabel,
   savedLabel,
+  signInCopy,
   className,
 }: {
   itemType: SavedItemType
   itemId: string
   initialSaved: boolean
+  signedIn: boolean
   saveLabel: string
   savedLabel: string
+  signInCopy: { title: string; body: string; cta: string }
   className?: string
 }) {
   const [saved, setSaved] = useState(initialSaved)
+  const [gateOpen, setGateOpen] = useState(false)
   const [pending, startTransition] = useTransition()
   const pathname = usePathname()
 
   function onClick() {
+    if (!signedIn) {
+      setGateOpen(true)
+      return
+    }
     const next = !saved
     setSaved(next) // optimistic
     startTransition(async () => {
       const result = await toggleSaveAction(itemType, itemId, pathname)
-      // A signed-out toggle redirects to sign-in (this line is unreachable then);
-      // an error reverts; otherwise reconcile with the server's truth.
       setSaved(result.error ? !next : result.saved)
     })
   }
 
   const label = saved ? savedLabel : saveLabel
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={pending}
-      aria-pressed={saved}
-      aria-label={label}
-      className={cn(
-        'focus-visible:ring-ring inline-flex items-center gap-1.5 border px-3 py-2 text-xs font-bold tracking-widest uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60',
-        saved ? 'border-primary text-primary' : 'text-foreground hover:border-primary/60 border-white/20',
-        className,
+    <>
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={pending}
+        aria-pressed={saved}
+        aria-label={label}
+        className={cn(
+          'focus-visible:ring-ring inline-flex items-center gap-1.5 border border-white bg-white px-3 py-2 text-xs font-bold tracking-widest text-black uppercase transition-colors hover:bg-white/85 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60',
+          className,
+        )}
+      >
+        <Bookmark aria-hidden="true" strokeWidth={2.5} className={cn('size-4', saved && 'fill-current')} />
+        {label}
+      </button>
+      {!signedIn && (
+        <SignInDialog
+          open={gateOpen}
+          onOpenChange={setGateOpen}
+          title={signInCopy.title}
+          body={signInCopy.body}
+          cta={signInCopy.cta}
+        />
       )}
-    >
-      <Bookmark aria-hidden="true" strokeWidth={2.5} className={cn('size-4', saved && 'fill-current')} />
-      {label}
-    </button>
+    </>
   )
 }

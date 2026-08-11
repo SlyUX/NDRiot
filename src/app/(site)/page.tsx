@@ -7,6 +7,7 @@ import { Hero } from '@/components/hero'
 import { JsonLd } from '@/components/json-ld'
 import { LoadMore } from '@/components/load-more'
 import { NewsletterForm } from '@/components/newsletter-form'
+import { SaveButton } from '@/components/save-button'
 import { organizationSchema, jsonLdGraph, websiteSchema } from '@/lib/structured-data'
 import { bookToCard, creatorToCard, editorialToCard, mediaToCard } from '@/lib/card-mappers'
 import {
@@ -34,6 +35,8 @@ import {
   FILTERED_CREATORS_QUERY,
 } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
+import { auth } from '@/auth'
+import { isSaved } from '@/sanity/reader-client'
 import { SITE_URL } from '@/lib/site-url'
 import type {
   BookSummary,
@@ -117,7 +120,7 @@ export default async function Home({
   // The book the hero last showed, so "Discover" re-rolls to a different one.
   const notFeature = Array.isArray(params.notf) ? params.notf[0] : params.notf
 
-  const [feature, booksResult, creatorsResult, genresWithBooks, newItems, homeEditorial, mediaItems, settings] =
+  const [feature, booksResult, creatorsResult, genresWithBooks, newItems, homeEditorial, mediaItems, settings, session] =
     await Promise.all([
       // Deliberately unfiltered. The hero is the guaranteed route to work
       // nobody went looking for (AGENTS.md §3), so narrowing the page must
@@ -138,9 +141,30 @@ export default async function Home({
       safeFetch<HomeEditorial[]>(HOME_EDITORIAL_QUERY, {}, []),
       safeFetch<MediaSummary[]>(MEDIA_HOME_QUERY, {}, []),
       getSiteSettings(),
+      auth(),
     ])
   const books = booksResult.items
   const creators = creatorsResult.items
+
+  // The hero's featured comic is savable too — its saved state, and a Save
+  // button passed as a slot so the client component stays out of the server hero.
+  const email = session?.user?.email
+  const featureSaved = feature && email ? await isSaved(email, feature._id) : false
+  const featureSave = feature ? (
+    <SaveButton
+      itemType="book"
+      itemId={feature._id}
+      initialSaved={featureSaved}
+      signedIn={Boolean(email)}
+      saveLabel={settings.sections.saveLabel}
+      savedLabel={settings.sections.savedLabel}
+      signInCopy={{
+        title: settings.sections.accountSignInTitle,
+        body: settings.sections.accountSignInBody,
+        cta: settings.sections.accountSignInCta,
+      }}
+    />
+  ) : null
 
   // Both rows offer the same genres — the set a book actually uses.
   const genres = genreOptions(genresWithBooks)
@@ -207,6 +231,7 @@ export default async function Home({
         newItems={newItems}
         discoverHref={feature ? `?${discoverParams.toString()}` : undefined}
         discoverLabel={settings.sections.spinLabel}
+        saveSlot={featureSave}
       />
 
       {/* Newsletter — a full-width pink band directly beneath the hero.
