@@ -37,8 +37,10 @@ export const dynamic = 'force-dynamic'
 /** Owned creators/media, resolved for the manage links (local shape, like the join pages). */
 type OwnedDoc = { _id: string; _type: string; name: string | null; slug: string | null }
 
-/** Two columns from tablet up, one on phones — shared by every feed list here. */
+/** Owner lists (Your Comics/Media): two columns from tablet up, one on phones. */
 const FEED_GRID = 'grid grid-cols-1 gap-x-8 sm:grid-cols-2'
+/** Saved shelves: three on desktop, two on portrait tablet, one on mobile. */
+const SAVED_GRID = 'grid grid-cols-1 gap-x-8 md:grid-cols-2 lg:grid-cols-3'
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings()
@@ -281,7 +283,7 @@ export default async function AccountPage() {
               <SectionHeading as="h2" size="sm">
                 {s.accountSavedComicsHeading}
               </SectionHeading>
-              <ul className={FEED_GRID}>
+              <ul className={SAVED_GRID}>
                 {savedBooks.map((book) => (
                   <SavedItemRow
                     key={book._id}
@@ -313,7 +315,7 @@ export default async function AccountPage() {
               <SectionHeading as="h2" size="sm">
                 {s.accountSavedCreatorsHeading}
               </SectionHeading>
-              <ul className={FEED_GRID}>
+              <ul className={SAVED_GRID}>
                 {savedCreators.map((creator) => (
                   <SavedItemRow
                     key={creator._id}
