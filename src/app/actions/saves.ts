@@ -1,7 +1,7 @@
 'use server'
 
 import { auth, signIn } from '@/auth'
-import { toggleSave, type SavedItemType } from '@/sanity/reader-client'
+import { toggleSave, unsaveItem, type SavedItemType } from '@/sanity/reader-client'
 
 /**
  * Toggle a reader's save on a comic or maker.
@@ -34,6 +34,20 @@ export async function toggleSaveAction(
   } catch (cause) {
     console.error('[saves] toggle failed', cause)
     return { saved: false, error: true }
+  }
+}
+
+/** Remove a saved item from the dashboard. Identity from the session. */
+export async function removeSaveAction(itemId: string): Promise<{ ok: boolean }> {
+  const session = await auth()
+  const email = session?.user?.email?.trim()
+  if (!email) return { ok: false }
+  try {
+    await unsaveItem(email, itemId)
+    return { ok: true }
+  } catch (cause) {
+    console.error('[saves] remove failed', cause)
+    return { ok: false }
   }
 }
 

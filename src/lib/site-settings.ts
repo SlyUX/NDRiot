@@ -371,6 +371,9 @@ export interface SiteSettings {
     accountViewCreatorLabel: string
     accountViewBookLabel: string
     accountViewMediaLabel: string
+    accountSavedComicsHeading: string
+    accountSavedCreatorsHeading: string
+    accountRemoveLabel: string
     accountSignInTitle: string
     accountSignInBody: string
     accountSignInCta: string
@@ -738,6 +741,9 @@ const DEFAULTS: SiteSettings = {
     accountViewCreatorLabel: 'Creator Profile',
     accountViewBookLabel: 'Book Page',
     accountViewMediaLabel: 'Media Page',
+    accountSavedComicsHeading: 'Saved Comics',
+    accountSavedCreatorsHeading: 'Favorite Creators',
+    accountRemoveLabel: 'Remove',
     accountSignInTitle: 'Sign in to save comics and makers',
     accountSignInBody:
       'ND Riot uses Google sign-in — it only confirms it’s you, and your saves stay private.',

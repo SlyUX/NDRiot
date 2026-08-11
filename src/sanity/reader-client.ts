@@ -93,3 +93,14 @@ export async function toggleSave(
   await client().createIfNotExists({ _id: id, _type: 'readerSave', email: owner, itemType, itemId })
   return true
 }
+
+/** Remove a save outright (idempotent) — the dashboard's destructive control. */
+export async function unsaveItem(email: string, itemId: string): Promise<void> {
+  const owner = normalizeEmail(email)
+  if (!owner || !itemId) return
+  try {
+    await client().delete(saveId(owner, itemId))
+  } catch (cause) {
+    console.error('[reader] unsave failed', cause)
+  }
+}

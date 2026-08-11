@@ -3656,6 +3656,27 @@
               },
               "optional": true
             },
+            "accountSavedComicsHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "accountSavedCreatorsHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "accountRemoveLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "accountSignInTitle": {
               "type": "objectAttribute",
               "value": {

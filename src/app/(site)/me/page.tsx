@@ -4,12 +4,12 @@ import Link from 'next/link'
 
 import { SignInButton, SignOutButton } from '@/components/auth-controls'
 import { ContentCard } from '@/components/content-card'
-import { ContentCardGrid } from '@/components/content-card-grid'
+import { SavedItemRow } from '@/components/saved-item-row'
 import { SectionHeading } from '@/components/section-heading'
 import { Button } from '@/components/ui/button'
 import { Section } from '@/components/ui/section'
 import { auth } from '@/auth'
-import { bookToCard, creatorToCard } from '@/lib/card-mappers'
+import { creatorToCard } from '@/lib/card-mappers'
 import {
   safeFetch,
   OWNED_BOOKS_QUERY,
@@ -28,14 +28,18 @@ import type { BookSummary, CreatorSummary, MediaSummary } from '@/lib/types'
  * The signed-in reader's home.
  *
  * Top: who they are — user details, plus their creator profile if they own one.
- * Then the things they manage (comics, media) as compact rows with edit/view
- * links, then their saved shelf. Nothing is inferred, ranked, or recommended
- * (AGENTS.md §3). Private and per-person, so it is never indexed.
+ * Then the things they manage (comics, media), then their saved shelf — every
+ * list a compact two-column feed. Saved items carry a destructive Remove.
+ * Nothing is inferred, ranked, or recommended (AGENTS.md §3). Never indexed.
  */
 export const dynamic = 'force-dynamic'
 
 /** Owned creators/media, resolved for the manage links (local shape, like the join pages). */
 type OwnedDoc = { _id: string; _type: string; name: string | null; slug: string | null }
+
+/** Two columns from tablet up, one on phones — shared by every feed list here. */
+const FEED_GRID = 'grid grid-cols-1 gap-x-8 sm:grid-cols-2'
+const FEED_ROW = 'border-border flex items-center gap-3 border-b py-3'
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings()
@@ -96,7 +100,6 @@ export default async function AccountPage() {
 
   const isCreator = ownedCreators.length > 0
   const hasSaves = savedBooks.length > 0 || savedCreators.length > 0
-  const editLabel = s.accountEditLabel
 
   return (
     <div>
@@ -122,7 +125,7 @@ export default async function AccountPage() {
                 <div className="flex flex-wrap gap-2">
                   <Button asChild variant="outline" size="sm">
                     <Link href={`/join/creators?editing=${encodeURIComponent(creator._id)}`}>
-                      {editLabel}
+                      {s.accountEditLabel}
                     </Link>
                   </Button>
                   {creator.slug && (
@@ -143,11 +146,11 @@ export default async function AccountPage() {
           <SectionHeading as="h2" size="sm">
             {s.accountComicsHeading}
           </SectionHeading>
-          <ul className="border-border divide-border divide-y border-y">
+          <ul className={FEED_GRID}>
             {ownedBooks.map((book) => {
               const view = book.slug ? `/books/${book.slug}` : null
               return (
-                <li key={book._id} className="flex items-center gap-3 py-3">
+                <li key={book._id} className={FEED_ROW}>
                   <div className="bg-muted relative aspect-[2/3] w-9 shrink-0 overflow-hidden">
                     {book.cover && (
                       <Image
@@ -171,7 +174,9 @@ export default async function AccountPage() {
                   )}
                   <div className="flex shrink-0 gap-2">
                     <Button asChild variant="outline" size="sm">
-                      <Link href={`/join/books?editing=${encodeURIComponent(book._id)}`}>{editLabel}</Link>
+                      <Link href={`/join/books?editing=${encodeURIComponent(book._id)}`}>
+                        {s.accountEditLabel}
+                      </Link>
                     </Button>
                     {view && (
                       <Button asChild variant="outline" size="sm">
@@ -192,11 +197,11 @@ export default async function AccountPage() {
           <SectionHeading as="h2" size="sm">
             {s.accountMediaHeading}
           </SectionHeading>
-          <ul className="border-border divide-border divide-y border-y">
+          <ul className={FEED_GRID}>
             {ownedMedia.map((outlet) => {
               const view = outlet.slug ? `/media/${outlet.slug}` : null
               return (
-                <li key={outlet._id} className="flex items-center gap-3 py-3">
+                <li key={outlet._id} className={FEED_ROW}>
                   <div className="bg-background relative aspect-square w-9 shrink-0 overflow-hidden">
                     {outlet.logo && (
                       <Image
@@ -220,7 +225,9 @@ export default async function AccountPage() {
                   )}
                   <div className="flex shrink-0 gap-2">
                     <Button asChild variant="outline" size="sm">
-                      <Link href={`/join/media?editing=${encodeURIComponent(outlet._id)}`}>{editLabel}</Link>
+                      <Link href={`/join/media?editing=${encodeURIComponent(outlet._id)}`}>
+                        {s.accountEditLabel}
+                      </Link>
                     </Button>
                     {view && (
                       <Button asChild variant="outline" size="sm">
@@ -235,29 +242,71 @@ export default async function AccountPage() {
         </Section>
       )}
 
-      {/* Saved — the reader's shelf. */}
+      {/* Saved shelf — feed-style, each row removable. */}
       {hasSaves ? (
         <>
           {savedBooks.length > 0 && (
-            <ContentCardGrid
-              heading={s.booksHeading}
-              cards={savedBooks.map(bookToCard)}
-              columns={5}
-              padding="md"
-              emptyMessage=""
-            />
+            <Section padding="md">
+              <SectionHeading as="h2" size="sm">
+                {s.accountSavedComicsHeading}
+              </SectionHeading>
+              <ul className={FEED_GRID}>
+                {savedBooks.map((book) => (
+                  <SavedItemRow
+                    key={book._id}
+                    itemId={book._id}
+                    title={book.title ?? 'Untitled'}
+                    href={book.slug ? `/books/${book.slug}` : null}
+                    removeLabel={s.accountRemoveLabel}
+                    thumb={
+                      <div className="bg-muted relative aspect-[2/3] w-9 shrink-0 overflow-hidden">
+                        {book.cover && (
+                          <Image
+                            src={urlFor(book.cover).width(72).url()}
+                            alt=""
+                            fill
+                            sizes="36px"
+                            className="object-cover"
+                          />
+                        )}
+                      </div>
+                    }
+                  />
+                ))}
+              </ul>
+            </Section>
           )}
+
           {savedCreators.length > 0 && (
-            <ContentCardGrid
-              heading={s.creatorsHeading}
-              cards={savedCreators.map(creatorToCard)}
-              layout="horizontal"
-              columns={4}
-              summaryLines={4}
-              padding="md"
-              background="charcoal"
-              emptyMessage=""
-            />
+            <Section padding="md" background="charcoal">
+              <SectionHeading as="h2" size="sm">
+                {s.accountSavedCreatorsHeading}
+              </SectionHeading>
+              <ul className={FEED_GRID}>
+                {savedCreators.map((creator) => (
+                  <SavedItemRow
+                    key={creator._id}
+                    itemId={creator._id}
+                    title={creator.name ?? 'Comic Maker'}
+                    href={creator.slug ? `/creators/${creator.slug}` : null}
+                    removeLabel={s.accountRemoveLabel}
+                    thumb={
+                      <div className="bg-muted relative aspect-square w-9 shrink-0 overflow-hidden">
+                        {creator.photo && (
+                          <Image
+                            src={urlFor(creator.photo).width(72).url()}
+                            alt=""
+                            fill
+                            sizes="36px"
+                            className="object-cover"
+                          />
+                        )}
+                      </div>
+                    }
+                  />
+                ))}
+              </ul>
+            </Section>
           )}
         </>
       ) : (

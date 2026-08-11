@@ -5,6 +5,7 @@ import { Logo } from '@/components/logo'
 import { MainNav } from '@/components/main-nav'
 import { NewsletterForm } from '@/components/newsletter-form'
 import { SocialIcon } from '@/components/social-icon'
+import { auth } from '@/auth'
 import { genreOptions } from '@/lib/filters'
 import { safeFetch, GENRES_WITH_BOOKS_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
@@ -23,11 +24,13 @@ import { getSiteSettings } from '@/lib/site-settings'
  * with negative margins before.
  */
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const [settings, genresWithBooks] = await Promise.all([
+  const [settings, genresWithBooks, session] = await Promise.all([
     getSiteSettings(),
     safeFetch<string[]>(GENRES_WITH_BOOKS_QUERY, {}, []),
+    auth(),
   ])
   const navGenres = genreOptions(genresWithBooks)
+  const avatar = session?.user?.image
 
   return (
     <>
@@ -49,14 +52,26 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
           </Link>
           <div className="flex items-center gap-3 lg:gap-5">
             <MainNav nav={settings.nav} genres={navGenres} />
-            {/* Account — links to the reader home; signed-out lands on its
-                sign-in prompt, so one control serves both states. */}
+            {/* Account — links to the reader home. Signed in shows the Google
+                avatar (the "you're logged in" signal); signed out, the generic
+                icon. The image host isn't in next/image's allowlist, so it's a
+                plain <img>; there is no CSP to block it. */}
             <Link
               href="/me"
               aria-label={settings.sections.accountTitle}
-              className="text-foreground/80 hover:text-primary focus-visible:ring-ring transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              className="focus-visible:ring-ring block focus-visible:ring-2 focus-visible:outline-none"
             >
-              <CircleUser className="size-5" />
+              {avatar ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={avatar}
+                  alt=""
+                  referrerPolicy="no-referrer"
+                  className="border-primary/50 size-6 border object-cover"
+                />
+              ) : (
+                <CircleUser className="text-foreground/80 hover:text-primary size-5 transition-colors" />
+              )}
             </Link>
             {settings.discordUrl && (
               <a

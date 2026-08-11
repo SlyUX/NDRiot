@@ -604,6 +604,9 @@ export type SiteSettings = {
     accountViewCreatorLabel?: string;
     accountViewBookLabel?: string;
     accountViewMediaLabel?: string;
+    accountSavedComicsHeading?: string;
+    accountSavedCreatorsHeading?: string;
+    accountRemoveLabel?: string;
     accountSignInTitle?: string;
     accountSignInBody?: string;
     accountSignInCta?: string;
