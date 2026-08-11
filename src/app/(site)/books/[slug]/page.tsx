@@ -76,6 +76,8 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
     creator?.name ?? 'this comic maker',
   )
 
+  const buyHeading = settings.sections.buyHeading.replace('{title}', book.title)
+
   return (
     <div>
       <JsonLd
@@ -96,26 +98,44 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
         )}
       />
       <Section padding="md" innerClassName="grid gap-8 sm:grid-cols-[300px_1fr]">
-        {/* Capped on mobile so the cover doesn't fill the first screen — some
-            title/description shows above the fold. The sm grid column (300px)
-            takes over from there, so the cap is lifted. */}
-        <div className="bg-muted relative aspect-[2/3] max-w-[250px] overflow-hidden sm:max-w-none">
-          {/* Art drops below the funding bar when one is showing, so the banner
-              never covers the cover (offset matches the bar's height). */}
-          <div className={`absolute ${book.fundingUrl ? FUNDING_BAR_OFFSET : 'inset-0'}`}>
-            {book.cover && (
-              <Image
-                src={urlFor(book.cover).width(600).url()}
-                // Decorative by default — the title sits immediately beside it.
-                alt={book.cover.alt ?? ''}
-                fill
-                sizes="(max-width: 640px) 100vw, 300px"
-                className="object-cover"
-                priority
-              />
-            )}
+        {/* Cover column: the art, then the primary actions beneath it — preview
+            first, then where to get it. Capped to the cover's width on mobile so
+            the buttons line up under the art rather than spanning the page; the
+            sm grid column (300px) takes over from there. */}
+        <div className="max-w-[250px] space-y-5 sm:max-w-none">
+          <div className="bg-muted relative aspect-[2/3] overflow-hidden">
+            {/* Art drops below the funding bar when one is showing, so the banner
+                never covers the cover (offset matches the bar's height). */}
+            <div className={`absolute ${book.fundingUrl ? FUNDING_BAR_OFFSET : 'inset-0'}`}>
+              {book.cover && (
+                <Image
+                  src={urlFor(book.cover).width(600).url()}
+                  // Decorative by default — the title sits immediately beside it.
+                  alt={book.cover.alt ?? ''}
+                  fill
+                  sizes="(max-width: 640px) 100vw, 300px"
+                  className="object-cover"
+                  priority
+                />
+              )}
+            </div>
+            {book.fundingUrl && <FundingBadge url={book.fundingUrl} />}
           </div>
-          {book.fundingUrl && <FundingBadge url={book.fundingUrl} />}
+
+          {/* Preview is the primary call to action — pink, full width under the
+              cover. Default variant is bg-primary / primary-foreground (§9). */}
+          {book.previewUrl && (
+            <Button asChild className="w-full font-black tracking-wide uppercase">
+              <a href={book.previewUrl} target="_blank" rel="noopener noreferrer">
+                {settings.sections.previewCta}
+                <ExternalLink aria-hidden="true" />
+              </a>
+            </Button>
+          )}
+
+          {/* Buy/read links, beneath the preview — set apart in their own
+              charcoal panel under the "Get it here" label. */}
+          <BookLinks links={book.links} heading={buyHeading} framed />
         </div>
 
         <div className="space-y-5">
@@ -157,15 +177,6 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
             copiedLabel={settings.sections.linkCopiedLabel}
           />
           <PortableTextBody value={book.description} />
-          <BookLinks links={book.links} />
-          {book.previewUrl && (
-            <Button asChild variant="outline" className="font-bold">
-              <a href={book.previewUrl} target="_blank" rel="noopener noreferrer">
-                {settings.sections.previewCta}
-                <ExternalLink aria-hidden="true" />
-              </a>
-            </Button>
-          )}
 
           {/* The creator, nested in the detail column beside the cover rather
               than in a band of its own. */}

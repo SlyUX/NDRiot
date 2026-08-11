@@ -28,7 +28,21 @@ function labelFor(link: BookLink): string {
   }
 }
 
-export default function BookLinks({ links }: { links?: BookLink[] | null }) {
+export default function BookLinks({
+  links,
+  heading,
+  framed = false,
+}: {
+  links?: BookLink[] | null
+  /** Optional label over the links. Rendered only when links actually show. */
+  heading?: string
+  /**
+   * Wrap the block in a charcoal panel with a 15px inset, setting the links
+   * apart as their own grouped section (§9's grouped-section surface). Off by
+   * default so the component stays a bare list unless a caller asks to frame it.
+   */
+  framed?: boolean
+}) {
   if (!links?.length) return null
 
   // A past campaign is not an action — drop expired `Back` links entirely.
@@ -40,7 +54,12 @@ export default function BookLinks({ links }: { links?: BookLink[] | null }) {
   if (prominent.length === 0 && rest.length === 0) return null
 
   return (
-    <div className="space-y-3">
+    <div className={cn('space-y-3', framed && 'bg-charcoal p-[15px]')}>
+      {/* A group label, not a document heading: on the book page this block sits
+          in the cover column, which precedes the <h1> title in source order, so
+          a real heading here would land before the page's h1. A styled <p>
+          keeps the look without breaking the heading outline (§10). */}
+      {heading && <p className="text-xs font-black tracking-widest uppercase">{heading}</p>}
       {prominent.length > 0 && (
         <div className="flex flex-wrap items-start gap-3">
           {prominent.map((link) => {
