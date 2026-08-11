@@ -47,6 +47,8 @@
   --color-muted: var(--muted);
   --color-charcoal: var(--charcoal);
   --color-funding: var(--funding);
+  --color-creator: var(--creator);
+  --color-creator-foreground: var(--creator-foreground);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
@@ -92,6 +94,11 @@
   --charcoal: #2a3640;
   /* "Currently funding" badge. Black text 11.8:1 (white fails at 1.8:1). */
   --funding: #2bde73;
+  /* Darker pink — the secondary "creator / owner controls" brand color. A
+     WHITE-text surface: white 6.19:1 (clears AA), black 3.39:1 (fails). It's a
+     surface/button fill, not body text on dark (3.33:1 there). */
+  --creator: #aa336a;
+  --creator-foreground: #ffffff;
   /* zinc-400 is the floor for muted text — zinc-500 is 4.27:1 and fails AA. */
   --muted-foreground: #a1a1aa;
   --accent: #18181b;

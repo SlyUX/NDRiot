@@ -1,5 +1,6 @@
 import { signIn, signOut } from '@/auth'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 /**
  * Sign-in / sign-out controls for the intake flow.
@@ -25,7 +26,16 @@ export function SignInButton({ label, redirectTo = '/join' }: { label: string; r
   )
 }
 
-export function SignOutButton({ label, redirectTo = '/join' }: { label: string; redirectTo?: string }) {
+export function SignOutButton({
+  label,
+  redirectTo = '/join',
+  className,
+}: {
+  label: string
+  redirectTo?: string
+  /** Override the link color — e.g. white on the creator section's pink. */
+  className?: string
+}) {
   return (
     <form
       action={async () => {
@@ -35,7 +45,10 @@ export function SignOutButton({ label, redirectTo = '/join' }: { label: string; 
     >
       <button
         type="submit"
-        className="text-muted-foreground hover:text-primary focus-visible:ring-ring text-xs tracking-widest uppercase underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+        className={cn(
+          'text-muted-foreground hover:text-primary focus-visible:ring-ring text-xs tracking-widest uppercase underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none',
+          className,
+        )}
       >
         {label}
       </button>
