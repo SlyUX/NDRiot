@@ -152,6 +152,9 @@ export default async function Home({
   const featureSaved = feature && email ? await isSaved(email, feature._id) : false
   const featureSave = feature ? (
     <SaveButton
+      // Keyed by the book so Discover swapping the feature remounts the button
+      // (its saved state lives in useState, which only reads initialSaved once).
+      key={feature._id}
       itemType="book"
       itemId={feature._id}
       initialSaved={featureSaved}

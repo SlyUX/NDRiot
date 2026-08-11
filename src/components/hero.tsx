@@ -50,18 +50,29 @@ const BACKGROUND_FALLBACK = '/nd-riot-hero-bkgrd.jpg'
  * its native 2:3 (nothing cropped), with the title and blurb beside it. The
  * whole panel links to the book. Stays a two-column row down to phones.
  */
-function FeatureBook({ book, ctaLabel }: { book: HeroBook; ctaLabel: string }) {
+function FeatureBook({
+  book,
+  ctaLabel,
+  saveSlot,
+}: {
+  book: HeroBook
+  ctaLabel: string
+  saveSlot?: ReactNode
+}) {
   const preview = truncate(book.descriptionText, 280) ?? truncate(book.shortDescription, 280)
+  const href = `/books/${book.slug}`
 
+  // Not one big <Link> anymore: Save is a <button> and lives in the text column,
+  // which can't sit inside an anchor. So the cover, title, and CTA each link to
+  // the book instead; `group` keeps the whole-panel hover affordance.
   return (
-    <Link
-      href={`/books/${book.slug}`}
-      className="group focus-visible:ring-ring border-border flex h-full min-h-[13rem] flex-row overflow-hidden border bg-black/40 focus-visible:ring-2 focus-visible:outline-none sm:min-h-[26rem]"
-    >
-      {/* The cover fills the panel height and the aspect derives its width, at
-          the cover's native 2:3 so nothing is cropped — a two-column row at
-          every width. */}
-      <div className="bg-muted relative aspect-[2/3] h-full w-auto shrink-0 overflow-hidden">
+    <div className="group border-border flex h-full min-h-[13rem] flex-row overflow-hidden border bg-black/40 sm:min-h-[26rem]">
+      {/* The cover fills the panel height at its native 2:3 (nothing cropped). */}
+      <Link
+        href={href}
+        aria-label={book.title}
+        className="focus-visible:ring-ring bg-muted relative aspect-[2/3] h-full w-auto shrink-0 overflow-hidden focus-visible:ring-2 focus-visible:outline-none"
+      >
         {book.cover ? (
           <Image
             src={urlFor(book.cover).width(800).url()}
@@ -75,13 +86,11 @@ function FeatureBook({ book, ctaLabel }: { book: HeroBook; ctaLabel: string }) {
           <div className="h-full w-full" aria-hidden="true" />
         )}
         {book.fundingUrl && (
-          // A plain badge, not the linking FundingBadge: the panel already links
-          // to the book, and an anchor cannot nest inside another.
           <span className="bg-funding absolute top-2 left-2 z-10 px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-black uppercase">
             Currently Funding
           </span>
         )}
-      </div>
+      </Link>
 
       {/* pr-12 on mobile keeps the top lines clear of the Discover button in
           the panel's corner; roomy uniform padding from sm up. */}
@@ -91,9 +100,14 @@ function FeatureBook({ book, ctaLabel }: { book: HeroBook; ctaLabel: string }) {
             {book.creatorName}
           </p>
         )}
-        <h2 className="text-base leading-tight font-black tracking-tight text-white uppercase group-hover:underline sm:text-2xl lg:text-3xl">
-          {book.title}
-        </h2>
+        <Link href={href} className="focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none">
+          <h2 className="text-base leading-tight font-black tracking-tight text-white uppercase group-hover:underline sm:text-2xl lg:text-3xl">
+            {book.title}
+          </h2>
+        </Link>
+        {/* Save — in the text flow directly under the title. self-start so it
+            keeps its natural width instead of stretching the column. */}
+        {saveSlot && <div className="self-start">{saveSlot}</div>}
         {/* Only the top genre on phones, where the column is tight; the full row
             from sm up. */}
         <TaxonomyRow
@@ -108,15 +122,18 @@ function FeatureBook({ book, ctaLabel }: { book: HeroBook; ctaLabel: string }) {
             {preview}
           </p>
         )}
-        <span className="text-primary mt-1 inline-flex items-center gap-1 text-xs font-bold tracking-widest uppercase">
+        <Link
+          href={href}
+          className="text-primary focus-visible:ring-ring mt-1 inline-flex items-center gap-1 self-start text-xs font-bold tracking-widest uppercase focus-visible:ring-2 focus-visible:outline-none"
+        >
           {ctaLabel}
           <ArrowRight
             aria-hidden="true"
             className="size-3.5 transition-transform group-hover:translate-x-0.5 motion-reduce:transform-none"
           />
-        </span>
+        </Link>
       </div>
-    </Link>
+    </div>
   )
 }
 
@@ -240,10 +257,7 @@ export function Hero({ hero, feature, newItems, discoverHref, discoverLabel, sav
                     nested inside it (anchors cannot nest), over the panel's
                     top-right. */}
                 <div className="relative flex-1">
-                  <FeatureBook book={feature} ctaLabel={hero.featureCtaLabel} />
-                  {/* Save sits over the cover's lower-left, clear of the Discover
-                      control (top-right) and the funding badge (top-left). */}
-                  {saveSlot && <div className="absolute bottom-3 left-3 z-10">{saveSlot}</div>}
+                  <FeatureBook book={feature} ctaLabel={hero.featureCtaLabel} saveSlot={saveSlot} />
                   {discoverHref && (
                     <Link
                       href={discoverHref}
