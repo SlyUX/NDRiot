@@ -1,6 +1,7 @@
 import { defineType, defineField } from 'sanity'
 
 import { FORMATS, FORMAT_DESCRIPTIONS, GENRES, MATURITY_DESCRIPTIONS, MATURITY_RATINGS } from '@/lib/taxonomy'
+import { validateFeedUrl } from '../validateFeedUrl'
 import { slugField } from './slugField'
 
 export default defineType({
@@ -119,6 +120,15 @@ export default defineType({
       title: 'Website',
       type: 'url',
       description: 'Their main site or storefront.',
+    }),
+    defineField({
+      name: 'feedUrl',
+      title: 'RSS / Atom feed URL',
+      type: 'url',
+      description:
+        'Optional. Their own feed — a blog, or webcomic updates. When set, ND Riot shows their latest posts on this profile, each linking out. Validated live: it must be a real feed.',
+      validation: (rule) =>
+        rule.uri({ scheme: ['http', 'https'] }).custom((value) => validateFeedUrl(value)),
     }),
     defineField({
       name: 'socials',

@@ -2,6 +2,7 @@ import { defineType, defineField } from 'sanity'
 
 import { GENRES, MEDIA_KINDS } from '@/lib/taxonomy'
 import { CheckboxSelectAllInput } from '@/sanity/components/CheckboxSelectAllInput'
+import { validateFeedUrl } from '../validateFeedUrl'
 import { slugField } from './slugField'
 
 /**
@@ -78,6 +79,23 @@ export default defineType({
       type: 'array',
       of: [{ type: 'mediaLink' }],
       description: 'Links to the show, channel, or site.',
+    }),
+    defineField({
+      name: 'feedUrl',
+      title: 'RSS / Atom feed URL',
+      type: 'url',
+      description:
+        "Optional. The outlet's own feed. When set — and only with their consent below — ND Riot shows their latest items on this profile, each linking out. Validated live: it must be a real feed.",
+      validation: (rule) =>
+        rule.uri({ scheme: ['http', 'https'] }).custom((value) => validateFeedUrl(value)),
+    }),
+    defineField({
+      name: 'feedConsent',
+      title: 'Outlet consents to feed display',
+      type: 'boolean',
+      description:
+        'Only show their feed with permission — this is syndication by invitation, not scraping. Leave off and the feed stays hidden even if a URL is set.',
+      initialValue: false,
     }),
   ],
   preview: {

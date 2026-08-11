@@ -365,6 +365,13 @@ export default defineType({
           description: 'Over the buy/read links on a book page — e.g. "Get it here". {title} is replaced with the comic’s title if you use it.',
         }),
         defineField({
+          name: 'feedHeading',
+          title: 'Profile feed heading',
+          type: 'string',
+          description:
+            'Over a creator’s or outlet’s syndicated RSS feed on their profile. Use {name} for their name — e.g. "Latest from {name}".',
+        }),
+        defineField({
           name: 'creatorBooksHeading',
           title: "Creator page — books heading",
           type: 'string',

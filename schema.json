@@ -1724,6 +1724,20 @@
           }
         },
         "optional": true
+      },
+      "feedUrl": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
+      "feedConsent": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "boolean"
+        },
+        "optional": true
       }
     }
   },
@@ -2629,6 +2643,13 @@
         "optional": true
       },
       "website": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
+      "feedUrl": {
         "type": "objectAttribute",
         "value": {
           "type": "string"
@@ -3545,6 +3566,13 @@
               "optional": true
             },
             "buyHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "feedHeading": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

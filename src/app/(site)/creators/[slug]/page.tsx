@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 
 import { ContentCardGrid } from '@/components/content-card-grid'
+import { FeedPreview } from '@/components/feed-preview'
 import { JsonLd } from '@/components/json-ld'
 import { OrganizationLink } from '@/components/organization-link'
 import PortableTextBody from '@/components/PortableTextBody'
@@ -16,6 +17,7 @@ import { externalHref } from '@/lib/utils'
 import { Section } from '@/components/ui/section'
 import { bookToCard, favoriteToCard } from '@/lib/card-mappers'
 import { pageMetadata } from '@/lib/page-metadata'
+import { fetchFeed } from '@/lib/feed-parse'
 import { safeFetch, CREATOR_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
 import { absoluteUrl } from '@/lib/site-url'
@@ -67,6 +69,11 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
   const booksHeading = settings.sections.creatorBooksHeading.replace('{name}', firstName)
   const favoritesHeading = settings.sections.creatorFavoritesHeading.replace('{name}', firstName)
   const worksHeading = settings.sections.creatorWorksHeading.replace('{name}', firstName)
+  const feedHeading = settings.sections.feedHeading.replace('{name}', firstName)
+
+  // Their own feed (blog, webcomic updates), if they gave one and it's live.
+  // Cached for half an hour; a dead or moved feed returns null and shows nothing.
+  const feed = creator.feedUrl ? await fetchFeed(creator.feedUrl, { revalidate: 1800 }) : null
 
   return (
     <div>
@@ -218,6 +225,12 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
               </Button>
             ))}
           </div>
+        </Section>
+      )}
+
+      {feed && (
+        <Section padding="md">
+          <FeedPreview heading={feedHeading} entries={feed.entries} />
         </Section>
       )}
 

@@ -351,6 +351,8 @@ export interface SiteSettings {
     previewCta: string
     /** Heading over a book's buy/read links. `{title}` is replaced with the title. */
     buyHeading: string
+    /** Heading over a profile's syndicated feed. `{name}` → the outlet/creator name. */
+    feedHeading: string
     creatorBooksHeading: string
     creatorWorksHeading: string
     creatorOrganizationsHeading: string
@@ -695,6 +697,7 @@ const DEFAULTS: SiteSettings = {
     downloadCta: 'Download',
     previewCta: 'Read a preview (PDF)',
     buyHeading: 'Get it here',
+    feedHeading: 'Latest from {name}',
     creatorBooksHeading: '{name}’s Comics',
     creatorWorksHeading: 'Where to find {name}’s work',
     creatorOrganizationsHeading: 'Member of',

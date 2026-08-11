@@ -2,10 +2,12 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 
+import { FeedPreview } from '@/components/feed-preview'
 import { GenreBadge } from '@/components/genre-badge'
 import { ShareBar } from '@/components/share-bar'
 import { Badge } from '@/components/ui/badge'
 import { Section } from '@/components/ui/section'
+import { fetchFeed } from '@/lib/feed-parse'
 import { pageMetadata } from '@/lib/page-metadata'
 import { safeFetch, MEDIA_DETAIL_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
@@ -49,6 +51,13 @@ export default async function MediaDetailPage({ params }: { params: Promise<{ sl
   if (!media) notFound()
 
   const sections = settings.sections
+
+  // Their own feed — shown only by invitation (consent flag) and only when a
+  // feed is actually there. Cached for half an hour; a dead feed returns null.
+  const feed =
+    media.feedConsent && media.feedUrl
+      ? await fetchFeed(media.feedUrl, { revalidate: 1800 })
+      : null
 
   return (
     <Section padding="md" maxWidth="3xl">
@@ -110,6 +119,12 @@ export default async function MediaDetailPage({ params }: { params: Promise<{ sl
               </Badge>
             ))}
           </div>
+        </div>
+      )}
+
+      {feed && (
+        <div className="mt-10">
+          <FeedPreview heading={sections.feedHeading.replace('{name}', media.name)} entries={feed.entries} />
         </div>
       )}
 
