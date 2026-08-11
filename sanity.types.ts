@@ -1739,6 +1739,89 @@ export type HOME_NEW_QUERY_RESULT = Array<
 >;
 
 // Source: src/lib/queries.ts
+// Variable: FEED_EDITORIAL_QUERY
+// Query: *[_type in ["column","interview"] && defined(slug.current) && defined(publishedAt)]|order(publishedAt desc)[0...30]{  _id,_type,title,"slug":slug.current,excerpt,publishedAt,  "authorName":author->name,"interviewerName":interviewer->name}
+export type FEED_EDITORIAL_QUERY_RESULT = Array<
+  | {
+      _id: string;
+      _type: "column";
+      title: string;
+      slug: string;
+      excerpt: string | null;
+      publishedAt: string;
+      authorName: string;
+      interviewerName: null;
+    }
+  | {
+      _id: string;
+      _type: "interview";
+      title: string;
+      slug: string;
+      excerpt: string | null;
+      publishedAt: string;
+      authorName: null;
+      interviewerName: string;
+    }
+>;
+
+// Source: src/lib/queries.ts
+// Variable: FEED_COMICS_QUERY
+// Query: *[_type=="book" && defined(slug.current)]|order(_createdAt desc)[0...30]{  _id,title,"slug":slug.current,_createdAt,  "descriptionText":pt::text(description),"creatorName":creator->name,genres}
+export type FEED_COMICS_QUERY_RESULT = Array<{
+  _id: string;
+  title: string;
+  slug: string;
+  _createdAt: string;
+  descriptionText: string;
+  creatorName: string;
+  genres: Array<
+    | "Action & Adventure"
+    | "Crime & Noir"
+    | "Drama"
+    | "Fantasy"
+    | "Historical"
+    | "Horror"
+    | "Humor & Satire"
+    | "Memoir & Autobio"
+    | "Punk & Protest"
+    | "Queer"
+    | "Romance"
+    | "Sci-Fi"
+    | "Slice of Life"
+    | "Superhero"
+    | "Weird & Experimental"
+  > | null;
+}>;
+
+// Source: src/lib/queries.ts
+// Variable: FEED_MEDIA_QUERY
+// Query: *[_type=="media" && defined(slug.current)]|order(_createdAt desc)[0...30]{  _id,name,"slug":slug.current,_createdAt,about,genresCovered}
+export type FEED_MEDIA_QUERY_RESULT = Array<{
+  _id: string;
+  name: string;
+  slug: string;
+  _createdAt: string;
+  about: string | null;
+  genresCovered: Array<
+    | "Action & Adventure"
+    | "Crime & Noir"
+    | "Drama"
+    | "Fantasy"
+    | "Historical"
+    | "Horror"
+    | "Humor & Satire"
+    | "Memoir & Autobio"
+    | "Punk & Protest"
+    | "Queer"
+    | "Romance"
+    | "Sci-Fi"
+    | "Slice of Life"
+    | "Superhero"
+    | "Weird & Experimental"
+  > | null;
+}>;
+
+// Source: src/lib/queries.ts
 // Variable: DOWNLOADS_QUERY
 // Query: *[_type=="freeDownload"]|order(publishedAt desc){_id,title,"slug":slug.current,description,cover,publishedAt,"creatorName":creator->name}
 export type DOWNLOADS_QUERY_RESULT = Array<{
@@ -2234,6 +2317,9 @@ declare module "@sanity/client" {
     '*[_type=="interview" && slug.current==$slug][0]{_id,title,excerpt,body,publishedAt,cover,"interviewerName":interviewer->name,"subjectName":subject->name,"interviewer":interviewer->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}}}': INTERVIEW_QUERY_RESULT;
     '*[_type in ["column","interview"] && defined(slug.current)]|order(publishedAt desc)[0...8]{\n  _id,_type,title,"slug":slug.current,excerpt,cover,thumbnail,publishedAt,\n  "authorName":author->name,\n  "subjectName":subject->name\n}': HOME_EDITORIAL_QUERY_RESULT;
     '*[_type in ["book","creator"] && defined(slug.current)]|order(_createdAt desc)[0...6]{\n  _id,_type,"slug":slug.current,\n  title,cover,maturity,"creatorName":creator->name,\n  name,photo,location,"studioName":studio->name\n}': HOME_NEW_QUERY_RESULT;
+    '*[_type in ["column","interview"] && defined(slug.current) && defined(publishedAt)]|order(publishedAt desc)[0...30]{\n  _id,_type,title,"slug":slug.current,excerpt,publishedAt,\n  "authorName":author->name,"interviewerName":interviewer->name\n}': FEED_EDITORIAL_QUERY_RESULT;
+    '*[_type=="book" && defined(slug.current)]|order(_createdAt desc)[0...30]{\n  _id,title,"slug":slug.current,_createdAt,\n  "descriptionText":pt::text(description),"creatorName":creator->name,genres\n}': FEED_COMICS_QUERY_RESULT;
+    '*[_type=="media" && defined(slug.current)]|order(_createdAt desc)[0...30]{\n  _id,name,"slug":slug.current,_createdAt,about,genresCovered\n}': FEED_MEDIA_QUERY_RESULT;
     '*[_type=="freeDownload"]|order(publishedAt desc){_id,title,"slug":slug.current,description,cover,publishedAt,"creatorName":creator->name}': DOWNLOADS_QUERY_RESULT;
     '*[_type=="freeDownload" && slug.current==$slug][0]{_id,title,description,cover,"creatorName":creator->name,"fileUrl":file.asset->url}': DOWNLOAD_QUERY_RESULT;
     '*[_type=="book" && defined(slug.current)]._id': BOOK_IDS_QUERY_RESULT;

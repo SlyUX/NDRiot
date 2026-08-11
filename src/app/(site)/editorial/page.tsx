@@ -17,6 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description: settings.sections.editorialDescription,
     path: '/editorial',
     siteTitle: settings.siteTitle,
+    feeds: [{ url: '/feeds/editorial.xml', title: settings.sections.editorialHeading }],
   })
 }
 

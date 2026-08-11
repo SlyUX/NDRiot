@@ -5,6 +5,7 @@ import { Section } from '@/components/ui/section'
 import { mediaToCard } from '@/lib/card-mappers'
 import { safeFetch, MEDIA_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
+import { absoluteUrl } from '@/lib/site-url'
 import type { MediaSummary } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
@@ -14,6 +15,14 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `${settings.sections.mediaPageHeading} · ${settings.siteTitle}`,
     description: settings.siteDescription,
+    // Advertise the media feed for reader/browser auto-discovery.
+    alternates: {
+      types: {
+        'application/rss+xml': [
+          { url: absoluteUrl('/feeds/media.xml'), title: settings.sections.mediaPageHeading },
+        ],
+      },
+    },
   }
 }
 

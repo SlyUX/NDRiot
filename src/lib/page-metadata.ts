@@ -18,16 +18,31 @@ export function pageMetadata(input: {
   path: string
   /** The full site title from settings; the bare brand is taken from it. */
   siteTitle: string
+  /**
+   * RSS/Atom feeds this page advertises via `<link rel="alternate">`, so a
+   * browser or reader can auto-discover them. `url` is site-root-relative.
+   */
+  feeds?: { url: string; title: string }[]
 }): Metadata {
   const canonical = absoluteUrl(input.path)
   const brand = input.siteTitle.split(':')[0].trim()
   const title = `${input.title} · ${brand}`
   const description = input.description?.trim() || undefined
 
+  const alternates: Metadata['alternates'] = { canonical }
+  if (input.feeds?.length) {
+    alternates.types = {
+      'application/rss+xml': input.feeds.map((feed) => ({
+        url: absoluteUrl(feed.url),
+        title: feed.title,
+      })),
+    }
+  }
+
   return {
     title,
     description,
-    alternates: { canonical },
+    alternates,
     openGraph: { title, description, url: canonical, type: 'website' },
   }
 }

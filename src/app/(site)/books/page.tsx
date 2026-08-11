@@ -31,6 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
     description: settings.sections.booksDescription,
     path: '/books',
     siteTitle: settings.siteTitle,
+    feeds: [{ url: '/feeds/comics.xml', title: settings.sections.booksHeading }],
   })
 }
 

@@ -156,6 +156,26 @@ export const HOME_NEW_QUERY = defineQuery(`*[_type in ["book","creator"] && defi
   name,photo,location,"studioName":studio->name
 }`)
 
+/* ---------------------------------------------------- RSS feeds
+ * Item projections for ND Riot's own feeds (src/app/feeds/*.xml). Each is
+ * newest-first and capped at 30, so a growing roster never bloats a feed.
+ * Editorial orders by publishedAt (the editor's date); comics and media by
+ * _createdAt (arrival in the directory), matching the "new" framing (§3).
+ */
+export const FEED_EDITORIAL_QUERY = defineQuery(`*[_type in ["column","interview"] && defined(slug.current) && defined(publishedAt)]|order(publishedAt desc)[0...30]{
+  _id,_type,title,"slug":slug.current,excerpt,publishedAt,
+  "authorName":author->name,"interviewerName":interviewer->name
+}`)
+
+export const FEED_COMICS_QUERY = defineQuery(`*[_type=="book" && defined(slug.current)]|order(_createdAt desc)[0...30]{
+  _id,title,"slug":slug.current,_createdAt,
+  "descriptionText":pt::text(description),"creatorName":creator->name,genres
+}`)
+
+export const FEED_MEDIA_QUERY = defineQuery(`*[_type=="media" && defined(slug.current)]|order(_createdAt desc)[0...30]{
+  _id,name,"slug":slug.current,_createdAt,about,genresCovered
+}`)
+
 export const DOWNLOADS_QUERY = defineQuery(`*[_type=="freeDownload"]|order(publishedAt desc){_id,title,"slug":slug.current,description,cover,publishedAt,"creatorName":creator->name}`)
 export const DOWNLOAD_QUERY = defineQuery(`*[_type=="freeDownload" && slug.current==$slug][0]{_id,title,description,cover,"creatorName":creator->name,"fileUrl":file.asset->url}`)
 
