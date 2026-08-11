@@ -203,9 +203,9 @@ export default defineType({
         }),
         defineField({
           name: 'featuredHeading',
-          title: 'Featured book label',
+          title: 'Featured comic label',
           type: 'string',
-          description: 'Small label over the featured book — e.g. "Featured".',
+          description: 'Small label over the featured comic — e.g. "The Spinner Rack".',
         }),
         defineField({
           name: 'newHeading',
@@ -303,10 +303,17 @@ export default defineType({
         }),
         defineField({
           name: 'discoverLabel',
-          title: 'Randomise button label',
+          title: 'Randomize button label (comic makers)',
           type: 'string',
           description:
-            'Shuffles the homepage rows. Pressing it again reshuffles. e.g. "Discover".',
+            'The neutral shuffle button on the comic-makers row (icon only). Pressing it reshuffles. e.g. "Discover".',
+        }),
+        defineField({
+          name: 'spinLabel',
+          title: 'Randomize button label (comics)',
+          type: 'string',
+          description:
+            'The comics-row shuffle button — the spinner-rack metaphor, shown as text beside the icon. e.g. "Spin the rack".',
         }),
         defineField({
           name: 'searchHomeLabel',
@@ -350,6 +357,12 @@ export default defineType({
           title: 'Book preview button label',
           type: 'string',
           description: 'On a book page with a preview PDF, e.g. "Read a preview (PDF)".',
+        }),
+        defineField({
+          name: 'buyHeading',
+          title: 'Book buy-links heading',
+          type: 'string',
+          description: 'Over the buy/read links on a book page — e.g. "Get it here". {title} is replaced with the comic’s title if you use it.',
         }),
         defineField({
           name: 'creatorBooksHeading',

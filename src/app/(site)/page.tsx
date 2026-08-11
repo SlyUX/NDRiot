@@ -153,7 +153,8 @@ export default async function Home({
         collapsible
         resultCount={booksResult.total}
         searchLabel={settings.sections.searchBooksLabel}
-        discoverLabel={settings.sections.discoverLabel}
+        discoverLabel={settings.sections.spinLabel}
+        showDiscoverText
       />
     </Suspense>
   )
@@ -205,7 +206,7 @@ export default async function Home({
         feature={feature}
         newItems={newItems}
         discoverHref={feature ? `?${discoverParams.toString()}` : undefined}
-        discoverLabel={settings.sections.discoverLabel}
+        discoverLabel={settings.sections.spinLabel}
       />
 
       {/* Newsletter — a full-width pink band directly beneath the hero.

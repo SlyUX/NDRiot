@@ -70,8 +70,15 @@ export interface FilterBarProps {
   resultCount: number
   /** Placeholder for the search box. Copy, so it comes from Sanity. */
   searchLabel: string
-  /** Label for the randomise button. Omit to hide it. */
+  /** Label for the randomize button. Omit to hide it. */
   discoverLabel?: string
+  /**
+   * Show `discoverLabel` as visible text beside the icon. On for comics rows
+   * (the "Spin the rack" spinner-rack read); off elsewhere, where the button
+   * stays icon-only with the label as its accessible name. Comics-only text is
+   * the point — the metaphor doesn't fit the comic-makers row.
+   */
+  showDiscoverText?: boolean
   /**
    * URL keys this bar owns. Defaults suit a page with one bar; the homepage
    * gives its creators bar a distinct set so it never touches the comics row.
@@ -90,6 +97,7 @@ export function FilterBar({
   resultCount,
   searchLabel,
   discoverLabel,
+  showDiscoverText = false,
   control = 'chips',
   collapsible = false,
   searchParam = 'q',
@@ -222,7 +230,7 @@ export function FilterBar({
           pages — then sit inline from md up. Under `chips`, search stands alone
           and the facets are their own panel below. */}
       <div className={cn(control === 'select' && 'space-y-3')}>
-        <div className={cn(control === 'select' && 'flex flex-wrap items-center gap-2')}>
+        <div className={cn((control === 'select' || discoverLabel) && 'flex flex-wrap items-center gap-2')}>
           <div className="relative w-full max-w-xs">
             <Search
               aria-hidden="true"
@@ -239,6 +247,29 @@ export function FilterBar({
               className="focus-visible:ring-ring placeholder:text-muted-foreground w-full border border-white/20 bg-transparent py-2 pr-3 pl-9 text-sm focus-visible:ring-2 focus-visible:outline-none"
             />
           </div>
+
+          {/* Randomize sits right beside the search box — the two ways in (look
+              for something / let the rack spin one up) share a row. A neutral
+              grey action button, not a filter chip: it keeps one look no matter
+              how many times it is pressed. charcoal is the site's grey surface
+              (§9); the white icon on it is 12.4:1. On comics rows the label
+              shows as text (the spinner-rack read); elsewhere it is icon-only
+              and the label is the button's accessible name instead. */}
+          {discoverLabel && (
+            <button
+              type="button"
+              onClick={discover}
+              aria-label={showDiscoverText ? undefined : discoverLabel}
+              className="focus-visible:ring-ring bg-charcoal text-foreground hover:bg-charcoal/80 inline-flex items-center gap-1.5 border border-transparent px-3 py-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            >
+              {showDiscoverText && (
+                <span className="text-xs font-bold tracking-widest whitespace-nowrap uppercase">
+                  {discoverLabel}
+                </span>
+              )}
+              <Shuffle aria-hidden="true" strokeWidth={2.5} className="size-4" />
+            </button>
+          )}
 
           {/* Mobile-only collapse toggle — the select controls fold behind it
               below md, exactly as the chip filters do on the listing pages. */}
@@ -335,23 +366,6 @@ export function FilterBar({
               </select>
             )
           })}
-
-          {discoverLabel && (
-          <button
-            type="button"
-            onClick={discover}
-            // Icon-only, so it needs a name of its own — the CMS label supplies
-            // it (AGENTS.md §2) without printing the word on screen.
-            aria-label={discoverLabel}
-            // A neutral grey action button, not a filter chip: it keeps one look
-            // no matter how many times it is pressed. charcoal is the site's
-            // grey surface (§9); the white icon on it is 12.4:1. A 1px
-            // transparent border keeps its height in line with the selects.
-            className="focus-visible:ring-ring bg-charcoal text-foreground hover:bg-charcoal/80 border border-transparent px-3 py-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
-          >
-            <Shuffle aria-hidden="true" strokeWidth={2.5} className="size-4" />
-          </button>
-          )}
           </div>
         )}
       </div>

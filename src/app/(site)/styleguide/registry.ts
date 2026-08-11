@@ -255,7 +255,14 @@ export const componentEntries: ComponentEntry[] = [
         name: 'discoverLabel',
         type: 'string',
         description:
-          'Shows a randomise button. Re-seeds on every press, so pressing again reshuffles — and the seed lives in the URL, so a shuffled view is shareable and stable on refresh.',
+          'Shows a randomize button beside the search box. Re-seeds on every press, so pressing again reshuffles — and the seed lives in the URL, so a shuffled view is shareable and stable on refresh.',
+      },
+      {
+        name: 'showDiscoverText',
+        type: 'boolean',
+        default: 'false',
+        description:
+          'Show discoverLabel as visible text beside the icon — on for comics rows (the "Spin the rack" read), off elsewhere, where the label is the icon button\'s accessible name instead.',
       },
       {
         name: 'collapsible',

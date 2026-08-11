@@ -241,11 +241,11 @@ export function Hero({ hero, feature, newItems, discoverHref, discoverLabel }: H
                     <Link
                       href={discoverHref}
                       scroll={false}
-                      aria-label={discoverLabel ?? 'Discover'}
+                      aria-label={discoverLabel ?? 'Spin the rack'}
                       className="focus-visible:ring-ring border-border bg-background/70 text-foreground hover:bg-background absolute top-3 right-3 z-10 inline-flex items-center gap-1.5 border p-2 text-xs font-bold tracking-widest uppercase backdrop-blur transition-colors focus-visible:ring-2 focus-visible:outline-none sm:px-3 sm:py-1.5"
                     >
                       {/* Icon-only in the tight phone column; labelled from sm up. */}
-                      <span className="hidden sm:inline">{discoverLabel ?? 'Discover'}</span>
+                      <span className="hidden sm:inline">{discoverLabel ?? 'Spin the rack'}</span>
                       <Shuffle aria-hidden="true" strokeWidth={2.5} className="size-3.5" />
                     </Link>
                   )}

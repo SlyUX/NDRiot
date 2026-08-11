@@ -580,6 +580,7 @@ export type SiteSettings = {
     downloadsHeading?: string;
     genreBooksHeading?: string;
     discoverLabel?: string;
+    spinLabel?: string;
     searchHomeLabel?: string;
     searchBooksLabel?: string;
     searchCreatorsLabel?: string;
@@ -587,6 +588,7 @@ export type SiteSettings = {
     genreCreatorsHeading?: string;
     downloadCta?: string;
     previewCta?: string;
+    buyHeading?: string;
     creatorBooksHeading?: string;
     creatorWorksHeading?: string;
     creatorOrganizationsHeading?: string;

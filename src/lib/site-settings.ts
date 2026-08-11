@@ -341,11 +341,16 @@ export interface SiteSettings {
     genreCreatorsHeading: string
     everythingElseHeading: string
     discoverLabel: string
+    /** The comics-specific randomise label — the spinner-rack metaphor. Shown as
+     *  visible text on comics rows; comic-maker rows use the neutral discoverLabel. */
+    spinLabel: string
     searchHomeLabel: string
     searchBooksLabel: string
     searchCreatorsLabel: string
     downloadCta: string
     previewCta: string
+    /** Heading over a book's buy/read links. `{title}` is replaced with the title. */
+    buyHeading: string
     creatorBooksHeading: string
     creatorWorksHeading: string
     creatorOrganizationsHeading: string
@@ -442,7 +447,7 @@ const DEFAULTS: SiteSettings = {
     headline: '“The Big Two”',
     tagline: 'Elevating Independent Comics',
     featureCtaLabel: 'Read more',
-    featuredHeading: 'Featured',
+    featuredHeading: 'The Spinner Rack',
     newHeading: 'New Comics & Comic Makers',
     ctas: [
       { label: 'All Comic Makers', href: '/creators' },
@@ -683,11 +688,13 @@ const DEFAULTS: SiteSettings = {
     genreCreatorsHeading: 'Comic Makers working in this genre',
     everythingElseHeading: 'While you are here',
     discoverLabel: 'Discover',
+    spinLabel: 'Spin the rack',
     searchHomeLabel: 'Search comics and comic makers',
     searchBooksLabel: 'Search titles and comic makers',
     searchCreatorsLabel: 'Search comic makers and studios',
     downloadCta: 'Download',
     previewCta: 'Read a preview (PDF)',
+    buyHeading: 'Get it here',
     creatorBooksHeading: '{name}’s Comics',
     creatorWorksHeading: 'Where to find {name}’s work',
     creatorOrganizationsHeading: 'Member of',
