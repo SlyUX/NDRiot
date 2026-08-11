@@ -40,6 +40,7 @@ type EditProfile = {
   slug: string | null
   location: string | null
   website: string | null
+  feedUrl: string | null
   bioText: string | null
   socials: { platform: string | null; url: string | null }[] | null
   works: { label: string | null; url: string | null }[] | null
@@ -63,6 +64,7 @@ function toInitial(p: EditProfile): CreatorIntakeInitial {
     slug: p.slug ?? '',
     location: p.location ?? '',
     website: p.website ?? '',
+    feedUrl: p.feedUrl ?? '',
     bio: p.bioText ?? '',
     socials: (p.socials ?? []).map((s) => ({ platform: s.platform ?? '', url: s.url ?? '' })),
     works: (p.works ?? []).map((w) => ({ label: w.label ?? '', url: w.url ?? '' })),

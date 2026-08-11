@@ -266,7 +266,7 @@ export const INTAKE_OWNED_CREATORS_QUERY = defineQuery(
  * references as bare ids for the selects — not the display projection.
  */
 export const INTAKE_CREATOR_EDIT_QUERY = defineQuery(`*[_type=="creator" && _id==$id][0]{
-  _id,name,"slug":slug.current,location,website,
+  _id,name,"slug":slug.current,location,website,feedUrl,
   "bioText":pt::text(bio),
   socials[]{platform,url},
   works[]{label,url},
@@ -349,7 +349,8 @@ export const INTAKE_MEDIA_EDIT_QUERY = defineQuery(`*[_type=="media" && _id==$id
   "aboutText":about,
   genresCovered,pitchInfo,
   logo,"logoAlt":logo.alt,
-  links[]{label,url}
+  links[]{label,url},
+  feedUrl,feedConsent
 }`)
 
 /** Creators who list a genre, for the category pages. */

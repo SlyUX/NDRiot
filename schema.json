@@ -4269,6 +4269,20 @@
               },
               "optional": true
             },
+            "feedUrlLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "feedUrlHint": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "socialsLabel": {
               "type": "objectAttribute",
               "value": {
@@ -5044,6 +5058,27 @@
               "optional": true
             },
             "linksHint": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "feedUrlLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "feedUrlHint": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "feedConsentLabel": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

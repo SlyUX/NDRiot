@@ -56,6 +56,7 @@ export interface CreatorIntakeInitial {
   slug: string
   location: string
   website: string
+  feedUrl: string
   bio: string
   socials: { platform: string; url: string }[]
   works: { label: string; url: string }[]
@@ -691,6 +692,24 @@ export function CreatorIntakeForm({
               defaultValue={initialText('website', initial?.website) || 'https://www.'}
               className={fieldClass}
             />
+          </div>
+
+          <div className="space-y-1.5">
+            <label htmlFor="feedUrl" className={labelClass}>
+              {copy.feedUrlLabel}
+              <Optional label={copy.optionalLabel} />
+            </label>
+            <input
+              id="feedUrl"
+              name="feedUrl"
+              type="url"
+              defaultValue={initialText('feedUrl', initial?.feedUrl)}
+              aria-describedby="feedUrl-hint"
+              className={fieldClass}
+            />
+            <p id="feedUrl-hint" className={hintClass}>
+              {copy.feedUrlHint}
+            </p>
           </div>
 
           <SocialLinksField copy={copy} initial={initial?.socials} />

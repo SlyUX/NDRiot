@@ -131,6 +131,8 @@ export type CreatorIntakeSettings = {
   collabYesLabel: string
   collabNoLabel: string
   websiteLabel: string
+  feedUrlLabel: string
+  feedUrlHint: string
   socialsLabel: string
   socialsHint: string
   socialPlatformPlaceholder: string
@@ -253,6 +255,9 @@ export type MediaIntakeSettings = {
   logoAltHint: string
   linksLabel: string
   linksHint: string
+  feedUrlLabel: string
+  feedUrlHint: string
+  feedConsentLabel: string
   permissionStatement: string
   anythingElseLabel: string
   submitLabel: string
@@ -514,6 +519,9 @@ const DEFAULTS: SiteSettings = {
     collabYesLabel: 'Yes — I’m looking for collaborators',
     collabNoLabel: 'Not right now',
     websiteLabel: 'Your website',
+    feedUrlLabel: 'Your RSS / Atom feed',
+    feedUrlHint:
+      'Optional. A blog or webcomic feed — we’ll show your latest posts on your profile, each linking back to you. We check the link is a real feed.',
     socialsLabel: 'Social links',
     socialsHint: 'Pick a platform and enter just your account name — we build the link. Add a row for each.',
     socialPlatformPlaceholder: 'Choose a platform',
@@ -645,6 +653,10 @@ const DEFAULTS: SiteSettings = {
     logoAltHint: 'For readers who can’t see it. Skip for a plain wordmark.',
     linksLabel: 'Where to find it',
     linksHint: 'Links to the show, channel, or site. One per row: a label, then its link.',
+    feedUrlLabel: 'Your RSS / Atom feed',
+    feedUrlHint:
+      'Optional. Your outlet’s feed. With your consent below, we’ll show your latest items on your ND Riot profile, each linking back to you. We check the link is a real feed.',
+    feedConsentLabel: 'Show my outlet’s latest feed items on our ND Riot profile.',
     permissionStatement:
       'I represent this outlet and consent to it being listed on ND Riot as an independent resource.',
     anythingElseLabel: 'Anything else?',

@@ -680,6 +680,8 @@ export default defineType({
         defineField({ name: 'collabYesLabel', title: 'Collaboration — yes option', type: 'string' }),
         defineField({ name: 'collabNoLabel', title: 'Collaboration — no option', type: 'string' }),
         defineField({ name: 'websiteLabel', title: 'Website label', type: 'string' }),
+        defineField({ name: 'feedUrlLabel', title: 'Feed URL label', type: 'string' }),
+        defineField({ name: 'feedUrlHint', title: 'Feed URL hint', type: 'string' }),
         defineField({ name: 'socialsLabel', title: 'Socials label', type: 'string' }),
         defineField({
           name: 'socialsHint',
@@ -883,6 +885,9 @@ export default defineType({
         defineField({ name: 'logoAltHint', title: 'Logo description hint', type: 'string' }),
         defineField({ name: 'linksLabel', title: 'Links label', type: 'string' }),
         defineField({ name: 'linksHint', title: 'Links hint', type: 'string' }),
+        defineField({ name: 'feedUrlLabel', title: 'Feed URL label', type: 'string' }),
+        defineField({ name: 'feedUrlHint', title: 'Feed URL hint', type: 'string' }),
+        defineField({ name: 'feedConsentLabel', title: 'Feed consent checkbox label', type: 'string' }),
         defineField({ name: 'permissionStatement', title: 'Permission checkbox statement', type: 'text', rows: 2 }),
         defineField({ name: 'anythingElseLabel', title: 'Anything-else label', type: 'string' }),
         defineField({ name: 'submitLabel', title: 'Submit button label', type: 'string' }),

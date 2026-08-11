@@ -35,6 +35,8 @@ type EditMedia = {
   logo: SanityImage | null
   logoAlt: string | null
   links: { label: string | null; url: string | null }[] | null
+  feedUrl: string | null
+  feedConsent: boolean | null
 }
 
 function toInitial(m: EditMedia): MediaIntakeInitial {
@@ -49,6 +51,8 @@ function toInitial(m: EditMedia): MediaIntakeInitial {
     logo: m.logo ?? null,
     logoAlt: m.logoAlt ?? '',
     links: (m.links ?? []).map((l) => ({ label: l.label ?? '', url: l.url ?? '' })),
+    feedUrl: m.feedUrl ?? '',
+    feedConsent: m.feedConsent ?? false,
   }
 }
 

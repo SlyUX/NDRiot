@@ -691,6 +691,8 @@ export type SiteSettings = {
     collabYesLabel?: string;
     collabNoLabel?: string;
     websiteLabel?: string;
+    feedUrlLabel?: string;
+    feedUrlHint?: string;
     socialsLabel?: string;
     socialsHint?: string;
     socialPlatformPlaceholder?: string;
@@ -804,6 +806,9 @@ export type SiteSettings = {
     logoAltHint?: string;
     linksLabel?: string;
     linksHint?: string;
+    feedUrlLabel?: string;
+    feedUrlHint?: string;
+    feedConsentLabel?: string;
     permissionStatement?: string;
     anythingElseLabel?: string;
     submitLabel?: string;
@@ -1988,13 +1993,14 @@ export type INTAKE_OWNED_CREATORS_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: INTAKE_CREATOR_EDIT_QUERY
-// Query: *[_type=="creator" && _id==$id][0]{  _id,name,"slug":slug.current,location,website,  "bioText":pt::text(bio),  socials[]{platform,url},  works[]{label,url},  genres,formats,openToCollaboration,  photo,"photoAlt":photo.alt,  "studioId":studio._ref,  "studioName":studio->name,  "studioWebsite":studio->website,  "studioLogo":studio->logo,  "orgIds":organizations[]._ref}
+// Query: *[_type=="creator" && _id==$id][0]{  _id,name,"slug":slug.current,location,website,feedUrl,  "bioText":pt::text(bio),  socials[]{platform,url},  works[]{label,url},  genres,formats,openToCollaboration,  photo,"photoAlt":photo.alt,  "studioId":studio._ref,  "studioName":studio->name,  "studioWebsite":studio->website,  "studioLogo":studio->logo,  "orgIds":organizations[]._ref}
 export type INTAKE_CREATOR_EDIT_QUERY_RESULT = {
   _id: string;
   name: string;
   slug: string;
   location: string | null;
   website: string | null;
+  feedUrl: string | null;
   bioText: string;
   socials: Array<{
     platform:
@@ -2229,7 +2235,7 @@ export type INTAKE_OWNED_MEDIA_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: INTAKE_MEDIA_EDIT_QUERY
-// Query: *[_type=="media" && _id==$id][0]{  _id,name,"slug":slug.current,kinds,  "aboutText":about,  genresCovered,pitchInfo,  logo,"logoAlt":logo.alt,  links[]{label,url}}
+// Query: *[_type=="media" && _id==$id][0]{  _id,name,"slug":slug.current,kinds,  "aboutText":about,  genresCovered,pitchInfo,  logo,"logoAlt":logo.alt,  links[]{label,url},  feedUrl,feedConsent}
 export type INTAKE_MEDIA_EDIT_QUERY_RESULT = {
   _id: string;
   name: string;
@@ -2262,6 +2268,8 @@ export type INTAKE_MEDIA_EDIT_QUERY_RESULT = {
     label: string | null;
     url: string;
   }> | null;
+  feedUrl: string | null;
+  feedConsent: boolean | null;
 } | null;
 
 // Source: src/lib/queries.ts
@@ -2337,7 +2345,7 @@ declare module "@sanity/client" {
     '*[_type=="creator"]._id': INTAKE_CREATOR_IDS_QUERY_RESULT;
     '*[_type=="creator" && defined(slug.current)]|order(name asc){_id,name}': INTAKE_CREATORS_QUERY_RESULT;
     '*[_type=="creator" && _id in $ids && defined(slug.current)]|order(name asc){_id,name}': INTAKE_OWNED_CREATORS_QUERY_RESULT;
-    '*[_type=="creator" && _id==$id][0]{\n  _id,name,"slug":slug.current,location,website,\n  "bioText":pt::text(bio),\n  socials[]{platform,url},\n  works[]{label,url},\n  genres,formats,openToCollaboration,\n  photo,"photoAlt":photo.alt,\n  "studioId":studio._ref,\n  "studioName":studio->name,\n  "studioWebsite":studio->website,\n  "studioLogo":studio->logo,\n  "orgIds":organizations[]._ref\n}': INTAKE_CREATOR_EDIT_QUERY_RESULT;
+    '*[_type=="creator" && _id==$id][0]{\n  _id,name,"slug":slug.current,location,website,feedUrl,\n  "bioText":pt::text(bio),\n  socials[]{platform,url},\n  works[]{label,url},\n  genres,formats,openToCollaboration,\n  photo,"photoAlt":photo.alt,\n  "studioId":studio._ref,\n  "studioName":studio->name,\n  "studioWebsite":studio->website,\n  "studioLogo":studio->logo,\n  "orgIds":organizations[]._ref\n}': INTAKE_CREATOR_EDIT_QUERY_RESULT;
     '*[_type=="book"]._id': INTAKE_BOOK_IDS_QUERY_RESULT;
     '*[_type=="book" && creator._ref in $ids && defined(slug.current)]|order(title asc){\n    _id,title,"creatorName":creator->name\n  }': INTAKE_OWNED_BOOKS_QUERY_RESULT;
     '*[_type=="book" && _id==$id][0]{\n  _id,title,"slug":slug.current,\n  "creatorId":creator._ref,\n  genres,format,maturity,status,issueCount,\n  shortDescription,\n  "descriptionText":pt::text(description),\n  cover,"coverAlt":cover.alt,\n  previewUrl,\n  links[]{kind,label,url,endDate}\n}': INTAKE_BOOK_EDIT_QUERY_RESULT;
@@ -2346,7 +2354,7 @@ declare module "@sanity/client" {
     '*[_type=="media" && slug.current==$slug][0]{\n  _id,name,kinds,logo,about,genresCovered,pitchInfo,feedUrl,feedConsent,\n  links[]{label,url}\n}': MEDIA_DETAIL_QUERY_RESULT;
     '*[_type=="media"]._id': INTAKE_MEDIA_IDS_QUERY_RESULT;
     '*[_type=="media" && _id in $ids && defined(slug.current)]|order(name asc){_id,name}': INTAKE_OWNED_MEDIA_QUERY_RESULT;
-    '*[_type=="media" && _id==$id][0]{\n  _id,name,"slug":slug.current,kinds,\n  "aboutText":about,\n  genresCovered,pitchInfo,\n  logo,"logoAlt":logo.alt,\n  links[]{label,url}\n}': INTAKE_MEDIA_EDIT_QUERY_RESULT;
+    '*[_type=="media" && _id==$id][0]{\n  _id,name,"slug":slug.current,kinds,\n  "aboutText":about,\n  genresCovered,pitchInfo,\n  logo,"logoAlt":logo.alt,\n  links[]{label,url},\n  feedUrl,feedConsent\n}': INTAKE_MEDIA_EDIT_QUERY_RESULT;
     '{\n  "items": *[_type=="creator" && $genre in genres]|order(name asc)[0...$limit]{\n    _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,\n    "bioText":pt::text(bio),\n    studio->{_id,name,"slug":slug.current,website,logo}\n  },\n  "total": count(*[_type=="creator" && $genre in genres])\n}': GENRE_CREATORS_QUERY_RESULT;
   }
 }

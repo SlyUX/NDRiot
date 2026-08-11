@@ -42,6 +42,8 @@ export interface MediaIntakeInitial {
   logo: SanityImage | null
   logoAlt: string
   links: { label: string; url: string }[]
+  feedUrl: string
+  feedConsent: boolean
 }
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
@@ -368,6 +370,37 @@ export function MediaIntakeForm({
             removeLabel={common.workRemoveLabel}
             initial={initial?.links.map((l) => ({ left: l.label, right: l.url }))}
           />
+
+          <div className="space-y-1.5">
+            <label htmlFor="feedUrl" className={labelClass}>
+              {copy.feedUrlLabel}
+              <Optional label={common.optionalLabel} />
+            </label>
+            <input
+              id="feedUrl"
+              name="feedUrl"
+              type="url"
+              defaultValue={text('feedUrl', initial?.feedUrl)}
+              aria-invalid={Boolean(errors.feedUrl)}
+              aria-describedby="feedUrl-hint"
+              className={fieldClass}
+            />
+            <p id="feedUrl-hint" className={hintClass}>
+              {copy.feedUrlHint}
+            </p>
+            {errors.feedUrl && <p className="text-destructive text-xs">{errors.feedUrl}</p>}
+
+            <label className="flex items-start gap-3 pt-1 text-sm">
+              <input
+                type="checkbox"
+                name="feedConsent"
+                value="yes"
+                defaultChecked={initial?.feedConsent}
+                className="mt-0.5 size-4 accent-[var(--primary)]"
+              />
+              <span>{copy.feedConsentLabel}</span>
+            </label>
+          </div>
         </fieldset>
 
         {/* — Permission — */}

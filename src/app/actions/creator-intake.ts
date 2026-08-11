@@ -12,6 +12,7 @@ import {
   toPortableText,
 } from '@/lib/intake/mapping'
 import { uploadImageFile } from '@/lib/intake/uploads'
+import { fetchFeed } from '@/lib/feed-parse'
 import { INTAKE_CREATOR_IDS_QUERY, INTAKE_ORGANIZATIONS_QUERY } from '@/lib/queries'
 import { auth } from '@/auth'
 import { ownsCreator, recordOwnership } from '@/sanity/ownership-client'
@@ -35,7 +36,7 @@ import { getWriteClient } from '@/sanity/write-client'
  *    matching the importer's update path, preserving identity (name/slug).
  */
 
-type FieldName = 'name' | 'bio' | 'permission'
+type FieldName = 'name' | 'bio' | 'permission' | 'feedUrl'
 
 export type CreatorIntakeState = {
   status: 'idle' | 'success' | 'error'
@@ -47,6 +48,7 @@ export type CreatorIntakeState = {
     slug: string
     location: string
     website: string
+    feedUrl: string
     photoAlt: string
     anythingElse: string
   }
@@ -188,6 +190,7 @@ export async function submitCreator(
     slug: String(formData.get('slug') ?? '').trim(),
     location: String(formData.get('location') ?? '').trim(),
     website: String(formData.get('website') ?? '').trim(),
+    feedUrl: String(formData.get('feedUrl') ?? '').trim(),
     photoAlt: String(formData.get('photoAlt') ?? '').trim(),
     anythingElse: String(formData.get('anythingElse') ?? '').trim(),
   }
@@ -209,6 +212,13 @@ export async function submitCreator(
     fieldErrors.bio = 'That’s longer than we can store — please trim it.'
   if (!isYes(String(formData.get('permission') ?? '')))
     fieldErrors.permission = 'We can only list work you confirm you have the right to share.'
+
+  // Feed URL is optional; when given, it must be a valid address AND actually
+  // resolve to a real RSS/Atom feed (same server-side check the Studio uses).
+  const feedUrl = normalizeUrl(values.feedUrl)
+  if (values.feedUrl && !feedUrl) fieldErrors.feedUrl = 'That doesn’t look like a valid web address.'
+  else if (feedUrl && !(await fetchFeed(feedUrl)))
+    fieldErrors.feedUrl = 'No RSS or Atom feed found at this address.'
 
   if (Object.keys(fieldErrors).length > 0) {
     return { status: 'error', fieldErrors, values }
@@ -340,6 +350,7 @@ export async function submitCreator(
   }
   if (values.location) fields.location = values.location
   if (website) fields.website = website
+  if (feedUrl) fields.feedUrl = feedUrl
   if (values.bio) fields.bio = toPortableText(values.bio)
   const socials = buildSocials(
     formData.getAll('socialPlatform').map(String),

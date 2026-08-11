@@ -2,8 +2,9 @@
 
 import { GENRES, MEDIA_KINDS } from '@/lib/taxonomy'
 import { honeypotTripped, rateLimited, submittedTooFast } from '@/lib/intake/anti-spam'
-import { buildMediaLinks, isYes, matchTaxonomy, slugify } from '@/lib/intake/mapping'
+import { buildMediaLinks, isYes, matchTaxonomy, normalizeUrl, slugify } from '@/lib/intake/mapping'
 import { uploadImageFile } from '@/lib/intake/uploads'
+import { fetchFeed } from '@/lib/feed-parse'
 import { INTAKE_MEDIA_IDS_QUERY } from '@/lib/queries'
 import { auth } from '@/auth'
 import { ownsDoc, recordOwnership } from '@/sanity/ownership-client'
@@ -16,7 +17,7 @@ import { getWriteClient } from '@/sanity/write-client'
  * its own record (recorded on create, re-checked fail-closed on edit).
  */
 
-type FieldName = 'name' | 'kinds' | 'permission'
+type FieldName = 'name' | 'kinds' | 'permission' | 'feedUrl'
 
 export type MediaIntakeState = {
   status: 'idle' | 'success' | 'error'
@@ -28,6 +29,7 @@ export type MediaIntakeState = {
     about: string
     pitchInfo: string
     logoAlt: string
+    feedUrl: string
     anythingElse: string
   }
 }
@@ -59,6 +61,7 @@ export async function submitMedia(
     about: String(formData.get('about') ?? '').trim(),
     pitchInfo: String(formData.get('pitchInfo') ?? '').trim(),
     logoAlt: String(formData.get('logoAlt') ?? '').trim(),
+    feedUrl: String(formData.get('feedUrl') ?? '').trim(),
     anythingElse: String(formData.get('anythingElse') ?? '').trim(),
   }
 
@@ -76,6 +79,13 @@ export async function submitMedia(
   if (!kinds.length) fieldErrors.kinds = 'Please choose at least one kind of media.'
   if (!isYes(String(formData.get('permission') ?? '')))
     fieldErrors.permission = 'Please confirm you represent this outlet and consent to being listed.'
+
+  // Feed URL is optional; when given, it must be a valid address AND actually
+  // resolve to a real RSS/Atom feed (same server-side check the Studio uses).
+  const feedUrl = normalizeUrl(values.feedUrl)
+  if (values.feedUrl && !feedUrl) fieldErrors.feedUrl = 'That doesn’t look like a valid web address.'
+  else if (feedUrl && !(await fetchFeed(feedUrl)))
+    fieldErrors.feedUrl = 'No RSS or Atom feed found at this address.'
 
   if (Object.keys(fieldErrors).length > 0) {
     return { status: 'error', fieldErrors, values }
@@ -146,6 +156,9 @@ export async function submitMedia(
   if (values.pitchInfo) fields.pitchInfo = values.pitchInfo.slice(0, LIMITS.pitch)
   if (genresCovered.length) fields.genresCovered = genresCovered
   if (links.length) fields.links = links
+  if (feedUrl) fields.feedUrl = feedUrl
+  // A boolean is definitive — always written, so unchecking withdraws consent.
+  fields.feedConsent = isYes(String(formData.get('feedConsent') ?? ''))
   if (logoAssetId) {
     fields.logo = {
       _type: 'imageWithAlt',
