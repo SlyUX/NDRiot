@@ -371,6 +371,13 @@ export default defineType({
           description:
             'Over a creator’s or outlet’s syndicated RSS feed on their profile. Use {name} for their name — e.g. "Latest from {name}".',
         }),
+        defineField({ name: 'saveLabel', title: 'Save button label', type: 'string', description: 'The bookmark toggle — e.g. "Save".' }),
+        defineField({ name: 'savedLabel', title: 'Saved button label', type: 'string', description: 'The bookmark toggle once saved — e.g. "Saved".' }),
+        defineField({ name: 'accountTitle', title: 'Reader home — title', type: 'string', description: 'Heading of the signed-in reader page (/me) — e.g. "Your ND Riot".' }),
+        defineField({ name: 'accountListingsHeading', title: 'Reader home — your listings heading', type: 'string', description: 'Over the docs a signed-in owner can manage.' }),
+        defineField({ name: 'accountSignInTitle', title: 'Reader home — signed-out title', type: 'string' }),
+        defineField({ name: 'accountSignInBody', title: 'Reader home — signed-out body', type: 'text', rows: 2 }),
+        defineField({ name: 'accountSignInCta', title: 'Reader home — sign-in button', type: 'string' }),
         defineField({
           name: 'creatorBooksHeading',
           title: "Creator page — books heading",
@@ -470,6 +477,7 @@ export default defineType({
           title: 'No creators match the filters',
           type: 'string',
         }),
+        defineField({ name: 'saved', title: 'Nothing saved yet', type: 'string', description: 'Empty state on the reader home when nothing is bookmarked.' }),
         defineField({ name: 'columns', title: 'No columns', type: 'string' }),
         defineField({ name: 'interviews', title: 'No interviews', type: 'string' }),
         defineField({ name: 'downloads', title: 'No downloads', type: 'string' }),

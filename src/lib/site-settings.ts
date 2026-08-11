@@ -358,6 +358,15 @@ export interface SiteSettings {
     buyHeading: string
     /** Heading over a profile's syndicated feed. `{name}` → the outlet/creator name. */
     feedHeading: string
+    /** SaveButton — the reader's explicit bookmark toggle (§3). */
+    saveLabel: string
+    savedLabel: string
+    /** The signed-in reader home (/me). */
+    accountTitle: string
+    accountListingsHeading: string
+    accountSignInTitle: string
+    accountSignInBody: string
+    accountSignInCta: string
     creatorBooksHeading: string
     creatorWorksHeading: string
     creatorOrganizationsHeading: string
@@ -387,6 +396,7 @@ export interface SiteSettings {
     interviews: string
     downloads: string
     media: string
+    saved: string
   }
   nav: NavItem[]
 }
@@ -710,6 +720,14 @@ const DEFAULTS: SiteSettings = {
     previewCta: 'Read a preview (PDF)',
     buyHeading: 'Get it here',
     feedHeading: 'Latest from {name}',
+    saveLabel: 'Save',
+    savedLabel: 'Saved',
+    accountTitle: 'Your ND Riot',
+    accountListingsHeading: 'Your listings',
+    accountSignInTitle: 'Sign in to save comics and makers',
+    accountSignInBody:
+      'ND Riot uses Google sign-in — it only confirms it’s you, and your saves stay private.',
+    accountSignInCta: 'Sign in with Google',
     creatorBooksHeading: '{name}’s Comics',
     creatorWorksHeading: 'Where to find {name}’s work',
     creatorOrganizationsHeading: 'Member of',
@@ -741,6 +759,7 @@ const DEFAULTS: SiteSettings = {
     interviews: 'No interviews yet.',
     downloads: 'No downloads yet.',
     media: 'No media listed yet.',
+    saved: 'Nothing saved yet — tap Save on any comic or maker and it lands here.',
   },
   // Comics and Comic Makers are plain top-level links straight to their
   // listings — the on-page filters cover browsing, so the old genre mega-menu

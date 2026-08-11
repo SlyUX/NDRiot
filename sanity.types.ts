@@ -593,6 +593,13 @@ export type SiteSettings = {
     previewCta?: string;
     buyHeading?: string;
     feedHeading?: string;
+    saveLabel?: string;
+    savedLabel?: string;
+    accountTitle?: string;
+    accountListingsHeading?: string;
+    accountSignInTitle?: string;
+    accountSignInBody?: string;
+    accountSignInCta?: string;
     creatorBooksHeading?: string;
     creatorWorksHeading?: string;
     creatorOrganizationsHeading?: string;
@@ -618,6 +625,7 @@ export type SiteSettings = {
     genreCreators?: string;
     filteredBooks?: string;
     filteredCreators?: string;
+    saved?: string;
     columns?: string;
     interviews?: string;
     downloads?: string;
@@ -1749,6 +1757,133 @@ export type HOME_NEW_QUERY_RESULT = Array<
 >;
 
 // Source: src/lib/queries.ts
+// Variable: SAVED_BOOKS_QUERY
+// Query: *[_type=="book" && _id in $ids && defined(slug.current)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}
+export type SAVED_BOOKS_QUERY_RESULT = Array<{
+  _id: string;
+  title: string;
+  slug: string;
+  status: "Complete" | "Ongoing" | "Upcoming" | null;
+  genres: Array<
+    | "Action & Adventure"
+    | "Crime & Noir"
+    | "Drama"
+    | "Fantasy"
+    | "Historical"
+    | "Horror"
+    | "Humor & Satire"
+    | "Memoir & Autobio"
+    | "Punk & Protest"
+    | "Queer"
+    | "Romance"
+    | "Sci-Fi"
+    | "Slice of Life"
+    | "Superhero"
+    | "Weird & Experimental"
+  > | null;
+  format:
+    | "Anthology"
+    | "Collected Edition"
+    | "Graphic Novel"
+    | "Minicomic"
+    | "One-Shot"
+    | "Single Issue"
+    | "Webcomic"
+    | "Zine"
+    | null;
+  maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
+  cover: ImageWithAlt | null;
+  descriptionText: string;
+  fundingUrl: string | null;
+  creatorName: string;
+}>;
+
+// Source: src/lib/queries.ts
+// Variable: SAVED_CREATORS_QUERY
+// Query: *[_type=="creator" && _id in $ids && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,location,photo,genres,openToCollaboration,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}
+export type SAVED_CREATORS_QUERY_RESULT = Array<{
+  _id: string;
+  name: string;
+  slug: string;
+  location: string | null;
+  photo: ImageWithAlt | null;
+  genres: Array<
+    | "Action & Adventure"
+    | "Crime & Noir"
+    | "Drama"
+    | "Fantasy"
+    | "Historical"
+    | "Horror"
+    | "Humor & Satire"
+    | "Memoir & Autobio"
+    | "Punk & Protest"
+    | "Queer"
+    | "Romance"
+    | "Sci-Fi"
+    | "Slice of Life"
+    | "Superhero"
+    | "Weird & Experimental"
+  > | null;
+  openToCollaboration: boolean | null;
+  bioText: string;
+  studio: {
+    _id: string;
+    name: string;
+    slug: string;
+    website: string | null;
+    logo: ImageWithAlt | null;
+  } | null;
+}>;
+
+// Source: src/lib/queries.ts
+// Variable: OWNED_DOCS_QUERY
+// Query: *[_id in $ids && defined(slug.current)]{_id,_type,name,"slug":slug.current}|order(name asc)
+export type OWNED_DOCS_QUERY_RESULT = Array<
+  | {
+      _id: string;
+      _type: "book";
+      name: null;
+      slug: string;
+    }
+  | {
+      _id: string;
+      _type: "column";
+      name: null;
+      slug: string;
+    }
+  | {
+      _id: string;
+      _type: "creator";
+      name: string;
+      slug: string;
+    }
+  | {
+      _id: string;
+      _type: "freeDownload";
+      name: null;
+      slug: string;
+    }
+  | {
+      _id: string;
+      _type: "interview";
+      name: null;
+      slug: string;
+    }
+  | {
+      _id: string;
+      _type: "media";
+      name: string;
+      slug: string;
+    }
+  | {
+      _id: string;
+      _type: "organization";
+      name: string;
+      slug: string;
+    }
+>;
+
+// Source: src/lib/queries.ts
 // Variable: FEED_EDITORIAL_QUERY
 // Query: *[_type in ["column","interview"] && defined(slug.current) && defined(publishedAt)]|order(publishedAt desc)[0...30]{  _id,_type,title,"slug":slug.current,excerpt,publishedAt,  "authorName":author->name,"interviewerName":interviewer->name}
 export type FEED_EDITORIAL_QUERY_RESULT = Array<
@@ -2332,6 +2467,9 @@ declare module "@sanity/client" {
     '*[_type=="interview" && slug.current==$slug][0]{_id,title,excerpt,body,publishedAt,cover,"interviewerName":interviewer->name,"subjectName":subject->name,"interviewer":interviewer->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}}}': INTERVIEW_QUERY_RESULT;
     '*[_type in ["column","interview"] && defined(slug.current)]|order(publishedAt desc)[0...8]{\n  _id,_type,title,"slug":slug.current,excerpt,cover,thumbnail,publishedAt,\n  "authorName":author->name,\n  "subjectName":subject->name\n}': HOME_EDITORIAL_QUERY_RESULT;
     '*[_type in ["book","creator"] && defined(slug.current)]|order(_createdAt desc)[0...6]{\n  _id,_type,"slug":slug.current,\n  title,cover,maturity,"creatorName":creator->name,\n  name,photo,location,"studioName":studio->name\n}': HOME_NEW_QUERY_RESULT;
+    '*[_type=="book" && _id in $ids && defined(slug.current)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}': SAVED_BOOKS_QUERY_RESULT;
+    '*[_type=="creator" && _id in $ids && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,location,photo,genres,openToCollaboration,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}': SAVED_CREATORS_QUERY_RESULT;
+    '*[_id in $ids && defined(slug.current)]{_id,_type,name,"slug":slug.current}|order(name asc)': OWNED_DOCS_QUERY_RESULT;
     '*[_type in ["column","interview"] && defined(slug.current) && defined(publishedAt)]|order(publishedAt desc)[0...30]{\n  _id,_type,title,"slug":slug.current,excerpt,publishedAt,\n  "authorName":author->name,"interviewerName":interviewer->name\n}': FEED_EDITORIAL_QUERY_RESULT;
     '*[_type=="book" && defined(slug.current)]|order(_createdAt desc)[0...30]{\n  _id,title,"slug":slug.current,_createdAt,\n  "descriptionText":pt::text(description),"creatorName":creator->name,genres\n}': FEED_COMICS_QUERY_RESULT;
     '*[_type=="media" && defined(slug.current)]|order(_createdAt desc)[0...30]{\n  _id,name,"slug":slug.current,_createdAt,about,genresCovered\n}': FEED_MEDIA_QUERY_RESULT;

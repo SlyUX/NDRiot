@@ -28,6 +28,7 @@ export default async function JoinHubPage() {
     { label: j.creatorsLabel, desc: j.creatorsDesc, href: '/join/creators' },
     { label: j.mediaLabel, desc: j.mediaDesc, href: '/join/media' },
     { label: j.contactLabel, desc: j.contactDesc, href: '/contact' },
+    { label: j.readersLabel, desc: j.readersDesc, href: '/me' },
   ]
 
   return (
@@ -49,21 +50,6 @@ export default async function JoinHubPage() {
             </Link>
           </li>
         ))}
-
-        {/* Reader profiles aren't built yet — a real card, no destination. */}
-        <li>
-          <div className="border-primary/10 flex h-full flex-col border border-dashed p-6">
-            <span className="flex items-center gap-2">
-              <span className="text-muted-foreground text-xl font-black tracking-tighter uppercase">
-                {j.readersLabel}
-              </span>
-              <span className="border-muted-foreground/40 text-muted-foreground border px-1.5 py-0.5 text-[0.625rem] font-semibold tracking-widest uppercase">
-                {j.readersBadge}
-              </span>
-            </span>
-            <span className="text-muted-foreground mt-2 text-sm">{j.readersDesc}</span>
-          </div>
-        </li>
       </ul>
     </Section>
   )

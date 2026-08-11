@@ -156,6 +156,17 @@ export const HOME_NEW_QUERY = defineQuery(`*[_type in ["book","creator"] && defi
   name,photo,location,"studioName":studio->name
 }`)
 
+/* ---------------------------------------------------- reader saves (/me)
+ * Resolve a signed-in reader's saved ids back to card-shaped summaries. Same
+ * projections as BOOKS_QUERY / CREATORS_QUERY so the cards match everywhere.
+ */
+export const SAVED_BOOKS_QUERY = defineQuery(`*[_type=="book" && _id in $ids && defined(slug.current)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}`)
+
+export const SAVED_CREATORS_QUERY = defineQuery(`*[_type=="creator" && _id in $ids && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,location,photo,genres,openToCollaboration,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}`)
+
+/** The docs a signed-in owner can manage — creators and media they own. */
+export const OWNED_DOCS_QUERY = defineQuery(`*[_id in $ids && defined(slug.current)]{_id,_type,name,"slug":slug.current}|order(name asc)`)
+
 /* ---------------------------------------------------- RSS feeds
  * Item projections for ND Riot's own feeds (src/app/feeds/*.xml). Each is
  * newest-first and capped at 30, so a growing roster never bloats a feed.

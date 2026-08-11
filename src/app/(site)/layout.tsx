@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Mail } from 'lucide-react'
+import { CircleUser, Mail } from 'lucide-react'
 
 import { Logo } from '@/components/logo'
 import { MainNav } from '@/components/main-nav'
@@ -49,6 +49,15 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
           </Link>
           <div className="flex items-center gap-3 lg:gap-5">
             <MainNav nav={settings.nav} genres={navGenres} />
+            {/* Account — links to the reader home; signed-out lands on its
+                sign-in prompt, so one control serves both states. */}
+            <Link
+              href="/me"
+              aria-label={settings.sections.accountTitle}
+              className="text-foreground/80 hover:text-primary focus-visible:ring-ring transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            >
+              <CircleUser className="size-5" />
+            </Link>
             {settings.discordUrl && (
               <a
                 href={settings.discordUrl}

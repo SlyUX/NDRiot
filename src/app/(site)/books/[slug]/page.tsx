@@ -9,11 +9,14 @@ import { ContentCardGrid } from '@/components/content-card-grid'
 import { JsonLd } from '@/components/json-ld'
 import PortableTextBody from '@/components/PortableTextBody'
 import { GenreBadge } from '@/components/genre-badge'
+import { SaveButton } from '@/components/save-button'
 import { SectionHeading } from '@/components/section-heading'
 import { ShareBar } from '@/components/share-bar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Section } from '@/components/ui/section'
+import { auth } from '@/auth'
+import { isSaved } from '@/sanity/reader-client'
 import { bookToCard } from '@/lib/card-mappers'
 import { pageMetadata } from '@/lib/page-metadata'
 import { safeFetch, BOOK_QUERY } from '@/lib/queries'
@@ -48,12 +51,16 @@ export async function generateMetadata({
 
 export default async function BookPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const [book, settings] = await Promise.all([
+  const [book, settings, session] = await Promise.all([
     safeFetch<BookDetail | null>(BOOK_QUERY, { slug }, null),
     getSiteSettings(),
+    auth(),
   ])
 
   if (!book) notFound()
+
+  const email = session?.user?.email
+  const saved = email ? await isSaved(email, book._id) : false
 
   const creator = book.creator
   // The creator, shown as a card after the description rather than as a byline
@@ -170,12 +177,21 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
             )}
           </div>
 
-          <ShareBar
-            title={book.title}
-            url={absoluteUrl(`/books/${slug}`)}
-            label={settings.sections.shareLabel}
-            copiedLabel={settings.sections.linkCopiedLabel}
-          />
+          <div className="flex flex-wrap items-center gap-3">
+            <SaveButton
+              itemType="book"
+              itemId={book._id}
+              initialSaved={saved}
+              saveLabel={settings.sections.saveLabel}
+              savedLabel={settings.sections.savedLabel}
+            />
+            <ShareBar
+              title={book.title}
+              url={absoluteUrl(`/books/${slug}`)}
+              label={settings.sections.shareLabel}
+              copiedLabel={settings.sections.linkCopiedLabel}
+            />
+          </div>
           <PortableTextBody value={book.description} />
 
           {/* The creator, nested in the detail column beside the cover rather

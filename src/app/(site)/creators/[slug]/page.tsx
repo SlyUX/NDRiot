@@ -7,6 +7,7 @@ import { FeedPreview } from '@/components/feed-preview'
 import { JsonLd } from '@/components/json-ld'
 import { OrganizationLink } from '@/components/organization-link'
 import PortableTextBody from '@/components/PortableTextBody'
+import { SaveButton } from '@/components/save-button'
 import SocialLinks from '@/components/SocialLinks'
 import { SectionHeading } from '@/components/section-heading'
 import { ShareBar } from '@/components/share-bar'
@@ -17,6 +18,8 @@ import { externalHref } from '@/lib/utils'
 import { Section } from '@/components/ui/section'
 import { bookToCard, favoriteToCard } from '@/lib/card-mappers'
 import { pageMetadata } from '@/lib/page-metadata'
+import { auth } from '@/auth'
+import { isSaved } from '@/sanity/reader-client'
 import { fetchFeed } from '@/lib/feed-parse'
 import { safeFetch, CREATOR_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
@@ -48,14 +51,18 @@ export async function generateMetadata({
 
 export default async function CreatorPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const [creator, settings] = await Promise.all([
+  const [creator, settings, session] = await Promise.all([
     safeFetch<CreatorDetail | null>(CREATOR_QUERY, { slug }, null),
     getSiteSettings(),
+    auth(),
   ])
 
   // Real 404 rather than a 200 that says "not found" — search engines and
   // monitoring both read the status code, not the copy.
   if (!creator) notFound()
+
+  const email = session?.user?.email
+  const saved = email ? await isSaved(email, creator._id) : false
 
   // Favorites are shown as horizontal creator cards. All on-site in practice;
   // any without a profile or link are dropped.
@@ -180,13 +187,21 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
               </div>
             )}
 
-            <ShareBar
-              title={creator.name ?? ''}
-              url={absoluteUrl(`/creators/${slug}`)}
-              label={settings.sections.shareLabel}
-              copiedLabel={settings.sections.linkCopiedLabel}
-              className="mt-5"
-            />
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <SaveButton
+                itemType="creator"
+                itemId={creator._id}
+                initialSaved={saved}
+                saveLabel={settings.sections.saveLabel}
+                savedLabel={settings.sections.savedLabel}
+              />
+              <ShareBar
+                title={creator.name ?? ''}
+                url={absoluteUrl(`/creators/${slug}`)}
+                label={settings.sections.shareLabel}
+                copiedLabel={settings.sections.linkCopiedLabel}
+              />
+            </div>
           </div>
         </div>
       </Section>
