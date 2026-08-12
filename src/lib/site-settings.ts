@@ -751,7 +751,7 @@ const DEFAULTS: SiteSettings = {
     creatorBooksHeading: '{name}’s Comics',
     creatorWorksHeading: 'Where to find {name}’s work',
     creatorOrganizationsHeading: 'Member of',
-    creatorFavoritesHeading: '{name}’s Favorite Comic Makers',
+    creatorFavoritesHeading: '{name}’s Cosigns',
     otherBooksHeading: 'Other comics by {name}',
     bookCreatorsHeading: 'Comic Makers:',
     editorialAuthorHeading: 'Author:',

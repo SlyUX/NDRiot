@@ -435,10 +435,10 @@ export default defineType({
         defineField({ name: 'linkCopiedLabel', title: 'Share bar — "link copied" confirmation', type: 'string' }),
         defineField({
           name: 'creatorFavoritesHeading',
-          title: 'Creator page — favorite creators heading',
+          title: 'Creator page — cosigns heading',
           type: 'string',
           description:
-            'Use {name} for the creator’s first name — e.g. "{name}’s Favorite Creators" renders as "Stephen’s Favorite Creators".',
+            'A creator’s public list of makers they endorse ("cosigns"). Use {name} for their first name — e.g. "{name}’s Cosigns" renders as "Stephen’s Cosigns".',
         }),
         defineField({
           name: 'otherBooksHeading',
