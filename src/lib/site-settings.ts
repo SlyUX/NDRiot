@@ -346,6 +346,7 @@ export interface SiteSettings {
     booksHeading: string
     creatorsHeading: string
     editorialHeading: string
+    resourcesHeading: string
     mediaHeading: string
     viewAllLabel: string
     viewMoreLabel: string
@@ -786,6 +787,7 @@ const DEFAULTS: SiteSettings = {
     booksHeading: 'Comics',
     creatorsHeading: 'Comic Makers',
     editorialHeading: 'Editorial',
+    resourcesHeading: 'Resources',
     mediaHeading: 'Media & Podcasts',
     viewAllLabel: 'View all',
     viewMoreLabel: 'View more',

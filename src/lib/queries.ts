@@ -200,6 +200,10 @@ export const DOWNLOAD_QUERY = defineQuery(`*[_type=="freeDownload" && slug.curre
 // §3). Cards link to the resource's own page; `kind` drives the card's label.
 export const RESOURCES_QUERY = defineQuery(`*[_type=="resource" && defined(slug.current)]|order(category asc, title asc){_id,title,"slug":slug.current,kind,category,description,image}`)
 
+// Recent resources for the homepage row — by recency (neutral, §3), same card
+// fields as RESOURCES_QUERY so both share ResourceSummary.
+export const HOME_RESOURCES_QUERY = defineQuery(`*[_type=="resource" && defined(slug.current)]|order(coalesce(publishedAt,_createdAt) desc)[0...8]{_id,title,"slug":slug.current,kind,category,description,image}`)
+
 // A single resource page. `kind` selects the lead media (videoUrl / fileUrl /
 // url); `body` is the write-up beneath it (Portable Text with inline images).
 export const RESOURCE_QUERY = defineQuery(`*[_type=="resource" && slug.current==$slug][0]{

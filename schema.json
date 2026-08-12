@@ -896,7 +896,7 @@
             },
             {
               "type": "string",
-              "value": "Learning"
+              "value": "Making Comics"
             },
             {
               "type": "string",
@@ -3852,6 +3852,13 @@
               "optional": true
             },
             "editorialHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "resourcesHeading": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

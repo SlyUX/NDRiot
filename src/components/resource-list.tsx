@@ -2,7 +2,8 @@ import Link from 'next/link'
 
 import { SectionHeading } from '@/components/section-heading'
 import { Section } from '@/components/ui/section'
-import type { ResourceKind, ResourceSummary } from '@/lib/types'
+import { RESOURCE_KIND_LABEL } from '@/lib/card-mappers'
+import type { ResourceSummary } from '@/lib/types'
 
 /**
  * The Resources section on /resources — a grid of cards, each linking to the
@@ -12,13 +13,6 @@ import type { ResourceKind, ResourceSummary } from '@/lib/types'
  * grouping come from the query; this only renders. Strings from Sanity (§2);
  * the kind label is a system classification (like a genre/format badge), code.
  */
-const KIND_LABEL: Record<ResourceKind, string> = {
-  video: 'Video',
-  download: 'Download',
-  link: 'Link',
-  guide: 'Guide',
-}
-
 export function ResourceList({
   heading,
   resources,
@@ -45,7 +39,7 @@ export function ResourceList({
                 className="group hover:border-primary focus-visible:ring-ring flex h-full flex-col border border-white/15 p-4 transition-colors focus-visible:ring-2 focus-visible:outline-none"
               >
                 <span className="text-primary text-[10px] font-bold tracking-widest uppercase">
-                  {KIND_LABEL[resource.kind]} · {resource.category}
+                  {RESOURCE_KIND_LABEL[resource.kind]} · {resource.category}
                 </span>
                 <h3 className="mt-2 leading-tight font-bold group-hover:underline">{resource.title}</h3>
                 {resource.description && (

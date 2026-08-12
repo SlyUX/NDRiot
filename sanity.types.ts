@@ -185,7 +185,7 @@ export type Resource = {
     | "Tools & Software"
     | "Community"
     | "Funding"
-    | "Learning"
+    | "Making Comics"
     | "Print & Distribution";
   description?: string;
   videoUrl?: string;
@@ -631,6 +631,7 @@ export type SiteSettings = {
     booksHeading?: string;
     creatorsHeading?: string;
     editorialHeading?: string;
+    resourcesHeading?: string;
     mediaHeading?: string;
     viewAllLabel?: string;
     viewMoreLabel?: string;
@@ -2203,7 +2204,26 @@ export type RESOURCES_QUERY_RESULT = Array<{
     | "Community"
     | "Funding"
     | "Hosting & Publishing"
-    | "Learning"
+    | "Making Comics"
+    | "Print & Distribution"
+    | "Tools & Software";
+  description: string | null;
+  image: ImageWithAlt | null;
+}>;
+
+// Source: src/lib/queries.ts
+// Variable: HOME_RESOURCES_QUERY
+// Query: *[_type=="resource" && defined(slug.current)]|order(coalesce(publishedAt,_createdAt) desc)[0...8]{_id,title,"slug":slug.current,kind,category,description,image}
+export type HOME_RESOURCES_QUERY_RESULT = Array<{
+  _id: string;
+  title: string;
+  slug: string;
+  kind: "download" | "guide" | "link" | "video";
+  category:
+    | "Community"
+    | "Funding"
+    | "Hosting & Publishing"
+    | "Making Comics"
     | "Print & Distribution"
     | "Tools & Software";
   description: string | null;
@@ -2221,7 +2241,7 @@ export type RESOURCE_QUERY_RESULT = {
     | "Community"
     | "Funding"
     | "Hosting & Publishing"
-    | "Learning"
+    | "Making Comics"
     | "Print & Distribution"
     | "Tools & Software";
   description: string | null;
@@ -2750,6 +2770,7 @@ declare module "@sanity/client" {
     '*[_type=="freeDownload"]|order(publishedAt desc){_id,title,"slug":slug.current,description,cover,publishedAt,"creatorName":creator->name}': DOWNLOADS_QUERY_RESULT;
     '*[_type=="freeDownload" && slug.current==$slug][0]{_id,title,description,cover,"creatorName":creator->name,"fileUrl":file.asset->url}': DOWNLOAD_QUERY_RESULT;
     '*[_type=="resource" && defined(slug.current)]|order(category asc, title asc){_id,title,"slug":slug.current,kind,category,description,image}': RESOURCES_QUERY_RESULT;
+    '*[_type=="resource" && defined(slug.current)]|order(coalesce(publishedAt,_createdAt) desc)[0...8]{_id,title,"slug":slug.current,kind,category,description,image}': HOME_RESOURCES_QUERY_RESULT;
     '*[_type=="resource" && slug.current==$slug][0]{\n  _id,title,kind,category,description,body,videoUrl,url,image,publishedAt,source,\n  "fileUrl":file.asset->url,\n  "creatorName":creator->name,"creatorSlug":creator->slug.current\n}': RESOURCE_QUERY_RESULT;
     '*[_type=="book" && defined(slug.current)]._id': BOOK_IDS_QUERY_RESULT;
     '*[_type=="book" && _id in $ids]{\n  _id,title,"slug":slug.current,status,genres,format,maturity,cover,shortDescription,\n  "descriptionText": pt::text(description),\n  "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,\n  "creatorName":creator->name\n}': HERO_BOOKS_QUERY_RESULT;

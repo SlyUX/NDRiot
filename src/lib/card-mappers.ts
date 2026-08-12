@@ -8,6 +8,8 @@ import type {
   HomeEditorial,
   InterviewSummary,
   MediaSummary,
+  ResourceKind,
+  ResourceSummary,
   SanityImage,
 } from '@/lib/types'
 import { truncate } from '@/lib/utils'
@@ -204,5 +206,29 @@ export function downloadToCard(download: DownloadSummary): ContentCardProps {
     eyebrow: download.creatorName,
     summary: download.description,
     aspectRatio: 'cover',
+  }
+}
+
+/** Reader-facing label for a resource's kind — a system classification (like a
+ *  genre/format badge), so it lives in code, not the CMS. Shared with the
+ *  /resources listing cards. */
+export const RESOURCE_KIND_LABEL: Record<ResourceKind, string> = {
+  video: 'Video',
+  download: 'Download',
+  link: 'Link',
+  guide: 'Guide',
+}
+
+export function resourceToCard(resource: ResourceSummary): ContentCardProps {
+  return {
+    title: resource.title,
+    href: `/resources/${resource.slug}`,
+    // Optional — a resource without a cover shows the plain box, like any
+    // imageless card. Kind + category still identify it below.
+    image: resource.image,
+    imageAlt: '',
+    eyebrow: `${RESOURCE_KIND_LABEL[resource.kind]} · ${resource.category}`,
+    summary: resource.description,
+    aspectRatio: 'landscape',
   }
 }

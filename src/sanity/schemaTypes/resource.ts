@@ -22,7 +22,7 @@ export const RESOURCE_CATEGORIES = [
   'Tools & Software',
   'Community',
   'Funding',
-  'Learning',
+  'Making Comics',
   'Print & Distribution',
 ] as const
 

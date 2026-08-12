@@ -9,7 +9,7 @@ import { LoadMore } from '@/components/load-more'
 import { NewsletterForm } from '@/components/newsletter-form'
 import { SaveButton } from '@/components/save-button'
 import { organizationSchema, jsonLdGraph, websiteSchema } from '@/lib/structured-data'
-import { bookToCard, creatorToCard, mediaToCard } from '@/lib/card-mappers'
+import { bookToCard, creatorToCard, mediaToCard, resourceToCard } from '@/lib/card-mappers'
 import {
   HOME_ROW_LIMIT,
   bookFilters,
@@ -29,6 +29,7 @@ import {
   GENRES_WITH_BOOKS_QUERY,
   HERO_BOOKS_QUERY,
   HOME_NEW_QUERY,
+  HOME_RESOURCES_QUERY,
   MEDIA_HOME_QUERY,
   FILTERED_BOOKS_QUERY,
   FILTERED_CREATORS_QUERY,
@@ -44,6 +45,7 @@ import type {
   HomeNewItem,
   MediaSummary,
   Paginated,
+  ResourceSummary,
 } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
@@ -118,7 +120,7 @@ export default async function Home({
   // The book the hero last showed, so "Discover" re-rolls to a different one.
   const notFeature = Array.isArray(params.notf) ? params.notf[0] : params.notf
 
-  const [feature, booksResult, creatorsResult, genresWithBooks, newItems, mediaItems, settings, session] =
+  const [feature, booksResult, creatorsResult, genresWithBooks, newItems, mediaItems, homeResources, settings, session] =
     await Promise.all([
       // Deliberately unfiltered. The hero is the guaranteed route to work
       // nobody went looking for (AGENTS.md §3), so narrowing the page must
@@ -137,6 +139,7 @@ export default async function Home({
       safeFetch<string[]>(GENRES_WITH_BOOKS_QUERY, {}, []),
       safeFetch<HomeNewItem[]>(HOME_NEW_QUERY, {}, []),
       safeFetch<MediaSummary[]>(MEDIA_HOME_QUERY, {}, []),
+      safeFetch<ResourceSummary[]>(HOME_RESOURCES_QUERY, {}, []),
       getSiteSettings(),
       auth(),
     ])
@@ -304,6 +307,25 @@ export default async function Home({
         viewAllLabel={settings.home.viewAllLabel}
         emptyMessage={creatorsFiltering ? settings.empty.filteredCreators : settings.empty.creators}
       />
+
+      {/* Resources: recent resources, where the editorial row used to sit — same
+          horizontal scroll, on the black surface between the two charcoal bands.
+          Hidden when there are none. */}
+      {homeResources.length > 0 && (
+        <ContentCardGrid
+          heading={settings.home.resourcesHeading}
+          cards={homeResources.map(resourceToCard)}
+          layout="horizontal"
+          columns={4}
+          aspectRatio="landscape"
+          summaryLines={3}
+          scroll
+          padding="md"
+          viewAllHref="/resources"
+          viewAllLabel={settings.home.viewAllLabel}
+          emptyMessage=""
+        />
+      )}
 
       {/* Media: independent outlets covering indie comics. Bottom row, a
           scrolling taste; the full list (and the disclaimer) is on /media.

@@ -282,6 +282,7 @@ export default defineType({
         defineField({ name: 'booksHeading', title: 'Books section heading', type: 'string' }),
         defineField({ name: 'creatorsHeading', title: 'Creators section heading', type: 'string' }),
         defineField({ name: 'editorialHeading', title: 'Editorial section heading', type: 'string' }),
+        defineField({ name: 'resourcesHeading', title: 'Resources section heading (home row)', type: 'string' }),
         defineField({ name: 'mediaHeading', title: 'Media section heading (home row)', type: 'string' }),
         defineField({
           name: 'viewAllLabel',
