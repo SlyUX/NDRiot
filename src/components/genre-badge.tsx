@@ -32,6 +32,10 @@ export function GenreBadge({
       variant={variant === 'overlay' ? 'default' : variant === 'default' ? 'secondary' : 'outline'}
       className={cn(
         size === 'md' ? 'px-2.5 py-0.5 text-xs' : 'px-2 py-0.5 text-[10px] tracking-wider uppercase',
+        // Default chips sit on the near-black page, where a transparent/subtle
+        // fill fades out. Charcoal (§9, white text 12.4:1) gives them a solid
+        // edge so they read as chips instead of dissolving into the background.
+        variant === 'default' && 'bg-charcoal text-foreground border-transparent',
         // Overlay sits on top of cover art, so it needs its own translucent
         // treatment rather than a solid token background.
         variant === 'overlay' && 'border-0 bg-black/60 text-white backdrop-blur-sm',

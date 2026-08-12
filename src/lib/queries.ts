@@ -150,10 +150,10 @@ export const HOME_EDITORIAL_QUERY = defineQuery(`*[_type in ["column","interview
  * creatorName, a creator fills name/photo/location/studioName, and the fields
  * that do not apply resolve to null.
  */
-export const HOME_NEW_QUERY = defineQuery(`*[_type in ["book","creator"] && defined(slug.current)]|order(_createdAt desc)[0...6]{
-  _id,_type,"slug":slug.current,
-  title,cover,maturity,"creatorName":creator->name,
-  name,photo,location,"studioName":studio->name
+export const HOME_NEW_QUERY = defineQuery(`*[_type in ["book","creator"] && defined(slug.current)]|order(_createdAt desc)[0...4]{
+  _id,_type,"slug":slug.current,genres,
+  title,"creatorName":creator->name,"descriptionText":pt::text(description),
+  name,"bioText":pt::text(bio)
 }`)
 
 /* ---------------------------------------------------- reader saves (/me)

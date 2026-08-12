@@ -1782,33 +1782,61 @@ export type HOME_EDITORIAL_QUERY_RESULT = Array<
 
 // Source: src/lib/queries.ts
 // Variable: HOME_NEW_QUERY
-// Query: *[_type in ["book","creator"] && defined(slug.current)]|order(_createdAt desc)[0...6]{  _id,_type,"slug":slug.current,  title,cover,maturity,"creatorName":creator->name,  name,photo,location,"studioName":studio->name}
+// Query: *[_type in ["book","creator"] && defined(slug.current)]|order(_createdAt desc)[0...4]{  _id,_type,"slug":slug.current,genres,  title,"creatorName":creator->name,"descriptionText":pt::text(description),  name,"bioText":pt::text(bio)}
 export type HOME_NEW_QUERY_RESULT = Array<
   | {
       _id: string;
       _type: "book";
       slug: string;
+      genres: Array<
+        | "Action & Adventure"
+        | "Crime & Noir"
+        | "Drama"
+        | "Fantasy"
+        | "Historical"
+        | "Horror"
+        | "Humor & Satire"
+        | "Memoir & Autobio"
+        | "Punk & Protest"
+        | "Queer"
+        | "Romance"
+        | "Sci-Fi"
+        | "Slice of Life"
+        | "Superhero"
+        | "Weird & Experimental"
+      > | null;
       title: string;
-      cover: ImageWithAlt | null;
-      maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
       creatorName: string;
+      descriptionText: string;
       name: null;
-      photo: null;
-      location: null;
-      studioName: null;
+      bioText: string;
     }
   | {
       _id: string;
       _type: "creator";
       slug: string;
+      genres: Array<
+        | "Action & Adventure"
+        | "Crime & Noir"
+        | "Drama"
+        | "Fantasy"
+        | "Historical"
+        | "Horror"
+        | "Humor & Satire"
+        | "Memoir & Autobio"
+        | "Punk & Protest"
+        | "Queer"
+        | "Romance"
+        | "Sci-Fi"
+        | "Slice of Life"
+        | "Superhero"
+        | "Weird & Experimental"
+      > | null;
       title: null;
-      cover: null;
-      maturity: null;
       creatorName: null;
+      descriptionText: string;
       name: string;
-      photo: ImageWithAlt | null;
-      location: string | null;
-      studioName: string | null;
+      bioText: string;
     }
 >;
 
@@ -2612,7 +2640,7 @@ declare module "@sanity/client" {
     '*[_type=="interview"]|order(publishedAt desc){_id,title,"slug":slug.current,excerpt,cover,thumbnail,publishedAt,"interviewerName":interviewer->name,"subjectName":subject->name}': INTERVIEWS_QUERY_RESULT;
     '*[_type=="interview" && slug.current==$slug][0]{_id,title,excerpt,body,publishedAt,cover,"interviewerName":interviewer->name,"subjectName":subject->name,"interviewer":interviewer->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}}}': INTERVIEW_QUERY_RESULT;
     '*[_type in ["column","interview"] && defined(slug.current)]|order(publishedAt desc)[0...8]{\n  _id,_type,title,"slug":slug.current,excerpt,cover,thumbnail,publishedAt,\n  "authorName":author->name,\n  "subjectName":subject->name\n}': HOME_EDITORIAL_QUERY_RESULT;
-    '*[_type in ["book","creator"] && defined(slug.current)]|order(_createdAt desc)[0...6]{\n  _id,_type,"slug":slug.current,\n  title,cover,maturity,"creatorName":creator->name,\n  name,photo,location,"studioName":studio->name\n}': HOME_NEW_QUERY_RESULT;
+    '*[_type in ["book","creator"] && defined(slug.current)]|order(_createdAt desc)[0...4]{\n  _id,_type,"slug":slug.current,genres,\n  title,"creatorName":creator->name,"descriptionText":pt::text(description),\n  name,"bioText":pt::text(bio)\n}': HOME_NEW_QUERY_RESULT;
     '*[_type=="book" && _id in $ids && defined(slug.current)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}': SAVED_BOOKS_QUERY_RESULT;
     '*[_type=="creator" && _id in $ids && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,location,photo,genres,openToCollaboration,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}': SAVED_CREATORS_QUERY_RESULT;
     '*[_id in $ids && defined(slug.current)]{_id,_type,name,"slug":slug.current}|order(name asc)': OWNED_DOCS_QUERY_RESULT;

@@ -2,7 +2,6 @@ import Link from 'next/link'
 
 import { Logo } from '@/components/logo'
 import { MainNav } from '@/components/main-nav'
-import { NewsletterForm } from '@/components/newsletter-form'
 import { SocialIcon } from '@/components/social-icon'
 import { auth, signIn } from '@/auth'
 import { genreOptions } from '@/lib/filters'
@@ -120,12 +119,6 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
 
       <footer className="border-primary/40 border-t">
         <div className="text-muted-foreground mx-auto flex max-w-[90rem] flex-col items-center gap-8 px-6 py-8 text-center text-xs tracking-widest uppercase">
-          {/* Newsletter — a small form; the prominent one is the pink band up top. */}
-          <div className="w-full max-w-xs">
-            <p className="text-foreground mb-2 font-bold">{settings.newsletter.heading}</p>
-            <NewsletterForm copy={settings.newsletter} variant="compact" className="normal-case tracking-normal" />
-          </div>
-
           {/* Footer nav — Get Listed is the intake funnel, moved down here out of
               the header; The Riot gathers About + Contact. */}
           <nav className="flex flex-wrap justify-center gap-x-12 gap-y-6">
@@ -189,7 +182,12 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
             </ul>
           )}
 
-          <span>{settings.footer}</span>
+          {/* Sign-off: the lockup rendered as a quiet gray mark (grayscale so the
+              pink recedes here, unlike the nav), above the tagline. */}
+          <div className="flex flex-col items-center gap-3 pt-2">
+            <Logo size="footer" alt="" className="opacity-75 grayscale" />
+            <span>{settings.footer}</span>
+          </div>
         </div>
       </footer>
     </>

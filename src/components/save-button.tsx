@@ -24,6 +24,7 @@ export function SaveButton({
   saveLabel,
   savedLabel,
   signInCopy,
+  variant = 'solid',
   className,
 }: {
   itemType: SavedItemType
@@ -33,6 +34,12 @@ export function SaveButton({
   saveLabel: string
   savedLabel: string
   signInCopy: { title: string; body: string; cta: string }
+  /**
+   * `solid` — filled white on black (21:1), the default on detail pages.
+   * `outline` — white border + white text on a transparent fill, for sitting
+   * over the busy hero image where the pink "read it" CTA is the primary.
+   */
+  variant?: 'solid' | 'outline'
   className?: string
 }) {
   const [saved, setSaved] = useState(initialSaved)
@@ -63,7 +70,10 @@ export function SaveButton({
         aria-pressed={saved}
         aria-label={label}
         className={cn(
-          'focus-visible:ring-ring inline-flex items-center gap-1.5 border border-white bg-white px-3 py-2 text-xs font-bold tracking-widest text-black uppercase transition-colors hover:bg-white/85 focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60',
+          'focus-visible:ring-ring inline-flex items-center gap-1.5 border border-white px-3 py-2 text-xs font-bold tracking-widest uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60',
+          variant === 'outline'
+            ? 'bg-transparent text-white hover:bg-white/10'
+            : 'bg-white text-black hover:bg-white/85',
           className,
         )}
       >

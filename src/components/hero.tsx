@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowRight, Book, Shuffle, User } from 'lucide-react'
+import { ArrowRight, Shuffle } from 'lucide-react'
 
 import { TaxonomyRow } from '@/components/content-card'
 import PortableTextBody from '@/components/PortableTextBody'
@@ -122,60 +122,56 @@ function FeatureBook({
             {preview}
           </p>
         )}
-        <Link
-          href={href}
-          className="text-primary focus-visible:ring-ring mt-1 inline-flex items-center gap-1 self-start text-xs font-bold tracking-widest uppercase focus-visible:ring-2 focus-visible:outline-none"
-        >
-          {ctaLabel}
-          <ArrowRight
-            aria-hidden="true"
-            className="size-3.5 transition-transform group-hover:translate-x-0.5 motion-reduce:transform-none"
-          />
-        </Link>
+        {/* Primary CTA — "read it" is the point of the hero, so it's the pink
+            button; Save (over the cover) is the outline secondary beside it. */}
+        <Button asChild size="sm" className="mt-1 self-start font-black tracking-widest uppercase">
+          <Link href={href}>
+            {ctaLabel}
+            <ArrowRight
+              aria-hidden="true"
+              className="size-3.5 transition-transform group-hover:translate-x-0.5 motion-reduce:transform-none"
+            />
+          </Link>
+        </Button>
       </div>
     </div>
   )
 }
 
-/** One rail row — a new book or creator, typed by its icon. */
+/**
+ * One rail row — a new book or creator as a compact text entry (no thumbnail).
+ * Title, an arrival line ("a new comic by …" / "a new comic maker"), a short
+ * blurb, and up to three genres — the same shape for either type.
+ */
 function NewRow({ item }: { item: HomeNewItem }) {
   const isBook = item._type === 'book'
   const href = isBook ? `/books/${item.slug}` : `/creators/${item.slug}`
   const title = isBook ? item.title : item.name
-  const subtitle = isBook ? item.creatorName : (item.studioName ?? item.location)
-  const image = isBook ? item.cover : item.photo
-  const Icon = isBook ? Book : User
-  const typeLabel = isBook ? 'Comic' : 'Comic Maker'
-  // A comic maker's portrait needs describing; a cover sits beside its own title.
-  const alt = isBook ? '' : `Portrait of ${item.name ?? 'comic maker'}`
+  const line = isBook
+    ? item.creatorName
+      ? `a new comic by ${item.creatorName}`
+      : 'a new comic'
+    : 'a new comic maker'
+  const blurb = truncate(isBook ? item.descriptionText : item.bioText, 90)
 
   return (
     <li>
       <Link
         href={href}
-        className="group focus-visible:ring-ring flex items-center gap-3 focus-visible:ring-2 focus-visible:outline-none"
+        className="group focus-visible:ring-ring block focus-visible:ring-2 focus-visible:outline-none"
       >
-        <div className="min-w-0 flex-1">
-          <p className="text-muted-foreground flex items-center gap-1.5 text-[10px] font-bold tracking-widest uppercase">
-            <Icon aria-hidden="true" className="size-3" />
-            {typeLabel}
-          </p>
-          <p className="group-hover:text-primary mt-1 line-clamp-2 text-sm leading-snug font-bold text-white transition-colors">
-            {title}
-          </p>
-          {subtitle && <p className="text-muted-foreground mt-0.5 truncate text-xs">{subtitle}</p>}
-        </div>
-        <div className="bg-muted relative aspect-[4/3] w-20 shrink-0 overflow-hidden sm:w-24">
-          {image && (
-            <Image
-              src={urlFor(image).width(240).url()}
-              alt={alt}
-              fill
-              sizes="96px"
-              className="object-cover"
-            />
-          )}
-        </div>
+        <p className="group-hover:text-primary line-clamp-2 text-sm leading-snug font-bold text-white transition-colors">
+          {title}
+        </p>
+        {/* White + italic: lifts the arrival line off the near-black rail and
+            gives it a clear rung below the title. */}
+        <p className="mt-0.5 text-xs text-white italic">{line}</p>
+        {blurb && (
+          <p className="text-muted-foreground mt-1 text-xs leading-snug">{blurb}</p>
+        )}
+        {item.genres?.length ? (
+          <TaxonomyRow genres={item.genres.slice(0, 3)} className="mt-1.5" />
+        ) : null}
       </Link>
     </li>
   )
@@ -241,35 +237,31 @@ export function Hero({ hero, feature, newItems, discoverHref, discoverLabel, sav
 
         {/* The split: featured book left, new-arrivals rail right. */}
         {(feature || newItems.length > 0) && (
-          <div className="mt-8 grid gap-6 lg:grid-cols-[1.7fr_1fr] lg:gap-8">
+          <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_350px] lg:gap-8">
             {feature && (
               <div className="flex h-full flex-col">
-                {/* "Featured" — named and set apart from the tagline above,
-                    mirroring the rail's heading opposite it. */}
+                {/* Heading row: the section name left, the Spin control right —
+                    "spin the rack" reads as the action that re-rolls the pick. */}
                 <div className="mb-4 flex items-center gap-3">
                   <h2 className="text-primary text-xs font-black tracking-[0.2em] uppercase">
                     {hero.featuredHeading}
                   </h2>
                   <span className="h-px flex-1 bg-white/20" aria-hidden="true" />
-                </div>
-
-                {/* The Discover button is a sibling of the feature's link, not
-                    nested inside it (anchors cannot nest), over the panel's
-                    top-right. */}
-                <div className="relative flex-1">
-                  <FeatureBook book={feature} ctaLabel={hero.featureCtaLabel} saveSlot={saveSlot} />
                   {discoverHref && (
                     <Link
                       href={discoverHref}
                       scroll={false}
                       aria-label={discoverLabel ?? 'Spin the rack'}
-                      className="focus-visible:ring-ring border-border bg-background/70 text-foreground hover:bg-background absolute top-3 right-3 z-10 inline-flex items-center gap-1.5 border p-2 text-xs font-bold tracking-widest uppercase backdrop-blur transition-colors focus-visible:ring-2 focus-visible:outline-none sm:px-3 sm:py-1.5"
+                      className="focus-visible:ring-ring border-border text-foreground hover:border-primary hover:text-primary inline-flex shrink-0 items-center gap-1.5 border px-3 py-1 text-xs font-bold tracking-widest uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none"
                     >
-                      {/* Icon-only in the tight phone column; labelled from sm up. */}
-                      <span className="hidden sm:inline">{discoverLabel ?? 'Spin the rack'}</span>
+                      {discoverLabel ?? 'Spin the rack'}
                       <Shuffle aria-hidden="true" strokeWidth={2.5} className="size-3.5" />
                     </Link>
                   )}
+                </div>
+
+                <div className="flex-1">
+                  <FeatureBook book={feature} ctaLabel={hero.featureCtaLabel} saveSlot={saveSlot} />
                 </div>
               </div>
             )}
@@ -277,10 +269,10 @@ export function Hero({ hero, feature, newItems, discoverHref, discoverLabel, sav
             {newItems.length > 0 && (
               <div className={cn(!feature && 'lg:col-span-full')}>
                 <div className="mb-4 flex items-center gap-3">
-                  <span className="h-px flex-1 bg-white/20" aria-hidden="true" />
-                  <h2 className="text-primary text-xs font-black tracking-[0.2em] uppercase">
+                  <h2 className="text-primary text-xs leading-tight font-black tracking-[0.2em] uppercase">
                     {hero.newHeading}
                   </h2>
+                  <span className="h-px flex-1 bg-white/20" aria-hidden="true" />
                 </div>
                 {/* On phones the rail stacks below the feature, so cap it to
                     three rows there — enough for a taste without pushing the

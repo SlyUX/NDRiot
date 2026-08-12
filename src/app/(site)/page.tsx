@@ -156,6 +156,7 @@ export default async function Home({
       itemId={feature._id}
       initialSaved={featureSaved}
       signedIn={Boolean(email)}
+      variant="outline"
       saveLabel={settings.sections.saveLabel}
       savedLabel={settings.sections.savedLabel}
       signInCopy={{

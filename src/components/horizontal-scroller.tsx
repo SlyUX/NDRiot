@@ -14,10 +14,10 @@ import { cn } from '@/lib/utils'
  * without a visible scrollbar. Touch users swipe; the arrows are a desktop
  * convenience.
  *
- * Both arrows persist at half opacity so the row reads as scrollable at a
- * glance. The one pointing somewhere there's more to see brightens on hover and
- * is clickable; the one with nothing that way stays dim and inert — a signpost,
- * not a dead control.
+ * An arrow appears only when it points somewhere there is more to see: none at
+ * all on a row that fits, the right one until you reach the end, the left one
+ * once there's something behind you. A row that doesn't overflow shows no arrows
+ * rather than a pair of dead controls.
  */
 export function HorizontalScroller({
   children,
@@ -85,22 +85,20 @@ export function HorizontalScroller({
 
       {([-1, 1] as const).map((direction) => {
         const active = direction === -1 ? canLeft : canRight
+        // Only render an arrow that goes somewhere — no dead controls, and none
+        // at all on a row that fits. Absolute-positioned, so appearing and
+        // disappearing never shifts the row.
+        if (!active) return null
         return (
           <button
             key={direction}
             type="button"
             aria-label={direction === -1 ? 'Scroll left' : 'Scroll right'}
             onClick={() => nudge(direction)}
-            disabled={!active}
             className={cn(
               // Pink fill with black icon (§9 — white on pink fails AA), square,
-              // desktop only. Half opacity at rest so both read as present.
-              'focus-visible:ring-ring bg-primary text-primary-foreground absolute top-1/2 z-10 hidden size-9 -translate-y-1/2 items-center justify-center opacity-50 transition-opacity focus-visible:ring-2 focus-visible:outline-none md:flex',
-              // Active: brighten to full when the reader is over the row or tabs
-              // to it. Inactive (nothing that way): locked at half and inert.
-              active
-                ? 'cursor-pointer group-hover/scroller:opacity-100 focus-visible:opacity-100'
-                : 'cursor-default',
+              // desktop only. Softly present at rest, full on hover/focus.
+              'focus-visible:ring-ring bg-primary text-primary-foreground absolute top-1/2 z-10 hidden size-9 -translate-y-1/2 cursor-pointer items-center justify-center opacity-70 transition-opacity group-hover/scroller:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:outline-none md:flex',
               direction === -1 ? 'left-0' : 'right-0',
             )}
           >
