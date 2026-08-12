@@ -610,6 +610,14 @@ export type SiteSettings = {
     accountSignInTitle?: string;
     accountSignInBody?: string;
     accountSignInCta?: string;
+    footerGetListedHeading?: string;
+    footerRiotHeading?: string;
+    footerJoinCreatorsLabel?: string;
+    footerJoinComicsLabel?: string;
+    footerJoinMediaLabel?: string;
+    footerAboutLabel?: string;
+    navLoginLabel?: string;
+    navJoinLabel?: string;
     creatorBooksHeading?: string;
     creatorWorksHeading?: string;
     creatorOrganizationsHeading?: string;

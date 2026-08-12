@@ -377,6 +377,15 @@ export interface SiteSettings {
     accountSignInTitle: string
     accountSignInBody: string
     accountSignInCta: string
+    /** Footer nav groups + the logged-out header account links. */
+    footerGetListedHeading: string
+    footerRiotHeading: string
+    footerJoinCreatorsLabel: string
+    footerJoinComicsLabel: string
+    footerJoinMediaLabel: string
+    footerAboutLabel: string
+    navLoginLabel: string
+    navJoinLabel: string
     creatorBooksHeading: string
     creatorWorksHeading: string
     creatorOrganizationsHeading: string
@@ -748,6 +757,14 @@ const DEFAULTS: SiteSettings = {
     accountSignInBody:
       'ND Riot uses Google sign-in — it only confirms it’s you, and your saves stay private.',
     accountSignInCta: 'Sign in with Google',
+    footerGetListedHeading: 'Get Listed',
+    footerRiotHeading: 'The Riot',
+    footerJoinCreatorsLabel: 'Comic Creators',
+    footerJoinComicsLabel: 'Comics',
+    footerJoinMediaLabel: 'Media',
+    footerAboutLabel: 'About',
+    navLoginLabel: 'Login',
+    navJoinLabel: 'Join',
     creatorBooksHeading: '{name}’s Comics',
     creatorWorksHeading: 'Where to find {name}’s work',
     creatorOrganizationsHeading: 'Member of',
@@ -804,22 +821,6 @@ const DEFAULTS: SiteSettings = {
             { label: 'Interviews', href: '/editorial#interviews' },
             { label: 'Downloads', href: '/downloads' },
             { label: 'ND Riot Magazine', href: '/magazine' },
-          ],
-        },
-      ],
-    },
-    {
-      _type: 'navPanel',
-      label: 'Join the Riot',
-      href: '/join',
-      groups: [
-        {
-          // The hub's paths, minus the coming-soon reader card (no destination
-          // yet); the top-level link still lands on the full /join hub.
-          links: [
-            { label: 'Comic Makers', href: '/join/creators' },
-            { label: 'Media', href: '/join/media' },
-            { label: 'Contact us', href: '/contact' },
           ],
         },
       ],
