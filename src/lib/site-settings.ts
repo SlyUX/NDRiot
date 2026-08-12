@@ -304,11 +304,29 @@ export type NewsletterSettings = {
   errorMessage: string
 }
 
+/**
+ * Transactional notification emails. Bodies support tokens replaced at send:
+ * `{name}` (the creator's first name), `{title}` (a book), `{count}` + `{titles}`
+ * (the daily book digest), `{link}` (the item's public URL), `{booksLink}` (the
+ * add-a-book form).
+ */
+export type NotificationsSettings = {
+  creatorSubmitSubject: string
+  creatorSubmitBody: string
+  creatorPublishedSubject: string
+  creatorPublishedBody: string
+  bookSubmitSubject: string
+  bookSubmitBody: string
+  bookDigestSubject: string
+  bookDigestBody: string
+}
+
 export interface SiteSettings {
   siteTitle: string
   siteDescription: string
   footer: string
   newsletter: NewsletterSettings
+  notifications: NotificationsSettings
   /** Invite to the ND Riot Discord — shown in the nav and footer. Absent hides them. */
   discordUrl?: string
   /** ND Riot's own social accounts, shown as a quiet follow row in the footer. */
@@ -442,6 +460,52 @@ const DEFAULTS: SiteSettings = {
     // Double opt-in: nobody is on the list until they confirm.
     successMessage: 'Almost there — check your inbox and confirm to finish subscribing.',
     errorMessage: 'That didn’t go through. Please try again in a moment.',
+  },
+  notifications: {
+    creatorSubmitSubject: 'Thanks for submitting your creator profile to ND Riot',
+    creatorSubmitBody: [
+      'Hi {name},',
+      '',
+      'Thanks for submitting your creator profile to ND Riot — welcome.',
+      '',
+      'A real person reviews every submission before it goes live, so your profile is pending approval. We’ll email you the moment it’s published.',
+      '',
+      'Once it’s approved, you’ll be able to add your comics to your profile. Hang tight — more soon.',
+      '',
+      '— ND Riot',
+    ].join('\n'),
+    creatorPublishedSubject: 'Your ND Riot profile is live',
+    creatorPublishedBody: [
+      'Hi {name},',
+      '',
+      'Good news — your creator profile is now live on ND Riot: {link}',
+      '',
+      'A quick note on signing in: ND Riot uses Google sign-in — the same Google account you submitted with. It only confirms it’s really you; we never see a password, and your email stays private. Sign in any time to manage your profile.',
+      '',
+      'You can now add your comics: {booksLink}',
+      '',
+      '— ND Riot',
+    ].join('\n'),
+    bookSubmitSubject: 'We received your comic submission',
+    bookSubmitBody: [
+      'Thanks — we’ve received your submission of “{title}.”',
+      '',
+      'A person reviews every submission before it goes live, so it’s pending approval. We’ll confirm once it’s published.',
+      '',
+      '— ND Riot',
+    ].join('\n'),
+    bookDigestSubject: 'Your comics are live on ND Riot',
+    bookDigestBody: [
+      'Hi {name},',
+      '',
+      'Good news — {count} of your comics are now live on ND Riot:',
+      '',
+      '{titles}',
+      '',
+      'Thanks for adding to the directory.',
+      '',
+      '— ND Riot',
+    ].join('\n'),
   },
   discordUrl: 'https://discord.gg/fSSMjE5dw',
   // Discord (community) stays prominent up top; these are the traditional
@@ -832,7 +896,7 @@ export const SITE_SETTINGS_QUERY = `*[_id=="siteSettings"][0]{
   siteTitle,siteDescription,footer,discordUrl,socialLinks[]{platform,url},
   newsletter{heading,description,placeholder,buttonLabel,consent,successMessage,errorMessage},
   about{heading,body,faqHeading,faq[]{question,answer},seoTitle,seoDescription},aiLetter,
-  home,sections,empty,creatorIntake,bookIntake,mediaIntake,
+  home,sections,empty,creatorIntake,bookIntake,mediaIntake,notifications,
   hero{background,headline,body,tagline,featureCtaLabel,featuredHeading,newHeading,ctas[]{label,href}},
   join{heading,body,ctaLabel,formUrl,funnelHeading,funnelIntro,creatorsLabel,creatorsDesc,contactLabel,contactDesc,mediaLabel,mediaDesc,readersLabel,readersDesc,readersBadge},
   contact{heading,linkLabel,body,nameLabel,emailLabel,subjectLabel,messageLabel,submitLabel,successMessage,errorMessage},
@@ -862,6 +926,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     siteDescription: data.siteDescription?.trim() || DEFAULTS.siteDescription,
     footer: data.footer?.trim() || DEFAULTS.footer,
     newsletter: mergeGroup(DEFAULTS.newsletter, data.newsletter),
+    notifications: mergeGroup(DEFAULTS.notifications, data.notifications),
     discordUrl: data.discordUrl?.trim() || DEFAULTS.discordUrl,
     socialLinks: data.socialLinks?.length ? data.socialLinks : DEFAULTS.socialLinks,
     about: {

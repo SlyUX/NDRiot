@@ -534,6 +534,16 @@ export type SiteSettings = {
     successMessage?: string;
     errorMessage?: string;
   };
+  notifications?: {
+    creatorSubmitSubject?: string;
+    creatorSubmitBody?: string;
+    creatorPublishedSubject?: string;
+    creatorPublishedBody?: string;
+    bookSubmitSubject?: string;
+    bookSubmitBody?: string;
+    bookDigestSubject?: string;
+    bookDigestBody?: string;
+  };
   hero?: {
     background?: ImageWithAlt;
     headline?: string;

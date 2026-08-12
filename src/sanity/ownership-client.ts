@@ -98,6 +98,24 @@ export async function ownsCreator(email: string, creatorId: string): Promise<boo
   }
 }
 
+/**
+ * The verified email that owns this doc (creator or media), or null. The
+ * reverse of the ownership check — used to address a notification to the owner
+ * when their doc is published. A book inherits its creator's owner, so callers
+ * pass the creator id for a book.
+ */
+export async function ownerEmailOf(docId: string): Promise<string | null> {
+  if (!docId) return null
+  try {
+    return await client().fetch<string | null>(`*[_id==$id][0].email`, {
+      id: `ownership-${docId}`,
+    })
+  } catch (cause) {
+    console.error('[ownership] ownerEmailOf failed', cause)
+    return null
+  }
+}
+
 // The ownership map is keyed by document id, so these generic aliases work for
 // any top-level owned type. Books inherit their creator's ownership; media owns
 // its own record.

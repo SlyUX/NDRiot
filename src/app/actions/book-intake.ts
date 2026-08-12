@@ -18,7 +18,9 @@ import {
   toPortableText,
 } from '@/lib/intake/mapping'
 import { uploadImageFile } from '@/lib/intake/uploads'
+import { fillTokens, sendEmail } from '@/lib/notify-email'
 import { INTAKE_BOOK_IDS_QUERY } from '@/lib/queries'
+import { getSiteSettings, type NotificationsSettings } from '@/lib/site-settings'
 import { auth } from '@/auth'
 import { creatorsOwnedBy } from '@/sanity/ownership-client'
 import { getWriteClient } from '@/sanity/write-client'
@@ -257,9 +259,10 @@ export async function submitBook(
     return { status: 'error', message: 'Something went wrong saving your submission — please try again.', values }
   }
 
+  const notifications = (await getSiteSettings()).notifications
   await Promise.all([
     notifyTeam({ title: values.title, email, slug, isUpdate, note: values.anythingElse, coverNote }),
-    notifyCreator({ email, isUpdate }),
+    notifyCreator({ email, isUpdate, title: values.title, copy: notifications }),
   ])
 
   return { status: 'success' }
@@ -306,29 +309,26 @@ async function notifyTeam(input: {
 }
 
 /** Confirmation to the submitter. */
-async function notifyCreator(input: { email: string; isUpdate: boolean }): Promise<void> {
-  const apiKey = process.env.RESEND_API_KEY
-  const from = process.env.CONTACT_FROM
-  if (!apiKey || !from) return
-
+async function notifyCreator(input: {
+  email: string
+  isUpdate: boolean
+  title: string
+  copy: NotificationsSettings
+}): Promise<void> {
+  // New submission uses the CMS-managed "comic submitted" copy (§2); an update
+  // gets a lighter, fixed confirmation.
   const subject = input.isUpdate
     ? 'An update to your comic has been submitted to NDRiot.com'
-    : 'Your comic has been submitted to NDRiot.com'
-  const text = [
-    input.isUpdate ? 'Thanks — your update has been received.' : 'Thanks for submitting your comic to ND Riot.',
-    '',
-    'A person reviews every submission before it goes live, so it’ll appear shortly. We’ll be in touch if anything needs a look.',
-    '',
-    '— ND Riot',
-  ].join('\n')
+    : input.copy.bookSubmitSubject
+  const text = input.isUpdate
+    ? [
+        'Thanks — your update has been received.',
+        '',
+        'A person reviews every change before it goes live, so it’ll appear shortly.',
+        '',
+        '— ND Riot',
+      ].join('\n')
+    : fillTokens(input.copy.bookSubmitBody, { title: input.title })
 
-  try {
-    await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from, to: [input.email], reply_to: CREATOR_REPLY_TO, subject, text }),
-    })
-  } catch (cause) {
-    console.error('[book-intake] creator confirmation failed', cause)
-  }
+  await sendEmail({ to: input.email, subject, text, replyTo: CREATOR_REPLY_TO })
 }

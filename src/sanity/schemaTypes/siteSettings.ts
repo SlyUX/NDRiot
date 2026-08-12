@@ -31,6 +31,7 @@ export default defineType({
     { name: 'contact', title: 'Contact page' },
     { name: 'about', title: 'About & AI letter' },
     { name: 'newsletter', title: 'Newsletter' },
+    { name: 'notifications', title: 'Notification emails' },
     { name: 'nav', title: 'Navigation' },
   ],
   fields: [
@@ -147,6 +148,26 @@ export default defineType({
         defineField({ name: 'consent', title: 'Consent line', type: 'string', description: 'Small print beneath the form.' }),
         defineField({ name: 'successMessage', title: 'Success message', type: 'string', description: 'Shown after submit. With double opt-in, this should tell them to check their inbox.' }),
         defineField({ name: 'errorMessage', title: 'Error message', type: 'string' }),
+      ],
+    }),
+
+    defineField({
+      name: 'notifications',
+      title: 'Notification emails',
+      type: 'object',
+      group: 'notifications',
+      options: { collapsible: true, collapsed: false },
+      description:
+        'Transactional emails to creators. Tokens replaced when sent: {name} (their first name), {title} (a comic), {count} + {titles} (the daily book digest), {link} (the item’s public page), {booksLink} (the add-a-comic form).',
+      fields: [
+        defineField({ name: 'creatorSubmitSubject', title: 'Creator submitted — subject', type: 'string' }),
+        defineField({ name: 'creatorSubmitBody', title: 'Creator submitted — body', type: 'text', rows: 8 }),
+        defineField({ name: 'creatorPublishedSubject', title: 'Creator approved/live — subject', type: 'string' }),
+        defineField({ name: 'creatorPublishedBody', title: 'Creator approved/live — body', type: 'text', rows: 8 }),
+        defineField({ name: 'bookSubmitSubject', title: 'Comic submitted — subject', type: 'string' }),
+        defineField({ name: 'bookSubmitBody', title: 'Comic submitted — body', type: 'text', rows: 8 }),
+        defineField({ name: 'bookDigestSubject', title: 'Comics approved (daily digest) — subject', type: 'string' }),
+        defineField({ name: 'bookDigestBody', title: 'Comics approved (daily digest) — body', type: 'text', rows: 8 }),
       ],
     }),
 

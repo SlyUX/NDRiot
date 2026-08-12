@@ -13,7 +13,9 @@ import {
 } from '@/lib/intake/mapping'
 import { uploadImageFile } from '@/lib/intake/uploads'
 import { fetchFeed } from '@/lib/feed-parse'
+import { fillTokens, sendEmail } from '@/lib/notify-email'
 import { INTAKE_CREATOR_IDS_QUERY, INTAKE_ORGANIZATIONS_QUERY } from '@/lib/queries'
+import { getSiteSettings, type NotificationsSettings } from '@/lib/site-settings'
 import { auth } from '@/auth'
 import { ownsCreator, recordOwnership } from '@/sanity/ownership-client'
 import { getWriteClient } from '@/sanity/write-client'
@@ -426,9 +428,15 @@ export async function submitCreator(
     }
   }
 
+  const notifications = (await getSiteSettings()).notifications
   await Promise.all([
     notifyTeam({ name: values.name, email, slug, isUpdate, note: values.anythingElse, photoNote }),
-    notifyCreator({ email, isUpdate }),
+    notifyCreator({
+      email,
+      isUpdate,
+      name: values.name.split(' ')[0] || values.name,
+      copy: notifications,
+    }),
   ])
 
   return { status: 'success' }
@@ -485,15 +493,17 @@ async function notifyTeam(input: {
  * a change they didn't make — a light touch, since real protection is the
  * human review the draft still passes through.
  */
-async function notifyCreator(input: { email: string; isUpdate: boolean }): Promise<void> {
-  const apiKey = process.env.RESEND_API_KEY
-  const from = process.env.CONTACT_FROM
-  if (!apiKey || !from) return
-
+async function notifyCreator(input: {
+  email: string
+  isUpdate: boolean
+  name: string
+  copy: NotificationsSettings
+}): Promise<void> {
+  // New submission uses the CMS-managed "creator submitted" copy (§2); an update
+  // gets a lighter, fixed confirmation.
   const subject = input.isUpdate
     ? 'An update to your Creator account has been submitted to NDRiot.com'
-    : 'Your Creator Account has been submitted on NDRiot.com'
-
+    : input.copy.creatorSubmitSubject
   const text = input.isUpdate
     ? [
         'Thanks — your update has been received.',
@@ -504,21 +514,7 @@ async function notifyCreator(input: { email: string; isUpdate: boolean }): Promi
         '',
         '— ND Riot',
       ].join('\n')
-    : [
-        'Thanks for submitting your creator profile to ND Riot.',
-        '',
-        'A person reviews every submission before it goes live, so your page will appear shortly. We’ll be in touch if anything needs a look.',
-        '',
-        '— ND Riot',
-      ].join('\n')
+    : fillTokens(input.copy.creatorSubmitBody, { name: input.name })
 
-  try {
-    await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from, to: [input.email], reply_to: CREATOR_REPLY_TO, subject, text }),
-    })
-  } catch (cause) {
-    console.error('[creator-intake] creator confirmation failed', cause)
-  }
+  await sendEmail({ to: input.email, subject, text, replyTo: CREATOR_REPLY_TO })
 }
