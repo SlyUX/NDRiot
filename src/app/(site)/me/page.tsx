@@ -3,6 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import { SignInButton, SignOutButton } from '@/components/auth-controls'
+import { NewsletterOptIn } from '@/components/newsletter-opt-in'
 import { SavedItemRow } from '@/components/saved-item-row'
 import { SectionHeading } from '@/components/section-heading'
 import { Button } from '@/components/ui/button'
@@ -353,6 +354,17 @@ export default async function AccountPage() {
           </Link>
         </Section>
       )}
+
+      {/* Monthly-email opt-in — every signed-in reader, explicit only (§3). */}
+      <Section padding="md">
+        <NewsletterOptIn
+          heading={s.accountNewsletterHeading}
+          body={s.accountNewsletterBody}
+          cta={s.accountNewsletterCta}
+          successLabel={settings.newsletter.successMessage}
+          errorLabel={settings.newsletter.errorMessage}
+        />
+      </Section>
     </div>
   )
 }

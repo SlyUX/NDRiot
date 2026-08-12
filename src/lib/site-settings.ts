@@ -156,6 +156,7 @@ export type CreatorIntakeSettings = {
   signedInLabel: string
   signOutLabel: string
   permissionStatement: string
+  newsletterOptInLabel: string
   anythingElseLabel: string
   submitLabel: string
   successMessage: string
@@ -395,6 +396,9 @@ export interface SiteSettings {
     accountSignInTitle: string
     accountSignInBody: string
     accountSignInCta: string
+    accountNewsletterHeading: string
+    accountNewsletterBody: string
+    accountNewsletterCta: string
     /** Footer nav groups + the logged-out header account links. */
     footerGetListedHeading: string
     footerRiotHeading: string
@@ -642,6 +646,8 @@ const DEFAULTS: SiteSettings = {
     signOutLabel: 'Sign out',
     permissionStatement:
       'I own or have permission to share everything I’ve linked here, and ND Riot can use it to build my profile.',
+    newsletterOptInLabel:
+      'Send me ND Riot’s monthly email — new comics, creators, and indie-comics resources. Confirm by email; unsubscribe anytime.',
     anythingElseLabel: 'Anything else?',
     submitLabel: 'Submit for review',
     successMessage:
@@ -821,6 +827,10 @@ const DEFAULTS: SiteSettings = {
     accountSignInBody:
       'ND Riot uses Google sign-in — it only confirms it’s you, and your saves stay private.',
     accountSignInCta: 'Sign in with Google',
+    accountNewsletterHeading: 'Monthly Updates',
+    accountNewsletterBody:
+      'New comics, creators, and indie-comics resources — once a month, no more. Confirm by email; unsubscribe anytime.',
+    accountNewsletterCta: 'Sign me up',
     footerGetListedHeading: 'Get Listed',
     footerRiotHeading: 'The Riot',
     footerJoinCreatorsLabel: 'Comic Creators',

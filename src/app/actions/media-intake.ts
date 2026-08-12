@@ -7,6 +7,7 @@ import { uploadImageFile } from '@/lib/intake/uploads'
 import { fetchFeed } from '@/lib/feed-parse'
 import { INTAKE_MEDIA_IDS_QUERY } from '@/lib/queries'
 import { auth } from '@/auth'
+import { subscribeToNewsletter } from '@/lib/mailerlite'
 import { ownsDoc, recordOwnership } from '@/sanity/ownership-client'
 import { getWriteClient } from '@/sanity/write-client'
 
@@ -200,9 +201,12 @@ export async function submitMedia(
     return { status: 'error', message: 'Something went wrong saving your submission — please try again.', values }
   }
 
+  const optIn = isYes(String(formData.get('newsletterOptIn') ?? ''))
   await Promise.all([
     notifyTeam({ name: values.name, email, slug, isUpdate, note: values.anythingElse, logoNote }),
     notifyCreator({ email, isUpdate }),
+    // Optional monthly-email opt-in (double opt-in) — best-effort, never blocks.
+    optIn ? subscribeToNewsletter(email) : Promise.resolve(false),
   ])
 
   return { status: 'success' }

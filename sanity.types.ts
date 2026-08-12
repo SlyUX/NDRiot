@@ -620,6 +620,9 @@ export type SiteSettings = {
     accountSignInTitle?: string;
     accountSignInBody?: string;
     accountSignInCta?: string;
+    accountNewsletterHeading?: string;
+    accountNewsletterBody?: string;
+    accountNewsletterCta?: string;
     footerGetListedHeading?: string;
     footerRiotHeading?: string;
     footerJoinCreatorsLabel?: string;
@@ -752,6 +755,7 @@ export type SiteSettings = {
     signedInLabel?: string;
     signOutLabel?: string;
     permissionStatement?: string;
+    newsletterOptInLabel?: string;
     anythingElseLabel?: string;
     submitLabel?: string;
     successMessage?: string;

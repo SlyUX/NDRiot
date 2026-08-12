@@ -1,18 +1,16 @@
 'use server'
 
 import { honeypotTripped, rateLimited, submittedTooFast } from '@/lib/intake/anti-spam'
+import { subscribeToNewsletter } from '@/lib/mailerlite'
 
 /**
- * Newsletter signup → MailerLite.
+ * Newsletter signup → MailerLite (the public homepage/footer band).
  *
- * The email goes straight to MailerLite's API and is NEVER stored in Sanity —
- * the production dataset is public-read, so a subscriber list living there
- * would be readable by anyone (same reasoning as the contact form). Double
- * opt-in is on at the MailerLite account level, so nobody joins until they
- * confirm; the API call just triggers the confirmation email.
- *
- * Env-gated: MAILERLITE_API_KEY + MAILERLITE_GROUP_ID. Absent → the feature
- * fails closed with a generic error (our problem, not the subscriber's).
+ * This action owns the public-form concerns — honeypot, timing, rate limit,
+ * email validation, echoing the field back on error. The actual MailerLite
+ * hand-off lives in `subscribeToNewsletter` (src/lib/mailerlite.ts), shared with
+ * the intake forms and the /me opt-in. Double opt-in is on at the account level,
+ * so nobody joins until they confirm; the call just triggers that email.
  */
 
 export type NewsletterState = {
@@ -44,31 +42,8 @@ export async function subscribeNewsletter(
     return { status: 'error', message: 'Too many attempts just now. Give it a few minutes.', email }
   }
 
-  const apiKey = process.env.MAILERLITE_API_KEY
-  const groupId = process.env.MAILERLITE_GROUP_ID
-  if (!apiKey || !groupId) {
-    console.error('[newsletter] MAILERLITE_API_KEY / MAILERLITE_GROUP_ID not set')
-    return { status: 'error', email }
-  }
-
-  try {
-    const res = await fetch('https://connect.mailerlite.com/api/subscribers', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      // MailerLite upserts on email and returns 200/201 (including for an
-      // already-subscribed address), so a repeat signup still reads as success.
-      body: JSON.stringify({ email, groups: [groupId] }),
-    })
-    if (!res.ok) {
-      console.error('[newsletter] MailerLite responded', res.status, await res.text())
-      return { status: 'error', email }
-    }
-  } catch (cause) {
-    console.error('[newsletter] request failed', cause)
+  if (!(await subscribeToNewsletter(email))) {
+    // Env not set or MailerLite rejected — our problem, not the subscriber's.
     return { status: 'error', email }
   }
 

@@ -422,6 +422,20 @@ export function MediaIntakeForm({
             {errors.permission && <p className="text-destructive text-xs">{errors.permission}</p>}
           </div>
 
+          {/* Optional newsletter opt-in — shared label with the creator form
+              (common), unticked by default; subscribes the signed-in email. */}
+          <div className="space-y-1.5">
+            <label className="flex items-start gap-3 text-sm">
+              <input
+                type="checkbox"
+                name="newsletterOptIn"
+                value="yes"
+                className="mt-0.5 size-4 accent-[var(--primary)]"
+              />
+              <span>{common.newsletterOptInLabel}</span>
+            </label>
+          </div>
+
           <div className="space-y-1.5">
             <label htmlFor="anythingElse" className={labelClass}>
               {copy.anythingElseLabel}

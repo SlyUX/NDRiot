@@ -3763,6 +3763,27 @@
               },
               "optional": true
             },
+            "accountNewsletterHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "accountNewsletterBody": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "accountNewsletterCta": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "footerGetListedHeading": {
               "type": "objectAttribute",
               "value": {
@@ -4685,6 +4706,13 @@
               "optional": true
             },
             "permissionStatement": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "newsletterOptInLabel": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

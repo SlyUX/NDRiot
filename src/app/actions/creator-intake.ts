@@ -17,6 +17,7 @@ import { fillTokens, sendEmail } from '@/lib/notify-email'
 import { INTAKE_CREATOR_IDS_QUERY, INTAKE_ORGANIZATIONS_QUERY } from '@/lib/queries'
 import { getSiteSettings, type NotificationsSettings } from '@/lib/site-settings'
 import { auth } from '@/auth'
+import { subscribeToNewsletter } from '@/lib/mailerlite'
 import { ownsCreator, recordOwnership } from '@/sanity/ownership-client'
 import { getWriteClient } from '@/sanity/write-client'
 
@@ -429,6 +430,7 @@ export async function submitCreator(
   }
 
   const notifications = (await getSiteSettings()).notifications
+  const optIn = isYes(String(formData.get('newsletterOptIn') ?? ''))
   await Promise.all([
     notifyTeam({ name: values.name, email, slug, isUpdate, note: values.anythingElse, photoNote }),
     notifyCreator({
@@ -437,6 +439,8 @@ export async function submitCreator(
       name: values.name.split(' ')[0] || values.name,
       copy: notifications,
     }),
+    // Optional monthly-email opt-in (double opt-in) — best-effort, never blocks.
+    optIn ? subscribeToNewsletter(email) : Promise.resolve(false),
   ])
 
   return { status: 'success' }

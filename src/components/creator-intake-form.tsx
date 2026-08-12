@@ -805,6 +805,20 @@ export function CreatorIntakeForm({
             )}
           </div>
 
+          {/* Optional newsletter opt-in — unticked by default; the action
+              subscribes the signed-in email via double opt-in when ticked. */}
+          <div className="space-y-1.5">
+            <label className="flex items-start gap-3 text-sm">
+              <input
+                type="checkbox"
+                name="newsletterOptIn"
+                value="yes"
+                className="mt-0.5 size-4 accent-[var(--primary)]"
+              />
+              <span>{copy.newsletterOptInLabel}</span>
+            </label>
+          </div>
+
           <div className="space-y-1.5">
             <label htmlFor="anythingElse" className={labelClass}>
               {copy.anythingElseLabel}

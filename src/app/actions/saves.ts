@@ -1,6 +1,7 @@
 'use server'
 
 import { auth, signIn } from '@/auth'
+import { subscribeToNewsletter } from '@/lib/mailerlite'
 import { toggleSave, unsaveItem, type SavedItemType } from '@/sanity/reader-client'
 
 /**
@@ -49,6 +50,19 @@ export async function removeSaveAction(itemId: string): Promise<{ ok: boolean }>
     console.error('[saves] remove failed', cause)
     return { ok: false }
   }
+}
+
+/**
+ * Opt the signed-in reader into the monthly newsletter from /me. Identity from
+ * the session; a fire-and-forget double-opt-in subscribe. Returns whether the
+ * subscribe was accepted so /me can show a transient "check your inbox" — no
+ * subscription status is ever stored (MailerLite owns the lifecycle).
+ */
+export async function optInNewsletterAction(): Promise<boolean> {
+  const session = await auth()
+  const email = session?.user?.email?.trim()
+  if (!email) return false
+  return subscribeToNewsletter(email)
 }
 
 /**
