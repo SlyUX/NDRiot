@@ -17,7 +17,6 @@ import {
   SAVED_CREATORS_QUERY,
 } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
-import { cn } from '@/lib/utils'
 import { ownedDocIds } from '@/sanity/ownership-client'
 import { savedItems } from '@/sanity/reader-client'
 import { urlFor } from '@/sanity/image'
@@ -111,14 +110,16 @@ export default async function AccountPage() {
             <h1 className="text-2xl font-black tracking-tighter uppercase sm:text-4xl">
               {isCreator ? s.accountUserCreatorHeading : s.accountUserHeading}
             </h1>
-            {session.user?.name && (
-              <p className={cn('mt-2 font-bold', isCreator ? 'text-white' : 'text-foreground')}>
-                {session.user.name}
-              </p>
+            {/* Name + email only for a plain reader — a creator's identity is
+                the profile block below, so these would just be noise. */}
+            {!isCreator && (
+              <>
+                {session.user?.name && (
+                  <p className="text-foreground mt-2 font-bold">{session.user.name}</p>
+                )}
+                <p className="text-muted-foreground text-sm">{email}</p>
+              </>
             )}
-            <p className={cn('text-sm', isCreator ? 'text-white/80' : 'text-muted-foreground')}>
-              {email}
-            </p>
           </div>
           <SignOutButton
             label={settings.creatorIntake.signOutLabel}
