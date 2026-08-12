@@ -37,10 +37,8 @@ export const dynamic = 'force-dynamic'
 /** Owned creators/media, resolved for the manage links (local shape, like the join pages). */
 type OwnedDoc = { _id: string; _type: string; name: string | null; slug: string | null }
 
-/** Owner lists (Your Comics/Media): two columns from tablet up, one on phones. */
-const FEED_GRID = 'grid grid-cols-1 gap-x-8 sm:grid-cols-2'
-/** Saved shelves: three on desktop, two on portrait tablet, one on mobile. */
-const SAVED_GRID = 'grid grid-cols-1 gap-x-8 md:grid-cols-2 lg:grid-cols-3'
+/** Every feed-style list here: three on desktop, two on portrait tablet, one on mobile. */
+const FEED_GRID = 'grid grid-cols-1 gap-x-8 md:grid-cols-2 lg:grid-cols-3'
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings()
@@ -110,7 +108,7 @@ export default async function AccountPage() {
       <Section padding="md" background={isCreator ? 'creator' : 'charcoal'}>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-black tracking-tighter uppercase sm:text-4xl">
+            <h1 className="text-2xl font-black tracking-tighter uppercase sm:text-4xl">
               {isCreator ? s.accountUserCreatorHeading : s.accountUserHeading}
             </h1>
             {session.user?.name && (
@@ -131,18 +129,18 @@ export default async function AccountPage() {
 
         {isCreator && (
           <>
-            <div className="mt-6 grid gap-6 sm:grid-cols-2">
+            <div className="mt-4 grid gap-4 sm:mt-6 sm:grid-cols-2 sm:gap-6">
               {ownedCreators.map((creator) => {
                 const sub = creator.studio?.name ?? creator.location
                 return (
-                  <div key={creator._id} className="flex gap-4">
-                    <div className="relative aspect-square w-20 shrink-0 overflow-hidden bg-white/10">
+                  <div key={creator._id} className="flex gap-3 sm:gap-4">
+                    <div className="relative aspect-square w-14 shrink-0 overflow-hidden bg-white/10 sm:w-20">
                       {creator.photo && (
                         <Image
                           src={urlFor(creator.photo).width(160).url()}
                           alt=""
                           fill
-                          sizes="80px"
+                          sizes="(max-width: 640px) 56px, 80px"
                           className="object-cover"
                         />
                       )}
@@ -170,7 +168,7 @@ export default async function AccountPage() {
 
             {/* Your Comics — inside the creator zone: white text, white buttons. */}
             {ownedBooks.length > 0 && (
-              <div className="mt-8">
+              <div className="mt-6 sm:mt-8">
                 <SectionHeading as="h2" size="sm">
                   {s.accountComicsHeading}
                 </SectionHeading>
@@ -283,7 +281,7 @@ export default async function AccountPage() {
               <SectionHeading as="h2" size="sm">
                 {s.accountSavedComicsHeading}
               </SectionHeading>
-              <ul className={SAVED_GRID}>
+              <ul className={FEED_GRID}>
                 {savedBooks.map((book) => (
                   <SavedItemRow
                     key={book._id}
@@ -315,7 +313,7 @@ export default async function AccountPage() {
               <SectionHeading as="h2" size="sm">
                 {s.accountSavedCreatorsHeading}
               </SectionHeading>
-              <ul className={SAVED_GRID}>
+              <ul className={FEED_GRID}>
                 {savedCreators.map((creator) => (
                   <SavedItemRow
                     key={creator._id}
