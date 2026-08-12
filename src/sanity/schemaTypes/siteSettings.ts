@@ -25,7 +25,7 @@ export default defineType({
     { name: 'sections', title: 'Section headings' },
     { name: 'empty', title: 'Empty states' },
     { name: 'join', title: 'Join the Riot' },
-    { name: 'creatorIntake', title: 'Comic Maker intake form' },
+    { name: 'creatorIntake', title: 'Comic Creator intake form' },
     { name: 'bookIntake', title: 'Comic intake form' },
     { name: 'mediaIntake', title: 'Media intake form' },
     { name: 'contact', title: 'Contact page' },
@@ -314,10 +314,9 @@ export default defineType({
         defineField({ name: 'booksHeading', title: 'Books page title', type: 'string' }),
         defineField({ name: 'creatorsHeading', title: 'Creators page title', type: 'string' }),
         defineField({ name: 'booksDescription', title: 'Comics page — meta description', type: 'text', rows: 2 }),
-        defineField({ name: 'creatorsDescription', title: 'Comic Makers page — meta description', type: 'text', rows: 2 }),
+        defineField({ name: 'creatorsDescription', title: 'Comic Creators page — meta description', type: 'text', rows: 2 }),
         defineField({ name: 'editorialDescription', title: 'Editorial page — meta description', type: 'text', rows: 2 }),
-        defineField({ name: 'downloadsHeading', title: 'Downloads section heading', type: 'string', description: 'The Free Downloads section on /resources — e.g. "Free Downloads".' }),
-        defineField({ name: 'resourcesPageTitle', title: 'Resources page — title (H1)', type: 'string', description: 'The /resources page heading + meta title — e.g. "Downloads & Resources".' }),
+        defineField({ name: 'resourcesPageTitle', title: 'Resources page — title (H1)', type: 'string', description: 'The /resources page heading + meta title — e.g. "Resources".' }),
         defineField({ name: 'resourcesPageDescription', title: 'Resources page — meta description', type: 'text', rows: 2 }),
         defineField({ name: 'resourcesHeading', title: 'Resources section heading', type: 'string', description: 'The resources section on /resources — e.g. "Resources".' }),
         defineField({ name: 'resourceVisitLabel', title: 'Resource page — "visit" button', type: 'string', description: 'On a Link resource — e.g. "Visit the site".' }),
@@ -330,10 +329,10 @@ export default defineType({
         }),
         defineField({
           name: 'discoverLabel',
-          title: 'Randomize button label (comic makers)',
+          title: 'Randomize button label (comic creators)',
           type: 'string',
           description:
-            'The neutral shuffle button on the comic-makers row (icon only). Pressing it reshuffles. e.g. "Discover".',
+            'The neutral shuffle button on the comic-creators row (icon only). Pressing it reshuffles. e.g. "Discover".',
         }),
         defineField({
           name: 'spinLabel',
@@ -476,7 +475,7 @@ export default defineType({
           title: 'Creator page — cosigns heading',
           type: 'string',
           description:
-            'A creator’s public list of makers they endorse ("cosigns"). Use {name} for their first name — e.g. "{name}’s Cosigns" renders as "Stephen’s Cosigns".',
+            'A creator’s public list of creators they endorse ("cosigns"). Use {name} for their first name — e.g. "{name}’s Cosigns" renders as "Stephen’s Cosigns".',
         }),
         defineField({
           name: 'otherBooksHeading',
@@ -528,7 +527,6 @@ export default defineType({
         defineField({ name: 'saved', title: 'Nothing saved yet', type: 'string', description: 'Empty state on the reader home when nothing is bookmarked.' }),
         defineField({ name: 'columns', title: 'No columns', type: 'string' }),
         defineField({ name: 'interviews', title: 'No interviews', type: 'string' }),
-        defineField({ name: 'downloads', title: 'No downloads', type: 'string' }),
         defineField({ name: 'resources', title: 'No resources', type: 'string' }),
         defineField({ name: 'media', title: 'No media', type: 'string' }),
       ],
@@ -646,7 +644,7 @@ export default defineType({
 
     defineField({
       name: 'creatorIntake',
-      title: 'Comic Maker intake form',
+      title: 'Comic Creator intake form',
       type: 'object',
       group: 'creatorIntake',
       options: { collapsible: true, collapsed: true },
@@ -822,7 +820,7 @@ export default defineType({
           type: 'text',
           rows: 2,
           description:
-            'Optional monthly-email opt-in on the Comic Maker AND Media forms (both share this label). Unticked by default; ticking subscribes the signed-in email via double opt-in.',
+            'Optional monthly-email opt-in on the Comic Creator AND Media forms (both share this label). Unticked by default; ticking subscribes the signed-in email via double opt-in.',
         }),
         defineField({ name: 'anythingElseLabel', title: 'Anything-else label', type: 'string' }),
         defineField({ name: 'submitLabel', title: 'Submit button label', type: 'string' }),

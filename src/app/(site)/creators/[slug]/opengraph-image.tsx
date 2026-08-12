@@ -5,7 +5,7 @@ import { logoDataUri, ogFonts, ogImageUrl, OG_CONTENT_TYPE, OG_SIZE } from '@/li
 import { safeFetch, CREATOR_QUERY } from '@/lib/queries'
 import type { CreatorDetail } from '@/lib/types'
 
-export const alt = 'A comic maker on ND Riot'
+export const alt = 'A comic creator on ND Riot'
 export const size = OG_SIZE
 export const contentType = OG_CONTENT_TYPE
 

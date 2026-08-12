@@ -24,7 +24,7 @@ ${settings.aiLetter}
 ## Key sections
 
 - [Comics](${SITE_URL}/books): the directory of independent comics.
-- [Comic Makers](${SITE_URL}/creators): the creators behind the work.
+- [Comic Creators](${SITE_URL}/creators): the creators behind the work.
 - [Editorial](${SITE_URL}/editorial): columns and interviews on indie comics.
 - [Media](${SITE_URL}/media): independent outlets covering indie comics.
 - [About ND Riot](${SITE_URL}/about): what this is, and what "real independent comics" means.

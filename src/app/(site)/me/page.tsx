@@ -320,7 +320,7 @@ export default async function AccountPage() {
                   <SavedItemRow
                     key={creator._id}
                     itemId={creator._id}
-                    title={creator.name ?? 'Comic Maker'}
+                    title={creator.name ?? 'Comic Creator'}
                     href={creator.slug ? `/creators/${creator.slug}` : null}
                     removeLabel={s.accountRemoveLabel}
                     thumb={

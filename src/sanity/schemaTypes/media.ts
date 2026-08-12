@@ -62,7 +62,7 @@ export default defineType({
       // custom input augments with a Select all / Clear all toggle.
       components: { input: CheckboxSelectAllInput },
       description:
-        'What they tend to cover, so a comic maker can find media aligned with their project. To add a genre, edit src/lib/taxonomy.ts.',
+        'What they tend to cover, so a comic creator can find media aligned with their project. To add a genre, edit src/lib/taxonomy.ts.',
       validation: (rule) => rule.unique(),
     }),
     defineField({

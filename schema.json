@@ -3951,13 +3951,6 @@
               },
               "optional": true
             },
-            "downloadsHeading": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
             "resourcesPageTitle": {
               "type": "objectAttribute",
               "value": {
@@ -4458,13 +4451,6 @@
               "optional": true
             },
             "interviews": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
-            "downloads": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

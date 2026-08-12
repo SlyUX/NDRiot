@@ -68,10 +68,10 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
   const creatorCard =
     creator?.slug != null
       ? {
-          title: creator.name ?? 'Comic Maker',
+          title: creator.name ?? 'Comic Creator',
           href: `/creators/${creator.slug}`,
           image: creator.photo,
-          imageAlt: `Portrait of ${creator.name ?? 'comic maker'}`,
+          imageAlt: `Portrait of ${creator.name ?? 'comic creator'}`,
           eyebrow: creator.studio?.name ?? creator.location,
           summary: truncate(creator.bioText, 160),
           aspectRatio: 'square' as const,
@@ -80,7 +80,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
 
   const otherBooksHeading = settings.sections.otherBooksHeading.replace(
     '{name}',
-    creator?.name ?? 'this comic maker',
+    creator?.name ?? 'this comic creator',
   )
 
   const buyHeading = settings.sections.buyHeading.replace('{title}', book.title)

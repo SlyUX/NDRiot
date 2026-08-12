@@ -1,5 +1,5 @@
 /**
- * Rename the live "Creator(s)" copy overrides to "Comic Maker(s)".
+ * Rename the live "Creator(s)" copy overrides to "Comic Creator(s)".
  *
  * Most creator→comic-maker copy lives in code defaults (site-settings.ts) and
  * ships with a deploy. These four fields are *overridden* in the production
@@ -18,10 +18,10 @@ import { API_VERSION, PROJECT_ID, loadToken, query } from './lib/sanity.mjs'
 
 /** [dotted path, expected current value, new value] */
 const CHANGES = [
-  ['home.creatorsHeading', 'Creators', 'Comic Makers'],
-  ['sections.creatorsHeading', 'Indie Comic Creators', 'Indie Comic Makers'],
-  ['sections.creatorFavoritesHeading', '{name}’s Favorite Creators', '{name}’s Favorite Comic Makers'],
-  ['sections.searchCreatorsLabel', 'Search Creators', 'Search Comic Makers'],
+  ['home.creatorsHeading', 'Creators', 'Comic Creators'],
+  ['sections.creatorsHeading', 'Indie Comic Creators', 'Indie Comic Creators'],
+  ['sections.creatorFavoritesHeading', '{name}’s Favorite Creators', '{name}’s Favorite Comic Creators'],
+  ['sections.searchCreatorsLabel', 'Search Creators', 'Search Comic Creators'],
 ]
 
 async function main() {

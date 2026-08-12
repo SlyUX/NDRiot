@@ -84,7 +84,7 @@ as the site filter. Produced 178 ideas; the top 100 by volume were analyzed.
 
 ### Fixed (verified on re-scan)
 - **Unique titles per page** — e.g., `The seed witch · ND Riot`,
-  `Indie Comic Makers · ND Riot`, `John Haney · ND Riot`.
+  `Indie Comic Creators · ND Riot`, `John Haney · ND Riot`.
 - **Canonical tags** present sitewide, pointing to correct URLs.
 - **Unique meta descriptions** on comic detail pages (pulled from synopsis).
 - Clean URL architecture (`/books/…`, `/creators/…`, `/editorial`).

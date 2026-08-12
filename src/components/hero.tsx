@@ -140,7 +140,7 @@ function FeatureBook({
 
 /**
  * One rail row — a new book or creator as a compact text entry (no thumbnail).
- * Title, an arrival line ("a new comic by …" / "a new comic maker"), a short
+ * Title, an arrival line ("a new comic by …" / "a new comic creator"), a short
  * blurb, and up to three genres — the same shape for either type.
  */
 function NewRow({ item }: { item: HomeNewItem }) {
@@ -151,7 +151,7 @@ function NewRow({ item }: { item: HomeNewItem }) {
     ? item.creatorName
       ? `a new comic by ${item.creatorName}`
       : 'a new comic'
-    : 'a new comic maker'
+    : 'a new comic creator'
   const blurb = truncate(isBook ? item.descriptionText : item.bioText, 90)
 
   return (

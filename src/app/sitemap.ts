@@ -48,9 +48,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     [
       ['/books', data.books, 0.8] as const,
       ['/creators', data.creators, 0.8] as const,
-      // Editorials (columns/interviews) are hidden for now — their detail pages
-      // still resolve, but we don't advertise them in the sitemap.
-      ['/downloads', data.downloads, 0.6] as const,
+      // Editorials (columns/interviews) and free downloads are hidden for now —
+      // their detail pages still resolve, but we don't advertise them.
       ['/resources', data.resources, 0.6] as const,
     ] satisfies ReadonlyArray<readonly [string, { slug: string | null; _updatedAt: string }[], number]>
   ).flatMap(([base, items, priority]) =>

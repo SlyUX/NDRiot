@@ -15,16 +15,21 @@ import type { ResourceSummary } from '@/lib/types'
  */
 export function ResourceList({
   heading,
+  headingAs = 'h2',
+  headingSize = 'sm',
   resources,
   emptyMessage,
 }: {
   heading: string
+  /** `h1` when the list *is* the page (/resources); `h2` for a section. */
+  headingAs?: 'h1' | 'h2'
+  headingSize?: 'sm' | 'md' | 'lg'
   resources: ResourceSummary[]
   emptyMessage: string
 }) {
   return (
     <Section padding="md">
-      <SectionHeading as="h2" size="sm">
+      <SectionHeading as={headingAs} size={headingSize}>
         {heading}
       </SectionHeading>
 

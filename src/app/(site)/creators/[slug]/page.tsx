@@ -42,7 +42,7 @@ export async function generateMetadata({
   ])
   if (!creator) return {}
   return pageMetadata({
-    title: creator.name ?? 'Comic Maker',
+    title: creator.name ?? 'Comic Creator',
     description: creator.bioText,
     path: `/creators/${slug}`,
     siteTitle: settings.siteTitle,
@@ -87,7 +87,7 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
       <JsonLd
         data={jsonLdGraph(
           comicMakerSchema({
-            name: creator.name ?? 'Comic Maker',
+            name: creator.name ?? 'Comic Creator',
             url: absoluteUrl(`/creators/${slug}`),
             photo: creator.photo,
             bio: creator.bioText,
@@ -95,8 +95,8 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
           }),
           breadcrumbSchema([
             { name: 'Home', path: '/' },
-            { name: 'Comic Makers', path: '/creators' },
-            { name: creator.name ?? 'Comic Maker', path: `/creators/${slug}` },
+            { name: 'Comic Creators', path: '/creators' },
+            { name: creator.name ?? 'Comic Creator', path: `/creators/${slug}` },
           ]),
         )}
       />

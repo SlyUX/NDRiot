@@ -645,7 +645,6 @@ export type SiteSettings = {
     booksDescription?: string;
     creatorsDescription?: string;
     editorialDescription?: string;
-    downloadsHeading?: string;
     resourcesPageTitle?: string;
     resourcesPageDescription?: string;
     resourcesHeading?: string;
@@ -719,7 +718,6 @@ export type SiteSettings = {
     saved?: string;
     columns?: string;
     interviews?: string;
-    downloads?: string;
     resources?: string;
     media?: string;
   };
