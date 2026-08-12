@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils'
 const headingVariants = cva('font-black tracking-tighter', {
   variants: {
     size: {
-      sm: 'text-xs tracking-widest',
+      sm: 'text-sm tracking-widest',
       md: 'text-2xl md:text-3xl',
       lg: 'text-3xl md:text-4xl',
     },

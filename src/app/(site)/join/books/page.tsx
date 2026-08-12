@@ -147,7 +147,10 @@ export default async function BooksIntakePage({
 
   return (
     <Section padding="md" maxWidth="3xl">
-      <h1 className="text-4xl font-black tracking-tighter uppercase sm:text-5xl">{copy.heading}</h1>
+      {/* The h1 carries the verb (Add vs Update) — no separate heading repeating it. */}
+      <h1 className="text-4xl font-black tracking-tighter uppercase sm:text-5xl">
+        {initial ? copy.editHeading : copy.heading}
+      </h1>
 
       <div className="border-primary/20 mt-8 flex flex-wrap items-center justify-between gap-3 border-b pb-4 text-xs">
         <span className="text-muted-foreground tracking-widest uppercase">
@@ -157,12 +160,7 @@ export default async function BooksIntakePage({
       </div>
 
       <div className="mt-8 space-y-6">
-        <div>
-          <h2 className="text-2xl font-black tracking-tighter uppercase">
-            {initial ? copy.editHeading : copy.heading}
-          </h2>
-          {!initial && <p className="text-muted-foreground mt-2 text-sm">{copy.intro}</p>}
-        </div>
+        {!initial && <p className="text-muted-foreground text-sm">{copy.intro}</p>}
         <BookIntakeForm
           key={initial?.updateId ?? 'new'}
           copy={copy}

@@ -87,7 +87,7 @@ export default async function MediaDetailPage({ params }: { params: Promise<{ sl
           {media.about && <p className="mt-4 max-w-prose text-sm">{media.about}</p>}
           {media.genresCovered && media.genresCovered.length > 0 && (
             <div className="mt-6">
-              <h2 className="text-muted-foreground text-xs font-black tracking-widest uppercase">
+              <h2 className="text-muted-foreground text-sm font-black tracking-widest uppercase">
                 {sections.mediaGenresHeading}
               </h2>
               <div className="mt-2 flex flex-wrap gap-1.5">
