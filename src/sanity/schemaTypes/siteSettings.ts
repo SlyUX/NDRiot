@@ -318,7 +318,9 @@ export default defineType({
         defineField({ name: 'downloadsHeading', title: 'Downloads section heading', type: 'string', description: 'The Free Downloads section on /resources — e.g. "Free Downloads".' }),
         defineField({ name: 'resourcesPageTitle', title: 'Resources page — title (H1)', type: 'string', description: 'The /resources page heading + meta title — e.g. "Downloads & Resources".' }),
         defineField({ name: 'resourcesPageDescription', title: 'Resources page — meta description', type: 'text', rows: 2 }),
-        defineField({ name: 'resourcesHeading', title: 'Resources section heading', type: 'string', description: 'The outbound-links section on /resources — e.g. "Resources".' }),
+        defineField({ name: 'resourcesHeading', title: 'Resources section heading', type: 'string', description: 'The resources section on /resources — e.g. "Resources".' }),
+        defineField({ name: 'resourceVisitLabel', title: 'Resource page — "visit" button', type: 'string', description: 'On a Link resource — e.g. "Visit the site".' }),
+        defineField({ name: 'resourceDownloadLabel', title: 'Resource page — "download" button', type: 'string', description: 'On a Download resource — e.g. "Download".' }),
         defineField({
           name: 'genreBooksHeading',
           title: 'Category page — books heading',

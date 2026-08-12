@@ -23,6 +23,7 @@ const EMPTY: SITEMAP_QUERY_RESULT = {
   columns: [],
   interviews: [],
   downloads: [],
+  resources: [],
   genres: [],
   formats: [],
 }
@@ -50,6 +51,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // Editorials (columns/interviews) are hidden for now — their detail pages
       // still resolve, but we don't advertise them in the sitemap.
       ['/downloads', data.downloads, 0.6] as const,
+      ['/resources', data.resources, 0.6] as const,
     ] satisfies ReadonlyArray<readonly [string, { slug: string | null; _updatedAt: string }[], number]>
   ).flatMap(([base, items, priority]) =>
     items

@@ -364,6 +364,8 @@ export interface SiteSettings {
     resourcesPageTitle: string
     resourcesPageDescription: string
     resourcesHeading: string
+    resourceVisitLabel: string
+    resourceDownloadLabel: string
     genreBooksHeading: string
     genreCreatorsHeading: string
     everythingElseHeading: string
@@ -805,6 +807,8 @@ const DEFAULTS: SiteSettings = {
     resourcesPageDescription:
       'Free downloads from indie comic creators, plus resources for making and publishing independent comics — hosting, tools, community, and funding.',
     resourcesHeading: 'Resources',
+    resourceVisitLabel: 'Visit the site',
+    resourceDownloadLabel: 'Download',
     genreBooksHeading: 'Comics',
     genreCreatorsHeading: 'Comic Makers working in this genre',
     everythingElseHeading: 'While you are here',

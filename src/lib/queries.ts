@@ -196,9 +196,17 @@ export const FEED_MEDIA_QUERY = defineQuery(`*[_type=="media" && defined(slug.cu
 export const DOWNLOADS_QUERY = defineQuery(`*[_type=="freeDownload"]|order(publishedAt desc){_id,title,"slug":slug.current,description,cover,publishedAt,"creatorName":creator->name}`)
 export const DOWNLOAD_QUERY = defineQuery(`*[_type=="freeDownload" && slug.current==$slug][0]{_id,title,description,cover,"creatorName":creator->name,"fileUrl":file.asset->url}`)
 
-// Resources — outbound links, grouped by category then title (neutral order,
-// never ranked — §3). A resource with no URL has nothing to point at.
-export const RESOURCES_QUERY = defineQuery(`*[_type=="resource" && defined(url)]|order(category asc, title asc){_id,title,url,category,description}`)
+// Resources — grouped by category then title (neutral order, never ranked —
+// §3). Cards link to the resource's own page; `kind` drives the card's label.
+export const RESOURCES_QUERY = defineQuery(`*[_type=="resource" && defined(slug.current)]|order(category asc, title asc){_id,title,"slug":slug.current,kind,category,description,image}`)
+
+// A single resource page. `kind` selects the lead media (videoUrl / fileUrl /
+// url); `body` is the write-up beneath it (Portable Text with inline images).
+export const RESOURCE_QUERY = defineQuery(`*[_type=="resource" && slug.current==$slug][0]{
+  _id,title,kind,category,description,body,videoUrl,url,image,publishedAt,source,
+  "fileUrl":file.asset->url,
+  "creatorName":creator->name,"creatorSlug":creator->slug.current
+}`)
 
 /**
  * IDs only, for the hero's random pick.
@@ -230,6 +238,7 @@ export const SITEMAP_QUERY = defineQuery(`{
   "columns": *[_type=="column" && defined(slug.current)]{"slug":slug.current,_updatedAt},
   "interviews": *[_type=="interview" && defined(slug.current)]{"slug":slug.current,_updatedAt},
   "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},
+  "resources": *[_type=="resource" && defined(slug.current)]{"slug":slug.current,_updatedAt},
   "genres": array::unique(*[_type=="book" && defined(genres)].genres[]),
   "formats": array::unique(*[_type=="book" && defined(format)].format)
 }`)

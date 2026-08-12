@@ -1,19 +1,24 @@
-import { ArrowUpRight } from 'lucide-react'
+import Link from 'next/link'
 
 import { SectionHeading } from '@/components/section-heading'
 import { Section } from '@/components/ui/section'
-import { externalHref } from '@/lib/utils'
-import type { ResourceSummary } from '@/lib/types'
+import type { ResourceKind, ResourceSummary } from '@/lib/types'
 
 /**
- * The Resources section on /resources — a grid of outbound links.
- *
- * A dedicated presentational component rather than ContentCard (§4): resources
- * carry no cover image and link off-site, where ContentCard is image-first and
- * renders an internal next/Link with no `target`/`rel`. Each block is a real
- * external anchor (new tab, nofollow). Ordering + grouping come from the query;
- * this only renders. Every string is Sanity's (§2).
+ * The Resources section on /resources — a grid of cards, each linking to the
+ * resource's own page (/resources/[slug]) where the video/file/link and the
+ * write-up live. A dedicated component rather than ContentCard (§4): resources
+ * carry a kind label and no cover, where ContentCard is image-first. Ordering +
+ * grouping come from the query; this only renders. Strings from Sanity (§2);
+ * the kind label is a system classification (like a genre/format badge), code.
  */
+const KIND_LABEL: Record<ResourceKind, string> = {
+  video: 'Video',
+  download: 'Download',
+  link: 'Link',
+  guide: 'Guide',
+}
+
 export function ResourceList({
   heading,
   resources,
@@ -35,25 +40,20 @@ export function ResourceList({
         <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {resources.map((resource) => (
             <li key={resource._id}>
-              <a
-                href={externalHref(resource.url)}
-                target="_blank"
-                rel="nofollow noopener noreferrer"
+              <Link
+                href={`/resources/${resource.slug}`}
                 className="group hover:border-primary focus-visible:ring-ring flex h-full flex-col border border-white/15 p-4 transition-colors focus-visible:ring-2 focus-visible:outline-none"
               >
                 <span className="text-primary text-[10px] font-bold tracking-widest uppercase">
-                  {resource.category}
+                  {KIND_LABEL[resource.kind]} · {resource.category}
                 </span>
-                <h3 className="mt-2 flex items-start gap-1 leading-tight font-bold group-hover:underline">
-                  <span className="min-w-0">{resource.title}</span>
-                  <ArrowUpRight className="size-4 shrink-0 opacity-60" aria-hidden="true" />
-                </h3>
+                <h3 className="mt-2 leading-tight font-bold group-hover:underline">{resource.title}</h3>
                 {resource.description && (
                   <p className="text-muted-foreground mt-2 line-clamp-3 text-sm">
                     {resource.description}
                   </p>
                 )}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
