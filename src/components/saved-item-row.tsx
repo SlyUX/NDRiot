@@ -4,10 +4,9 @@ import type { ReactNode } from 'react'
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Bookmark } from 'lucide-react'
+import { X } from 'lucide-react'
 
 import { removeSaveAction } from '@/app/actions/saves'
-import { Button } from '@/components/ui/button'
 
 /**
  * One row in the dashboard's saved lists — a compact feed-style entry with a
@@ -55,17 +54,15 @@ export function SavedItemRow({
       ) : (
         <span className="min-w-0 flex-1 truncate text-sm font-bold">{title}</span>
       )}
-      <Button
+      <button
         type="button"
-        variant="destructive"
-        size="sm"
         onClick={onRemove}
         disabled={pending}
-        className="shrink-0"
+        aria-label={removeLabel}
+        className="focus-visible:ring-ring hover:text-primary shrink-0 text-white transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
       >
-        <Bookmark aria-hidden="true" className="size-3.5 fill-current" />
-        {removeLabel}
-      </Button>
+        <X aria-hidden="true" className="size-4" />
+      </button>
     </li>
   )
 }
