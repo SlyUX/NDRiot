@@ -196,6 +196,10 @@ export const FEED_MEDIA_QUERY = defineQuery(`*[_type=="media" && defined(slug.cu
 export const DOWNLOADS_QUERY = defineQuery(`*[_type=="freeDownload"]|order(publishedAt desc){_id,title,"slug":slug.current,description,cover,publishedAt,"creatorName":creator->name}`)
 export const DOWNLOAD_QUERY = defineQuery(`*[_type=="freeDownload" && slug.current==$slug][0]{_id,title,description,cover,"creatorName":creator->name,"fileUrl":file.asset->url}`)
 
+// Resources — outbound links, grouped by category then title (neutral order,
+// never ranked — §3). A resource with no URL has nothing to point at.
+export const RESOURCES_QUERY = defineQuery(`*[_type=="resource" && defined(url)]|order(category asc, title asc){_id,title,url,category,description}`)
+
 /**
  * IDs only, for the hero's random pick.
  *

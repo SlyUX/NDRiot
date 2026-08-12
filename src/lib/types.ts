@@ -7,6 +7,7 @@ import type {
   CREATOR_QUERY_RESULT,
   DOWNLOADS_QUERY_RESULT,
   DOWNLOAD_QUERY_RESULT,
+  RESOURCES_QUERY_RESULT,
   HERO_BOOKS_QUERY_RESULT,
   HOME_EDITORIAL_QUERY_RESULT,
   HOME_NEW_QUERY_RESULT,
@@ -34,6 +35,7 @@ export type CreatorSummary = CREATORS_QUERY_RESULT[number]
 export type ColumnSummary = COLUMNS_QUERY_RESULT[number]
 export type InterviewSummary = INTERVIEWS_QUERY_RESULT[number]
 export type DownloadSummary = DOWNLOADS_QUERY_RESULT[number]
+export type ResourceSummary = RESOURCES_QUERY_RESULT[number]
 export type MediaSummary = MEDIA_QUERY_RESULT[number]
 export type MediaDetail = NonNullable<MEDIA_DETAIL_QUERY_RESULT>
 export type HeroBook = HERO_BOOKS_QUERY_RESULT[number]

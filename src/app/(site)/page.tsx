@@ -9,7 +9,7 @@ import { LoadMore } from '@/components/load-more'
 import { NewsletterForm } from '@/components/newsletter-form'
 import { SaveButton } from '@/components/save-button'
 import { organizationSchema, jsonLdGraph, websiteSchema } from '@/lib/structured-data'
-import { bookToCard, creatorToCard, editorialToCard, mediaToCard } from '@/lib/card-mappers'
+import { bookToCard, creatorToCard, mediaToCard } from '@/lib/card-mappers'
 import {
   HOME_ROW_LIMIT,
   bookFilters,
@@ -28,7 +28,6 @@ import {
   BOOK_IDS_QUERY,
   GENRES_WITH_BOOKS_QUERY,
   HERO_BOOKS_QUERY,
-  HOME_EDITORIAL_QUERY,
   HOME_NEW_QUERY,
   MEDIA_HOME_QUERY,
   FILTERED_BOOKS_QUERY,
@@ -42,7 +41,6 @@ import type {
   BookSummary,
   CreatorSummary,
   HeroBook,
-  HomeEditorial,
   HomeNewItem,
   MediaSummary,
   Paginated,
@@ -120,7 +118,7 @@ export default async function Home({
   // The book the hero last showed, so "Discover" re-rolls to a different one.
   const notFeature = Array.isArray(params.notf) ? params.notf[0] : params.notf
 
-  const [feature, booksResult, creatorsResult, genresWithBooks, newItems, homeEditorial, mediaItems, settings, session] =
+  const [feature, booksResult, creatorsResult, genresWithBooks, newItems, mediaItems, settings, session] =
     await Promise.all([
       // Deliberately unfiltered. The hero is the guaranteed route to work
       // nobody went looking for (AGENTS.md §3), so narrowing the page must
@@ -138,7 +136,6 @@ export default async function Home({
       ),
       safeFetch<string[]>(GENRES_WITH_BOOKS_QUERY, {}, []),
       safeFetch<HomeNewItem[]>(HOME_NEW_QUERY, {}, []),
-      safeFetch<HomeEditorial[]>(HOME_EDITORIAL_QUERY, {}, []),
       safeFetch<MediaSummary[]>(MEDIA_HOME_QUERY, {}, []),
       getSiteSettings(),
       auth(),
@@ -306,25 +303,6 @@ export default async function Home({
         viewAllLabel={settings.home.viewAllLabel}
         emptyMessage={creatorsFiltering ? settings.empty.filteredCreators : settings.empty.creators}
       />
-
-      {/* Editorial: one row of the most recent columns and interviews, wide
-          horizontal cards with the 4:3 thumbnail. Hidden entirely when there is
-          none, so the homepage never carries an empty editorial band. */}
-      {homeEditorial.length > 0 && (
-        <ContentCardGrid
-          heading={settings.home.editorialHeading}
-          cards={homeEditorial.map(editorialToCard)}
-          layout="horizontal"
-          columns={4}
-          aspectRatio="landscape"
-          summaryLines={3}
-          scroll
-          padding="md"
-          viewAllHref="/editorial"
-          viewAllLabel={settings.home.viewAllLabel}
-          emptyMessage=""
-        />
-      )}
 
       {/* Media: independent outlets covering indie comics. Bottom row, a
           scrolling taste; the full list (and the disclaimer) is on /media.

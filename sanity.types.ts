@@ -164,6 +164,25 @@ export type HomepageFeature = {
   >;
 };
 
+export type Resource = {
+  _id: string;
+  _type: "resource";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title: string;
+  url: string;
+  category:
+    | "Hosting & Publishing"
+    | "Tools & Software"
+    | "Community"
+    | "Funding"
+    | "Learning"
+    | "Print & Distribution";
+  description?: string;
+  publishedAt?: string;
+};
+
 export type SanityFileAssetReference = {
   _ref: string;
   _type: "reference";
@@ -591,6 +610,9 @@ export type SiteSettings = {
     creatorsDescription?: string;
     editorialDescription?: string;
     downloadsHeading?: string;
+    resourcesPageTitle?: string;
+    resourcesPageDescription?: string;
+    resourcesHeading?: string;
     genreBooksHeading?: string;
     discoverLabel?: string;
     spinLabel?: string;
@@ -660,6 +682,7 @@ export type SiteSettings = {
     columns?: string;
     interviews?: string;
     downloads?: string;
+    resources?: string;
     media?: string;
   };
   join?: {
@@ -1034,6 +1057,7 @@ export type AllSanitySchemaTypes =
   | ColumnReference
   | InterviewReference
   | HomepageFeature
+  | Resource
   | SanityFileAssetReference
   | FreeDownload
   | Slug
@@ -2097,6 +2121,23 @@ export type DOWNLOAD_QUERY_RESULT = {
 } | null;
 
 // Source: src/lib/queries.ts
+// Variable: RESOURCES_QUERY
+// Query: *[_type=="resource" && defined(url)]|order(category asc, title asc){_id,title,url,category,description}
+export type RESOURCES_QUERY_RESULT = Array<{
+  _id: string;
+  title: string;
+  url: string;
+  category:
+    | "Community"
+    | "Funding"
+    | "Hosting & Publishing"
+    | "Learning"
+    | "Print & Distribution"
+    | "Tools & Software";
+  description: string | null;
+}>;
+
+// Source: src/lib/queries.ts
 // Variable: BOOK_IDS_QUERY
 // Query: *[_type=="book" && defined(slug.current)]._id
 export type BOOK_IDS_QUERY_RESULT = Array<string>;
@@ -2582,6 +2623,7 @@ declare module "@sanity/client" {
     '*[_type=="media" && defined(slug.current)]|order(_createdAt desc)[0...30]{\n  _id,name,"slug":slug.current,_createdAt,about,genresCovered\n}': FEED_MEDIA_QUERY_RESULT;
     '*[_type=="freeDownload"]|order(publishedAt desc){_id,title,"slug":slug.current,description,cover,publishedAt,"creatorName":creator->name}': DOWNLOADS_QUERY_RESULT;
     '*[_type=="freeDownload" && slug.current==$slug][0]{_id,title,description,cover,"creatorName":creator->name,"fileUrl":file.asset->url}': DOWNLOAD_QUERY_RESULT;
+    '*[_type=="resource" && defined(url)]|order(category asc, title asc){_id,title,url,category,description}': RESOURCES_QUERY_RESULT;
     '*[_type=="book" && defined(slug.current)]._id': BOOK_IDS_QUERY_RESULT;
     '*[_type=="book" && _id in $ids]{\n  _id,title,"slug":slug.current,status,genres,format,maturity,cover,shortDescription,\n  "descriptionText": pt::text(description),\n  "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,\n  "creatorName":creator->name\n}': HERO_BOOKS_QUERY_RESULT;
     '{\n  "books": *[_type=="book" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "creators": *[_type=="creator" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "columns": *[_type=="column" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "interviews": *[_type=="interview" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "genres": array::unique(*[_type=="book" && defined(genres)].genres[]),\n  "formats": array::unique(*[_type=="book" && defined(format)].format)\n}': SITEMAP_QUERY_RESULT;

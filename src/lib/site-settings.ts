@@ -361,6 +361,9 @@ export interface SiteSettings {
     creatorsDescription: string
     editorialDescription: string
     downloadsHeading: string
+    resourcesPageTitle: string
+    resourcesPageDescription: string
+    resourcesHeading: string
     genreBooksHeading: string
     genreCreatorsHeading: string
     everythingElseHeading: string
@@ -436,6 +439,7 @@ export interface SiteSettings {
     columns: string
     interviews: string
     downloads: string
+    resources: string
     media: string
     saved: string
   }
@@ -797,6 +801,10 @@ const DEFAULTS: SiteSettings = {
     editorialDescription:
       'Columns and interviews on independent comics from ND Riot — the people, the craft, and the scene behind real indie work.',
     downloadsHeading: 'Free Downloads',
+    resourcesPageTitle: 'Downloads & Resources',
+    resourcesPageDescription:
+      'Free downloads from indie comic creators, plus resources for making and publishing independent comics — hosting, tools, community, and funding.',
+    resourcesHeading: 'Resources',
     genreBooksHeading: 'Comics',
     genreCreatorsHeading: 'Comic Makers working in this genre',
     everythingElseHeading: 'While you are here',
@@ -869,6 +877,7 @@ const DEFAULTS: SiteSettings = {
     columns: 'No columns yet.',
     interviews: 'No interviews yet.',
     downloads: 'No downloads yet.',
+    resources: 'No resources yet — check back soon.',
     media: 'No media listed yet.',
     saved: 'Nothing saved yet — tap Save on any comic or maker and it lands here.',
   },
@@ -882,18 +891,17 @@ const DEFAULTS: SiteSettings = {
     { _type: 'navLink', label: 'Comic Makers', href: '/creators' },
     {
       _type: 'navPanel',
-      label: 'Editorial',
-      href: '/editorial',
+      label: 'Downloads & Resources',
+      href: '/resources',
       groups: [
         {
-          // Columns and Interviews are sections of /editorial, not separate
-          // listing routes, so these deep-link to the anchors on that page.
-          // Downloads and the magazine moved here when the Comics dropdown was
-          // retired — all "beyond the directory" reading in one place.
+          // Free Downloads and Resources are sections of /resources, so these
+          // deep-link to the anchors on that page; the magazine keeps its home
+          // here. Editorials (columns/interviews) are hidden for now — their
+          // detail pages remain, but nothing links to a listing.
           links: [
-            { label: 'Columns', href: '/editorial#columns' },
-            { label: 'Interviews', href: '/editorial#interviews' },
-            { label: 'Downloads', href: '/downloads' },
+            { label: 'Free Downloads', href: '/resources#downloads' },
+            { label: 'Resources', href: '/resources#resources' },
             { label: 'ND Riot Magazine', href: '/magazine' },
           ],
         },

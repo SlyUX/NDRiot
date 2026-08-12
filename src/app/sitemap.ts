@@ -35,9 +35,8 @@ const STATIC_ROUTES: SitemapEntry[] = [
   // The recruitment funnel's entrance — rated above the other static pages
   // because it is the one we most want found.
   { url: absoluteUrl('/join'), changeFrequency: 'monthly', priority: 0.9 },
-  { url: absoluteUrl('/editorial'), changeFrequency: 'weekly', priority: 0.7 },
+  { url: absoluteUrl('/resources'), changeFrequency: 'weekly', priority: 0.7 },
   { url: absoluteUrl('/about'), changeFrequency: 'monthly', priority: 0.6 },
-  { url: absoluteUrl('/downloads'), changeFrequency: 'weekly', priority: 0.7 },
   { url: absoluteUrl('/magazine'), changeFrequency: 'monthly', priority: 0.4 },
 ]
 
@@ -48,8 +47,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     [
       ['/books', data.books, 0.8] as const,
       ['/creators', data.creators, 0.8] as const,
-      ['/editorial/columns', data.columns, 0.6] as const,
-      ['/editorial/interviews', data.interviews, 0.6] as const,
+      // Editorials (columns/interviews) are hidden for now — their detail pages
+      // still resolve, but we don't advertise them in the sitemap.
       ['/downloads', data.downloads, 0.6] as const,
     ] satisfies ReadonlyArray<readonly [string, { slug: string | null; _updatedAt: string }[], number]>
   ).flatMap(([base, items, priority]) =>
