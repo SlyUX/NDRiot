@@ -366,6 +366,14 @@ export interface SiteSettings {
     resourcesHeading: string
     resourceVisitLabel: string
     resourceDownloadLabel: string
+    ragPageTitle: string
+    ragPageDescription: string
+    ragArchiveHeading: string
+    ragReadLabel: string
+    ragDownloadLabel: string
+    ragBuyHeading: string
+    ragTocHeading: string
+    ragCreditsHeading: string
     genreBooksHeading: string
     genreCreatorsHeading: string
     everythingElseHeading: string
@@ -441,6 +449,7 @@ export interface SiteSettings {
     columns: string
     interviews: string
     resources: string
+    ragIssues: string
     media: string
     saved: string
   }
@@ -808,6 +817,15 @@ const DEFAULTS: SiteSettings = {
     resourcesHeading: 'Resources',
     resourceVisitLabel: 'Visit the site',
     resourceDownloadLabel: 'Download',
+    ragPageTitle: 'ND Riot Rag',
+    ragPageDescription:
+      'The ND Riot Rag — our magazine. Read each issue online or download the PDF free; other editions are linked where you can get them.',
+    ragArchiveHeading: 'Past issues',
+    ragReadLabel: 'Read online',
+    ragDownloadLabel: 'Download PDF',
+    ragBuyHeading: 'Other editions',
+    ragTocHeading: 'In this issue',
+    ragCreditsHeading: 'Credits',
     genreBooksHeading: 'Comics',
     genreCreatorsHeading: 'Comic Creators working in this genre',
     everythingElseHeading: 'While you are here',
@@ -880,6 +898,7 @@ const DEFAULTS: SiteSettings = {
     columns: 'No columns yet.',
     interviews: 'No interviews yet.',
     resources: 'No resources yet — check back soon.',
+    ragIssues: 'The first issue is on its way — check back soon.',
     media: 'No media listed yet.',
     saved: 'Nothing saved yet — tap Save on any comic or creator and it lands here.',
   },

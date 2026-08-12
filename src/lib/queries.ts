@@ -212,6 +212,22 @@ export const RESOURCE_QUERY = defineQuery(`*[_type=="resource" && slug.current==
   "creatorName":creator->name,"creatorSlug":creator->slug.current
 }`)
 
+// ---- ND Riot Rag (magazine) ----
+// Archive cards — every issue, newest (highest number) first.
+export const RAG_ISSUES_QUERY = defineQuery(`*[_type=="ragIssue" && defined(slug.current)]|order(issueNumber desc){_id,title,issueNumber,"slug":slug.current,cover,publishedAt}`)
+// The newest issue, in full — featured on /magazine.
+export const RAG_LATEST_QUERY = defineQuery(`*[_type=="ragIssue" && defined(slug.current)]|order(issueNumber desc)[0]{
+  _id,title,issueNumber,publishedAt,description,cover,"pdfUrl":pdfFile.asset->url,
+  buyLinks[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},
+  toc,credits
+}`)
+// A single issue page.
+export const RAG_ISSUE_QUERY = defineQuery(`*[_type=="ragIssue" && slug.current==$slug][0]{
+  _id,title,issueNumber,publishedAt,description,cover,"pdfUrl":pdfFile.asset->url,
+  buyLinks[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},
+  toc,credits
+}`)
+
 /**
  * IDs only, for the hero's random pick.
  *
@@ -243,6 +259,7 @@ export const SITEMAP_QUERY = defineQuery(`{
   "interviews": *[_type=="interview" && defined(slug.current)]{"slug":slug.current,_updatedAt},
   "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},
   "resources": *[_type=="resource" && defined(slug.current)]{"slug":slug.current,_updatedAt},
+  "ragIssues": *[_type=="ragIssue" && defined(slug.current)]{"slug":slug.current,_updatedAt},
   "genres": array::unique(*[_type=="book" && defined(genres)].genres[]),
   "formats": array::unique(*[_type=="book" && defined(format)].format)
 }`)

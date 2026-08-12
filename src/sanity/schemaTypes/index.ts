@@ -5,6 +5,7 @@ import column from './column'
 import interview from './interview'
 import freeDownload from './freeDownload'
 import resource from './resource'
+import ragIssue from './ragIssue'
 import homepageFeature from './homepageFeature'
 import hubPage from './hubPage'
 import bookLink from './bookLink'
@@ -17,6 +18,6 @@ import siteSettings from './siteSettings'
 
 export const schemaTypes = [
   siteSettings,
-  creator, book, media, column, interview, freeDownload, resource, homepageFeature, hubPage, organization,
+  creator, book, media, column, interview, freeDownload, resource, ragIssue, homepageFeature, hubPage, organization,
   bookLink, mediaLink, socialLink, favoriteCreator, imageWithAlt,
 ]

@@ -8,6 +8,7 @@ import type {
   HomeEditorial,
   InterviewSummary,
   MediaSummary,
+  RagIssueSummary,
   ResourceKind,
   ResourceSummary,
   SanityImage,
@@ -217,6 +218,19 @@ export const RESOURCE_KIND_LABEL: Record<ResourceKind, string> = {
   download: 'Download',
   link: 'Link',
   guide: 'Guide',
+}
+
+export function ragIssueToCard(issue: RagIssueSummary): ContentCardProps {
+  return {
+    title: issue.title,
+    href: `/magazine/${issue.slug}`,
+    image: issue.cover,
+    imageAlt: '',
+    // "Issue N" is a structural label (code), like a page number.
+    eyebrow: `Issue ${issue.issueNumber}`,
+    date: formatDate(issue.publishedAt),
+    aspectRatio: 'cover',
+  }
 }
 
 export function resourceToCard(resource: ResourceSummary): ContentCardProps {
