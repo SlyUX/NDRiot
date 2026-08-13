@@ -87,7 +87,7 @@ function FeatureBook({
         )}
         {book.fundingUrl && (
           <span className="bg-funding absolute top-2 left-2 z-10 px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-black uppercase">
-            Currently Funding
+            Now Funding
           </span>
         )}
       </Link>

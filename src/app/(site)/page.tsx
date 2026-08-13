@@ -20,6 +20,7 @@ import {
   homeBookFacets,
   homeCreatorFacets,
   pageLimit,
+  randomSeed,
   seededShuffle,
   type SearchParams,
 } from '@/lib/filters'
@@ -182,7 +183,6 @@ export default async function Home({
         resultCount={booksResult.total}
         searchLabel={settings.sections.searchBooksLabel}
         discoverLabel={settings.sections.spinLabel}
-        showDiscoverText
       />
     </Suspense>
   )
@@ -203,18 +203,16 @@ export default async function Home({
     </Suspense>
   )
 
-  // Browsing shuffles when Discover is on; a search leaves the order alone so
-  // Load More does not reshuffle the set under the reader.
+  // Default browse is randomly ordered — a fresh, fair rotation each visit, so no
+  // title keeps the top spot by its name (AGENTS.md §3: alphabetical was an MVP
+  // compromise, not the destination). A search leaves the order alone so Load
+  // More doesn't reshuffle under the reader; Spin re-rolls to a specific seed.
   const displayBooks = booksFiltering
     ? books
-    : bookSeed === null
-      ? books
-      : seededShuffle(books, bookSeed)
+    : seededShuffle(books, bookSeed ?? randomSeed())
   const displayCreators = creatorsFiltering
     ? creators
-    : creatorSeed === null
-      ? creators
-      : seededShuffle(creators, creatorSeed)
+    : seededShuffle(creators, creatorSeed ?? randomSeed())
 
   // "Discover" re-rolls the feature: the same URL with `notf` set to the current
   // book, so the next render excludes it. Carries the other params through.

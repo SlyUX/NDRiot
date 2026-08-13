@@ -46,6 +46,7 @@ export const FILTERED_BOOKS_QUERY = defineQuery(`{
     && (!defined($maturity) || maturity == $maturity)
     && (!defined($status) || status == $status)
     && (!defined($funding) || count(links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))]) > 0)
+    && (!defined($preview) || defined(previewUrl))
     && (!defined($q) || title match $q || creator->name match $q || shortDescription match $q || pt::text(description) match $q)
   ]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturity,issueCount,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},
   "total": count(*[
@@ -55,6 +56,7 @@ export const FILTERED_BOOKS_QUERY = defineQuery(`{
     && (!defined($maturity) || maturity == $maturity)
     && (!defined($status) || status == $status)
     && (!defined($funding) || count(links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))]) > 0)
+    && (!defined($preview) || defined(previewUrl))
     && (!defined($q) || title match $q || creator->name match $q || shortDescription match $q || pt::text(description) match $q)
   ])
 }`)

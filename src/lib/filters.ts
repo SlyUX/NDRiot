@@ -86,7 +86,8 @@ export function homeBookFacets(genres: readonly string[]): Facet[] {
     { param: 'genre', label: 'Genre', options: genres },
     { param: 'format', label: 'Format', options: FORMATS },
     { param: 'audience', label: 'Audience', options: MATURITY_RATINGS },
-    { param: 'funding', label: 'Currently funding', options: [], toggle: true, tone: 'funding' },
+    { param: 'funding', label: 'Now funding', options: [], toggle: true, tone: 'funding' },
+    { param: 'preview', label: 'Has preview', options: [], toggle: true },
   ]
 }
 
@@ -140,6 +141,8 @@ export function bookFilters(params: SearchParams) {
     // A flag: present means "only books with a live campaign". Absent means
     // every book, not "only books that are not funding".
     funding: one(params.funding) ? true : null,
+    // "Sample before you buy" — only books that carry a free preview.
+    preview: one(params.preview) ? true : null,
     q: searchTerm(params.q),
   }
 }
@@ -184,6 +187,16 @@ export function creatorHomeFilters(params: SearchParams) {
  * mulberry32: small, fast, and good enough for arranging a page. Not for
  * anything where predictability matters.
  */
+/**
+ * A fresh random seed for the default, unfiltered browse order (§3) — computed
+ * here, not in a component body, so the per-request randomness is intentional
+ * and out of React's purity checks (a Server Component renders once per request,
+ * so this is safe).
+ */
+export function randomSeed(): number {
+  return Math.floor(Math.random() * 0x7fffffff)
+}
+
 export function seededShuffle<T>(items: T[], seed: number): T[] {
   let state = seed >>> 0
   const random = () => {

@@ -152,7 +152,7 @@ export function FundingBadge({ url, className }: { url: string; className?: stri
         className,
       )}
     >
-      Currently Funding
+      Now Funding
     </a>
   )
 }
