@@ -3,13 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "node scripts/copy-pdf-worker.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "typegen": "sanity schema extract --enforce-required-fields && sanity typegen generate",
-    "prebuild": "npm run typegen && node scripts/copy-pdf-worker.mjs",
+    "prebuild": "npm run typegen",
     "import:creators": "node scripts/import-creators.mjs",
     "import:books": "node scripts/import-books.mjs"
   },
@@ -28,7 +27,6 @@
     "radix-ui": "^1.6.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "react-pdf": "^10.4.1",
     "sanity": "^6.5.0",
     "shadcn": "^4.13.1",
     "styled-components": "^6.4.4",
