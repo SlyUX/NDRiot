@@ -1,8 +1,9 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowUpRight, Download } from 'lucide-react'
+import { Download } from 'lucide-react'
 
 import BookLinks from '@/components/book-links'
+import { PdfReaderLauncher } from '@/components/pdf-reader-launcher'
 import PortableTextBody from '@/components/PortableTextBody'
 import { SectionHeading } from '@/components/section-heading'
 import { Button } from '@/components/ui/button'
@@ -70,12 +71,8 @@ export function RagIssueView({
         <div className="min-w-0 flex-1 space-y-4">
           {issue.pdfUrl && (
             <div className="flex flex-wrap gap-3">
-              <Button asChild size="lg" className="font-black tracking-wide uppercase">
-                <a href={issue.pdfUrl} target="_blank" rel="noopener noreferrer">
-                  {labels.read}
-                  <ArrowUpRight aria-hidden="true" className="size-4" />
-                </a>
-              </Button>
+              {/* Read in an on-demand pdf.js reader (loads only when opened). */}
+              <PdfReaderLauncher url={issue.pdfUrl} openLabel={labels.read} title={issue.title} />
               <Button asChild variant="outline" size="lg" className="font-black tracking-wide uppercase">
                 {/* ?dl= flips Sanity's asset to Content-Disposition: attachment. */}
                 <a href={`${issue.pdfUrl}?dl=`}>
