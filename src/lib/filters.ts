@@ -244,6 +244,14 @@ export function hasActiveFilters(filters: Record<string, unknown>): boolean {
  */
 export const PAGE_SIZE = 24
 
+/**
+ * When a listing is shown in random order, the whole matching set is fetched so
+ * it can be shuffled before slicing to a page (GROQ has no seeded random). This
+ * caps that fetch — generous for an indie roster; if the catalog ever exceeds
+ * it, the tail wouldn't rotate into view and this becomes a two-query job.
+ */
+export const SHUFFLE_CAP = 1000
+
 /** A single scrollable row's worth for the homepage's browse rows. */
 export const HOME_ROW_LIMIT = 24
 

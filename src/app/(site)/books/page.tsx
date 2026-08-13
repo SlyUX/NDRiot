@@ -8,11 +8,15 @@ import { Section } from '@/components/ui/section'
 import { bookToCard } from '@/lib/card-mappers'
 import {
   PAGE_SIZE,
+  SHUFFLE_CAP,
   bookFacets,
   bookFilters,
+  discoverSeed,
   genreOptions,
   hasActiveFilters,
   pageLimit,
+  randomSeed,
+  seededShuffle,
   type SearchParams,
 } from '@/lib/filters'
 import { pageMetadata } from '@/lib/page-metadata'
@@ -44,17 +48,22 @@ export default async function BooksPage({
   const filters = bookFilters(params)
   const filtering = hasActiveFilters(filters)
   const limit = pageLimit(params)
+  // Unfiltered browse is randomly ordered (§3: alphabetical was an MVP
+  // compromise) — seeded so Load More is stable (the seed rides the Load More
+  // URL). Filtering keeps query order so a narrowed set doesn't reshuffle as you
+  // page. Fetch the whole set when shuffling, then slice to the page.
+  const seed = filtering ? null : (discoverSeed(params, 'sort', 'seed') ?? randomSeed())
 
   const [result, genresWithBooks, settings] = await Promise.all([
     safeFetch<Paginated<BookSummary>>(
       FILTERED_BOOKS_QUERY,
-      { ...filters, limit },
+      { ...filters, limit: seed === null ? limit : SHUFFLE_CAP },
       { items: [], total: 0 },
     ),
     safeFetch<string[]>(GENRES_WITH_BOOKS_QUERY, {}, []),
     getSiteSettings(),
   ])
-  const books = result.items
+  const books = seed === null ? result.items : seededShuffle(result.items, seed).slice(0, limit)
 
   // Only fetched when filtering emptied the page. An empty result is a
   // discovery moment, not an error (AGENTS.md §3) — so offer the rest of the
@@ -89,7 +98,8 @@ export default async function BooksPage({
         className="pt-6"
         footer={
           <LoadMore
-            searchParams={params}
+            // Carry the seed so paging re-renders the same shuffle, just deeper.
+            searchParams={seed === null ? params : { ...params, sort: 'random', seed: String(seed) }}
             shown={books.length}
             total={result.total}
             pageSize={PAGE_SIZE}
