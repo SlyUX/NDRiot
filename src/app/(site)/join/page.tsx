@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { Section } from '@/components/ui/section'
+import { TheDeal } from '@/components/the-deal'
 import { getSiteSettings } from '@/lib/site-settings'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -35,6 +36,10 @@ export default async function JoinHubPage() {
     <Section padding="md" maxWidth="3xl">
       <h1 className="text-4xl font-black tracking-tighter uppercase sm:text-5xl">{j.funnelHeading}</h1>
       <p className="text-muted-foreground mt-4 max-w-prose text-sm">{j.funnelIntro}</p>
+
+      {/* The deal, said plainly, before anyone picks a door. */}
+      <TheDeal text={j.terms} className="mt-8" />
+      <p className="text-muted-foreground mt-4 max-w-prose text-sm italic">{j.termsWhy}</p>
 
       <ul className="mt-12 grid gap-4 sm:grid-cols-2">
         {cards.map((c) => (

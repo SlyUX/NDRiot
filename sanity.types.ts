@@ -799,6 +799,8 @@ export type SiteSettings = {
     readersLabel?: string;
     readersDesc?: string;
     readersBadge?: string;
+    terms?: string;
+    termsWhy?: string;
     heading?: string;
     body?: Array<{
       children?: Array<{

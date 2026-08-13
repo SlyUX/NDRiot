@@ -85,6 +85,10 @@ export interface JoinSettings {
   readersLabel: string
   readersDesc: string
   readersBadge: string
+  /** The plain-terms reassurance ("the deal") shown across the Join flow. */
+  terms: string
+  /** The "what's in it for us" trust-closer, shown on the hub. */
+  termsWhy: string
 }
 
 /**
@@ -589,6 +593,10 @@ const DEFAULTS: SiteSettings = {
     readersLabel: 'Reader profiles',
     readersDesc: 'Save and follow the comic creators and comics you love.',
     readersBadge: 'Coming soon',
+    terms:
+      'ND Riot is free. No fees, no cut, no rights grab, nothing exclusive — we link readers straight to wherever you sell, and never host or sell your work ourselves. A real person reviews every submission before it goes live.',
+    termsWhy:
+      'What’s in it for us? We make comics too, and believe community is the first step toward elevating independent voices.',
   },
   creatorIntake: {
     heading: 'Create a Comic Creator Profile',
@@ -666,7 +674,7 @@ const DEFAULTS: SiteSettings = {
     anythingElseLabel: 'Anything else?',
     submitLabel: 'Submit for review',
     successMessage:
-      'Thanks — your details are in. A person reviews every submission before it goes live, so your page will appear shortly. We’ll be in touch if anything needs a look.',
+      'Thanks — your details are in. A person reviews every submission before it goes live, usually within a few days. We’ll email you when your creator page is approved — then you can add your comics.',
     errorMessage: 'That didn’t save. Please try again in a moment.',
     optionalLabel: 'optional',
   },
@@ -728,7 +736,7 @@ const DEFAULTS: SiteSettings = {
     anythingElseLabel: 'Anything else?',
     submitLabel: 'Submit for review',
     successMessage:
-      'Got it — your comic is in. A person reviews every submission before it goes live, so it’ll appear shortly. We’ll be in touch if anything needs a look.',
+      'Got it — your comic is in. A person reviews every submission before it goes live, usually within a few days, and we’ll email you when it’s up.',
     errorMessage: 'That didn’t save. Please try again in a moment.',
   },
   mediaIntake: {
@@ -925,7 +933,7 @@ export const SITE_SETTINGS_QUERY = `*[_id=="siteSettings"][0]{
   about{heading,body,faqHeading,faq[]{question,answer},seoTitle,seoDescription},aiLetter,
   home,sections,empty,creatorIntake,bookIntake,mediaIntake,notifications,
   hero{background,headline,body,tagline,featureCtaLabel,featuredHeading,newHeading,ctas[]{label,href}},
-  join{heading,body,ctaLabel,formUrl,funnelHeading,funnelIntro,creatorsLabel,creatorsDesc,contactLabel,contactDesc,mediaLabel,mediaDesc,readersLabel,readersDesc,readersBadge},
+  join{heading,body,ctaLabel,formUrl,funnelHeading,funnelIntro,creatorsLabel,creatorsDesc,contactLabel,contactDesc,mediaLabel,mediaDesc,readersLabel,readersDesc,readersBadge,terms,termsWhy},
   contact{heading,linkLabel,body,nameLabel,emailLabel,subjectLabel,messageLabel,submitLabel,successMessage,errorMessage},
   nav[]{_type,label,href,groups[]{heading,useGenres,links[]{label,href}}}
 }`
@@ -998,6 +1006,8 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       readersLabel: data.join?.readersLabel?.trim() || DEFAULTS.join.readersLabel,
       readersDesc: data.join?.readersDesc?.trim() || DEFAULTS.join.readersDesc,
       readersBadge: data.join?.readersBadge?.trim() || DEFAULTS.join.readersBadge,
+      terms: data.join?.terms?.trim() || DEFAULTS.join.terms,
+      termsWhy: data.join?.termsWhy?.trim() || DEFAULTS.join.termsWhy,
     },
     creatorIntake: mergeGroup(DEFAULTS.creatorIntake, data.creatorIntake),
     bookIntake: mergeGroup(DEFAULTS.bookIntake, data.bookIntake),

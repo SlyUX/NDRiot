@@ -9,6 +9,7 @@ import {
   type BookPickerItem,
   type OwnedCreator,
 } from '@/components/book-intake-form'
+import { TheDeal } from '@/components/the-deal'
 import { Section } from '@/components/ui/section'
 import {
   safeFetch,
@@ -101,6 +102,7 @@ export default async function BooksIntakePage({
     return (
       <Section padding="md" maxWidth="3xl">
         <h1 className="text-4xl font-black tracking-tighter uppercase sm:text-5xl">{copy.heading}</h1>
+        <TheDeal text={settings.join.terms} className="mt-6" />
         <div className="mt-12 space-y-4">
           <h2 className="text-2xl font-black tracking-tighter uppercase">{copy.signInPrompt}</h2>
           <p className="text-muted-foreground max-w-prose text-sm">{copy.signInBody}</p>
@@ -151,6 +153,8 @@ export default async function BooksIntakePage({
       <h1 className="text-4xl font-black tracking-tighter uppercase sm:text-5xl">
         {initial ? copy.editHeading : copy.heading}
       </h1>
+
+      <TheDeal text={settings.join.terms} className="mt-6" />
 
       <div className="border-primary/20 mt-8 flex flex-wrap items-center justify-between gap-3 border-b pb-4 text-xs">
         <span className="text-muted-foreground tracking-widest uppercase">

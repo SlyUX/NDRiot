@@ -615,6 +615,21 @@ export default defineType({
           description: 'Small tag on the readers card, e.g. "Coming soon".',
         }),
         defineField({
+          name: 'terms',
+          title: '“The deal” — plain-terms reassurance',
+          type: 'text',
+          rows: 3,
+          description:
+            'Shown across the Join flow (hub + Creator + Comic forms). The sentence a wary creator needs up front: cost, rights, exclusivity, and that we link rather than host/sell.',
+        }),
+        defineField({
+          name: 'termsWhy',
+          title: '“What’s in it for us” — trust-closer (hub)',
+          type: 'text',
+          rows: 2,
+          description: 'A short why-we-do-this line, shown on the Join hub beneath the deal.',
+        }),
+        defineField({
           name: 'heading',
           title: 'Creator form · Heading',
           type: 'string',

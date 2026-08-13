@@ -9,6 +9,7 @@ import {
   type CreatorIntakeOrg,
 } from '@/components/creator-intake-form'
 import PortableTextBody from '@/components/PortableTextBody'
+import { TheDeal } from '@/components/the-deal'
 import { Section } from '@/components/ui/section'
 import {
   safeFetch,
@@ -123,6 +124,8 @@ export default async function JoinPage({
     return (
       <Section padding="md" maxWidth="3xl">
         <h1 className="text-4xl font-black tracking-tighter uppercase sm:text-5xl">{heading}</h1>
+        {/* The deal, before the sign-in wall — reassure the wary creator first. */}
+        <TheDeal text={settings.join.terms} className="mt-6" />
         {body && (
           <div className="mt-6">
             <PortableTextBody value={body} />
@@ -167,6 +170,8 @@ export default async function JoinPage({
   return (
     <Section padding="md" maxWidth="3xl">
       <h1 className="text-4xl font-black tracking-tighter uppercase sm:text-5xl">{heading}</h1>
+
+      <TheDeal text={settings.join.terms} className="mt-6" />
 
       {body && (
         <div className="mt-6">

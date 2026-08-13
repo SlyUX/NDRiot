@@ -5019,6 +5019,20 @@
               },
               "optional": true
             },
+            "terms": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "termsWhy": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "heading": {
               "type": "objectAttribute",
               "value": {
