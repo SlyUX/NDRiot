@@ -913,6 +913,9 @@ const DEFAULTS: SiteSettings = {
     { _type: 'navLink', label: 'Comic Creators', href: '/creators' },
     { _type: 'navLink', label: 'Resources', href: '/resources' },
     { _type: 'navLink', label: 'ND Riot Rag', href: '/magazine' },
+    // "WTH?" = the newcomer's "what is this?" — orientation is user-serving, so
+    // it earns a nav slot; the punk label keeps it an invitation, not an About.
+    { _type: 'navLink', label: 'WTH?', href: '/about' },
   ],
 }
 
