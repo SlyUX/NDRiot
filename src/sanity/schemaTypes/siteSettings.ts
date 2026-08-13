@@ -326,9 +326,10 @@ export default defineType({
         defineField({ name: 'ragArchiveHeading', title: 'Rag — past-issues heading', type: 'string', description: 'Over the archive of older issues — e.g. "Past issues".' }),
         defineField({ name: 'ragReadLabel', title: 'Rag — "read online" button', type: 'string', description: 'Opens the PDF in the browser — e.g. "Read online".' }),
         defineField({ name: 'ragDownloadLabel', title: 'Rag — "download PDF" button', type: 'string', description: 'e.g. "Download PDF".' }),
-        defineField({ name: 'ragBuyHeading', title: 'Rag — other-editions heading', type: 'string', description: 'Over the EPUB/print links — e.g. "Other editions".' }),
+        defineField({ name: 'ragBuyHeading', title: 'Rag — editions heading', type: 'string', description: 'Over the EPUB/print links — e.g. "Get it here" (matches the comic pages).' }),
         defineField({ name: 'ragTocHeading', title: 'Rag — table-of-contents heading', type: 'string', description: 'e.g. "In this issue".' }),
-        defineField({ name: 'ragCreditsHeading', title: 'Rag — credits heading', type: 'string', description: 'e.g. "Credits".' }),
+        defineField({ name: 'ragContributorsHeading', title: 'Rag — contributors heading', type: 'string', description: 'e.g. "Contributors".' }),
+        defineField({ name: 'ragOtherHeading', title: 'Rag — other-issues heading', type: 'string', description: 'Over the row of other issues on an issue page — e.g. "Other issues".' }),
         defineField({
           name: 'genreBooksHeading',
           title: 'Category page — books heading',

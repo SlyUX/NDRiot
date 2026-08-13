@@ -1,4 +1,4 @@
-import { defineType, defineField } from 'sanity'
+import { defineType, defineField, defineArrayMember } from 'sanity'
 
 import { slugField } from './slugField'
 
@@ -70,11 +70,57 @@ export default defineType({
       description: 'What’s inside. Format it as a list; add links to contributors if you like.',
     }),
     defineField({
-      name: 'credits',
-      title: 'Credits',
+      name: 'contributors',
+      title: 'Contributors',
       type: 'array',
-      of: [{ type: 'block' }, { type: 'imageWithAlt' }],
-      description: 'Who made this issue — writers, artists, editors, thanks.',
+      description: 'Who made this issue. Pick the ND Riot creator (or type a name), with the section they worked on and their role.',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'contributor',
+          fields: [
+            defineField({
+              name: 'creator',
+              title: 'ND Riot contributor',
+              type: 'reference',
+              to: [{ type: 'creator' }],
+              description: 'Pick the ND Riot creator — their name links to their profile. For someone not on ND Riot, leave this blank and use "Name" below.',
+            }),
+            defineField({
+              name: 'customName',
+              title: 'Name (if not on ND Riot)',
+              type: 'string',
+              description: 'Only when the contributor isn’t an ND Riot creator.',
+            }),
+            defineField({
+              name: 'section',
+              title: 'Section',
+              type: 'string',
+              description: 'Which part of the issue — e.g. "Cover", "Feature", "Interview".',
+            }),
+            defineField({
+              name: 'role',
+              title: 'Role',
+              type: 'string',
+              description: 'What they did — e.g. "Writer", "Artist", "Editor".',
+            }),
+          ],
+          validation: (rule) =>
+            rule.custom((value) => {
+              const v = value as { creator?: unknown; customName?: string } | undefined
+              if (!v?.creator && !v?.customName?.trim())
+                return 'Pick an ND Riot contributor or type a name.'
+              return true
+            }),
+          preview: {
+            select: { creatorName: 'creator.name', customName: 'customName', role: 'role', section: 'section' },
+            prepare: ({ creatorName, customName, role, section }) => ({
+              title: creatorName || customName || 'Contributor',
+              subtitle: [role, section].filter(Boolean).join(' · '),
+            }),
+          },
+        }),
+      ],
     }),
     defineField({
       name: 'publishedAt',

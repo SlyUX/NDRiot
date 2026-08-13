@@ -219,13 +219,15 @@ export const RAG_ISSUES_QUERY = defineQuery(`*[_type=="ragIssue" && defined(slug
 export const RAG_LATEST_QUERY = defineQuery(`*[_type=="ragIssue" && defined(slug.current)]|order(issueNumber desc)[0]{
   _id,title,issueNumber,publishedAt,description,cover,"pdfUrl":pdfFile.asset->url,
   buyLinks[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},
-  toc,credits
+  toc,
+  contributors[]{_key,section,role,customName,"creatorName":creator->name,"creatorSlug":creator->slug.current}
 }`)
 // A single issue page.
 export const RAG_ISSUE_QUERY = defineQuery(`*[_type=="ragIssue" && slug.current==$slug][0]{
   _id,title,issueNumber,publishedAt,description,cover,"pdfUrl":pdfFile.asset->url,
   buyLinks[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},
-  toc,credits
+  toc,
+  contributors[]{_key,section,role,customName,"creatorName":creator->name,"creatorSlug":creator->slug.current}
 }`)
 
 /**

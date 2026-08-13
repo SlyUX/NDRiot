@@ -38,7 +38,7 @@ export default async function MagazinePage() {
     download: s.ragDownloadLabel,
     buyHeading: s.ragBuyHeading,
     tocHeading: s.ragTocHeading,
-    creditsHeading: s.ragCreditsHeading,
+    contributorsHeading: s.ragContributorsHeading,
   }
   // Archive = every issue except the one featured up top.
   const archive = latest ? issues.filter((issue) => issue._id !== latest._id) : issues

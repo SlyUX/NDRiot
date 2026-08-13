@@ -373,7 +373,8 @@ export interface SiteSettings {
     ragDownloadLabel: string
     ragBuyHeading: string
     ragTocHeading: string
-    ragCreditsHeading: string
+    ragContributorsHeading: string
+    ragOtherHeading: string
     genreBooksHeading: string
     genreCreatorsHeading: string
     everythingElseHeading: string
@@ -823,9 +824,10 @@ const DEFAULTS: SiteSettings = {
     ragArchiveHeading: 'Past issues',
     ragReadLabel: 'Read online',
     ragDownloadLabel: 'Download PDF',
-    ragBuyHeading: 'Other editions',
+    ragBuyHeading: 'Get it here',
     ragTocHeading: 'In this issue',
-    ragCreditsHeading: 'Credits',
+    ragContributorsHeading: 'Contributors',
+    ragOtherHeading: 'Other issues',
     genreBooksHeading: 'Comics',
     genreCreatorsHeading: 'Comic Creators working in this genre',
     everythingElseHeading: 'While you are here',

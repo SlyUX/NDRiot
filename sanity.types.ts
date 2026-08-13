@@ -216,30 +216,14 @@ export type RagIssue = {
         _key: string;
       } & ImageWithAlt)
   >;
-  credits?: Array<
-    | {
-        children?: Array<{
-          marks?: Array<string>;
-          text?: string;
-          _type: "span";
-          _key: string;
-        }>;
-        style?:
-          "normal" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "blockquote";
-        listItem?: "bullet" | "number";
-        markDefs?: Array<{
-          href?: string;
-          _type: "link";
-          _key: string;
-        }>;
-        level?: number;
-        _type: "block";
-        _key: string;
-      }
-    | ({
-        _key: string;
-      } & ImageWithAlt)
-  >;
+  contributors?: Array<{
+    creator?: CreatorReference;
+    customName?: string;
+    section?: string;
+    role?: string;
+    _type: "contributor";
+    _key: string;
+  }>;
   publishedAt?: string;
 };
 
@@ -729,7 +713,8 @@ export type SiteSettings = {
     ragDownloadLabel?: string;
     ragBuyHeading?: string;
     ragTocHeading?: string;
-    ragCreditsHeading?: string;
+    ragContributorsHeading?: string;
+    ragOtherHeading?: string;
     genreBooksHeading?: string;
     discoverLabel?: string;
     spinLabel?: string;
@@ -2379,7 +2364,7 @@ export type RAG_ISSUES_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: RAG_LATEST_QUERY
-// Query: *[_type=="ragIssue" && defined(slug.current)]|order(issueNumber desc)[0]{  _id,title,issueNumber,publishedAt,description,cover,"pdfUrl":pdfFile.asset->url,  buyLinks[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},  toc,credits}
+// Query: *[_type=="ragIssue" && defined(slug.current)]|order(issueNumber desc)[0]{  _id,title,issueNumber,publishedAt,description,cover,"pdfUrl":pdfFile.asset->url,  buyLinks[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},  toc,  contributors[]{_key,section,role,customName,"creatorName":creator->name,"creatorSlug":creator->slug.current}}
 export type RAG_LATEST_QUERY_RESULT = {
   _id: string;
   title: string;
@@ -2419,35 +2404,19 @@ export type RAG_LATEST_QUERY_RESULT = {
         _key: string;
       }
   > | null;
-  credits: Array<
-    | ({
-        _key: string;
-      } & ImageWithAlt)
-    | {
-        children?: Array<{
-          marks?: Array<string>;
-          text?: string;
-          _type: "span";
-          _key: string;
-        }>;
-        style?:
-          "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
-        listItem?: "bullet" | "number";
-        markDefs?: Array<{
-          href?: string;
-          _type: "link";
-          _key: string;
-        }>;
-        level?: number;
-        _type: "block";
-        _key: string;
-      }
-  > | null;
+  contributors: Array<{
+    _key: string;
+    section: string | null;
+    role: string | null;
+    customName: string | null;
+    creatorName: string | null;
+    creatorSlug: string | null;
+  }> | null;
 } | null;
 
 // Source: src/lib/queries.ts
 // Variable: RAG_ISSUE_QUERY
-// Query: *[_type=="ragIssue" && slug.current==$slug][0]{  _id,title,issueNumber,publishedAt,description,cover,"pdfUrl":pdfFile.asset->url,  buyLinks[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},  toc,credits}
+// Query: *[_type=="ragIssue" && slug.current==$slug][0]{  _id,title,issueNumber,publishedAt,description,cover,"pdfUrl":pdfFile.asset->url,  buyLinks[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},  toc,  contributors[]{_key,section,role,customName,"creatorName":creator->name,"creatorSlug":creator->slug.current}}
 export type RAG_ISSUE_QUERY_RESULT = {
   _id: string;
   title: string;
@@ -2487,30 +2456,14 @@ export type RAG_ISSUE_QUERY_RESULT = {
         _key: string;
       }
   > | null;
-  credits: Array<
-    | ({
-        _key: string;
-      } & ImageWithAlt)
-    | {
-        children?: Array<{
-          marks?: Array<string>;
-          text?: string;
-          _type: "span";
-          _key: string;
-        }>;
-        style?:
-          "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
-        listItem?: "bullet" | "number";
-        markDefs?: Array<{
-          href?: string;
-          _type: "link";
-          _key: string;
-        }>;
-        level?: number;
-        _type: "block";
-        _key: string;
-      }
-  > | null;
+  contributors: Array<{
+    _key: string;
+    section: string | null;
+    role: string | null;
+    customName: string | null;
+    creatorName: string | null;
+    creatorSlug: string | null;
+  }> | null;
 } | null;
 
 // Source: src/lib/queries.ts
@@ -3011,8 +2964,8 @@ declare module "@sanity/client" {
     '*[_type=="resource" && defined(slug.current)]|order(coalesce(publishedAt,_createdAt) desc)[0...8]{_id,title,"slug":slug.current,kind,category,description,image}': HOME_RESOURCES_QUERY_RESULT;
     '*[_type=="resource" && slug.current==$slug][0]{\n  _id,title,kind,category,description,body,videoUrl,url,image,publishedAt,source,\n  "fileUrl":file.asset->url,\n  "creatorName":creator->name,"creatorSlug":creator->slug.current\n}': RESOURCE_QUERY_RESULT;
     '*[_type=="ragIssue" && defined(slug.current)]|order(issueNumber desc){_id,title,issueNumber,"slug":slug.current,cover,publishedAt}': RAG_ISSUES_QUERY_RESULT;
-    '*[_type=="ragIssue" && defined(slug.current)]|order(issueNumber desc)[0]{\n  _id,title,issueNumber,publishedAt,description,cover,"pdfUrl":pdfFile.asset->url,\n  buyLinks[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},\n  toc,credits\n}': RAG_LATEST_QUERY_RESULT;
-    '*[_type=="ragIssue" && slug.current==$slug][0]{\n  _id,title,issueNumber,publishedAt,description,cover,"pdfUrl":pdfFile.asset->url,\n  buyLinks[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},\n  toc,credits\n}': RAG_ISSUE_QUERY_RESULT;
+    '*[_type=="ragIssue" && defined(slug.current)]|order(issueNumber desc)[0]{\n  _id,title,issueNumber,publishedAt,description,cover,"pdfUrl":pdfFile.asset->url,\n  buyLinks[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},\n  toc,\n  contributors[]{_key,section,role,customName,"creatorName":creator->name,"creatorSlug":creator->slug.current}\n}': RAG_LATEST_QUERY_RESULT;
+    '*[_type=="ragIssue" && slug.current==$slug][0]{\n  _id,title,issueNumber,publishedAt,description,cover,"pdfUrl":pdfFile.asset->url,\n  buyLinks[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},\n  toc,\n  contributors[]{_key,section,role,customName,"creatorName":creator->name,"creatorSlug":creator->slug.current}\n}': RAG_ISSUE_QUERY_RESULT;
     '*[_type=="book" && defined(slug.current)]._id': BOOK_IDS_QUERY_RESULT;
     '*[_type=="book" && _id in $ids]{\n  _id,title,"slug":slug.current,status,genres,format,maturity,cover,shortDescription,\n  "descriptionText": pt::text(description),\n  "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,\n  "creatorName":creator->name\n}': HERO_BOOKS_QUERY_RESULT;
     '{\n  "books": *[_type=="book" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "creators": *[_type=="creator" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "columns": *[_type=="column" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "interviews": *[_type=="interview" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "resources": *[_type=="resource" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "ragIssues": *[_type=="ragIssue" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "genres": array::unique(*[_type=="book" && defined(genres)].genres[]),\n  "formats": array::unique(*[_type=="book" && defined(format)].format)\n}': SITEMAP_QUERY_RESULT;
