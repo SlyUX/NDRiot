@@ -226,6 +226,9 @@ export const RESOURCE_QUERY = defineQuery(`*[_type=="resource" && slug.current==
   "creatorName":creator->name,"creatorSlug":creator->slug.current
 }`)
 
+/** Distinct resource categories that have at least one published resource — for the nav. */
+export const RESOURCE_CATEGORIES_WITH_CONTENT_QUERY = defineQuery(`array::unique(*[_type=="resource" && defined(slug.current) && defined(category)].category)`)
+
 // ---- Conventions ----
 // Directory cards — every convention, alphabetical (neutral order, never by
 // rating; §3). A venue creators table at, not a contributor.

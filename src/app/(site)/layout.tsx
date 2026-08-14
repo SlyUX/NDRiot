@@ -5,8 +5,13 @@ import { MainNav } from '@/components/main-nav'
 import { SocialIcon } from '@/components/social-icon'
 import { auth, signIn } from '@/auth'
 import { genreOptions } from '@/lib/filters'
-import { safeFetch, GENRES_WITH_BOOKS_QUERY } from '@/lib/queries'
+import {
+  safeFetch,
+  GENRES_WITH_BOOKS_QUERY,
+  RESOURCE_CATEGORIES_WITH_CONTENT_QUERY,
+} from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
+import { RESOURCE_CATEGORIES } from '@/lib/taxonomy'
 
 const FOOTER_LINK =
   'hover:text-primary focus-visible:ring-ring transition-colors focus-visible:ring-2 focus-visible:outline-none'
@@ -27,12 +32,16 @@ const SOCIAL_LINK =
  * with negative margins before.
  */
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const [settings, genresWithBooks, session] = await Promise.all([
+  const [settings, genresWithBooks, resourceCategories, session] = await Promise.all([
     getSiteSettings(),
     safeFetch<string[]>(GENRES_WITH_BOOKS_QUERY, {}, []),
+    safeFetch<string[]>(RESOURCE_CATEGORIES_WITH_CONTENT_QUERY, {}, []),
     auth(),
   ])
   const navGenres = genreOptions(genresWithBooks)
+  // Only categories that have content, in taxonomy order — so nav links never
+  // point at an empty category.
+  const navCategories = RESOURCE_CATEGORIES.filter((category) => resourceCategories.includes(category))
   const avatar = session?.user?.image
   const s = settings.sections
 
@@ -55,7 +64,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
             <Logo size="nav" alt="" priority />
           </Link>
           <div className="flex items-center gap-3 lg:gap-5">
-            <MainNav nav={settings.nav} genres={navGenres} />
+            <MainNav nav={settings.nav} genres={navGenres} resourceCategories={navCategories} />
             {/* Account. Signed in: the Google avatar (the "you're logged in"
                 signal) linking to /me — a plain <img> since the image host isn't
                 in next/image's allowlist and there's no CSP to block it. Signed

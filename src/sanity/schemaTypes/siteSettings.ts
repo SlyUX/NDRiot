@@ -1159,10 +1159,18 @@ export default defineType({
                         'Populate this column from the site genre list automatically. When on, the links below are ignored.',
                     }),
                     defineField({
+                      name: 'useResourceCategories',
+                      title: 'Fill with resource categories',
+                      type: 'boolean',
+                      initialValue: false,
+                      description:
+                        'Populate this column from the resource categories that have content (links to each category on /resources). When on, the links below are ignored.',
+                    }),
+                    defineField({
                       name: 'links',
                       title: 'Links',
                       type: 'array',
-                      hidden: ({ parent }) => Boolean(parent?.useGenres),
+                      hidden: ({ parent }) => Boolean(parent?.useGenres || parent?.useResourceCategories),
                       of: [
                         defineArrayMember({
                           type: 'object',

@@ -6882,6 +6882,13 @@
                             },
                             "optional": true
                           },
+                          "useResourceCategories": {
+                            "type": "objectAttribute",
+                            "value": {
+                              "type": "boolean"
+                            },
+                            "optional": true
+                          },
                           "links": {
                             "type": "objectAttribute",
                             "value": {

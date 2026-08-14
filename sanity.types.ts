@@ -1071,6 +1071,7 @@ export type SiteSettings = {
         groups?: Array<{
           heading?: string;
           useGenres?: boolean;
+          useResourceCategories?: boolean;
           links?: Array<{
             label: string;
             href: string;
@@ -2431,6 +2432,18 @@ export type RESOURCE_QUERY_RESULT = {
 } | null;
 
 // Source: src/lib/queries.ts
+// Variable: RESOURCE_CATEGORIES_WITH_CONTENT_QUERY
+// Query: array::unique(*[_type=="resource" && defined(slug.current) && defined(category)].category)
+export type RESOURCE_CATEGORIES_WITH_CONTENT_QUERY_RESULT = Array<
+  | "Community"
+  | "Funding"
+  | "Hosting & Publishing"
+  | "Making Comics"
+  | "Print & Distribution"
+  | "Tools & Software"
+>;
+
+// Source: src/lib/queries.ts
 // Variable: CONVENTIONS_QUERY
 // Query: *[_type=="convention" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,location,whenHint,description,image}
 export type CONVENTIONS_QUERY_RESULT = Array<{
@@ -3071,6 +3084,7 @@ declare module "@sanity/client" {
     '*[_type=="resource" && defined(slug.current)]|order(category asc, title asc){_id,title,"slug":slug.current,kind,category,description,image}': RESOURCES_QUERY_RESULT;
     '*[_type=="resource" && defined(slug.current)]|order(coalesce(publishedAt,_createdAt) desc)[0...8]{_id,title,"slug":slug.current,kind,category,description,image}': HOME_RESOURCES_QUERY_RESULT;
     '*[_type=="resource" && slug.current==$slug][0]{\n  _id,title,kind,category,description,body,videoUrl,url,image,publishedAt,source,\n  "fileUrl":file.asset->url,\n  "creatorName":creator->name,"creatorSlug":creator->slug.current\n}': RESOURCE_QUERY_RESULT;
+    'array::unique(*[_type=="resource" && defined(slug.current) && defined(category)].category)': RESOURCE_CATEGORIES_WITH_CONTENT_QUERY_RESULT;
     '*[_type=="convention" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,location,whenHint,description,image}': CONVENTIONS_QUERY_RESULT;
     '*[_type=="convention" && slug.current==$slug][0]{\n  _id,name,"slug":slug.current,location,whenHint,website,description,image\n}': CONVENTION_QUERY_RESULT;
     '*[_type=="ragIssue" && defined(slug.current)]|order(issueNumber desc){_id,title,issueNumber,"slug":slug.current,cover,publishedAt}': RAG_ISSUES_QUERY_RESULT;

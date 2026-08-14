@@ -14,11 +14,23 @@ import type { NavGroup, NavItem, NavLink, NavPanel } from '@/lib/site-settings'
  * genreOptions in lib/filters) — Browse should not offer a genre whose page is
  * empty. Falls back to the full taxonomy when the caller has no live list.
  */
-export function groupLinks(group: NavGroup, genres?: readonly string[]): NavLink[] {
+export function groupLinks(
+  group: NavGroup,
+  genres?: readonly string[],
+  resourceCategories?: readonly string[],
+): NavLink[] {
   if (group.useGenres) {
     return (genres ?? GENRES).map((genre) => ({
       label: genre,
       href: `/categories/${encodeURIComponent(genre)}`,
+    }))
+  }
+  // Resource categories link to their filtered view on the hub. Driven by live
+  // content (only categories with resources), so there are no dead links.
+  if (group.useResourceCategories) {
+    return (resourceCategories ?? []).map((category) => ({
+      label: category,
+      href: `/resources?category=${encodeURIComponent(category)}`,
     }))
   }
   return group.links ?? []

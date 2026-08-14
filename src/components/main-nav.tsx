@@ -31,7 +31,15 @@ const LINK =
 const HEADING = 'text-muted-foreground mb-2 px-3 text-[10px] font-bold tracking-widest uppercase'
 
 /** Desktop dropdown contents: each group a column; a long group (genres) wraps. */
-function DesktopPanel({ panel, genres }: { panel: NavPanel; genres?: readonly string[] }) {
+function DesktopPanel({
+  panel,
+  genres,
+  resourceCategories,
+}: {
+  panel: NavPanel
+  genres?: readonly string[]
+  resourceCategories?: readonly string[]
+}) {
   // w-max so the panel is at least as wide as its longest row — with the
   // nowrap links below, that keeps "All Resources" on one line.
   return (
@@ -50,7 +58,7 @@ function DesktopPanel({ panel, genres }: { panel: NavPanel; genres?: readonly st
       )}
       <div className="flex gap-8">
       {panel.groups?.map((group, i) => {
-        const links = groupLinks(group, genres)
+        const links = groupLinks(group, genres, resourceCategories)
         const many = links.length > 8
         return (
           <div key={group.heading ?? i} className={cn(many && 'min-w-[20rem]')}>
@@ -74,7 +82,15 @@ function DesktopPanel({ panel, genres }: { panel: NavPanel; genres?: readonly st
   )
 }
 
-function DesktopNav({ nav, genres }: { nav: NavItem[]; genres?: readonly string[] }) {
+function DesktopNav({
+  nav,
+  genres,
+  resourceCategories,
+}: {
+  nav: NavItem[]
+  genres?: readonly string[]
+  resourceCategories?: readonly string[]
+}) {
   return (
     <NavigationMenu viewport={false} className="hidden md:flex">
       <NavigationMenuList className="gap-1">
@@ -96,7 +112,7 @@ function DesktopNav({ nav, genres }: { nav: NavItem[]; genres?: readonly string[
                   right-0/left-auto: anchor the panel to the trigger's right
                   edge so a wide menu opens leftward and never runs off-screen. */}
               <NavigationMenuContent className="!rounded-none !bg-background !ring-0 border-primary/40 z-50 right-0 left-auto border">
-                <DesktopPanel panel={item} genres={genres} />
+                <DesktopPanel panel={item} genres={genres} resourceCategories={resourceCategories} />
               </NavigationMenuContent>
             </NavigationMenuItem>
           ) : (
@@ -117,7 +133,15 @@ function DesktopNav({ nav, genres }: { nav: NavItem[]; genres?: readonly string[
   )
 }
 
-function MobileNav({ nav, genres }: { nav: NavItem[]; genres?: readonly string[] }) {
+function MobileNav({
+  nav,
+  genres,
+  resourceCategories,
+}: {
+  nav: NavItem[]
+  genres?: readonly string[]
+  resourceCategories?: readonly string[]
+}) {
   const [open, setOpen] = useState(false)
   const close = () => setOpen(false)
 
@@ -163,7 +187,7 @@ function MobileNav({ nav, genres }: { nav: NavItem[]; genres?: readonly string[]
                     <div key={group.heading ?? i}>
                       {group.heading && <p className={HEADING}>{group.heading}</p>}
                       <ul className="grid grid-cols-2 gap-x-4">
-                        {groupLinks(group, genres).map((link) => (
+                        {groupLinks(group, genres, resourceCategories).map((link) => (
                           <li key={link.href}>
                             <Link href={link.href} onClick={close} className={LINK}>
                               {link.label}
@@ -192,11 +216,19 @@ function MobileNav({ nav, genres }: { nav: NavItem[]; genres?: readonly string[]
   )
 }
 
-export function MainNav({ nav, genres }: { nav: NavItem[]; genres?: readonly string[] }) {
+export function MainNav({
+  nav,
+  genres,
+  resourceCategories,
+}: {
+  nav: NavItem[]
+  genres?: readonly string[]
+  resourceCategories?: readonly string[]
+}) {
   return (
     <>
-      <DesktopNav nav={nav} genres={genres} />
-      <MobileNav nav={nav} genres={genres} />
+      <DesktopNav nav={nav} genres={genres} resourceCategories={resourceCategories} />
+      <MobileNav nav={nav} genres={genres} resourceCategories={resourceCategories} />
     </>
   )
 }

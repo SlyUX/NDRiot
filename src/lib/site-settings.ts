@@ -31,6 +31,8 @@ export interface NavGroup {
   heading?: string
   /** When true the links come from the genre taxonomy, not from `links`. */
   useGenres?: boolean
+  /** When true the links are the resource categories that have content. */
+  useResourceCategories?: boolean
   links?: NavLink[]
 }
 
@@ -964,15 +966,17 @@ const DEFAULTS: SiteSettings = {
     { _type: 'navLink', label: 'Comics', href: '/books' },
     { _type: 'navLink', label: 'Comic Creators', href: '/creators' },
     // The supporting family lives in one dropdown so it stops eating top-level
-    // slots as it grows (Media and Comic Shops land here next). "All Resources"
-    // is the panel's own landing (/resources); Conventions and future siblings
-    // sit beneath it.
+    // slots as it grows (Comic Shops land here next). Named "For Creators" so
+    // "Resources" only ever labels the category group inside — the resource
+    // categories (live, non-empty) sit as peers of the Conventions/Media
+    // directories, all reachable from the nav.
     {
       _type: 'navPanel',
-      label: 'Resources',
-      href: '/resources',
+      label: 'For Creators',
       groups: [
+        { heading: 'Resources', useResourceCategories: true },
         {
+          heading: 'Directories',
           links: [
             { label: 'Conventions', href: '/conventions' },
             { label: 'Media Outlets', href: '/media' },
