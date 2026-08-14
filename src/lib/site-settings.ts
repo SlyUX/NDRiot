@@ -430,6 +430,9 @@ export interface SiteSettings {
     accountPostComicsGroup: string
     accountPostKindLabel: string
     accountPostPlaceholder: string
+    accountPostMentionsLabel: string
+    accountPostMentionCreators: string
+    accountPostMentionConventions: string
     accountPostSubmitLabel: string
     accountPostSuccess: string
     /** Reader update feed (/me). */
@@ -903,6 +906,9 @@ const DEFAULTS: SiteSettings = {
     accountPostComicsGroup: 'Your Comics',
     accountPostKindLabel: 'Kind',
     accountPostPlaceholder: 'What’s new?',
+    accountPostMentionsLabel: 'Mention (optional)',
+    accountPostMentionCreators: 'Creators',
+    accountPostMentionConventions: 'Conventions',
     accountPostSubmitLabel: 'Post Update',
     accountPostSuccess: 'Posted. Your followers will see it.',
     accountFeedHeading: 'From Who You Follow',

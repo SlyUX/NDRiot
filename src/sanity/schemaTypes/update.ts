@@ -47,6 +47,14 @@ export default defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
+      name: 'mentions',
+      title: 'Mentions',
+      type: 'array',
+      description:
+        'Other creators or conventions this update references — a collaborator, a con you’re tabling at. Shown as links under the note.',
+      of: [{ type: 'reference', to: [{ type: 'creator' }, { type: 'convention' }] }],
+    }),
+    defineField({
       name: 'publishedAt',
       title: 'Posted',
       type: 'datetime',

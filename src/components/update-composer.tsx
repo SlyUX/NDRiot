@@ -25,6 +25,9 @@ const fieldClass =
 /** A creator or comic the signed-in owner can post about. */
 export type ComposerTarget = { id: string; label: string; group: 'creator' | 'comic' }
 
+/** A creator or convention an update can reference. */
+export type MentionOption = { id: string; label: string; group: 'creator' | 'convention' }
+
 export type ComposerLabels = {
   heading: string
   intro: string
@@ -33,6 +36,9 @@ export type ComposerLabels = {
   comicsGroupLabel: string
   kindLabel: string
   placeholder: string
+  mentionsLabel: string
+  mentionCreatorsGroup: string
+  mentionConventionsGroup: string
   submit: string
   success: string
 }
@@ -40,15 +46,19 @@ export type ComposerLabels = {
 export function UpdateComposer({
   targets,
   kinds,
+  mentions,
   labels,
 }: {
   targets: ComposerTarget[]
   kinds: readonly string[]
+  mentions: MentionOption[]
   labels: ComposerLabels
 }) {
   const [state, action, pending] = useActionState(postUpdate, INITIAL)
   const creators = targets.filter((t) => t.group === 'creator')
   const comics = targets.filter((t) => t.group === 'comic')
+  const mentionCreators = mentions.filter((m) => m.group === 'creator')
+  const mentionConventions = mentions.filter((m) => m.group === 'convention')
 
   return (
     <div>
@@ -112,6 +122,50 @@ export function UpdateComposer({
           placeholder={labels.placeholder}
           className={`${fieldClass} resize-y`}
         />
+
+        {/* Optional references to other creators/conventions, shown as links in
+            the feed. Checkboxes so it works without JS; the action validates ids. */}
+        {mentions.length > 0 && (
+          <fieldset className="space-y-2">
+            <legend className="text-xs tracking-widest uppercase">{labels.mentionsLabel}</legend>
+            <div className="max-h-44 space-y-3 overflow-y-auto border border-white/20 p-3">
+              {mentionCreators.length > 0 && (
+                <div>
+                  <p className="text-muted-foreground mb-1.5 text-[10px] font-bold tracking-widest uppercase">
+                    {labels.mentionCreatorsGroup}
+                  </p>
+                  <ul className="space-y-1">
+                    {mentionCreators.map((m) => (
+                      <li key={m.id}>
+                        <label className="flex items-center gap-2 text-sm">
+                          <input type="checkbox" name="mentions" value={m.id} className="accent-primary" />
+                          {m.label}
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {mentionConventions.length > 0 && (
+                <div>
+                  <p className="text-muted-foreground mb-1.5 text-[10px] font-bold tracking-widest uppercase">
+                    {labels.mentionConventionsGroup}
+                  </p>
+                  <ul className="space-y-1">
+                    {mentionConventions.map((m) => (
+                      <li key={m.id}>
+                        <label className="flex items-center gap-2 text-sm">
+                          <input type="checkbox" name="mentions" value={m.id} className="accent-primary" />
+                          {m.label}
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </fieldset>
+        )}
 
         <div className="flex flex-wrap items-center gap-4">
           <Button type="submit" disabled={pending} className="font-black tracking-wide uppercase">

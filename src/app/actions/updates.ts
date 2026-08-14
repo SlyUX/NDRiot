@@ -16,6 +16,8 @@ import { getWriteClient } from '@/sanity/write-client'
  * The reader feed (Save = Follow) is recency-only, never ranked (§3).
  */
 const BODY_LIMIT = 200
+/** Cap on how many creators/conventions one update can reference. */
+const MENTION_CAP = 8
 
 export type PostUpdateState = {
   status: 'idle' | 'success' | 'error'
@@ -34,6 +36,11 @@ export async function postUpdate(
 
   const targetId = String(formData.get('targetId') ?? '').trim()
   const body = String(formData.get('body') ?? '').trim()
+  const mentionIds = formData
+    .getAll('mentions')
+    .map((value) => String(value).trim())
+    .filter(Boolean)
+    .slice(0, MENTION_CAP)
   const rawKind = String(formData.get('kind') ?? '').trim()
   const kind: UpdateKind = (UPDATE_KINDS as readonly string[]).includes(rawKind)
     ? (rawKind as UpdateKind)
@@ -68,12 +75,29 @@ export async function postUpdate(
   if (!allowed)
     return { status: 'error', message: 'You can only post to a creator or comic you own.', nonce: prev.nonce }
 
+  // Keep only mention ids that are real creators/conventions — no dangling refs
+  // from a tampered form.
+  let validMentions: string[] = []
+  if (mentionIds.length) {
+    try {
+      validMentions = await client.fetch<string[]>(
+        `*[_type in ["creator","convention"] && _id in $ids]._id`,
+        { ids: mentionIds },
+      )
+    } catch (cause) {
+      console.error('[updates] mention check failed', cause)
+    }
+  }
+
   try {
     await client.create({
       _type: 'update',
       kind,
       body: body.slice(0, BODY_LIMIT),
       target: { _type: 'reference', _ref: targetId },
+      ...(validMentions.length
+        ? { mentions: validMentions.map((id) => ({ _type: 'reference', _ref: id, _key: id })) }
+        : {}),
       publishedAt: new Date().toISOString(),
     })
   } catch (cause) {

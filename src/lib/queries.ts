@@ -184,7 +184,8 @@ export const UPDATES_FEED_QUERY = defineQuery(`*[_type=="update" && target._ref 
   _id,body,kind,publishedAt,
   "targetType":target->_type,
   "targetName":coalesce(target->title,target->name),
-  "targetSlug":target->slug.current
+  "targetSlug":target->slug.current,
+  "mentions":mentions[]->{_id,_type,name,"slug":slug.current}
 }`)
 
 /* ---------------------------------------------------- RSS feeds

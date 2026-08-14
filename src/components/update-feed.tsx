@@ -53,6 +53,24 @@ export function UpdateFeed({
                   {date && <span className="text-muted-foreground ml-auto">{date}</span>}
                 </div>
                 <p className="mt-2 text-sm">{update.body}</p>
+                {update.mentions && update.mentions.length > 0 && (
+                  <ul className="mt-2 flex flex-wrap gap-2">
+                    {update.mentions.map((mention) => (
+                      <li key={mention._id}>
+                        <Link
+                          href={
+                            mention._type === 'convention'
+                              ? `/conventions/${mention.slug}`
+                              : `/creators/${mention.slug}`
+                          }
+                          className="border-border hover:border-primary hover:text-primary inline-block border px-2 py-0.5 text-xs transition-colors"
+                        >
+                          {mention.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </li>
             )
           })}

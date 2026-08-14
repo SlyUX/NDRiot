@@ -6,7 +6,7 @@ import { SignInButton, SignOutButton } from '@/components/auth-controls'
 import { NewsletterOptIn } from '@/components/newsletter-opt-in'
 import { SavedItemRow } from '@/components/saved-item-row'
 import { SectionHeading } from '@/components/section-heading'
-import { UpdateComposer, type ComposerTarget } from '@/components/update-composer'
+import { UpdateComposer, type ComposerTarget, type MentionOption } from '@/components/update-composer'
 import { UpdateFeed } from '@/components/update-feed'
 import { Button } from '@/components/ui/button'
 import { Section } from '@/components/ui/section'
@@ -14,6 +14,8 @@ import { auth } from '@/auth'
 import { UPDATE_KINDS } from '@/lib/taxonomy'
 import {
   safeFetch,
+  CONVENTIONS_QUERY,
+  CREATORS_QUERY,
   OWNED_BOOKS_QUERY,
   OWNED_DOCS_QUERY,
   OWNED_MEDIA_QUERY,
@@ -25,7 +27,13 @@ import { getSiteSettings } from '@/lib/site-settings'
 import { ownedDocIds } from '@/sanity/ownership-client'
 import { savedItems } from '@/sanity/reader-client'
 import { urlFor } from '@/sanity/image'
-import type { BookSummary, CreatorSummary, MediaSummary, UpdateFeedItem } from '@/lib/types'
+import type {
+  BookSummary,
+  ConventionSummary,
+  CreatorSummary,
+  MediaSummary,
+  UpdateFeedItem,
+} from '@/lib/types'
 
 /**
  * The signed-in reader's home.
@@ -125,6 +133,28 @@ export default async function AccountPage() {
       group: 'comic' as const,
     })),
   ]
+
+  // Mentionable creators + conventions for the composer — only fetched when the
+  // composer is shown (i.e. this reader is a creator).
+  let mentionOptions: MentionOption[] = []
+  if (composerTargets.length > 0) {
+    const [allCreators, allConventions] = await Promise.all([
+      safeFetch<CreatorSummary[]>(CREATORS_QUERY, {}, []),
+      safeFetch<ConventionSummary[]>(CONVENTIONS_QUERY, {}, []),
+    ])
+    mentionOptions = [
+      ...allCreators.map((creator) => ({
+        id: creator._id,
+        label: creator.name ?? 'Unknown',
+        group: 'creator' as const,
+      })),
+      ...allConventions.map((convention) => ({
+        id: convention._id,
+        label: convention.name,
+        group: 'convention' as const,
+      })),
+    ]
+  }
 
   return (
     <div>
@@ -258,6 +288,7 @@ export default async function AccountPage() {
           <UpdateComposer
             targets={composerTargets}
             kinds={UPDATE_KINDS}
+            mentions={mentionOptions}
             labels={{
               heading: s.accountPostHeading,
               intro: s.accountPostIntro,
@@ -266,6 +297,9 @@ export default async function AccountPage() {
               comicsGroupLabel: s.accountPostComicsGroup,
               kindLabel: s.accountPostKindLabel,
               placeholder: s.accountPostPlaceholder,
+              mentionsLabel: s.accountPostMentionsLabel,
+              mentionCreatorsGroup: s.accountPostMentionCreators,
+              mentionConventionsGroup: s.accountPostMentionConventions,
               submit: s.accountPostSubmitLabel,
               success: s.accountPostSuccess,
             }}

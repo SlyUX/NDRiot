@@ -887,6 +887,36 @@
     }
   },
   {
+    "type": "type",
+    "name": "convention.reference",
+    "value": {
+      "type": "object",
+      "attributes": {
+        "_ref": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string"
+          }
+        },
+        "_type": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string",
+            "value": "reference"
+          }
+        },
+        "_weak": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "boolean"
+          },
+          "optional": true
+        }
+      },
+      "dereferencesTo": "convention"
+    }
+  },
+  {
     "name": "update",
     "type": "document",
     "attributes": {
@@ -977,6 +1007,26 @@
           ]
         },
         "optional": false
+      },
+      "mentions": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "array",
+          "of": {
+            "type": "union",
+            "of": [
+              {
+                "type": "inline",
+                "name": "creator.reference"
+              },
+              {
+                "type": "inline",
+                "name": "convention.reference"
+              }
+            ]
+          }
+        },
+        "optional": true
       },
       "publishedAt": {
         "type": "objectAttribute",
@@ -4897,6 +4947,27 @@
               "optional": true
             },
             "accountPostPlaceholder": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "accountPostMentionsLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "accountPostMentionCreators": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "accountPostMentionConventions": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"
