@@ -397,9 +397,8 @@ export interface SiteSettings {
     /** The comics-specific randomise label — the spinner-rack metaphor. Shown as
      *  visible text on comics rows; comic-maker rows use the neutral discoverLabel. */
     spinLabel: string
-    /** Hero updates rail headings — personalized vs global (§2). */
+    /** Hero rail — heading over a reader's followed-creator updates (§2). */
     feedMineHeading: string
-    feedLatestHeading: string
     searchHomeLabel: string
     searchBooksLabel: string
     searchCreatorsLabel: string
@@ -885,7 +884,6 @@ const DEFAULTS: SiteSettings = {
     discoverLabel: 'Discover',
     spinLabel: 'Spin the rack',
     feedMineHeading: 'My Feed',
-    feedLatestHeading: 'Latest Updates',
     searchHomeLabel: 'Search comics and comic creators',
     searchBooksLabel: 'Search titles and comic creators',
     searchCreatorsLabel: 'Search comic creators and studios',

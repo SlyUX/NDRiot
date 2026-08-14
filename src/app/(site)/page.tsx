@@ -128,7 +128,7 @@ export default async function Home({
   // The book the hero last showed, so "Discover" re-rolls to a different one.
   const notFeature = Array.isArray(params.notf) ? params.notf[0] : params.notf
 
-  const [feature, booksResult, creatorsResult, genresWithBooks, newItems, mediaItems, homeResources, globalUpdates, settings, session] =
+  const [feature, booksResult, creatorsResult, genresWithBooks, newItems, mediaItems, homeResources, settings, session] =
     await Promise.all([
       // Deliberately unfiltered. The hero is the guaranteed route to work
       // nobody went looking for (AGENTS.md §3), so narrowing the page must
@@ -148,9 +148,6 @@ export default async function Home({
       safeFetch<HomeNewItem[]>(HOME_NEW_QUERY, {}, []),
       safeFetch<MediaSummary[]>(MEDIA_HOME_QUERY, {}, []),
       safeFetch<ResourceSummary[]>(HOME_RESOURCES_QUERY, {}, []),
-      // The rail: the global recency feed of all creators' updates, shown to
-      // everyone. Never ranked (§3).
-      safeFetch<RailUpdate[]>(RAIL_UPDATES_QUERY, { limit: RAIL_LIMIT }, []),
       getSiteSettings(),
       auth(),
     ])
@@ -161,24 +158,26 @@ export default async function Home({
   // button passed as a slot so the client component stays out of the server hero.
   const email = session?.user?.email
 
-  // The updates rail: the same global recency feed for everyone. A signed-in
-  // reader's followed targets are highlighted in place — never reordered (§3:
-  // emphasis, not ranking). Per-session, so who you follow never leaks past the
-  // request; no public follow counts.
-  let followedTargetIds = new Set<string>()
+  // The rail's updates section — updates from creators/comics this reader
+  // follows, newest first. A follow-benefit, so it only appears for a signed-in
+  // reader with follows; everyone else gets the New Creators & Books rail alone.
+  // Per-session, so who you follow never leaks past the request; no follow counts.
+  let followedUpdates: RailUpdate[] = []
   let isCreator = false
   if (email) {
     const [saves, ownedCreatorIds] = await Promise.all([savedItems(email), creatorsOwnedBy(email)])
     isCreator = ownedCreatorIds.length > 0
-    followedTargetIds = new Set(saves.map((save) => save.itemId))
+    const savedIds = saves.map((save) => save.itemId)
+    if (savedIds.length) {
+      followedUpdates = await safeFetch<RailUpdate[]>(
+        RAIL_UPDATES_QUERY,
+        { ids: savedIds, limit: RAIL_LIMIT },
+        [],
+      )
+    }
   }
-  const feedItems: RailFeedItem[] = globalUpdates.map((update) => ({
-    ...update,
-    followed: followedTargetIds.has(update.targetId),
-  }))
-  // Signed-in readers get the "My Feed" framing (their follows glow within it);
-  // signed-out sees the neutral global heading.
-  const feedHeading = email ? settings.sections.feedMineHeading : settings.sections.feedLatestHeading
+  const feedItems: RailFeedItem[] = followedUpdates.map((update) => ({ ...update, followed: true }))
+  const feedHeading = settings.sections.feedMineHeading
   const feedUserType: 'reader' | 'creator' = isCreator ? 'creator' : 'reader'
   const featureSaved = feature && email ? await isSaved(email, feature._id) : false
   const featureSave = feature ? (

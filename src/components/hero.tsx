@@ -251,22 +251,21 @@ function FeedRow({ item }: { item: RailFeedItem }) {
 }
 
 /**
- * The updates rail — a scrollable recency feed. A thin user-type bar (cyan for a
- * reader, pink for a creator) accents the heading; followed updates glow within.
+ * The updates section of the rail — updates from creators the reader follows, a
+ * scrollable recency list. A thin user-type bar (cyan for a reader, pink for a
+ * creator) accents the heading; each followed update is boxed with its avatar.
  */
 function FeedRail({
   heading,
   items,
   userType,
-  hasFeature,
 }: {
   heading: string
   items: RailFeedItem[]
   userType: 'reader' | 'creator'
-  hasFeature: boolean
 }) {
   return (
-    <div className={cn(!hasFeature && 'lg:col-span-full')}>
+    <div>
       <div className="mb-4 flex items-center gap-3">
         <span
           aria-hidden="true"
@@ -280,6 +279,30 @@ function FeedRail({
       <ul className="max-h-[26rem] space-y-4 overflow-y-auto pr-1">
         {items.map((item) => (
           <FeedRow key={item._id} item={item} />
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+/**
+ * The new-arrivals section of the rail — newest books and creators, by arrival.
+ * Always present, so the rail stays populated while updates are sparse; it sits
+ * beneath the followed-updates section when there is one.
+ */
+function NewArrivals({ heading, items }: { heading: string; items: HomeNewItem[] }) {
+  return (
+    <div>
+      <div className="mb-4 flex items-center gap-3">
+        <h2 className="text-primary text-xs leading-tight font-black tracking-[0.2em] uppercase">
+          {heading}
+        </h2>
+        <span className="h-px flex-1 bg-white/20" aria-hidden="true" />
+      </div>
+      {/* On phones the rail stacks below the feature, so cap it to three rows. */}
+      <ul className="space-y-4 max-sm:[&>li:nth-child(n+4)]:hidden">
+        {items.map((item) => (
+          <NewRow key={item._id} item={item} />
         ))}
       </ul>
     </div>
@@ -386,34 +409,15 @@ export function Hero({
               </div>
             )}
 
-            {/* Updates rail when there are any; otherwise the new-arrivals rail. */}
-            {feedItems.length > 0 ? (
-              <FeedRail
-                heading={feedHeading}
-                items={feedItems}
-                userType={feedUserType}
-                hasFeature={Boolean(feature)}
-              />
-            ) : (
-              newItems.length > 0 && (
-                <div className={cn(!feature && 'lg:col-span-full')}>
-                  <div className="mb-4 flex items-center gap-3">
-                    <h2 className="text-primary text-xs leading-tight font-black tracking-[0.2em] uppercase">
-                      {hero.newHeading}
-                    </h2>
-                    <span className="h-px flex-1 bg-white/20" aria-hidden="true" />
-                  </div>
-                  {/* On phones the rail stacks below the feature, so cap it to
-                      three rows there — enough for a taste without pushing the
-                      content rows a screen down. Full list from sm up, where it
-                      sits beside the feature and balances its height. */}
-                  <ul className="space-y-4 max-sm:[&>li:nth-child(n+4)]:hidden">
-                    {newItems.map((item) => (
-                      <NewRow key={item._id} item={item} />
-                    ))}
-                  </ul>
-                </div>
-              )
+            {/* Rail: a reader's followed updates (when any) stacked over the
+                new-arrivals list, which is always there to keep it populated. */}
+            {(feedItems.length > 0 || newItems.length > 0) && (
+              <div className={cn('space-y-8', !feature && 'lg:col-span-full')}>
+                {feedItems.length > 0 && (
+                  <FeedRail heading={feedHeading} items={feedItems} userType={feedUserType} />
+                )}
+                {newItems.length > 0 && <NewArrivals heading={hero.newHeading} items={newItems} />}
+              </div>
             )}
           </div>
         )}

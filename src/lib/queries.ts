@@ -181,15 +181,14 @@ export const OWNED_MEDIA_QUERY = defineQuery(`*[_type=="media" && _id in $ids &&
  * or counted (§3). Target resolved to a name + slug for linking.
  */
 /**
- * The homepage hero rail — the global recency feed of every creator's updates,
- * shown to everyone. A signed-in reader's followed targets are highlighted in
- * place (matched by `targetId`), never reordered (§3: emphasis, not ranking).
- * Carries the author's avatar (the creator behind the target) for that highlight
- * and the update's mentions. Recency only, never ranked.
+ * The homepage hero rail's updates section — updates from the creators/comics a
+ * signed-in reader follows (target in their saved `$ids`), newest first. Updates
+ * are a follow-benefit, not a global broadcast: no volume race for the homepage
+ * (§3-spirit). Carries the author's avatar (the creator behind the target) and
+ * the update's mentions. Recency only, never ranked.
  */
-export const RAIL_UPDATES_QUERY = defineQuery(`*[_type=="update" && defined(publishedAt)]|order(publishedAt desc)[0...$limit]{
+export const RAIL_UPDATES_QUERY = defineQuery(`*[_type=="update" && target._ref in $ids && defined(publishedAt)]|order(publishedAt desc)[0...$limit]{
   _id,body,kind,publishedAt,
-  "targetId":target._ref,
   "targetType":target->_type,
   "targetName":coalesce(target->title,target->name),
   "targetSlug":target->slug.current,

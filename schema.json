@@ -4750,13 +4750,6 @@
               },
               "optional": true
             },
-            "feedLatestHeading": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
             "searchHomeLabel": {
               "type": "objectAttribute",
               "value": {

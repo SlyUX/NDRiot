@@ -766,7 +766,6 @@ export type SiteSettings = {
     discoverLabel?: string;
     spinLabel?: string;
     feedMineHeading?: string;
-    feedLatestHeading?: string;
     searchHomeLabel?: string;
     searchBooksLabel?: string;
     searchCreatorsLabel?: string;
@@ -2237,7 +2236,7 @@ export type OWNED_MEDIA_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: RAIL_UPDATES_QUERY
-// Query: *[_type=="update" && defined(publishedAt)]|order(publishedAt desc)[0...$limit]{  _id,body,kind,publishedAt,  "targetId":target._ref,  "targetType":target->_type,  "targetName":coalesce(target->title,target->name),  "targetSlug":target->slug.current,  "authorName":coalesce(target->name,target->creator->name),  "photo":coalesce(target->photo,target->creator->photo),  "mentions":mentions[]->{_id,_type,name,"slug":slug.current}}
+// Query: *[_type=="update" && target._ref in $ids && defined(publishedAt)]|order(publishedAt desc)[0...$limit]{  _id,body,kind,publishedAt,  "targetType":target->_type,  "targetName":coalesce(target->title,target->name),  "targetSlug":target->slug.current,  "authorName":coalesce(target->name,target->creator->name),  "photo":coalesce(target->photo,target->creator->photo),  "mentions":mentions[]->{_id,_type,name,"slug":slug.current}}
 export type RAIL_UPDATES_QUERY_RESULT = Array<{
   _id: string;
   body: string;
@@ -2249,7 +2248,6 @@ export type RAIL_UPDATES_QUERY_RESULT = Array<{
     | "Milestone"
     | "New release";
   publishedAt: string;
-  targetId: string;
   targetType: "book" | "creator";
   targetName: string | null;
   targetSlug: string;
@@ -3143,7 +3141,7 @@ declare module "@sanity/client" {
     '*[_id in $ids && defined(slug.current)]{_id,_type,name,"slug":slug.current}|order(name asc)': OWNED_DOCS_QUERY_RESULT;
     '*[_type=="book" && creator._ref in $ids && defined(slug.current)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}': OWNED_BOOKS_QUERY_RESULT;
     '*[_type=="media" && _id in $ids && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,kinds,logo,about,genresCovered}': OWNED_MEDIA_QUERY_RESULT;
-    '*[_type=="update" && defined(publishedAt)]|order(publishedAt desc)[0...$limit]{\n  _id,body,kind,publishedAt,\n  "targetId":target._ref,\n  "targetType":target->_type,\n  "targetName":coalesce(target->title,target->name),\n  "targetSlug":target->slug.current,\n  "authorName":coalesce(target->name,target->creator->name),\n  "photo":coalesce(target->photo,target->creator->photo),\n  "mentions":mentions[]->{_id,_type,name,"slug":slug.current}\n}': RAIL_UPDATES_QUERY_RESULT;
+    '*[_type=="update" && target._ref in $ids && defined(publishedAt)]|order(publishedAt desc)[0...$limit]{\n  _id,body,kind,publishedAt,\n  "targetType":target->_type,\n  "targetName":coalesce(target->title,target->name),\n  "targetSlug":target->slug.current,\n  "authorName":coalesce(target->name,target->creator->name),\n  "photo":coalesce(target->photo,target->creator->photo),\n  "mentions":mentions[]->{_id,_type,name,"slug":slug.current}\n}': RAIL_UPDATES_QUERY_RESULT;
     '*[_type=="update" && target._ref in $ids && defined(publishedAt)]|order(publishedAt desc)[0...$limit]{\n  _id,body,kind,publishedAt,\n  "targetType":target->_type,\n  "targetName":coalesce(target->title,target->name),\n  "targetSlug":target->slug.current,\n  "mentions":mentions[]->{_id,_type,name,"slug":slug.current}\n}': UPDATES_FEED_QUERY_RESULT;
     '*[_type in ["column","interview"] && defined(slug.current) && defined(publishedAt)]|order(publishedAt desc)[0...30]{\n  _id,_type,title,"slug":slug.current,excerpt,publishedAt,\n  "authorName":author->name,"interviewerName":interviewer->name\n}': FEED_EDITORIAL_QUERY_RESULT;
     '*[_type=="book" && defined(slug.current)]|order(_createdAt desc)[0...30]{\n  _id,title,"slug":slug.current,_createdAt,\n  "descriptionText":pt::text(description),"creatorName":creator->name,genres\n}': FEED_COMICS_QUERY_RESULT;
