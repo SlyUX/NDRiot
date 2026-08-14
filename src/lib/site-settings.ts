@@ -372,6 +372,9 @@ export interface SiteSettings {
     resourceDownloadLabel: string
     /** "See more" link at the right of each row on the /resources hub. */
     resourcesMoreLabel: string
+    /** One-line intros under the Conventions + Media rows on the /resources hub. */
+    conventionsRowSubtitle: string
+    mediaRowSubtitle: string
     /** Conventions directory (/conventions) + detail. */
     conventionsPageTitle: string
     conventionsPageDescription: string
@@ -824,7 +827,7 @@ const DEFAULTS: SiteSettings = {
     creatorsHeading: 'Comic Creators',
     editorialHeading: 'Editorial',
     resourcesHeading: 'Resources',
-    mediaHeading: 'Media & Podcasts',
+    mediaHeading: 'Media Outlets',
     viewAllLabel: 'View all',
     viewMoreLabel: 'View more',
   },
@@ -847,6 +850,9 @@ const DEFAULTS: SiteSettings = {
     resourceVisitLabel: 'Visit the site',
     resourceDownloadLabel: 'Download',
     resourcesMoreLabel: 'Give me more',
+    conventionsRowSubtitle: 'What conventions are worth your time as an independent creator?',
+    mediaRowSubtitle:
+      'Who’s talking about independent creators and comics — and how to reach out to them.',
     conventionsPageTitle: 'Conventions',
     conventionsPageDescription:
       'Comics conventions worth a creator’s table — where to show your work, meet readers, and find your scene. Independent-comics focused.',

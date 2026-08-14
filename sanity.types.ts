@@ -740,6 +740,8 @@ export type SiteSettings = {
     resourceVisitLabel?: string;
     resourceDownloadLabel?: string;
     resourcesMoreLabel?: string;
+    conventionsRowSubtitle?: string;
+    mediaRowSubtitle?: string;
     conventionsPageTitle?: string;
     conventionsPageDescription?: string;
     conventionVisitLabel?: string;

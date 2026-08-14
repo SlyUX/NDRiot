@@ -322,6 +322,8 @@ export default defineType({
         defineField({ name: 'resourceVisitLabel', title: 'Resource page — "visit" button', type: 'string', description: 'On a Link resource — e.g. "Visit the site".' }),
         defineField({ name: 'resourceDownloadLabel', title: 'Resource page — "download" button', type: 'string', description: 'On a Download resource — e.g. "Download".' }),
         defineField({ name: 'resourcesMoreLabel', title: 'Resources — row "more" link', type: 'string', description: 'The see-more link at the right of each row on /resources — e.g. "Give me more".' }),
+        defineField({ name: 'conventionsRowSubtitle', title: 'Resources — Conventions row intro', type: 'text', rows: 2, description: 'One line under the Conventions row heading on /resources. Resource-category rows get their intros from code.' }),
+        defineField({ name: 'mediaRowSubtitle', title: 'Resources — Media Outlets row intro', type: 'text', rows: 2, description: 'One line under the Media Outlets row heading on /resources.' }),
         defineField({ name: 'conventionsPageTitle', title: 'Conventions — page title (H1)', type: 'string', description: 'The /conventions heading + meta title — e.g. "Conventions".' }),
         defineField({ name: 'conventionsPageDescription', title: 'Conventions — page description (SEO + intro)', type: 'text', rows: 2, description: 'One or two lines for the /conventions meta description and intro.' }),
         defineField({ name: 'conventionVisitLabel', title: 'Convention page — "official site" button', type: 'string', description: 'Links out to the convention’s website — e.g. "Official site".' }),

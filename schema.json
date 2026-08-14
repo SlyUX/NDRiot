@@ -4574,6 +4574,20 @@
               },
               "optional": true
             },
+            "conventionsRowSubtitle": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "mediaRowSubtitle": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "conventionsPageTitle": {
               "type": "objectAttribute",
               "value": {

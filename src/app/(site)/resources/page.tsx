@@ -7,6 +7,7 @@ import { ResourceList } from '@/components/resource-list'
 import { Section } from '@/components/ui/section'
 import { conventionToCard, mediaToCard, resourceToCard } from '@/lib/card-mappers'
 import type { SearchParams } from '@/lib/filters'
+import { RESOURCE_CATEGORY_DESCRIPTIONS, type ResourceCategory } from '@/lib/taxonomy'
 import { pageMetadata } from '@/lib/page-metadata'
 import { safeFetch, CONVENTIONS_QUERY, MEDIA_QUERY, RESOURCES_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
@@ -95,6 +96,7 @@ export default async function ResourcesPage({
     ...Array.from(byCategory, ([category, items]) => ({
       key: category,
       heading: category,
+      subtitle: RESOURCE_CATEGORY_DESCRIPTIONS[category as ResourceCategory],
       cards: items.slice(0, ROW_CAP).map(resourceToCard),
       aspectRatio: 'landscape' as const,
       href: `/resources?category=${encodeURIComponent(category)}`,
@@ -104,6 +106,7 @@ export default async function ResourcesPage({
           {
             key: 'conventions',
             heading: s.conventionsPageTitle,
+            subtitle: s.conventionsRowSubtitle,
             cards: conventions.slice(0, ROW_CAP).map(conventionToCard),
             aspectRatio: 'square' as const,
             href: '/conventions',
@@ -115,6 +118,7 @@ export default async function ResourcesPage({
           {
             key: 'media',
             heading: settings.home.mediaHeading,
+            subtitle: s.mediaRowSubtitle,
             cards: media.slice(0, ROW_CAP).map(mediaToCard),
             aspectRatio: 'square' as const,
             href: '/media',
@@ -145,6 +149,7 @@ export default async function ResourcesPage({
             key={row.key}
             heading={row.heading}
             headingAs="h2"
+            subtitle={row.subtitle}
             cards={row.cards}
             layout="horizontal"
             columns={4}

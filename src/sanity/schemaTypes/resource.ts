@@ -1,5 +1,6 @@
 import { defineType, defineField } from 'sanity'
 
+import { RESOURCE_CATEGORIES } from '@/lib/taxonomy'
 import { slugField } from './slugField'
 
 /**
@@ -17,15 +18,6 @@ import { slugField } from './slugField'
  * `creator` reference when it's by an ND Riot contributor, or a free-text
  * `source` for anyone else.
  */
-export const RESOURCE_CATEGORIES = [
-  'Hosting & Publishing',
-  'Tools & Software',
-  'Community',
-  'Funding',
-  'Making Comics',
-  'Print & Distribution',
-] as const
-
 export const RESOURCE_KINDS = [
   { title: 'Video — embedded YouTube, then copy', value: 'video' },
   { title: 'Download — a file, then copy', value: 'download' },

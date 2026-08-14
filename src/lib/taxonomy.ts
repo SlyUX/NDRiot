@@ -209,6 +209,37 @@ export const MEDIA_KINDS = [
 
 export type MediaKind = (typeof MEDIA_KINDS)[number]
 
+/* ------------------------------------------------------------- resources */
+
+/**
+ * What a resource is *about* — the subject a creator browses by. A fixed list,
+ * like genres: each is a row on the /resources hub and a filterable view.
+ *
+ * Kind (video/guide/download/link, in resource.ts) is orthogonal — that's the
+ * delivery format, shown as a badge on each card. People come looking by need
+ * ("funding", "printing"), not by format, so category is the primary axis.
+ */
+export const RESOURCE_CATEGORIES = [
+  'Hosting & Publishing',
+  'Tools & Software',
+  'Community',
+  'Funding',
+  'Making Comics',
+  'Print & Distribution',
+] as const
+
+export type ResourceCategory = (typeof RESOURCE_CATEGORIES)[number]
+
+/** The one-line intro under each category row on /resources. */
+export const RESOURCE_CATEGORY_DESCRIPTIONS: Record<ResourceCategory, string> = {
+  'Hosting & Publishing': 'Where to put your comics online and how to get them published.',
+  'Tools & Software': 'Apps, hardware, and gear for drawing, lettering, and laying out comics.',
+  Community: 'Where independent creators gather, swap advice, and find collaborators.',
+  Funding: 'Crowdfunding, grants, and other ways to pay for making your comics.',
+  'Making Comics': 'Tutorials, discussions, and tools focused on the craft of making comics.',
+  'Print & Distribution': 'Getting your comics printed, shipped, and into readers’ hands.',
+}
+
 /* --------------------------------------------------------------- statuses */
 
 /** A book's publication status. Ordered as the schema lists them. */
