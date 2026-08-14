@@ -739,9 +739,9 @@ export type SiteSettings = {
     resourcesHeading?: string;
     resourceVisitLabel?: string;
     resourceDownloadLabel?: string;
+    resourcesMoreLabel?: string;
     conventionsPageTitle?: string;
     conventionsPageDescription?: string;
-    conventionsResourcesLinkLabel?: string;
     conventionVisitLabel?: string;
     ragPageTitle?: string;
     ragPageDescription?: string;

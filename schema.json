@@ -4567,6 +4567,13 @@
               },
               "optional": true
             },
+            "resourcesMoreLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "conventionsPageTitle": {
               "type": "objectAttribute",
               "value": {
@@ -4575,13 +4582,6 @@
               "optional": true
             },
             "conventionsPageDescription": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
-            "conventionsResourcesLinkLabel": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

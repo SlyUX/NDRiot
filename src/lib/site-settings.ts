@@ -370,10 +370,11 @@ export interface SiteSettings {
     resourcesHeading: string
     resourceVisitLabel: string
     resourceDownloadLabel: string
+    /** "See more" link at the right of each row on the /resources hub. */
+    resourcesMoreLabel: string
     /** Conventions directory (/conventions) + detail. */
     conventionsPageTitle: string
     conventionsPageDescription: string
-    conventionsResourcesLinkLabel: string
     conventionVisitLabel: string
     ragPageTitle: string
     ragPageDescription: string
@@ -845,10 +846,10 @@ const DEFAULTS: SiteSettings = {
     resourcesHeading: 'Resources',
     resourceVisitLabel: 'Visit the site',
     resourceDownloadLabel: 'Download',
+    resourcesMoreLabel: 'Give me more',
     conventionsPageTitle: 'Conventions',
     conventionsPageDescription:
       'Comics conventions worth a creator’s table — where to show your work, meet readers, and find your scene. Independent-comics focused.',
-    conventionsResourcesLinkLabel: 'Browse conventions',
     conventionVisitLabel: 'Official site',
     ragPageTitle: 'ND Riot Rag',
     ragPageDescription:
