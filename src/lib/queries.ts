@@ -180,6 +180,21 @@ export const OWNED_MEDIA_QUERY = defineQuery(`*[_type=="media" && _id in $ids &&
  * reader's saved set (Save = Follow), newest first. Recency only, never ranked
  * or counted (§3). Target resolved to a name + slug for linking.
  */
+/**
+ * Updates for the homepage hero rail. One query, two modes: pass `$ids` = [] for
+ * the global "Latest Updates" recency feed, or a reader's saved ids for their
+ * "My Feed". Carries the author's avatar (the creator behind the target) so a
+ * followed update can show a thumbnail. Recency only, never ranked (§3).
+ */
+export const RAIL_UPDATES_QUERY = defineQuery(`*[_type=="update" && defined(publishedAt) && (count($ids) == 0 || target._ref in $ids)]|order(publishedAt desc)[0...$limit]{
+  _id,body,kind,publishedAt,
+  "targetType":target->_type,
+  "targetName":coalesce(target->title,target->name),
+  "targetSlug":target->slug.current,
+  "authorName":coalesce(target->name,target->creator->name),
+  "photo":coalesce(target->photo,target->creator->photo)
+}`)
+
 export const UPDATES_FEED_QUERY = defineQuery(`*[_type=="update" && target._ref in $ids && defined(publishedAt)]|order(publishedAt desc)[0...$limit]{
   _id,body,kind,publishedAt,
   "targetType":target->_type,

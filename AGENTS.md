@@ -154,6 +154,7 @@ Decided 2026-07-20. Every value below is a CSS variable in `src/app/globals.css`
 | `--charcoal` | `#2A3640` | Full-width band behind grouped sections (a shade darker than #36454F). White text 12.4:1, `--muted-foreground` 4.82:1 — both clear AA. |
 | `--funding` | `#2BDE73` | Live-campaign accent: the "Currently Funding" cover badge and the "Fund it Here" button, both **black** text on the green (11.8:1; white fails at 1.8:1). Also used as green *text* on `--background` for the campaign "Ends …" line — 11.59:1, clears AA/AAA. |
 | `--creator` | `#AA336A` | Secondary brand — the darker pink for creator/owner zones (the `/me` creator profile section background). A **white**-text surface (`--creator-foreground` `#FFFFFF`, 6.19:1; black fails at 3.39:1). Surface/fill only — as *text* on `--background` it's 3.33:1, so never body text on dark. |
+| `--reader` | `#00FEFF` | Base-reader secondary — electric cyan, the reader counterpart to `--creator` (e.g. the homepage feed rail's user-type accent). **Accent only** on `--background` — text/border/graphic is 16.2:1 (clears AAA). The inverse of `--creator`: never a fill (a cyan fill needs **black** text, 16.6:1; white fails at 1.26:1). |
 | `--radius` | `0px` | All radii. Square corners are the punk read — no `rounded-*` in components. |
 
 **Verified contrast, do not re-derive:**

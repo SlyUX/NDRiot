@@ -14,6 +14,7 @@ import type {
   CONVENTIONS_QUERY_RESULT,
   CONVENTION_QUERY_RESULT,
   UPDATES_FEED_QUERY_RESULT,
+  RAIL_UPDATES_QUERY_RESULT,
   HERO_BOOKS_QUERY_RESULT,
   HOME_EDITORIAL_QUERY_RESULT,
   HOME_NEW_QUERY_RESULT,
@@ -53,6 +54,9 @@ export type ConventionSummary = CONVENTIONS_QUERY_RESULT[number]
 export type ConventionDetail = NonNullable<CONVENTION_QUERY_RESULT>
 
 export type UpdateFeedItem = UPDATES_FEED_QUERY_RESULT[number]
+/** A hero-rail update. `followed` is added at assembly time, not from the query. */
+export type RailUpdate = RAIL_UPDATES_QUERY_RESULT[number]
+export type RailFeedItem = RailUpdate & { followed: boolean }
 export type MediaSummary = MEDIA_QUERY_RESULT[number]
 export type MediaDetail = NonNullable<MEDIA_DETAIL_QUERY_RESULT>
 export type HeroBook = HERO_BOOKS_QUERY_RESULT[number]

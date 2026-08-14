@@ -34,10 +34,12 @@ import {
   MEDIA_HOME_QUERY,
   FILTERED_BOOKS_QUERY,
   FILTERED_CREATORS_QUERY,
+  RAIL_UPDATES_QUERY,
 } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
 import { auth } from '@/auth'
-import { isSaved } from '@/sanity/reader-client'
+import { isSaved, savedItems } from '@/sanity/reader-client'
+import { creatorsOwnedBy } from '@/sanity/ownership-client'
 import { SITE_URL } from '@/lib/site-url'
 import type {
   BookSummary,
@@ -46,8 +48,13 @@ import type {
   HomeNewItem,
   MediaSummary,
   Paginated,
+  RailFeedItem,
+  RailUpdate,
   ResourceSummary,
 } from '@/lib/types'
+
+/** How many updates the hero rail holds before scrolling. */
+const RAIL_LIMIT = 20
 
 export const dynamic = 'force-dynamic'
 
@@ -121,7 +128,7 @@ export default async function Home({
   // The book the hero last showed, so "Discover" re-rolls to a different one.
   const notFeature = Array.isArray(params.notf) ? params.notf[0] : params.notf
 
-  const [feature, booksResult, creatorsResult, genresWithBooks, newItems, mediaItems, homeResources, settings, session] =
+  const [feature, booksResult, creatorsResult, genresWithBooks, newItems, mediaItems, homeResources, globalUpdates, settings, session] =
     await Promise.all([
       // Deliberately unfiltered. The hero is the guaranteed route to work
       // nobody went looking for (AGENTS.md §3), so narrowing the page must
@@ -141,6 +148,9 @@ export default async function Home({
       safeFetch<HomeNewItem[]>(HOME_NEW_QUERY, {}, []),
       safeFetch<MediaSummary[]>(MEDIA_HOME_QUERY, {}, []),
       safeFetch<ResourceSummary[]>(HOME_RESOURCES_QUERY, {}, []),
+      // Global recency feed of all creators' updates — the logged-out rail, and
+      // the top-up under a logged-in reader's follows. Never ranked (§3).
+      safeFetch<RailUpdate[]>(RAIL_UPDATES_QUERY, { ids: [], limit: RAIL_LIMIT }, []),
       getSiteSettings(),
       auth(),
     ])
@@ -150,6 +160,37 @@ export default async function Home({
   // The hero's featured comic is savable too — its saved state, and a Save
   // button passed as a slot so the client component stays out of the server hero.
   const email = session?.user?.email
+
+  // The updates rail. Signed in with follows → "My Feed": your followed creators'
+  // updates (glowing), topped up with global recency to fill the rail. Otherwise
+  // the global "Latest Updates". Recency only — follows are emphasized, never
+  // reordered (§3). Per-session, so `who you follow` never leaks past the request.
+  let followedUpdates: RailUpdate[] = []
+  let isCreator = false
+  if (email) {
+    const [saves, ownedCreatorIds] = await Promise.all([savedItems(email), creatorsOwnedBy(email)])
+    isCreator = ownedCreatorIds.length > 0
+    const savedIds = saves.map((save) => save.itemId)
+    if (savedIds.length) {
+      followedUpdates = await safeFetch<RailUpdate[]>(
+        RAIL_UPDATES_QUERY,
+        { ids: savedIds, limit: RAIL_LIMIT },
+        [],
+      )
+    }
+  }
+  const followedUpdateIds = new Set(followedUpdates.map((update) => update._id))
+  const topUp = globalUpdates
+    .filter((update) => !followedUpdateIds.has(update._id))
+    .slice(0, Math.max(0, RAIL_LIMIT - followedUpdates.length))
+  const feedItems: RailFeedItem[] = [
+    ...followedUpdates.map((update) => ({ ...update, followed: true })),
+    ...topUp.map((update) => ({ ...update, followed: false })),
+  ]
+  const feedHeading = followedUpdates.length
+    ? settings.sections.feedMineHeading
+    : settings.sections.feedLatestHeading
+  const feedUserType: 'reader' | 'creator' = isCreator ? 'creator' : 'reader'
   const featureSaved = feature && email ? await isSaved(email, feature._id) : false
   const featureSave = feature ? (
     <SaveButton
@@ -231,6 +272,9 @@ export default async function Home({
         hero={settings.hero}
         feature={feature}
         newItems={newItems}
+        feedItems={feedItems}
+        feedHeading={feedHeading}
+        feedUserType={feedUserType}
         discoverHref={feature ? `?${discoverParams.toString()}` : undefined}
         discoverLabel={settings.sections.spinLabel}
         saveSlot={featureSave}

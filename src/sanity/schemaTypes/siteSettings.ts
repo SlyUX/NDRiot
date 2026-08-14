@@ -356,6 +356,8 @@ export default defineType({
           description:
             'The comics-row shuffle button — the spinner-rack metaphor, shown as text beside the icon. e.g. "Spin the rack".',
         }),
+        defineField({ name: 'feedMineHeading', title: 'Hero rail — personalized heading', type: 'string', description: 'Heading over the hero updates rail when it shows a signed-in reader’s followed creators — e.g. "My Feed".' }),
+        defineField({ name: 'feedLatestHeading', title: 'Hero rail — global heading', type: 'string', description: 'Heading over the hero updates rail when it shows everyone’s latest updates — e.g. "Latest Updates".' }),
         defineField({
           name: 'searchHomeLabel',
           title: 'Homepage search placeholder',

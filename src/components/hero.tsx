@@ -7,7 +7,7 @@ import { TaxonomyRow } from '@/components/content-card'
 import PortableTextBody from '@/components/PortableTextBody'
 import { Button } from '@/components/ui/button'
 import type { HeroSettings } from '@/lib/site-settings'
-import type { HeroBook, HomeNewItem } from '@/lib/types'
+import type { HeroBook, HomeNewItem, RailFeedItem } from '@/lib/types'
 import { cn, truncate } from '@/lib/utils'
 import { urlFor } from '@/sanity/image'
 
@@ -27,8 +27,15 @@ export interface HeroProps {
   hero: HeroSettings
   /** One random book, chosen per request — the spotlight. */
   feature: HeroBook | null
-  /** Newest books and creators, for the rail. */
+  /** Newest books and creators — the rail's fallback when there are no updates. */
   newItems: HomeNewItem[]
+  /** The updates rail: My Feed (with follows) or the global Latest Updates. When
+   *  non-empty it takes the rail; otherwise `newItems` does. */
+  feedItems: RailFeedItem[]
+  /** Rail heading for the feed — reflects which feed is shown (§2 copy). */
+  feedHeading: string
+  /** Whose accent colors the feed rail — the viewer's type. */
+  feedUserType: 'reader' | 'creator'
   /** URL that re-rolls the feature to a different random book. Omit to hide. */
   discoverHref?: string
   /** Label for that button — CMS copy (AGENTS.md §2). */
@@ -177,7 +184,99 @@ function NewRow({ item }: { item: HomeNewItem }) {
   )
 }
 
-export function Hero({ hero, feature, newItems, discoverHref, discoverLabel, saveSlot }: HeroProps) {
+/**
+ * One update in the rail. A followed creator's update glows — a hot-pink left
+ * border and the creator's avatar — so it stands out from the global recency
+ * around it, without being reordered (§3: emphasis, not ranking).
+ */
+function FeedRow({ item }: { item: RailFeedItem }) {
+  const href = item.targetSlug
+    ? item.targetType === 'book'
+      ? `/books/${item.targetSlug}`
+      : `/creators/${item.targetSlug}`
+    : null
+  return (
+    <li className={cn('flex gap-2.5', item.followed && 'border-primary border-l-2 pl-2.5')}>
+      {item.followed && (
+        <div className="bg-muted relative size-7 shrink-0 overflow-hidden">
+          {item.photo && (
+            <Image
+              src={urlFor(item.photo).width(56).url()}
+              alt={item.authorName ?? ''}
+              fill
+              sizes="28px"
+              className="object-cover"
+            />
+          )}
+        </div>
+      )}
+      <div className="min-w-0 flex-1">
+        <p className="text-primary text-[10px] font-black tracking-widest uppercase">{item.kind}</p>
+        {href ? (
+          <Link
+            href={href}
+            className="group focus-visible:ring-ring block focus-visible:ring-2 focus-visible:outline-none"
+          >
+            <span className="group-hover:text-primary block truncate text-xs font-bold text-white transition-colors">
+              {item.targetName}
+            </span>
+          </Link>
+        ) : (
+          <span className="block truncate text-xs font-bold text-white">{item.targetName}</span>
+        )}
+        <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-white/85">{item.body}</p>
+      </div>
+    </li>
+  )
+}
+
+/**
+ * The updates rail — a scrollable recency feed. A thin user-type bar (cyan for a
+ * reader, pink for a creator) accents the heading; followed updates glow within.
+ */
+function FeedRail({
+  heading,
+  items,
+  userType,
+  hasFeature,
+}: {
+  heading: string
+  items: RailFeedItem[]
+  userType: 'reader' | 'creator'
+  hasFeature: boolean
+}) {
+  return (
+    <div className={cn(!hasFeature && 'lg:col-span-full')}>
+      <div className="mb-4 flex items-center gap-3">
+        <span
+          aria-hidden="true"
+          className={cn('h-4 w-1 shrink-0', userType === 'creator' ? 'bg-creator' : 'bg-reader')}
+        />
+        <h2 className="text-primary text-xs leading-tight font-black tracking-[0.2em] uppercase">
+          {heading}
+        </h2>
+        <span className="h-px flex-1 bg-white/20" aria-hidden="true" />
+      </div>
+      <ul className="max-h-[26rem] space-y-4 overflow-y-auto pr-1">
+        {items.map((item) => (
+          <FeedRow key={item._id} item={item} />
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+export function Hero({
+  hero,
+  feature,
+  newItems,
+  feedItems,
+  feedHeading,
+  feedUserType,
+  discoverHref,
+  discoverLabel,
+  saveSlot,
+}: HeroProps) {
   return (
     // Hand-rolled rather than <Section> so the background layers can span the
     // full bleed while the content stays at the site width.
@@ -235,8 +334,9 @@ export function Hero({ hero, feature, newItems, discoverHref, discoverLabel, sav
           )}
         </div>
 
-        {/* The split: featured book left, new-arrivals rail right. */}
-        {(feature || newItems.length > 0) && (
+        {/* The split: featured book left, updates rail right (new arrivals when
+            there are no updates yet). */}
+        {(feature || feedItems.length > 0 || newItems.length > 0) && (
           <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_350px] lg:gap-8">
             {feature && (
               <div className="flex h-full flex-col">
@@ -266,24 +366,34 @@ export function Hero({ hero, feature, newItems, discoverHref, discoverLabel, sav
               </div>
             )}
 
-            {newItems.length > 0 && (
-              <div className={cn(!feature && 'lg:col-span-full')}>
-                <div className="mb-4 flex items-center gap-3">
-                  <h2 className="text-primary text-xs leading-tight font-black tracking-[0.2em] uppercase">
-                    {hero.newHeading}
-                  </h2>
-                  <span className="h-px flex-1 bg-white/20" aria-hidden="true" />
+            {/* Updates rail when there are any; otherwise the new-arrivals rail. */}
+            {feedItems.length > 0 ? (
+              <FeedRail
+                heading={feedHeading}
+                items={feedItems}
+                userType={feedUserType}
+                hasFeature={Boolean(feature)}
+              />
+            ) : (
+              newItems.length > 0 && (
+                <div className={cn(!feature && 'lg:col-span-full')}>
+                  <div className="mb-4 flex items-center gap-3">
+                    <h2 className="text-primary text-xs leading-tight font-black tracking-[0.2em] uppercase">
+                      {hero.newHeading}
+                    </h2>
+                    <span className="h-px flex-1 bg-white/20" aria-hidden="true" />
+                  </div>
+                  {/* On phones the rail stacks below the feature, so cap it to
+                      three rows there — enough for a taste without pushing the
+                      content rows a screen down. Full list from sm up, where it
+                      sits beside the feature and balances its height. */}
+                  <ul className="space-y-4 max-sm:[&>li:nth-child(n+4)]:hidden">
+                    {newItems.map((item) => (
+                      <NewRow key={item._id} item={item} />
+                    ))}
+                  </ul>
                 </div>
-                {/* On phones the rail stacks below the feature, so cap it to
-                    three rows there — enough for a taste without pushing the
-                    content rows a screen down. Full list from sm up, where it
-                    sits beside the feature and balances its height. */}
-                <ul className="space-y-4 max-sm:[&>li:nth-child(n+4)]:hidden">
-                  {newItems.map((item) => (
-                    <NewRow key={item._id} item={item} />
-                  ))}
-                </ul>
-              </div>
+              )
             )}
           </div>
         )}
