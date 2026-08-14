@@ -791,11 +791,15 @@ export type SiteSettings = {
     accountPostHeading?: string;
     accountPostIntro?: string;
     accountPostTargetLabel?: string;
+    accountPostTargetPlaceholder?: string;
     accountPostCreatorsGroup?: string;
     accountPostComicsGroup?: string;
     accountPostKindLabel?: string;
+    accountPostKindPlaceholder?: string;
     accountPostPlaceholder?: string;
     accountPostMentionsLabel?: string;
+    accountPostMentionSearch?: string;
+    accountPostMentionNoMatch?: string;
     accountPostMentionCreators?: string;
     accountPostMentionConventions?: string;
     accountPostSubmitLabel?: string;

@@ -426,11 +426,15 @@ export interface SiteSettings {
     accountPostHeading: string
     accountPostIntro: string
     accountPostTargetLabel: string
+    accountPostTargetPlaceholder: string
     accountPostCreatorsGroup: string
     accountPostComicsGroup: string
     accountPostKindLabel: string
+    accountPostKindPlaceholder: string
     accountPostPlaceholder: string
     accountPostMentionsLabel: string
+    accountPostMentionSearch: string
+    accountPostMentionNoMatch: string
     accountPostMentionCreators: string
     accountPostMentionConventions: string
     accountPostSubmitLabel: string
@@ -902,11 +906,15 @@ const DEFAULTS: SiteSettings = {
     accountPostIntro:
       'A quick note to your followers — a new page, a con, a campaign. Everyone who saved this comic or your profile sees it. Keep it short; 200 characters.',
     accountPostTargetLabel: 'About',
+    accountPostTargetPlaceholder: 'Profile or Book update?',
     accountPostCreatorsGroup: 'Your Profiles',
     accountPostComicsGroup: 'Your Comics',
-    accountPostKindLabel: 'Kind',
+    accountPostKindLabel: 'Type of Update',
+    accountPostKindPlaceholder: 'Select One',
     accountPostPlaceholder: 'What’s new?',
     accountPostMentionsLabel: 'Mention (optional)',
+    accountPostMentionSearch: 'Search creators and conventions…',
+    accountPostMentionNoMatch: 'No matches.',
     accountPostMentionCreators: 'Creators',
     accountPostMentionConventions: 'Conventions',
     accountPostSubmitLabel: 'Post Update',

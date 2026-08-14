@@ -4925,6 +4925,13 @@
               },
               "optional": true
             },
+            "accountPostTargetPlaceholder": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "accountPostCreatorsGroup": {
               "type": "objectAttribute",
               "value": {
@@ -4946,6 +4953,13 @@
               },
               "optional": true
             },
+            "accountPostKindPlaceholder": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "accountPostPlaceholder": {
               "type": "objectAttribute",
               "value": {
@@ -4954,6 +4968,20 @@
               "optional": true
             },
             "accountPostMentionsLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "accountPostMentionSearch": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "accountPostMentionNoMatch": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"
