@@ -3,7 +3,6 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 
 import { ContentCardGrid } from '@/components/content-card-grid'
-import { ResourceList } from '@/components/resource-list'
 import { Section } from '@/components/ui/section'
 import { conventionToCard, mediaToCard, resourceToCard } from '@/lib/card-mappers'
 import type { SearchParams } from '@/lib/filters'
@@ -79,11 +78,17 @@ export default async function ResourcesPage({
             {s.resourcesPageTitle}
           </Link>
         </Section>
-        <ResourceList
+        <ContentCardGrid
           headingAs="h1"
           headingSize="lg"
           heading={activeCategory}
-          resources={byCategory.get(activeCategory) ?? []}
+          subtitle={RESOURCE_CATEGORY_DESCRIPTIONS[activeCategory as ResourceCategory]}
+          cards={(byCategory.get(activeCategory) ?? []).map(resourceToCard)}
+          layout="vertical"
+          columns={3}
+          aspectRatio="landscape"
+          summaryLines={3}
+          padding="md"
           emptyMessage={settings.empty.resources}
         />
       </>
