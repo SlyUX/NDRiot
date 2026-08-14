@@ -26,20 +26,23 @@ import { cn } from '@/lib/utils'
  * fill from the taxonomy — see lib/nav.
  */
 
-const LINK = 'block px-3 py-1.5 text-sm text-foreground/80 hover:text-primary transition-colors'
+const LINK =
+  'block px-3 py-1.5 text-sm whitespace-nowrap text-foreground/80 hover:text-primary transition-colors'
 const HEADING = 'text-muted-foreground mb-2 px-3 text-[10px] font-bold tracking-widest uppercase'
 
 /** Desktop dropdown contents: each group a column; a long group (genres) wraps. */
 function DesktopPanel({ panel, genres }: { panel: NavPanel; genres?: readonly string[] }) {
+  // w-max so the panel is at least as wide as its longest row — with the
+  // nowrap links below, that keeps "All Resources" on one line.
   return (
-    <div className="p-5">
+    <div className="w-max p-5">
       {/* The trigger opens the menu rather than navigating, so the panel's own
           landing page needs a link of its own. */}
       {panel.href && (
         <NavigationMenuLink asChild>
           <Link
             href={panel.href}
-            className="text-primary mb-3 block px-3 text-xs font-bold tracking-widest uppercase hover:underline"
+            className="text-primary mb-3 block px-3 text-xs font-bold tracking-widest whitespace-nowrap uppercase hover:underline"
           >
             All {panel.label}
           </Link>

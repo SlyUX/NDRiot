@@ -964,7 +964,14 @@ const DEFAULTS: SiteSettings = {
       _type: 'navPanel',
       label: 'Resources',
       href: '/resources',
-      groups: [{ links: [{ label: 'Conventions', href: '/conventions' }] }],
+      groups: [
+        {
+          links: [
+            { label: 'Conventions', href: '/conventions' },
+            { label: 'Media Outlets', href: '/media' },
+          ],
+        },
+      ],
     },
     { _type: 'navLink', label: 'ND Riot Rag', href: '/magazine' },
     // "WTH?" = the newcomer's "what is this?" — orientation is user-serving, so
