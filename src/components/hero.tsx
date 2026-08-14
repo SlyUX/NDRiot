@@ -196,7 +196,9 @@ function FeedRow({ item }: { item: RailFeedItem }) {
       : `/creators/${item.targetSlug}`
     : null
   return (
-    <li className={cn('flex gap-2.5', item.followed && 'border-primary border-l-2 pl-2.5')}>
+    // A followed update is boxed in a hot-pink border with the creator's avatar,
+    // so it stands out where it naturally falls in the recency order.
+    <li className={cn('flex gap-2.5', item.followed && 'border-primary border p-2.5')}>
       {item.followed && (
         <div className="bg-muted relative size-7 shrink-0 overflow-hidden">
           {item.photo && (
@@ -225,6 +227,24 @@ function FeedRow({ item }: { item: RailFeedItem }) {
           <span className="block truncate text-xs font-bold text-white">{item.targetName}</span>
         )}
         <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-white/85">{item.body}</p>
+        {item.mentions && item.mentions.length > 0 && (
+          <ul className="mt-1.5 flex flex-wrap gap-1">
+            {item.mentions.map((mention) => (
+              <li key={mention._id}>
+                <Link
+                  href={
+                    mention._type === 'convention'
+                      ? `/conventions/${mention.slug}`
+                      : `/creators/${mention.slug}`
+                  }
+                  className="border-border hover:border-primary hover:text-primary inline-block border px-1.5 py-0.5 text-[10px] text-white/85 transition-colors"
+                >
+                  {mention.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </li>
   )

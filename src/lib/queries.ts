@@ -181,18 +181,21 @@ export const OWNED_MEDIA_QUERY = defineQuery(`*[_type=="media" && _id in $ids &&
  * or counted (§3). Target resolved to a name + slug for linking.
  */
 /**
- * Updates for the homepage hero rail. One query, two modes: pass `$ids` = [] for
- * the global "Latest Updates" recency feed, or a reader's saved ids for their
- * "My Feed". Carries the author's avatar (the creator behind the target) so a
- * followed update can show a thumbnail. Recency only, never ranked (§3).
+ * The homepage hero rail — the global recency feed of every creator's updates,
+ * shown to everyone. A signed-in reader's followed targets are highlighted in
+ * place (matched by `targetId`), never reordered (§3: emphasis, not ranking).
+ * Carries the author's avatar (the creator behind the target) for that highlight
+ * and the update's mentions. Recency only, never ranked.
  */
-export const RAIL_UPDATES_QUERY = defineQuery(`*[_type=="update" && defined(publishedAt) && (count($ids) == 0 || target._ref in $ids)]|order(publishedAt desc)[0...$limit]{
+export const RAIL_UPDATES_QUERY = defineQuery(`*[_type=="update" && defined(publishedAt)]|order(publishedAt desc)[0...$limit]{
   _id,body,kind,publishedAt,
+  "targetId":target._ref,
   "targetType":target->_type,
   "targetName":coalesce(target->title,target->name),
   "targetSlug":target->slug.current,
   "authorName":coalesce(target->name,target->creator->name),
-  "photo":coalesce(target->photo,target->creator->photo)
+  "photo":coalesce(target->photo,target->creator->photo),
+  "mentions":mentions[]->{_id,_type,name,"slug":slug.current}
 }`)
 
 export const UPDATES_FEED_QUERY = defineQuery(`*[_type=="update" && target._ref in $ids && defined(publishedAt)]|order(publishedAt desc)[0...$limit]{
