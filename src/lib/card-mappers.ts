@@ -2,6 +2,7 @@ import type { ContentCardProps } from '@/components/content-card'
 import type {
   BookSummary,
   ColumnSummary,
+  ConventionSummary,
   CreatorSummary,
   DownloadSummary,
   FavoriteCreator,
@@ -194,6 +195,21 @@ export function mediaToCard(media: MediaSummary): ContentCardProps {
     imageAlt: '',
     eyebrow: media.kinds?.length ? media.kinds.join(' · ') : undefined,
     summary: truncate(media.about, 160),
+    aspectRatio: 'square',
+  }
+}
+
+export function conventionToCard(convention: ConventionSummary): ContentCardProps {
+  return {
+    title: convention.name,
+    href: `/conventions/${convention.slug}`,
+    image: convention.image,
+    // Real alt if the editor gave it (a logo/banner); the name sits beside it,
+    // so a blank falls back to a plain box.
+    imageAlt: convention.image?.alt ?? '',
+    eyebrow: convention.location ?? undefined,
+    summary: truncate(convention.description, 160),
+    date: convention.whenHint ?? undefined,
     aspectRatio: 'square',
   }
 }

@@ -164,6 +164,27 @@ export type HomepageFeature = {
   >;
 };
 
+export type Convention = {
+  _id: string;
+  _type: "convention";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  name: string;
+  slug: Slug;
+  location?: string;
+  whenHint?: string;
+  website?: string;
+  description?: string;
+  image?: ImageWithAlt;
+};
+
+export type Slug = {
+  _type: "slug";
+  current: string;
+  source?: string;
+};
+
 export type Update = {
   _id: string;
   _type: "update";
@@ -243,12 +264,6 @@ export type RagIssue = {
     _key: string;
   }>;
   publishedAt?: string;
-};
-
-export type Slug = {
-  _type: "slug";
-  current: string;
-  source?: string;
 };
 
 export type Resource = {
@@ -724,6 +739,10 @@ export type SiteSettings = {
     resourcesHeading?: string;
     resourceVisitLabel?: string;
     resourceDownloadLabel?: string;
+    conventionsPageTitle?: string;
+    conventionsPageDescription?: string;
+    conventionsResourcesLinkLabel?: string;
+    conventionVisitLabel?: string;
     ragPageTitle?: string;
     ragPageDescription?: string;
     ragArchiveHeading?: string;
@@ -813,6 +832,7 @@ export type SiteSettings = {
     columns?: string;
     interviews?: string;
     resources?: string;
+    conventions?: string;
     ragIssues?: string;
     media?: string;
   };
@@ -1190,10 +1210,11 @@ export type AllSanitySchemaTypes =
   | ColumnReference
   | InterviewReference
   | HomepageFeature
+  | Convention
+  | Slug
   | Update
   | SanityFileAssetReference
   | RagIssue
-  | Slug
   | Resource
   | FreeDownload
   | Interview
@@ -2072,6 +2093,12 @@ export type OWNED_DOCS_QUERY_RESULT = Array<
     }
   | {
       _id: string;
+      _type: "convention";
+      name: string;
+      slug: string;
+    }
+  | {
+      _id: string;
       _type: "creator";
       name: string;
       slug: string;
@@ -2399,6 +2426,33 @@ export type RESOURCE_QUERY_RESULT = {
   fileUrl: string | null;
   creatorName: string | null;
   creatorSlug: string | null;
+} | null;
+
+// Source: src/lib/queries.ts
+// Variable: CONVENTIONS_QUERY
+// Query: *[_type=="convention" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,location,whenHint,description,image}
+export type CONVENTIONS_QUERY_RESULT = Array<{
+  _id: string;
+  name: string;
+  slug: string;
+  location: string | null;
+  whenHint: string | null;
+  description: string | null;
+  image: ImageWithAlt | null;
+}>;
+
+// Source: src/lib/queries.ts
+// Variable: CONVENTION_QUERY
+// Query: *[_type=="convention" && slug.current==$slug][0]{  _id,name,"slug":slug.current,location,whenHint,website,description,image}
+export type CONVENTION_QUERY_RESULT = {
+  _id: string;
+  name: string;
+  slug: string;
+  location: string | null;
+  whenHint: string | null;
+  website: string | null;
+  description: string | null;
+  image: ImageWithAlt | null;
 } | null;
 
 // Source: src/lib/queries.ts
@@ -3015,6 +3069,8 @@ declare module "@sanity/client" {
     '*[_type=="resource" && defined(slug.current)]|order(category asc, title asc){_id,title,"slug":slug.current,kind,category,description,image}': RESOURCES_QUERY_RESULT;
     '*[_type=="resource" && defined(slug.current)]|order(coalesce(publishedAt,_createdAt) desc)[0...8]{_id,title,"slug":slug.current,kind,category,description,image}': HOME_RESOURCES_QUERY_RESULT;
     '*[_type=="resource" && slug.current==$slug][0]{\n  _id,title,kind,category,description,body,videoUrl,url,image,publishedAt,source,\n  "fileUrl":file.asset->url,\n  "creatorName":creator->name,"creatorSlug":creator->slug.current\n}': RESOURCE_QUERY_RESULT;
+    '*[_type=="convention" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,location,whenHint,description,image}': CONVENTIONS_QUERY_RESULT;
+    '*[_type=="convention" && slug.current==$slug][0]{\n  _id,name,"slug":slug.current,location,whenHint,website,description,image\n}': CONVENTION_QUERY_RESULT;
     '*[_type=="ragIssue" && defined(slug.current)]|order(issueNumber desc){_id,title,issueNumber,"slug":slug.current,cover,publishedAt}': RAG_ISSUES_QUERY_RESULT;
     '*[_type=="ragIssue" && defined(slug.current)]|order(issueNumber desc)[0]{\n  _id,title,issueNumber,publishedAt,description,cover,"pdfUrl":pdfFile.asset->url,\n  buyLinks[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},\n  toc,\n  contributors[]{_key,section,role,customName,"creatorName":creator->name,"creatorSlug":creator->slug.current}\n}': RAG_LATEST_QUERY_RESULT;
     '*[_type=="ragIssue" && slug.current==$slug][0]{\n  _id,title,issueNumber,publishedAt,description,cover,"pdfUrl":pdfFile.asset->url,\n  buyLinks[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},\n  toc,\n  contributors[]{_key,section,role,customName,"creatorName":creator->name,"creatorSlug":creator->slug.current}\n}': RAG_ISSUE_QUERY_RESULT;

@@ -226,6 +226,15 @@ export const RESOURCE_QUERY = defineQuery(`*[_type=="resource" && slug.current==
   "creatorName":creator->name,"creatorSlug":creator->slug.current
 }`)
 
+// ---- Conventions ----
+// Directory cards — every convention, alphabetical (neutral order, never by
+// rating; §3). A venue creators table at, not a contributor.
+export const CONVENTIONS_QUERY = defineQuery(`*[_type=="convention" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,location,whenHint,description,image}`)
+// A single convention page.
+export const CONVENTION_QUERY = defineQuery(`*[_type=="convention" && slug.current==$slug][0]{
+  _id,name,"slug":slug.current,location,whenHint,website,description,image
+}`)
+
 // ---- ND Riot Rag (magazine) ----
 // Archive cards — every issue, newest (highest number) first.
 export const RAG_ISSUES_QUERY = defineQuery(`*[_type=="ragIssue" && defined(slug.current)]|order(issueNumber desc){_id,title,issueNumber,"slug":slug.current,cover,publishedAt}`)

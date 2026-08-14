@@ -370,6 +370,11 @@ export interface SiteSettings {
     resourcesHeading: string
     resourceVisitLabel: string
     resourceDownloadLabel: string
+    /** Conventions directory (/conventions) + detail. */
+    conventionsPageTitle: string
+    conventionsPageDescription: string
+    conventionsResourcesLinkLabel: string
+    conventionVisitLabel: string
     ragPageTitle: string
     ragPageDescription: string
     ragArchiveHeading: string
@@ -467,6 +472,7 @@ export interface SiteSettings {
     columns: string
     interviews: string
     resources: string
+    conventions: string
     ragIssues: string
     media: string
     saved: string
@@ -839,6 +845,11 @@ const DEFAULTS: SiteSettings = {
     resourcesHeading: 'Resources',
     resourceVisitLabel: 'Visit the site',
     resourceDownloadLabel: 'Download',
+    conventionsPageTitle: 'Conventions',
+    conventionsPageDescription:
+      'Comics conventions worth a creator’s table — where to show your work, meet readers, and find your scene. Independent-comics focused.',
+    conventionsResourcesLinkLabel: 'Browse conventions',
+    conventionVisitLabel: 'Official site',
     ragPageTitle: 'ND Riot Rag',
     ragPageDescription:
       'The ND Riot Rag — our magazine. Read each issue online or download the PDF free; other editions are linked where you can get them.',
@@ -933,6 +944,7 @@ const DEFAULTS: SiteSettings = {
     columns: 'No columns yet.',
     interviews: 'No interviews yet.',
     resources: 'No resources yet — check back soon.',
+    conventions: 'No conventions listed yet — check back soon.',
     ragIssues: 'The first issue is on its way — check back soon.',
     media: 'No media listed yet.',
     saved: 'Nothing saved yet — tap Save on any comic or creator and it lands here.',
@@ -945,6 +957,7 @@ const DEFAULTS: SiteSettings = {
     { _type: 'navLink', label: 'Comics', href: '/books' },
     { _type: 'navLink', label: 'Comic Creators', href: '/creators' },
     { _type: 'navLink', label: 'Resources', href: '/resources' },
+    { _type: 'navLink', label: 'Conventions', href: '/conventions' },
     { _type: 'navLink', label: 'ND Riot Rag', href: '/magazine' },
     // "WTH?" = the newcomer's "what is this?" — orientation is user-serving, so
     // it earns a nav slot; the punk label keeps it an invitation, not an About.
