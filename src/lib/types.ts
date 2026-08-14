@@ -11,6 +11,7 @@ import type {
   RESOURCE_QUERY_RESULT,
   RAG_ISSUES_QUERY_RESULT,
   RAG_ISSUE_QUERY_RESULT,
+  UPDATES_FEED_QUERY_RESULT,
   HERO_BOOKS_QUERY_RESULT,
   HOME_EDITORIAL_QUERY_RESULT,
   HOME_NEW_QUERY_RESULT,
@@ -45,6 +46,8 @@ export type ResourceKind = ResourceSummary['kind']
 
 export type RagIssueSummary = RAG_ISSUES_QUERY_RESULT[number]
 export type RagIssueDetail = NonNullable<RAG_ISSUE_QUERY_RESULT>
+
+export type UpdateFeedItem = UPDATES_FEED_QUERY_RESULT[number]
 export type MediaSummary = MEDIA_QUERY_RESULT[number]
 export type MediaDetail = NonNullable<MEDIA_DETAIL_QUERY_RESULT>
 export type HeroBook = HERO_BOOKS_QUERY_RESULT[number]

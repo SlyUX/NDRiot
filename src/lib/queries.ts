@@ -175,6 +175,18 @@ export const OWNED_BOOKS_QUERY = defineQuery(`*[_type=="book" && creator._ref in
 /** An owner's media outlets, by id. */
 export const OWNED_MEDIA_QUERY = defineQuery(`*[_type=="media" && _id in $ids && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,kinds,logo,about,genresCovered}`)
 
+/**
+ * The reader's update feed — updates whose target (a comic or creator) is in the
+ * reader's saved set (Save = Follow), newest first. Recency only, never ranked
+ * or counted (§3). Target resolved to a name + slug for linking.
+ */
+export const UPDATES_FEED_QUERY = defineQuery(`*[_type=="update" && target._ref in $ids && defined(publishedAt)]|order(publishedAt desc)[0...$limit]{
+  _id,body,kind,publishedAt,
+  "targetType":target->_type,
+  "targetName":coalesce(target->title,target->name),
+  "targetSlug":target->slug.current
+}`)
+
 /* ---------------------------------------------------- RSS feeds
  * Item projections for ND Riot's own feeds (src/app/feeds/*.xml). Each is
  * newest-first and capped at 30, so a growing roster never bloats a feed.

@@ -411,6 +411,19 @@ export interface SiteSettings {
     accountSavedComicsHeading: string
     accountSavedCreatorsHeading: string
     accountRemoveLabel: string
+    /** Creator update composer (/me). */
+    accountPostHeading: string
+    accountPostIntro: string
+    accountPostTargetLabel: string
+    accountPostCreatorsGroup: string
+    accountPostComicsGroup: string
+    accountPostKindLabel: string
+    accountPostPlaceholder: string
+    accountPostSubmitLabel: string
+    accountPostSuccess: string
+    /** Reader update feed (/me). */
+    accountFeedHeading: string
+    accountFeedEmpty: string
     accountSignInTitle: string
     accountSignInBody: string
     accountSignInCta: string
@@ -862,6 +875,18 @@ const DEFAULTS: SiteSettings = {
     accountSavedComicsHeading: 'Saved Comics',
     accountSavedCreatorsHeading: 'Favorite Creators',
     accountRemoveLabel: 'Remove',
+    accountPostHeading: 'Post an Update',
+    accountPostIntro:
+      'A quick note to your followers — a new page, a con, a campaign. Everyone who saved this comic or your profile sees it. Keep it short; 200 characters.',
+    accountPostTargetLabel: 'About',
+    accountPostCreatorsGroup: 'Your Profiles',
+    accountPostComicsGroup: 'Your Comics',
+    accountPostKindLabel: 'Kind',
+    accountPostPlaceholder: 'What’s new?',
+    accountPostSubmitLabel: 'Post Update',
+    accountPostSuccess: 'Posted. Your followers will see it.',
+    accountFeedHeading: 'From Who You Follow',
+    accountFeedEmpty: 'Nothing yet. Updates from comics and creators you’ve saved show up here.',
     accountSignInTitle: 'Sign in to save comics and creators',
     accountSignInBody:
       'ND Riot uses Google sign-in — it only confirms it’s you, and your saves stay private.',

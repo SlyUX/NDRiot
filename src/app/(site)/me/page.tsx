@@ -6,9 +6,12 @@ import { SignInButton, SignOutButton } from '@/components/auth-controls'
 import { NewsletterOptIn } from '@/components/newsletter-opt-in'
 import { SavedItemRow } from '@/components/saved-item-row'
 import { SectionHeading } from '@/components/section-heading'
+import { UpdateComposer, type ComposerTarget } from '@/components/update-composer'
+import { UpdateFeed } from '@/components/update-feed'
 import { Button } from '@/components/ui/button'
 import { Section } from '@/components/ui/section'
 import { auth } from '@/auth'
+import { UPDATE_KINDS } from '@/lib/taxonomy'
 import {
   safeFetch,
   OWNED_BOOKS_QUERY,
@@ -16,12 +19,13 @@ import {
   OWNED_MEDIA_QUERY,
   SAVED_BOOKS_QUERY,
   SAVED_CREATORS_QUERY,
+  UPDATES_FEED_QUERY,
 } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
 import { ownedDocIds } from '@/sanity/ownership-client'
 import { savedItems } from '@/sanity/reader-client'
 import { urlFor } from '@/sanity/image'
-import type { BookSummary, CreatorSummary, MediaSummary } from '@/lib/types'
+import type { BookSummary, CreatorSummary, MediaSummary, UpdateFeedItem } from '@/lib/types'
 
 /**
  * The signed-in reader's home.
@@ -79,7 +83,11 @@ export default async function AccountPage() {
   const ownedCreatorIds = ownedDocs.filter((d) => d._type === 'creator').map((d) => d._id)
   const ownedMediaIds = ownedDocs.filter((d) => d._type === 'media').map((d) => d._id)
 
-  const [savedBooks, savedCreators, ownedCreators, ownedBooks, ownedMedia] = await Promise.all([
+  // The reader's update feed — everything they saved is a follow (§3). Newest
+  // first, capped; recency only, never ranked.
+  const followIds = [...bookIds, ...creatorIds]
+
+  const [savedBooks, savedCreators, ownedCreators, ownedBooks, ownedMedia, updates] = await Promise.all([
     bookIds.length
       ? safeFetch<BookSummary[]>(SAVED_BOOKS_QUERY, { ids: bookIds }, [])
       : Promise.resolve<BookSummary[]>([]),
@@ -95,10 +103,28 @@ export default async function AccountPage() {
     ownedMediaIds.length
       ? safeFetch<MediaSummary[]>(OWNED_MEDIA_QUERY, { ids: ownedMediaIds }, [])
       : Promise.resolve<MediaSummary[]>([]),
+    followIds.length
+      ? safeFetch<UpdateFeedItem[]>(UPDATES_FEED_QUERY, { ids: followIds, limit: 30 }, [])
+      : Promise.resolve<UpdateFeedItem[]>([]),
   ])
 
   const isCreator = ownedCreators.length > 0
   const hasSaves = savedBooks.length > 0 || savedCreators.length > 0
+
+  // What a creator can post about: each creator they own, plus each of those
+  // creators' comics. The action re-checks ownership — this only shapes the picker.
+  const composerTargets: ComposerTarget[] = [
+    ...ownedCreators.map((creator) => ({
+      id: creator._id,
+      label: creator.name ?? 'Your profile',
+      group: 'creator' as const,
+    })),
+    ...ownedBooks.map((book) => ({
+      id: book._id,
+      label: book.title ?? 'Untitled',
+      group: 'comic' as const,
+    })),
+  ]
 
   return (
     <div>
@@ -223,6 +249,40 @@ export default async function AccountPage() {
           </>
         )}
       </Section>
+
+      {/* Post an update — creators only, targeting a creator or comic they own.
+          Direct-publish; the action re-checks ownership (§3-safe: a plain push
+          to people who chose to follow, never a broadcast or a ranking). */}
+      {composerTargets.length > 0 && (
+        <Section padding="md">
+          <UpdateComposer
+            targets={composerTargets}
+            kinds={UPDATE_KINDS}
+            labels={{
+              heading: s.accountPostHeading,
+              intro: s.accountPostIntro,
+              targetLabel: s.accountPostTargetLabel,
+              creatorsGroupLabel: s.accountPostCreatorsGroup,
+              comicsGroupLabel: s.accountPostComicsGroup,
+              kindLabel: s.accountPostKindLabel,
+              placeholder: s.accountPostPlaceholder,
+              submit: s.accountPostSubmitLabel,
+              success: s.accountPostSuccess,
+            }}
+          />
+        </Section>
+      )}
+
+      {/* From who you follow — updates on saved comics/creators, newest first. */}
+      {followIds.length > 0 && (
+        <Section padding="md">
+          <UpdateFeed
+            heading={s.accountFeedHeading}
+            emptyLabel={s.accountFeedEmpty}
+            updates={updates}
+          />
+        </Section>
+      )}
 
       {/* Your Media — owners of an outlet (creator or not). Plain feed rows. */}
       {ownedMedia.length > 0 && (

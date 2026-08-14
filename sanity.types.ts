@@ -164,6 +164,25 @@ export type HomepageFeature = {
   >;
 };
 
+export type Update = {
+  _id: string;
+  _type: "update";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  kind:
+    | "General news"
+    | "New page"
+    | "New release"
+    | "Crowdfunding \u2014 prelaunch"
+    | "Crowdfunding \u2014 live"
+    | "At a convention"
+    | "Milestone";
+  body: string;
+  target: CreatorReference | BookReference;
+  publishedAt: string;
+};
+
 export type SanityFileAssetReference = {
   _ref: string;
   _type: "reference";
@@ -741,6 +760,17 @@ export type SiteSettings = {
     accountSavedComicsHeading?: string;
     accountSavedCreatorsHeading?: string;
     accountRemoveLabel?: string;
+    accountPostHeading?: string;
+    accountPostIntro?: string;
+    accountPostTargetLabel?: string;
+    accountPostCreatorsGroup?: string;
+    accountPostComicsGroup?: string;
+    accountPostKindLabel?: string;
+    accountPostPlaceholder?: string;
+    accountPostSubmitLabel?: string;
+    accountPostSuccess?: string;
+    accountFeedHeading?: string;
+    accountFeedEmpty?: string;
     accountSignInTitle?: string;
     accountSignInBody?: string;
     accountSignInCta?: string;
@@ -1161,6 +1191,7 @@ export type AllSanitySchemaTypes =
   | ColumnReference
   | InterviewReference
   | HomepageFeature
+  | Update
   | SanityFileAssetReference
   | RagIssue
   | Slug
@@ -2158,6 +2189,26 @@ export type OWNED_MEDIA_QUERY_RESULT = Array<{
 }>;
 
 // Source: src/lib/queries.ts
+// Variable: UPDATES_FEED_QUERY
+// Query: *[_type=="update" && target._ref in $ids && defined(publishedAt)]|order(publishedAt desc)[0...$limit]{  _id,body,kind,publishedAt,  "targetType":target->_type,  "targetName":coalesce(target->title,target->name),  "targetSlug":target->slug.current}
+export type UPDATES_FEED_QUERY_RESULT = Array<{
+  _id: string;
+  body: string;
+  kind:
+    | "At a convention"
+    | "Crowdfunding \u2014 live"
+    | "Crowdfunding \u2014 prelaunch"
+    | "General news"
+    | "Milestone"
+    | "New page"
+    | "New release";
+  publishedAt: string;
+  targetType: "book" | "creator";
+  targetName: string | null;
+  targetSlug: string;
+}>;
+
+// Source: src/lib/queries.ts
 // Variable: FEED_EDITORIAL_QUERY
 // Query: *[_type in ["column","interview"] && defined(slug.current) && defined(publishedAt)]|order(publishedAt desc)[0...30]{  _id,_type,title,"slug":slug.current,excerpt,publishedAt,  "authorName":author->name,"interviewerName":interviewer->name}
 export type FEED_EDITORIAL_QUERY_RESULT = Array<
@@ -2957,6 +3008,7 @@ declare module "@sanity/client" {
     '*[_id in $ids && defined(slug.current)]{_id,_type,name,"slug":slug.current}|order(name asc)': OWNED_DOCS_QUERY_RESULT;
     '*[_type=="book" && creator._ref in $ids && defined(slug.current)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}': OWNED_BOOKS_QUERY_RESULT;
     '*[_type=="media" && _id in $ids && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,kinds,logo,about,genresCovered}': OWNED_MEDIA_QUERY_RESULT;
+    '*[_type=="update" && target._ref in $ids && defined(publishedAt)]|order(publishedAt desc)[0...$limit]{\n  _id,body,kind,publishedAt,\n  "targetType":target->_type,\n  "targetName":coalesce(target->title,target->name),\n  "targetSlug":target->slug.current\n}': UPDATES_FEED_QUERY_RESULT;
     '*[_type in ["column","interview"] && defined(slug.current) && defined(publishedAt)]|order(publishedAt desc)[0...30]{\n  _id,_type,title,"slug":slug.current,excerpt,publishedAt,\n  "authorName":author->name,"interviewerName":interviewer->name\n}': FEED_EDITORIAL_QUERY_RESULT;
     '*[_type=="book" && defined(slug.current)]|order(_createdAt desc)[0...30]{\n  _id,title,"slug":slug.current,_createdAt,\n  "descriptionText":pt::text(description),"creatorName":creator->name,genres\n}': FEED_COMICS_QUERY_RESULT;
     '*[_type=="media" && defined(slug.current)]|order(_createdAt desc)[0...30]{\n  _id,name,"slug":slug.current,_createdAt,about,genresCovered\n}': FEED_MEDIA_QUERY_RESULT;

@@ -160,6 +160,40 @@ export function linkKindForHost(url: string): LinkKind | null {
   return KIND_BY_HOST.find(([pattern]) => pattern.test(host))?.[1] ?? null
 }
 
+/* ---------------------------------------------------------------- updates */
+
+/**
+ * What kind of thing a creator update is. A controlled vocabulary, like genres
+ * and formats — one fixed list feeds the schema's option set, the composer's
+ * picker, and the label the feed shows, so they never drift.
+ *
+ * Kept short and concrete: the reasons a creator actually pings their followers.
+ * Order runs everyday news → crowdfunding → out-in-the-world. "General news" is
+ * the catch-all and the default. These are structural tags, not editorial copy —
+ * a reader browses by them, so free text would splinter "Con" from "Convention".
+ */
+export const UPDATE_KINDS = [
+  'General news',
+  'New page',
+  'New release',
+  'Crowdfunding — prelaunch',
+  'Crowdfunding — live',
+  'At a convention',
+  'Milestone',
+] as const
+
+export type UpdateKind = (typeof UPDATE_KINDS)[number]
+
+export const UPDATE_KIND_DESCRIPTIONS: Record<UpdateKind, string> = {
+  'General news': 'Anything worth telling your followers. The catch-all.',
+  'New page': 'A fresh page or chapter is up.',
+  'New release': 'A new issue, collection, or book is out.',
+  'Crowdfunding — prelaunch': 'A campaign is coming — get on the notify list.',
+  'Crowdfunding — live': 'A campaign is live now. Time-limited.',
+  'At a convention': 'Tabling, appearing, or exhibiting somewhere.',
+  Milestone: 'A goal hit, an anniversary, a thank-you.',
+}
+
 /* ----------------------------------------------------------------- media */
 
 /**
