@@ -174,7 +174,6 @@ export function linkKindForHost(url: string): LinkKind | null {
  */
 export const UPDATE_KINDS = [
   'General news',
-  'New page',
   'New release',
   'Crowdfunding — prelaunch',
   'Crowdfunding — live',
@@ -186,7 +185,6 @@ export type UpdateKind = (typeof UPDATE_KINDS)[number]
 
 export const UPDATE_KIND_DESCRIPTIONS: Record<UpdateKind, string> = {
   'General news': 'Anything worth telling your followers. The catch-all.',
-  'New page': 'A fresh page or chapter is up.',
   'New release': 'A new issue, collection, or book is out.',
   'Crowdfunding — prelaunch': 'A campaign is coming — get on the notify list.',
   'Crowdfunding — live': 'A campaign is live now. Time-limited.',

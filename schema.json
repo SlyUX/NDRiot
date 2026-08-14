@@ -814,10 +814,6 @@
             },
             {
               "type": "string",
-              "value": "New page"
-            },
-            {
-              "type": "string",
               "value": "New release"
             },
             {

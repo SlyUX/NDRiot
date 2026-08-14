@@ -172,7 +172,6 @@ export type Update = {
   _rev: string;
   kind:
     | "General news"
-    | "New page"
     | "New release"
     | "Crowdfunding \u2014 prelaunch"
     | "Crowdfunding \u2014 live"
@@ -2200,7 +2199,6 @@ export type UPDATES_FEED_QUERY_RESULT = Array<{
     | "Crowdfunding \u2014 prelaunch"
     | "General news"
     | "Milestone"
-    | "New page"
     | "New release";
   publishedAt: string;
   targetType: "book" | "creator";
