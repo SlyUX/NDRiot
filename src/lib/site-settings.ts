@@ -956,8 +956,16 @@ const DEFAULTS: SiteSettings = {
   nav: [
     { _type: 'navLink', label: 'Comics', href: '/books' },
     { _type: 'navLink', label: 'Comic Creators', href: '/creators' },
-    { _type: 'navLink', label: 'Resources', href: '/resources' },
-    { _type: 'navLink', label: 'Conventions', href: '/conventions' },
+    // The supporting family lives in one dropdown so it stops eating top-level
+    // slots as it grows (Media and Comic Shops land here next). "All Resources"
+    // is the panel's own landing (/resources); Conventions and future siblings
+    // sit beneath it.
+    {
+      _type: 'navPanel',
+      label: 'Resources',
+      href: '/resources',
+      groups: [{ links: [{ label: 'Conventions', href: '/conventions' }] }],
+    },
     { _type: 'navLink', label: 'ND Riot Rag', href: '/magazine' },
     // "WTH?" = the newcomer's "what is this?" — orientation is user-serving, so
     // it earns a nav slot; the punk label keeps it an invitation, not an About.
