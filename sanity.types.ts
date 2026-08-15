@@ -821,6 +821,7 @@ export type SiteSettings = {
     navLoginLabel?: string;
     navJoinLabel?: string;
     creatorBooksHeading?: string;
+    creatorUpdatesHeading?: string;
     creatorWorksHeading?: string;
     creatorOrganizationsHeading?: string;
     openToCollaborationLabel?: string;
@@ -2302,6 +2303,39 @@ export type UPDATES_FEED_QUERY_RESULT = Array<{
 }>;
 
 // Source: src/lib/queries.ts
+// Variable: CREATOR_UPDATES_QUERY
+// Query: *[_type=="update" && defined(publishedAt) && (target._ref == $creatorId || target->creator._ref == $creatorId)]|order(publishedAt desc)[0...$limit]{  _id,body,kind,publishedAt,  "targetType":target->_type,  "targetName":coalesce(target->title,target->name),  "targetSlug":target->slug.current,  "mentions":mentions[]->{_id,_type,name,"slug":slug.current}}
+export type CREATOR_UPDATES_QUERY_RESULT = Array<{
+  _id: string;
+  body: string;
+  kind:
+    | "At a convention"
+    | "Crowdfunding \u2014 live"
+    | "Crowdfunding \u2014 prelaunch"
+    | "General news"
+    | "Milestone"
+    | "New release";
+  publishedAt: string;
+  targetType: "book" | "creator";
+  targetName: string | null;
+  targetSlug: string;
+  mentions: Array<
+    | {
+        _id: string;
+        _type: "convention";
+        name: string;
+        slug: string;
+      }
+    | {
+        _id: string;
+        _type: "creator";
+        name: string;
+        slug: string;
+      }
+  > | null;
+}>;
+
+// Source: src/lib/queries.ts
 // Variable: FEED_EDITORIAL_QUERY
 // Query: *[_type in ["column","interview"] && defined(slug.current) && defined(publishedAt)]|order(publishedAt desc)[0...30]{  _id,_type,title,"slug":slug.current,excerpt,publishedAt,  "authorName":author->name,"interviewerName":interviewer->name}
 export type FEED_EDITORIAL_QUERY_RESULT = Array<
@@ -3142,6 +3176,7 @@ declare module "@sanity/client" {
     '*[_type=="media" && _id in $ids && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,kinds,logo,about,genresCovered}': OWNED_MEDIA_QUERY_RESULT;
     '*[_type=="update" && target._ref in $ids && defined(publishedAt)]|order(publishedAt desc)[0...$limit]{\n  _id,body,kind,publishedAt,\n  "targetType":target->_type,\n  "targetName":coalesce(target->title,target->name),\n  "targetSlug":target->slug.current,\n  "authorName":coalesce(target->name,target->creator->name),\n  "photo":coalesce(target->photo,target->creator->photo),\n  "mentions":mentions[]->{_id,_type,name,"slug":slug.current}\n}': RAIL_UPDATES_QUERY_RESULT;
     '*[_type=="update" && target._ref in $ids && defined(publishedAt)]|order(publishedAt desc)[0...$limit]{\n  _id,body,kind,publishedAt,\n  "targetType":target->_type,\n  "targetName":coalesce(target->title,target->name),\n  "targetSlug":target->slug.current,\n  "mentions":mentions[]->{_id,_type,name,"slug":slug.current}\n}': UPDATES_FEED_QUERY_RESULT;
+    '*[_type=="update" && defined(publishedAt) && (target._ref == $creatorId || target->creator._ref == $creatorId)]|order(publishedAt desc)[0...$limit]{\n  _id,body,kind,publishedAt,\n  "targetType":target->_type,\n  "targetName":coalesce(target->title,target->name),\n  "targetSlug":target->slug.current,\n  "mentions":mentions[]->{_id,_type,name,"slug":slug.current}\n}': CREATOR_UPDATES_QUERY_RESULT;
     '*[_type in ["column","interview"] && defined(slug.current) && defined(publishedAt)]|order(publishedAt desc)[0...30]{\n  _id,_type,title,"slug":slug.current,excerpt,publishedAt,\n  "authorName":author->name,"interviewerName":interviewer->name\n}': FEED_EDITORIAL_QUERY_RESULT;
     '*[_type=="book" && defined(slug.current)]|order(_createdAt desc)[0...30]{\n  _id,title,"slug":slug.current,_createdAt,\n  "descriptionText":pt::text(description),"creatorName":creator->name,genres\n}': FEED_COMICS_QUERY_RESULT;
     '*[_type=="media" && defined(slug.current)]|order(_createdAt desc)[0...30]{\n  _id,name,"slug":slug.current,_createdAt,about,genresCovered\n}': FEED_MEDIA_QUERY_RESULT;

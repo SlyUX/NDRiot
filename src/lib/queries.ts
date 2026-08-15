@@ -205,6 +205,19 @@ export const UPDATES_FEED_QUERY = defineQuery(`*[_type=="update" && target._ref 
   "mentions":mentions[]->{_id,_type,name,"slug":slug.current}
 }`)
 
+/**
+ * A creator's own updates, for their public profile — posts targeting the
+ * creator directly, or one of their comics. Recency only (§3). Same shape as the
+ * reader feed, so it renders through the same component.
+ */
+export const CREATOR_UPDATES_QUERY = defineQuery(`*[_type=="update" && defined(publishedAt) && (target._ref == $creatorId || target->creator._ref == $creatorId)]|order(publishedAt desc)[0...$limit]{
+  _id,body,kind,publishedAt,
+  "targetType":target->_type,
+  "targetName":coalesce(target->title,target->name),
+  "targetSlug":target->slug.current,
+  "mentions":mentions[]->{_id,_type,name,"slug":slug.current}
+}`)
+
 /* ---------------------------------------------------- RSS feeds
  * Item projections for ND Riot's own feeds (src/app/feeds/*.xml). Each is
  * newest-first and capped at 30, so a growing roster never bloats a feed.

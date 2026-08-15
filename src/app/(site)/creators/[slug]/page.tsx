@@ -10,6 +10,7 @@ import PortableTextBody from '@/components/PortableTextBody'
 import { SaveButton } from '@/components/save-button'
 import SocialLinks from '@/components/SocialLinks'
 import { SectionHeading } from '@/components/section-heading'
+import { UpdateFeed } from '@/components/update-feed'
 import { ShareBar } from '@/components/share-bar'
 import { GenreBadge } from '@/components/genre-badge'
 import { Badge } from '@/components/ui/badge'
@@ -21,11 +22,11 @@ import { pageMetadata } from '@/lib/page-metadata'
 import { auth } from '@/auth'
 import { isSaved } from '@/sanity/reader-client'
 import { fetchFeed } from '@/lib/feed-parse'
-import { safeFetch, CREATOR_QUERY } from '@/lib/queries'
+import { safeFetch, CREATOR_QUERY, CREATOR_UPDATES_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
 import { absoluteUrl } from '@/lib/site-url'
 import { breadcrumbSchema, comicMakerSchema, jsonLdGraph } from '@/lib/structured-data'
-import type { CreatorDetail } from '@/lib/types'
+import type { CreatorDetail, UpdateFeedItem } from '@/lib/types'
 import { urlFor } from '@/sanity/image'
 
 export const dynamic = 'force-dynamic'
@@ -77,6 +78,14 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
   const favoritesHeading = settings.sections.creatorFavoritesHeading.replace('{name}', firstName)
   const worksHeading = settings.sections.creatorWorksHeading.replace('{name}', firstName)
   const feedHeading = settings.sections.feedHeading.replace('{name}', firstName)
+  const updatesHeading = settings.sections.creatorUpdatesHeading.replace('{name}', firstName)
+
+  // Their ND Riot updates — posts targeting this creator or one of their comics.
+  const creatorUpdates = await safeFetch<UpdateFeedItem[]>(
+    CREATOR_UPDATES_QUERY,
+    { creatorId: creator._id, limit: 20 },
+    [],
+  )
 
   // Their own feed (blog, webcomic updates), if they gave one and it's live.
   // Cached for half an hour; a dead or moved feed returns null and shows nothing.
@@ -216,6 +225,14 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
         // pt-2: tight to the header row above, per design.
         <Section padding="md" className="pt-2">
           <PortableTextBody value={creator.bio} />
+        </Section>
+      )}
+
+      {/* Their ND Riot updates — recent news, read-only here (managed from the
+          dashboard). Only shown when there are any. */}
+      {creatorUpdates.length > 0 && (
+        <Section padding="md">
+          <UpdateFeed heading={updatesHeading} emptyLabel="" updates={creatorUpdates} />
         </Section>
       )}
 

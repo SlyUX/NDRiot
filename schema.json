@@ -5135,6 +5135,13 @@
               },
               "optional": true
             },
+            "creatorUpdatesHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "creatorWorksHeading": {
               "type": "objectAttribute",
               "value": {

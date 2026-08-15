@@ -465,6 +465,12 @@ export default defineType({
           description: 'Use {name} for the creator’s first name — e.g. "{name}’s Books".',
         }),
         defineField({
+          name: 'creatorUpdatesHeading',
+          title: 'Creator page — updates heading',
+          type: 'string',
+          description: 'Heading over the creator’s ND Riot updates. Use {name} for their first name — e.g. "{name}’s Updates".',
+        }),
+        defineField({
           name: 'creatorWorksHeading',
           title: 'Creator page — external works heading',
           type: 'string',
