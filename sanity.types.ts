@@ -784,7 +784,6 @@ export type SiteSettings = {
     accountMediaHeading?: string;
     accountEditLabel?: string;
     accountViewCreatorLabel?: string;
-    accountViewBookLabel?: string;
     accountViewMediaLabel?: string;
     accountSavedComicsHeading?: string;
     accountSavedCreatorsHeading?: string;

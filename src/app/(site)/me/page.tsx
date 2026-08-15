@@ -6,8 +6,10 @@ import { SignInButton, SignOutButton } from '@/components/auth-controls'
 import { NewsletterOptIn } from '@/components/newsletter-opt-in'
 import { SavedItemRow } from '@/components/saved-item-row'
 import { SectionHeading } from '@/components/section-heading'
-import { UpdateComposer, type ComposerTarget, type MentionOption } from '@/components/update-composer'
+import { type ComposerTarget, type MentionOption } from '@/components/update-composer'
+import { PostUpdateDialog } from '@/components/post-update-dialog'
 import { UpdateFeed } from '@/components/update-feed'
+import { YourComics, type YourComicsBook } from '@/components/your-comics'
 import { Button } from '@/components/ui/button'
 import { Section } from '@/components/ui/section'
 import { auth } from '@/auth'
@@ -119,6 +121,15 @@ export default async function AccountPage() {
   const isCreator = ownedCreators.length > 0
   const hasSaves = savedBooks.length > 0 || savedCreators.length > 0
 
+  // Precomputed for the Your Comics rail (a client component takes plain data).
+  const yourComicsBooks: YourComicsBook[] = ownedBooks.map((book) => ({
+    id: book._id,
+    title: book.title ?? 'Untitled',
+    href: book.slug ? `/books/${book.slug}` : null,
+    editHref: `/join/books?editing=${encodeURIComponent(book._id)}`,
+    coverUrl: book.cover ? urlFor(book.cover).width(300).url() : null,
+  }))
+
   // What a creator can post about: each creator they own, plus each of those
   // creators' comics. The action re-checks ownership — this only shapes the picker.
   const composerTargets: ComposerTarget[] = [
@@ -158,9 +169,9 @@ export default async function AccountPage() {
 
   return (
     <div>
-      {/* Profile — a creator gets the darker-pink zone (white text, white
-          buttons) holding their identity AND their comics; a plain reader gets
-          the charcoal band with just their details. */}
+      {/* Profile — a creator gets the darker-pink zone holding their identity
+          beside their comics (on ND Riot pink); a plain reader gets the charcoal
+          band with just their details. */}
       <Section padding="md" background={isCreator ? 'creator' : 'charcoal'}>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -186,106 +197,65 @@ export default async function AccountPage() {
         </div>
 
         {isCreator && (
-          <>
-            <div className="mt-4 grid gap-4 sm:mt-6 sm:grid-cols-2 sm:gap-6">
-              {ownedCreators.map((creator) => {
-                const sub = creator.studio?.name ?? creator.location
-                return (
-                  <div key={creator._id} className="flex gap-3 sm:gap-4">
-                    <div className="relative aspect-square w-14 shrink-0 overflow-hidden bg-white/10 sm:w-20">
-                      {creator.photo && (
-                        <Image
-                          src={urlFor(creator.photo).width(160).url()}
-                          alt=""
-                          fill
-                          sizes="(max-width: 640px) 56px, 80px"
-                          className="object-cover"
-                        />
-                      )}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate font-bold text-white">{creator.name}</p>
-                      {sub && <p className="truncate text-sm text-white/80">{sub}</p>}
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        <Button asChild variant="inverse" size="sm">
-                          <Link href={`/join/creators?editing=${encodeURIComponent(creator._id)}`}>
-                            {s.accountEditLabel}
-                          </Link>
-                        </Button>
-                        {creator.slug && (
-                          <Button asChild variant="inverse" size="sm">
-                            <Link href={`/creators/${creator.slug}`}>{s.accountViewCreatorLabel}</Link>
-                          </Button>
+          // One row on desktop: the creator block sized to its content, Your
+          // Comics filling the rest; they stack on phones.
+          <div className="mt-6 lg:flex lg:items-start lg:gap-8">
+            <div className="lg:w-80 lg:shrink-0">
+              <div className="space-y-4">
+                {ownedCreators.map((creator) => {
+                  const sub = creator.studio?.name ?? creator.location
+                  return (
+                    <div key={creator._id} className="flex gap-3 sm:gap-4">
+                      <div className="relative aspect-square w-14 shrink-0 overflow-hidden bg-white/10 sm:w-20">
+                        {creator.photo && (
+                          <Image
+                            src={urlFor(creator.photo).width(160).url()}
+                            alt=""
+                            fill
+                            sizes="(max-width: 640px) 56px, 80px"
+                            className="object-cover"
+                          />
                         )}
                       </div>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-
-            {/* Your Comics — inside the creator zone: white text, white buttons. */}
-            {ownedBooks.length > 0 && (
-              <div className="mt-6 sm:mt-8">
-                <SectionHeading as="h2" size="sm">
-                  {s.accountComicsHeading}
-                </SectionHeading>
-                <ul className={FEED_GRID}>
-                  {ownedBooks.map((book) => {
-                    const view = book.slug ? `/books/${book.slug}` : null
-                    return (
-                      <li key={book._id} className="flex items-center gap-3 border-b border-white/20 py-3">
-                        <div className="relative aspect-[2/3] w-9 shrink-0 overflow-hidden bg-white/10">
-                          {book.cover && (
-                            <Image
-                              src={urlFor(book.cover).width(72).url()}
-                              alt=""
-                              fill
-                              sizes="36px"
-                              className="object-cover"
-                            />
-                          )}
-                        </div>
-                        {view ? (
-                          <Link
-                            href={view}
-                            className="min-w-0 flex-1 truncate text-sm font-bold text-white hover:underline"
-                          >
-                            {book.title}
-                          </Link>
-                        ) : (
-                          <span className="min-w-0 flex-1 truncate text-sm font-bold text-white">
-                            {book.title}
-                          </span>
-                        )}
-                        <div className="flex shrink-0 gap-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-bold text-white">{creator.name}</p>
+                        {sub && <p className="truncate text-sm text-white/80">{sub}</p>}
+                        <div className="mt-2 flex flex-wrap gap-2">
                           <Button asChild variant="inverse" size="sm">
-                            <Link href={`/join/books?editing=${encodeURIComponent(book._id)}`}>
+                            <Link href={`/join/creators?editing=${encodeURIComponent(creator._id)}`}>
                               {s.accountEditLabel}
                             </Link>
                           </Button>
-                          {view && (
+                          {creator.slug && (
                             <Button asChild variant="inverse" size="sm">
-                              <Link href={view}>{s.accountViewBookLabel}</Link>
+                              <Link href={`/creators/${creator.slug}`}>{s.accountViewCreatorLabel}</Link>
                             </Button>
                           )}
                         </div>
-                      </li>
-                    )
-                  })}
-                </ul>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            {yourComicsBooks.length > 0 && (
+              <div className="mt-6 min-w-0 lg:mt-0 lg:flex-1">
+                <YourComics
+                  books={yourComicsBooks}
+                  heading={s.accountComicsHeading}
+                  editLabel={s.accountEditLabel}
+                />
               </div>
             )}
-          </>
+          </div>
         )}
       </Section>
 
-      {/* Post an update — creators only, targeting a creator or comic they own.
-          Direct-publish; the action re-checks ownership (§3-safe: a plain push
-          to people who chose to follow, never a broadcast or a ranking). */}
+      {/* Post an update — a modal, triggered right under the profile block. */}
       {composerTargets.length > 0 && (
         <Section padding="md">
-          <UpdateComposer
+          <PostUpdateDialog
             targets={composerTargets}
             kinds={UPDATE_KINDS}
             mentions={mentionOptions}
@@ -307,17 +277,6 @@ export default async function AccountPage() {
               submit: s.accountPostSubmitLabel,
               success: s.accountPostSuccess,
             }}
-          />
-        </Section>
-      )}
-
-      {/* From who you follow — updates on saved comics/creators, newest first. */}
-      {followIds.length > 0 && (
-        <Section padding="md">
-          <UpdateFeed
-            heading={s.accountFeedHeading}
-            emptyLabel={s.accountFeedEmpty}
-            updates={updates}
           />
         </Section>
       )}
@@ -373,74 +332,85 @@ export default async function AccountPage() {
         </Section>
       )}
 
-      {/* Saved shelf — feed-style, each row removable, on the plain surface. */}
-      {hasSaves ? (
-        <>
-          {savedBooks.length > 0 && (
-            <Section padding="md">
-              <SectionHeading as="h2" size="sm">
-                {s.accountSavedComicsHeading}
-              </SectionHeading>
-              <ul className={FEED_GRID}>
-                {savedBooks.map((book) => (
-                  <SavedItemRow
-                    key={book._id}
-                    itemId={book._id}
-                    title={book.title ?? 'Untitled'}
-                    href={book.slug ? `/books/${book.slug}` : null}
-                    removeLabel={s.accountRemoveLabel}
-                    thumb={
-                      <div className="bg-muted relative aspect-[2/3] w-9 shrink-0 overflow-hidden">
-                        {book.cover && (
-                          <Image
-                            src={urlFor(book.cover).width(72).url()}
-                            alt=""
-                            fill
-                            sizes="36px"
-                            className="object-cover"
-                          />
-                        )}
-                      </div>
-                    }
-                  />
-                ))}
-              </ul>
-            </Section>
-          )}
+      {/* Your Feed + Saved Comics, side by side; Favorite Creators below. */}
+      {(followIds.length > 0 || savedBooks.length > 0) && (
+        <Section padding="md">
+          <div className="grid gap-8 lg:grid-cols-2">
+            {followIds.length > 0 && (
+              <UpdateFeed
+                heading={s.accountFeedHeading}
+                emptyLabel={s.accountFeedEmpty}
+                updates={updates}
+              />
+            )}
+            {savedBooks.length > 0 && (
+              <div>
+                <SectionHeading as="h2" size="sm">
+                  {s.accountSavedComicsHeading}
+                </SectionHeading>
+                <ul>
+                  {savedBooks.map((book) => (
+                    <SavedItemRow
+                      key={book._id}
+                      itemId={book._id}
+                      title={book.title ?? 'Untitled'}
+                      href={book.slug ? `/books/${book.slug}` : null}
+                      removeLabel={s.accountRemoveLabel}
+                      thumb={
+                        <div className="bg-muted relative aspect-[2/3] w-9 shrink-0 overflow-hidden">
+                          {book.cover && (
+                            <Image
+                              src={urlFor(book.cover).width(72).url()}
+                              alt=""
+                              fill
+                              sizes="36px"
+                              className="object-cover"
+                            />
+                          )}
+                        </div>
+                      }
+                    />
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </Section>
+      )}
 
-          {savedCreators.length > 0 && (
-            <Section padding="md">
-              <SectionHeading as="h2" size="sm">
-                {s.accountSavedCreatorsHeading}
-              </SectionHeading>
-              <ul className={FEED_GRID}>
-                {savedCreators.map((creator) => (
-                  <SavedItemRow
-                    key={creator._id}
-                    itemId={creator._id}
-                    title={creator.name ?? 'Comic Creator'}
-                    href={creator.slug ? `/creators/${creator.slug}` : null}
-                    removeLabel={s.accountRemoveLabel}
-                    thumb={
-                      <div className="bg-muted relative aspect-square w-9 shrink-0 overflow-hidden">
-                        {creator.photo && (
-                          <Image
-                            src={urlFor(creator.photo).width(72).url()}
-                            alt=""
-                            fill
-                            sizes="36px"
-                            className="object-cover"
-                          />
-                        )}
-                      </div>
-                    }
-                  />
-                ))}
-              </ul>
-            </Section>
-          )}
-        </>
-      ) : (
+      {savedCreators.length > 0 && (
+        <Section padding="md">
+          <SectionHeading as="h2" size="sm">
+            {s.accountSavedCreatorsHeading}
+          </SectionHeading>
+          <ul className={FEED_GRID}>
+            {savedCreators.map((creator) => (
+              <SavedItemRow
+                key={creator._id}
+                itemId={creator._id}
+                title={creator.name ?? 'Comic Creator'}
+                href={creator.slug ? `/creators/${creator.slug}` : null}
+                removeLabel={s.accountRemoveLabel}
+                thumb={
+                  <div className="bg-muted relative aspect-square w-9 shrink-0 overflow-hidden">
+                    {creator.photo && (
+                      <Image
+                        src={urlFor(creator.photo).width(72).url()}
+                        alt=""
+                        fill
+                        sizes="36px"
+                        className="object-cover"
+                      />
+                    )}
+                  </div>
+                }
+              />
+            ))}
+          </ul>
+        </Section>
+      )}
+
+      {!hasSaves && (
         // An empty shelf is a discovery moment, not a dead end (§3).
         <Section padding="md" maxWidth="3xl">
           <p className="text-muted-foreground text-sm">{settings.empty.saved}</p>

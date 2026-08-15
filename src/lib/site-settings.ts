@@ -419,7 +419,6 @@ export interface SiteSettings {
     accountMediaHeading: string
     accountEditLabel: string
     accountViewCreatorLabel: string
-    accountViewBookLabel: string
     accountViewMediaLabel: string
     accountSavedComicsHeading: string
     accountSavedCreatorsHeading: string
@@ -900,7 +899,6 @@ const DEFAULTS: SiteSettings = {
     accountMediaHeading: 'Your Media',
     accountEditLabel: 'Edit',
     accountViewCreatorLabel: 'Creator Profile',
-    accountViewBookLabel: 'Book Page',
     accountViewMediaLabel: 'Media Page',
     accountSavedComicsHeading: 'Saved Comics',
     accountSavedCreatorsHeading: 'Favorite Creators',
@@ -922,7 +920,7 @@ const DEFAULTS: SiteSettings = {
     accountPostMentionConventions: 'Conventions',
     accountPostSubmitLabel: 'Post Update',
     accountPostSuccess: 'Posted. Your followers will see it.',
-    accountFeedHeading: 'From Who You Follow',
+    accountFeedHeading: 'Your Feed',
     accountFeedEmpty: 'Nothing yet. Updates from comics and creators you’ve saved show up here.',
     accountSignInTitle: 'Sign in to save comics and creators',
     accountSignInBody:

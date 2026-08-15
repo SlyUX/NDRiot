@@ -4876,13 +4876,6 @@
               },
               "optional": true
             },
-            "accountViewBookLabel": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
             "accountViewMediaLabel": {
               "type": "objectAttribute",
               "value": {

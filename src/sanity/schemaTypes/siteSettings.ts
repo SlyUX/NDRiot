@@ -422,7 +422,6 @@ export default defineType({
         defineField({ name: 'accountMediaHeading', title: 'Reader home — your media heading', type: 'string' }),
         defineField({ name: 'accountEditLabel', title: 'Reader home — edit button label', type: 'string', description: 'On each owned item — e.g. "Edit".' }),
         defineField({ name: 'accountViewCreatorLabel', title: 'Reader home — view creator page button', type: 'string', description: 'Links to the public creator page — e.g. "Creator Profile".' }),
-        defineField({ name: 'accountViewBookLabel', title: 'Reader home — view book page button', type: 'string', description: 'Links to the public book page — e.g. "Book Page".' }),
         defineField({ name: 'accountViewMediaLabel', title: 'Reader home — view media page button', type: 'string', description: 'Links to the public media page — e.g. "Media Page".' }),
         defineField({ name: 'accountSavedComicsHeading', title: 'Reader home — saved comics heading', type: 'string', description: 'e.g. "Saved Comics".' }),
         defineField({ name: 'accountSavedCreatorsHeading', title: 'Reader home — saved creators heading', type: 'string', description: 'e.g. "Favorite Creators".' }),
