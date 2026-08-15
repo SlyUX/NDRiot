@@ -181,28 +181,30 @@ export default async function CreatorPage({
       />
 
       {/* Owner band — only when you're viewing your own profile. A thin notice
-          plus the owner's two shortcuts: the dashboard (manage everything) and
-          the edit form. No inline editing on the public page itself. */}
+          plus the owner's two shortcuts, inline: the dashboard (manage
+          everything) and the edit form. Links are white (pink is only 3.34:1 on
+          charcoal — fails AA, §9); no inline editing on the public page itself. */}
       {isOwner && (
         <div className="bg-charcoal">
-          <div className="mx-auto flex max-w-[90rem] flex-wrap items-center justify-between gap-x-4 gap-y-1 px-6 py-1.5 text-sm">
-            <span className="text-white/80">
-              {ownerBanner(settings.sections.profileOwnerBanner)}
-            </span>
-            <div className="flex shrink-0 items-center gap-4">
+          <div className="mx-auto flex max-w-[90rem] flex-wrap items-center gap-x-3 gap-y-1 px-6 py-1.5 text-sm text-white/80">
+            <span>{ownerBanner(settings.sections.profileOwnerBanner)}</span>
+            <span className="flex items-center gap-2">
               <Link
                 href="/me"
-                className="text-primary focus-visible:ring-ring font-bold tracking-wide uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none"
+                className="focus-visible:ring-ring text-white underline underline-offset-2 hover:no-underline focus-visible:ring-2 focus-visible:outline-none"
               >
                 {settings.sections.profileOwnerDashboardLabel}
               </Link>
+              <span aria-hidden="true" className="text-white/30">
+                |
+              </span>
               <Link
                 href={`/join/creators?editing=${encodeURIComponent(creator._id)}`}
-                className="text-primary focus-visible:ring-ring font-bold tracking-wide uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none"
+                className="focus-visible:ring-ring text-white underline underline-offset-2 hover:no-underline focus-visible:ring-2 focus-visible:outline-none"
               >
                 {settings.sections.profileOwnerEditLabel}
               </Link>
-            </div>
+            </span>
           </div>
         </div>
       )}
