@@ -788,6 +788,8 @@ export type SiteSettings = {
     accountSavedComicsHeading?: string;
     accountSavedCreatorsHeading?: string;
     accountRemoveLabel?: string;
+    accountRemovedLabel?: string;
+    accountUndoLabel?: string;
     accountPostHeading?: string;
     accountPostIntro?: string;
     accountPostTargetLabel?: string;

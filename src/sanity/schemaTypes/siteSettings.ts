@@ -426,6 +426,8 @@ export default defineType({
         defineField({ name: 'accountSavedComicsHeading', title: 'Reader home — saved comics heading', type: 'string', description: 'e.g. "Saved Comics".' }),
         defineField({ name: 'accountSavedCreatorsHeading', title: 'Reader home — saved creators heading', type: 'string', description: 'e.g. "Favorite Creators".' }),
         defineField({ name: 'accountRemoveLabel', title: 'Reader home — remove-from-saved button', type: 'string', description: 'Destructive control on a saved item — e.g. "Remove".' }),
+        defineField({ name: 'accountRemovedLabel', title: 'Reader home — "removed" toast word', type: 'string', description: 'Leads the undo toast after a remove: "{Removed} <title>" — e.g. "Removed".' }),
+        defineField({ name: 'accountUndoLabel', title: 'Reader home — undo button', type: 'string', description: 'The undo action in the remove toast — e.g. "Undo".' }),
         defineField({ name: 'accountPostHeading', title: 'Reader home — post-an-update heading', type: 'string', description: 'The creator composer heading — e.g. "Post an Update".' }),
         defineField({ name: 'accountPostIntro', title: 'Reader home — post-an-update intro', type: 'text', rows: 3, description: 'One line under the heading: what an update is and who sees it. Mention the 200-character limit.' }),
         defineField({ name: 'accountPostTargetLabel', title: 'Reader home — update "About" field label', type: 'string', description: 'Label on the picker for which comic/profile the update is about — e.g. "About".' }),

@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { Logo } from '@/components/logo'
 import { MainNav } from '@/components/main-nav'
 import { SocialIcon } from '@/components/social-icon'
+import { ToastProvider } from '@/components/toast-provider'
 import { auth, signIn } from '@/auth'
 import { genreOptions } from '@/lib/filters'
 import {
@@ -46,7 +47,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   const s = settings.sections
 
   return (
-    <>
+    <ToastProvider>
       {/* Sticky + z-50: keeps the nav on screen and, crucially, gives it a
           stacking context above the page so the dropdowns are not painted
           behind content. bg-background so nothing shows through on scroll. The
@@ -199,6 +200,6 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
           </div>
         </div>
       </footer>
-    </>
+    </ToastProvider>
   )
 }

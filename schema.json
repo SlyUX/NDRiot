@@ -4904,6 +4904,20 @@
               },
               "optional": true
             },
+            "accountRemovedLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "accountUndoLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "accountPostHeading": {
               "type": "objectAttribute",
               "value": {

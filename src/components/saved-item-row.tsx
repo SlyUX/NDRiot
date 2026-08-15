@@ -2,45 +2,64 @@
 
 import type { ReactNode } from 'react'
 import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { X } from 'lucide-react'
 
-import { removeSaveAction } from '@/app/actions/saves'
+import { removeSaveAction, toggleSaveAction } from '@/app/actions/saves'
+import { useToast } from '@/components/toast-provider'
 
 /**
  * A saved item on the dashboard with a destructive Remove. Two layouts: `row` (a
  * feed-style line with a title) and `tile` (a cover that links to the item, with
- * the Remove tucked in a corner — for the wrapping cover grids). Removing is
- * optimistic (it hides at once), then reconciled with a router refresh. The
- * thumbnail is a slot so the server page keeps using next/image.
+ * the Remove tucked in a corner — for the wrapping cover grids).
+ *
+ * Remove is optimistic (it hides at once) and commits immediately, then raises
+ * an Undo toast — clicking Undo un-hides it and re-saves. "Commit, then undo" so
+ * nothing depends on a timer holding un-saved data (navigating away can't lose
+ * it). The thumbnail is a slot so the server page keeps using next/image.
  */
 export function SavedItemRow({
   itemId,
+  itemType,
   title,
   href,
   thumb,
   removeLabel,
+  removedLabel,
+  undoLabel,
   layout = 'row',
 }: {
   itemId: string
+  itemType: 'book' | 'creator'
   title: string
   href: string | null
   thumb: ReactNode
   removeLabel: string
+  removedLabel: string
+  undoLabel: string
   layout?: 'row' | 'tile'
 }) {
   const [removed, setRemoved] = useState(false)
   const [pending, startTransition] = useTransition()
-  const router = useRouter()
+  const { toast } = useToast()
+  const pathname = usePathname()
 
   if (removed) return null
 
   function onRemove() {
-    setRemoved(true) // optimistic
+    setRemoved(true) // optimistic hide
     startTransition(async () => {
       await removeSaveAction(itemId)
-      router.refresh()
+    })
+    toast(`${removedLabel} ${title}`, {
+      label: undoLabel,
+      onClick: () => {
+        setRemoved(false) // un-hide (the row is still mounted, just hidden)
+        startTransition(async () => {
+          await toggleSaveAction(itemType, itemId, pathname)
+        })
+      },
     })
   }
 

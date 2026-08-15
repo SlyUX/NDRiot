@@ -423,6 +423,8 @@ export interface SiteSettings {
     accountSavedComicsHeading: string
     accountSavedCreatorsHeading: string
     accountRemoveLabel: string
+    accountRemovedLabel: string
+    accountUndoLabel: string
     /** Creator update composer (/me). */
     accountPostHeading: string
     accountPostIntro: string
@@ -907,6 +909,8 @@ const DEFAULTS: SiteSettings = {
     accountSavedComicsHeading: 'Your Saved Comics',
     accountSavedCreatorsHeading: 'Favorite Creators',
     accountRemoveLabel: 'Remove',
+    accountRemovedLabel: 'Removed',
+    accountUndoLabel: 'Undo',
     accountPostHeading: 'Post an Update',
     accountPostIntro:
       'A quick note to your followers — a new page, a con, a campaign. Everyone who saved this comic or your profile sees it. Keep it short; 200 characters.',

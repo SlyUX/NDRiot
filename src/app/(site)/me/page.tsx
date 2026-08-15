@@ -355,9 +355,12 @@ export default async function AccountPage() {
                       key={book._id}
                       layout="tile"
                       itemId={book._id}
+                      itemType="book"
                       title={book.title ?? 'Untitled'}
                       href={book.slug ? `/books/${book.slug}` : null}
                       removeLabel={s.accountRemoveLabel}
+                      removedLabel={s.accountRemovedLabel}
+                      undoLabel={s.accountUndoLabel}
                       thumb={
                         <div className="bg-muted relative aspect-[2/3] w-full overflow-hidden">
                           {book.cover && (
@@ -390,9 +393,12 @@ export default async function AccountPage() {
               <SavedItemRow
                 key={creator._id}
                 itemId={creator._id}
+                itemType="creator"
                 title={creator.name ?? 'Comic Creator'}
                 href={creator.slug ? `/creators/${creator.slug}` : null}
                 removeLabel={s.accountRemoveLabel}
+                removedLabel={s.accountRemovedLabel}
+                undoLabel={s.accountUndoLabel}
                 thumb={
                   <div className="bg-muted relative aspect-square w-9 shrink-0 overflow-hidden">
                     {creator.photo && (
