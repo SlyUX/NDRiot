@@ -1,24 +1,26 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { useState, useTransition } from 'react'
+import { useRef, useState, useTransition } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { X } from 'lucide-react'
 
 import { removeSaveAction, toggleSaveAction } from '@/app/actions/saves'
-import { useToast } from '@/components/toast-provider'
 
 /**
  * A saved item on the dashboard with a destructive Remove. Two layouts: `row` (a
  * feed-style line with a title) and `tile` (a cover that links to the item, with
  * the Remove tucked in a corner — for the wrapping cover grids).
  *
- * Remove is optimistic (it hides at once) and commits immediately, then raises
- * an Undo toast — clicking Undo un-hides it and re-saves. "Commit, then undo" so
- * nothing depends on a timer holding un-saved data (navigating away can't lose
- * it). The thumbnail is a slot so the server page keeps using next/image.
+ * Remove is optimistic and commits immediately, then the item's own slot becomes
+ * an in-place "Removed <title> — Undo" for a few seconds (contextual, right where
+ * your eyes are — not a toast to miss at the bottom). Undo restores it in place
+ * and re-saves; otherwise it commits and the slot disappears. The thumbnail is a
+ * slot so the server page keeps using next/image.
  */
+const UNDO_MS = 6000
+
 export function SavedItemRow({
   itemId,
   itemType,
@@ -40,27 +42,61 @@ export function SavedItemRow({
   undoLabel: string
   layout?: 'row' | 'tile'
 }) {
-  const [removed, setRemoved] = useState(false)
+  const [state, setState] = useState<'visible' | 'undo' | 'gone'>('visible')
   const [pending, startTransition] = useTransition()
-  const { toast } = useToast()
   const pathname = usePathname()
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  if (removed) return null
+  if (state === 'gone') return null
 
   function onRemove() {
-    setRemoved(true) // optimistic hide
+    setState('undo')
     startTransition(async () => {
       await removeSaveAction(itemId)
     })
-    toast(`${removedLabel} ${title}`, {
-      label: undoLabel,
-      onClick: () => {
-        setRemoved(false) // un-hide (the row is still mounted, just hidden)
-        startTransition(async () => {
-          await toggleSaveAction(itemType, itemId, pathname)
-        })
-      },
+    timer.current = setTimeout(() => setState('gone'), UNDO_MS)
+  }
+
+  function onUndo() {
+    if (timer.current) clearTimeout(timer.current)
+    setState('visible')
+    startTransition(async () => {
+      await toggleSaveAction(itemType, itemId, pathname)
     })
+  }
+
+  // The in-place undo notice, shaped to the slot it replaces.
+  if (state === 'undo') {
+    if (layout === 'tile') {
+      return (
+        <li className="border-primary flex aspect-[2/3] flex-col items-center justify-center gap-1 border-2 p-1 text-center">
+          <span className="text-muted-foreground text-[10px] tracking-widest uppercase">
+            {removedLabel}
+          </span>
+          <button
+            type="button"
+            onClick={onUndo}
+            className="text-primary focus-visible:ring-ring text-xs font-black tracking-wide uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none"
+          >
+            {undoLabel}
+          </button>
+        </li>
+      )
+    }
+    return (
+      <li className="border-primary flex items-center justify-between gap-3 border-b-2 py-3">
+        <span className="text-muted-foreground min-w-0 flex-1 truncate text-sm">
+          <span className="text-foreground font-bold">{removedLabel}</span> {title}
+        </span>
+        <button
+          type="button"
+          onClick={onUndo}
+          className="text-primary focus-visible:ring-ring shrink-0 text-sm font-black tracking-wide uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none"
+        >
+          {undoLabel}
+        </button>
+      </li>
+    )
   }
 
   if (layout === 'tile') {
