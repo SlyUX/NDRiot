@@ -237,6 +237,34 @@ export default async function AccountPage() {
                   )
                 })}
               </div>
+              {/* Post an Update — a modal, its trigger filling the creator column. */}
+              {composerTargets.length > 0 && (
+                <div className="mt-4">
+                  <PostUpdateDialog
+                    targets={composerTargets}
+                    kinds={UPDATE_KINDS}
+                    mentions={mentionOptions}
+                    labels={{
+                      heading: s.accountPostHeading,
+                      intro: s.accountPostIntro,
+                      targetLabel: s.accountPostTargetLabel,
+                      targetPlaceholder: s.accountPostTargetPlaceholder,
+                      creatorsGroupLabel: s.accountPostCreatorsGroup,
+                      comicsGroupLabel: s.accountPostComicsGroup,
+                      kindLabel: s.accountPostKindLabel,
+                      kindPlaceholder: s.accountPostKindPlaceholder,
+                      placeholder: s.accountPostPlaceholder,
+                      mentionsLabel: s.accountPostMentionsLabel,
+                      mentionSearchPlaceholder: s.accountPostMentionSearch,
+                      mentionNoMatch: s.accountPostMentionNoMatch,
+                      mentionCreatorsGroup: s.accountPostMentionCreators,
+                      mentionConventionsGroup: s.accountPostMentionConventions,
+                      submit: s.accountPostSubmitLabel,
+                      success: s.accountPostSuccess,
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
             {yourComicsBooks.length > 0 && (
@@ -251,35 +279,6 @@ export default async function AccountPage() {
           </div>
         )}
       </Section>
-
-      {/* Post an update — a modal, triggered right under the profile block. */}
-      {composerTargets.length > 0 && (
-        <Section padding="md">
-          <PostUpdateDialog
-            targets={composerTargets}
-            kinds={UPDATE_KINDS}
-            mentions={mentionOptions}
-            labels={{
-              heading: s.accountPostHeading,
-              intro: s.accountPostIntro,
-              targetLabel: s.accountPostTargetLabel,
-              targetPlaceholder: s.accountPostTargetPlaceholder,
-              creatorsGroupLabel: s.accountPostCreatorsGroup,
-              comicsGroupLabel: s.accountPostComicsGroup,
-              kindLabel: s.accountPostKindLabel,
-              kindPlaceholder: s.accountPostKindPlaceholder,
-              placeholder: s.accountPostPlaceholder,
-              mentionsLabel: s.accountPostMentionsLabel,
-              mentionSearchPlaceholder: s.accountPostMentionSearch,
-              mentionNoMatch: s.accountPostMentionNoMatch,
-              mentionCreatorsGroup: s.accountPostMentionCreators,
-              mentionConventionsGroup: s.accountPostMentionConventions,
-              submit: s.accountPostSubmitLabel,
-              success: s.accountPostSuccess,
-            }}
-          />
-        </Section>
-      )}
 
       {/* Your Media — owners of an outlet (creator or not). Plain feed rows. */}
       {ownedMedia.length > 0 && (

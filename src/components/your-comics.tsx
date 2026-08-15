@@ -40,7 +40,7 @@ export function YourComics({
     <section className="bg-primary relative overflow-hidden">
       {/* Black wash so white text/icons clear AA on the pink (like the hero). */}
       <div className="absolute inset-0 bg-black/60" aria-hidden="true" />
-      <div className="relative p-5 sm:p-6">
+      <div className="relative p-4 sm:p-5">
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-sm font-black tracking-widest text-white uppercase">{heading}</h2>
           {/* Accordion trigger — phones only; the "+" rotates 45° into "×". */}
@@ -69,7 +69,7 @@ export function YourComics({
         <ul
           id="your-comics-rail"
           className={cn(
-            'punk-scroll mt-4 flex gap-3 overflow-x-auto pb-3',
+            'punk-scroll mt-3 flex gap-3 overflow-x-auto',
             !open && 'hidden lg:flex',
           )}
         >

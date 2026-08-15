@@ -31,7 +31,7 @@ export function PostUpdateDialog({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="font-black tracking-wide uppercase">
+        <Button className="w-full justify-center font-black tracking-wide uppercase">
           <Plus aria-hidden="true" className="size-4" />
           {labels.heading}
         </Button>
