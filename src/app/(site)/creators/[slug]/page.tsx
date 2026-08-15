@@ -333,6 +333,15 @@ export default async function CreatorPage({
                   heading={updatesHeading}
                   emptyLabel=""
                   updates={creatorUpdates}
+                  owner={
+                    isOwner
+                      ? {
+                          deleteLabel: settings.sections.updateDeleteLabel,
+                          deletedLabel: settings.sections.updateDeletedLabel,
+                          undoLabel: settings.sections.updateUndoLabel,
+                        }
+                      : undefined
+                  }
                 />
               </div>
             </div>

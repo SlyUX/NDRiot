@@ -5156,6 +5156,27 @@
               },
               "optional": true
             },
+            "updateDeleteLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "updateDeletedLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "updateUndoLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "profileOwnerBanner": {
               "type": "objectAttribute",
               "value": {

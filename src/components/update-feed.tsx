@@ -1,26 +1,25 @@
-import Link from 'next/link'
-
 import { SectionHeading } from '@/components/section-heading'
-import { formatDate } from '@/lib/card-mappers'
+import { UpdateItemContent } from '@/components/update-item-content'
+import { UpdateRow, type UpdateOwnerLabels } from '@/components/update-row'
 import type { UpdateFeedItem } from '@/lib/types'
 
 /**
- * The reader's update feed on /me — updates from comics and creators they saved
- * (Save = Follow), newest first. Presentational; the ordering is pure recency,
- * never ranked or counted (§3). Headings and the empty line come from Sanity.
- *
- * Shows an empty state when the reader follows someone but no one has posted yet
- * — the section only renders at all when they have follows, so it doubles as a
- * quiet nudge that following surfaces updates here.
+ * An update feed, newest first — pure recency, never ranked or counted (§3).
+ * Read-only by default (the reader's /me "Your Feed", a creator's public
+ * profile). When `owner` labels are passed — a creator viewing their OWN
+ * profile — each update becomes an interactive row with a delete + in-place undo.
  */
 export function UpdateFeed({
   heading,
   emptyLabel,
   updates,
+  owner,
 }: {
   heading: string
   emptyLabel: string
   updates: UpdateFeedItem[]
+  /** Present only when the viewer owns these updates — enables delete/undo. */
+  owner?: UpdateOwnerLabels
 }) {
   return (
     <div>
@@ -31,49 +30,15 @@ export function UpdateFeed({
         <p className="text-muted-foreground text-sm">{emptyLabel}</p>
       ) : (
         <ul className="border-border divide-border divide-y border-t">
-          {updates.map((update) => {
-            const href = update.targetSlug
-              ? update.targetType === 'book'
-                ? `/books/${update.targetSlug}`
-                : `/creators/${update.targetSlug}`
-              : null
-            const date = formatDate(update.publishedAt)
-            const name = update.targetName ?? 'Untitled'
-            return (
+          {updates.map((update) =>
+            owner ? (
+              <UpdateRow key={update._id} update={update} labels={owner} />
+            ) : (
               <li key={update._id} className="py-4">
-                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-xs">
-                  <span className="text-primary font-black tracking-widest uppercase">{update.kind}</span>
-                  {href ? (
-                    <Link href={href} className="hover:text-primary font-bold transition-colors">
-                      {name}
-                    </Link>
-                  ) : (
-                    <span className="font-bold">{name}</span>
-                  )}
-                  {date && <span className="text-muted-foreground ml-auto">{date}</span>}
-                </div>
-                <p className="mt-2 text-sm">{update.body}</p>
-                {update.mentions && update.mentions.length > 0 && (
-                  <ul className="mt-2 flex flex-wrap gap-2">
-                    {update.mentions.map((mention) => (
-                      <li key={mention._id}>
-                        <Link
-                          href={
-                            mention._type === 'convention'
-                              ? `/conventions/${mention.slug}`
-                              : `/creators/${mention.slug}`
-                          }
-                          className="border-border hover:border-primary hover:text-primary inline-block border px-2 py-0.5 text-xs transition-colors"
-                        >
-                          {mention.name}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                <UpdateItemContent update={update} />
               </li>
-            )
-          })}
+            ),
+          )}
         </ul>
       )}
     </div>

@@ -199,6 +199,7 @@ export const RAIL_UPDATES_QUERY = defineQuery(`*[_type=="update" && target._ref 
 
 export const UPDATES_FEED_QUERY = defineQuery(`*[_type=="update" && target._ref in $ids && defined(publishedAt)]|order(publishedAt desc)[0...$limit]{
   _id,body,kind,publishedAt,
+  "targetId":target._ref,
   "targetType":target->_type,
   "targetName":coalesce(target->title,target->name),
   "targetSlug":target->slug.current,
@@ -212,6 +213,7 @@ export const UPDATES_FEED_QUERY = defineQuery(`*[_type=="update" && target._ref 
  */
 export const CREATOR_UPDATES_QUERY = defineQuery(`*[_type=="update" && defined(publishedAt) && (target._ref == $creatorId || target->creator._ref == $creatorId)]|order(publishedAt desc)[0...$limit]{
   _id,body,kind,publishedAt,
+  "targetId":target._ref,
   "targetType":target->_type,
   "targetName":coalesce(target->title,target->name),
   "targetSlug":target->slug.current,
