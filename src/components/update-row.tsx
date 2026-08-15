@@ -4,7 +4,9 @@ import { useRef, useState, useTransition } from 'react'
 import { Trash2 } from 'lucide-react'
 
 import { deleteUpdate, restoreUpdate } from '@/app/actions/updates'
+import { EditUpdateDialog } from '@/components/edit-update-dialog'
 import { UpdateItemContent } from '@/components/update-item-content'
+import type { ComposerLabels, MentionOption } from '@/components/update-composer'
 import type { UpdateFeedItem } from '@/lib/types'
 
 /**
@@ -15,18 +17,23 @@ import type { UpdateFeedItem } from '@/lib/types'
  */
 const UNDO_MS = 6000
 
-export type UpdateOwnerLabels = {
+export type UpdateOwnerConfig = {
   deleteLabel: string
   deletedLabel: string
   undoLabel: string
+  /** Edit: the pencil label + everything the composer needs, pre-built. */
+  editLabel: string
+  editKinds: readonly string[]
+  editMentions: MentionOption[]
+  editLabels: ComposerLabels
 }
 
 export function UpdateRow({
   update,
-  labels,
+  config,
 }: {
   update: UpdateFeedItem
-  labels: UpdateOwnerLabels
+  config: UpdateOwnerConfig
 }) {
   const [state, setState] = useState<'visible' | 'deleting' | 'gone'>('visible')
   const [pending, startTransition] = useTransition()
@@ -60,13 +67,13 @@ export function UpdateRow({
   if (state === 'deleting') {
     return (
       <li className="flex items-center justify-between gap-3 py-4">
-        <span className="text-foreground text-sm font-bold">{labels.deletedLabel}</span>
+        <span className="text-foreground text-sm font-bold">{config.deletedLabel}</span>
         <button
           type="button"
           onClick={onUndo}
           className="text-primary focus-visible:ring-ring shrink-0 text-sm font-black tracking-wide uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none"
         >
-          {labels.undoLabel}
+          {config.undoLabel}
         </button>
       </li>
     )
@@ -77,15 +84,24 @@ export function UpdateRow({
       <UpdateItemContent
         update={update}
         action={
-          <button
-            type="button"
-            onClick={onDelete}
-            disabled={pending}
-            aria-label={labels.deleteLabel}
-            className="text-muted-foreground hover:text-destructive focus-visible:ring-ring transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
-          >
-            <Trash2 aria-hidden="true" className="size-4" />
-          </button>
+          <span className="flex items-center gap-2.5">
+            <EditUpdateDialog
+              update={update}
+              kinds={config.editKinds}
+              mentions={config.editMentions}
+              labels={config.editLabels}
+              triggerLabel={config.editLabel}
+            />
+            <button
+              type="button"
+              onClick={onDelete}
+              disabled={pending}
+              aria-label={config.deleteLabel}
+              className="text-muted-foreground hover:text-destructive focus-visible:ring-ring transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
+            >
+              <Trash2 aria-hidden="true" className="size-4" />
+            </button>
+          </span>
         }
       />
     </li>

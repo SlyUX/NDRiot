@@ -1,8 +1,8 @@
 'use client'
 
-import { useActionState, useState } from 'react'
+import { useActionState, useEffect, useRef, useState } from 'react'
 
-import { postUpdate, type PostUpdateState } from '@/app/actions/updates'
+import { editUpdate, postUpdate, type PostUpdateState } from '@/app/actions/updates'
 import { SectionHeading } from '@/components/section-heading'
 import { Button } from '@/components/ui/button'
 
@@ -47,6 +47,9 @@ export type ComposerLabels = {
   success: string
 }
 
+/** An update being edited — the composer pre-fills from this and patches it. */
+export type EditUpdate = { updateId: string; kind: string; body: string; mentionIds: string[] }
+
 const groupHeadingClass =
   'text-muted-foreground mb-1.5 text-[10px] font-bold tracking-widest uppercase'
 const optionClass =
@@ -62,14 +65,16 @@ const optionClass =
 function MentionPicker({
   options,
   labels,
+  initialSelected,
 }: {
   options: MentionOption[]
   labels: Pick<
     ComposerLabels,
     'mentionsLabel' | 'mentionSearchPlaceholder' | 'mentionNoMatch' | 'mentionCreatorsGroup' | 'mentionConventionsGroup'
   >
+  initialSelected?: MentionOption[]
 }) {
-  const [selected, setSelected] = useState<MentionOption[]>([])
+  const [selected, setSelected] = useState<MentionOption[]>(initialSelected ?? [])
   const [query, setQuery] = useState('')
 
   const selectedIds = new Set(selected.map((option) => option.id))
@@ -175,15 +180,32 @@ export function UpdateComposer({
   kinds,
   mentions,
   labels,
+  edit,
+  onSuccess,
 }: {
   targets: ComposerTarget[]
   kinds: readonly string[]
   mentions: MentionOption[]
   labels: ComposerLabels
+  /** When set, the composer edits this update (target locked) instead of posting. */
+  edit?: EditUpdate
+  /** Fired once per successful submit — used to close the edit dialog + refresh. */
+  onSuccess?: () => void
 }) {
-  const [state, action, pending] = useActionState(postUpdate, INITIAL)
+  const [state, action, pending] = useActionState(edit ? editUpdate : postUpdate, INITIAL)
   const creators = targets.filter((t) => t.group === 'creator')
   const comics = targets.filter((t) => t.group === 'comic')
+  const editMentions = edit ? mentions.filter((m) => edit.mentionIds.includes(m.id)) : undefined
+
+  // Fire onSuccess once per successful submit (guarded by the last-fired nonce,
+  // so an unmemoized callback can't re-trigger it).
+  const firedNonce = useRef(0)
+  useEffect(() => {
+    if (state.status === 'success' && state.nonce !== firedNonce.current) {
+      firedNonce.current = state.nonce
+      onSuccess?.()
+    }
+  }, [state.status, state.nonce, onSuccess])
 
   return (
     <div>
@@ -192,44 +214,54 @@ export function UpdateComposer({
       </SectionHeading>
       <p className="text-muted-foreground mb-5 max-w-prose text-sm">{labels.intro}</p>
 
-      {/* key={state.nonce} clears the fields after a successful post (nonce bumps
-          only on success); an error leaves the draft untouched. */}
-      <form key={state.nonce} action={action} className="max-w-prose space-y-4">
+      {/* Post mode keys by nonce to clear on success; edit mode uses a stable key
+          (the dialog closes on success instead). */}
+      <form key={edit ? 'edit' : state.nonce} action={action} className="max-w-prose space-y-4">
+        {edit && <input type="hidden" name="updateId" value={edit.updateId} />}
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <label htmlFor="update-target" className="block text-xs tracking-widest uppercase">
-              {labels.targetLabel}
-            </label>
-            <select id="update-target" name="targetId" required defaultValue="" className={fieldClass}>
-              <option value="" disabled>
-                {labels.targetPlaceholder}
-              </option>
-              {creators.length > 0 && (
-                <optgroup label={labels.creatorsGroupLabel}>
-                  {creators.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.label}
-                    </option>
-                  ))}
-                </optgroup>
-              )}
-              {comics.length > 0 && (
-                <optgroup label={labels.comicsGroupLabel}>
-                  {comics.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.label}
-                    </option>
-                  ))}
-                </optgroup>
-              )}
-            </select>
-          </div>
+          {/* Target is fixed when editing — an update is "about" its comic/creator. */}
+          {!edit && (
+            <div className="space-y-1.5">
+              <label htmlFor="update-target" className="block text-xs tracking-widest uppercase">
+                {labels.targetLabel}
+              </label>
+              <select id="update-target" name="targetId" required defaultValue="" className={fieldClass}>
+                <option value="" disabled>
+                  {labels.targetPlaceholder}
+                </option>
+                {creators.length > 0 && (
+                  <optgroup label={labels.creatorsGroupLabel}>
+                    {creators.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+                {comics.length > 0 && (
+                  <optgroup label={labels.comicsGroupLabel}>
+                    {comics.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+              </select>
+            </div>
+          )}
 
           <div className="space-y-1.5">
             <label htmlFor="update-kind" className="block text-xs tracking-widest uppercase">
               {labels.kindLabel}
             </label>
-            <select id="update-kind" name="kind" required defaultValue="" className={fieldClass}>
+            <select
+              id="update-kind"
+              name="kind"
+              required
+              defaultValue={edit?.kind ?? ''}
+              className={fieldClass}
+            >
               <option value="" disabled>
                 {labels.kindPlaceholder}
               </option>
@@ -247,13 +279,16 @@ export function UpdateComposer({
           required
           rows={3}
           maxLength={BODY_LIMIT}
+          defaultValue={edit?.body}
           placeholder={labels.placeholder}
           className={`${fieldClass} resize-y`}
         />
 
         {/* Optional references to other creators/conventions, shown as links in
             the feed. Searchable so it scales; the action validates ids. */}
-        {mentions.length > 0 && <MentionPicker options={mentions} labels={labels} />}
+        {mentions.length > 0 && (
+          <MentionPicker options={mentions} labels={labels} initialSelected={editMentions} />
+        )}
 
         <div className="flex flex-wrap items-center gap-4">
           <Button type="submit" disabled={pending} className="font-black tracking-wide uppercase">

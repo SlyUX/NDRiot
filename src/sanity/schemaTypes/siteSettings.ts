@@ -477,6 +477,8 @@ export default defineType({
         defineField({ name: 'updateDeleteLabel', title: 'Creator page — delete update (aria)', type: 'string', description: 'Accessible label on the delete control an owner sees on each of their updates — e.g. "Delete update".' }),
         defineField({ name: 'updateDeletedLabel', title: 'Creator page — "deleted" undo word', type: 'string', description: 'Leads the in-place undo after deleting an update — e.g. "Deleted".' }),
         defineField({ name: 'updateUndoLabel', title: 'Creator page — undo delete', type: 'string', description: 'The undo action after deleting an update — e.g. "Undo".' }),
+        defineField({ name: 'updateEditLabel', title: 'Creator page — edit update (aria + dialog title)', type: 'string', description: 'Label on the edit pencil an owner sees on each update — e.g. "Edit update".' }),
+        defineField({ name: 'updateEditSubmit', title: 'Creator page — save edited update button', type: 'string', description: 'Submit button in the edit-update dialog — e.g. "Save changes".' }),
         defineField({ name: 'profileOwnerBanner', title: 'Creator page — owner band text', type: 'string', description: 'Shown in a thin band when a creator views their own profile — e.g. "You’re logged into this profile.".' }),
         defineField({ name: 'profileOwnerEditLabel', title: 'Creator page — owner edit link', type: 'string', description: 'The edit link in the owner band → the full edit form — e.g. "Edit your Profile".' }),
         defineField({ name: 'profileOwnerDashboardLabel', title: 'Creator page — owner dashboard link', type: 'string', description: 'Shown under the avatar when the owner views their profile → /me — e.g. "My Dashboard".' }),

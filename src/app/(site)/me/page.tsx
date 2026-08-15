@@ -10,6 +10,7 @@ import { type ComposerTarget, type MentionOption } from '@/components/update-com
 import { PostUpdateDialog } from '@/components/post-update-dialog'
 import { UpdateFeed } from '@/components/update-feed'
 import { YourComics, type YourComicsBook } from '@/components/your-comics'
+import { updateOwnerConfig } from '@/lib/composer-labels'
 import { Button } from '@/components/ui/button'
 import { Section } from '@/components/ui/section'
 import { auth } from '@/auth'
@@ -354,11 +355,7 @@ export default async function AccountPage() {
                 heading={s.accountMyUpdatesHeading}
                 emptyLabel={s.accountMyUpdatesEmpty}
                 updates={myUpdates}
-                owner={{
-                  deleteLabel: s.updateDeleteLabel,
-                  deletedLabel: s.updateDeletedLabel,
-                  undoLabel: s.updateUndoLabel,
-                }}
+                owner={updateOwnerConfig(s, mentionOptions)}
               />
             )}
           </div>

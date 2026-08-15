@@ -24,15 +24,28 @@ import { auth } from "@/auth";
 import { isSaved } from "@/sanity/reader-client";
 import { ownsCreator } from "@/sanity/ownership-client";
 import { fetchFeed } from "@/lib/feed-parse";
-import { safeFetch, CREATOR_QUERY, CREATOR_UPDATES_QUERY } from "@/lib/queries";
+import {
+  safeFetch,
+  CREATOR_QUERY,
+  CREATOR_UPDATES_QUERY,
+  CREATORS_QUERY,
+  CONVENTIONS_QUERY,
+} from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
+import { updateOwnerConfig } from "@/lib/composer-labels";
+import type { MentionOption } from "@/components/update-composer";
 import { absoluteUrl } from "@/lib/site-url";
 import {
   breadcrumbSchema,
   comicMakerSchema,
   jsonLdGraph,
 } from "@/lib/structured-data";
-import type { CreatorDetail, UpdateFeedItem } from "@/lib/types";
+import type {
+  ConventionSummary,
+  CreatorDetail,
+  CreatorSummary,
+  UpdateFeedItem,
+} from "@/lib/types";
 import { urlFor } from "@/sanity/image";
 
 export const dynamic = "force-dynamic";
@@ -114,6 +127,28 @@ export default async function CreatorPage({
     { creatorId: creator._id, limit: 20 },
     [],
   );
+
+  // For the owner: the mention options (creators + conventions) the edit dialog
+  // needs. Only fetched when the viewer owns this profile.
+  let ownerMentions: MentionOption[] = [];
+  if (isOwner) {
+    const [allCreators, allConventions] = await Promise.all([
+      safeFetch<CreatorSummary[]>(CREATORS_QUERY, {}, []),
+      safeFetch<ConventionSummary[]>(CONVENTIONS_QUERY, {}, []),
+    ]);
+    ownerMentions = [
+      ...allCreators.map((c) => ({
+        id: c._id,
+        label: c.name ?? "Unknown",
+        group: "creator" as const,
+      })),
+      ...allConventions.map((c) => ({
+        id: c._id,
+        label: c.name,
+        group: "convention" as const,
+      })),
+    ];
+  }
 
   // Their own feed (blog, webcomic updates), if they gave one and it's live.
   // Cached for half an hour; a dead or moved feed returns null and shows nothing.
@@ -335,11 +370,7 @@ export default async function CreatorPage({
                   updates={creatorUpdates}
                   owner={
                     isOwner
-                      ? {
-                          deleteLabel: settings.sections.updateDeleteLabel,
-                          deletedLabel: settings.sections.updateDeletedLabel,
-                          undoLabel: settings.sections.updateUndoLabel,
-                        }
+                      ? updateOwnerConfig(settings.sections, ownerMentions)
                       : undefined
                   }
                 />

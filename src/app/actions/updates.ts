@@ -116,6 +116,87 @@ export async function postUpdate(
   return { status: 'success', nonce: prev.nonce + 1 }
 }
 
+/**
+ * Edit one of your own updates — patch the kind, body, and mentions (the target
+ * stays fixed; an update is "about" its comic/creator). Ownership-gated on the
+ * update's target, same as posting. Returns the PostUpdateState shape so the
+ * composer can drive it through useActionState like a post.
+ */
+export async function editUpdate(
+  prev: PostUpdateState,
+  formData: FormData,
+): Promise<PostUpdateState> {
+  const session = await auth()
+  const email = session?.user?.email?.trim()
+  if (!email) return { status: 'error', message: 'Your session expired — please sign in again.', nonce: prev.nonce }
+
+  const updateId = String(formData.get('updateId') ?? '').trim()
+  const body = String(formData.get('body') ?? '').trim()
+  const mentionIds = formData
+    .getAll('mentions')
+    .map((value) => String(value).trim())
+    .filter(Boolean)
+    .slice(0, MENTION_CAP)
+  const rawKind = String(formData.get('kind') ?? '').trim()
+  const kind: UpdateKind = (UPDATE_KINDS as readonly string[]).includes(rawKind)
+    ? (rawKind as UpdateKind)
+    : 'General news'
+  if (!updateId) return { status: 'error', message: 'Something went wrong — reload and try again.', nonce: prev.nonce }
+  if (!body) return { status: 'error', message: 'Write a short update first.', nonce: prev.nonce }
+  if (body.length > BODY_LIMIT)
+    return { status: 'error', message: `Keep it under ${BODY_LIMIT} characters.`, nonce: prev.nonce }
+
+  let client
+  try {
+    client = getWriteClient()
+  } catch (cause) {
+    console.error('[updates] write client unavailable', cause)
+    return { status: 'error', message: 'Editing is temporarily unavailable — try again shortly.', nonce: prev.nonce }
+  }
+
+  let targetRef: string | undefined
+  try {
+    const doc = await client.fetch<{ targetRef?: string } | null>(
+      `*[_id==$id && _type=="update"][0]{"targetRef":target._ref}`,
+      { id: updateId },
+    )
+    targetRef = doc?.targetRef
+  } catch (cause) {
+    console.error('[updates] edit target lookup failed', cause)
+  }
+  if (!targetRef || !(await ownsTarget(client, email, targetRef)))
+    return { status: 'error', message: 'You can only edit your own updates.', nonce: prev.nonce }
+
+  let validMentions: string[] = []
+  if (mentionIds.length) {
+    try {
+      validMentions = await client.fetch<string[]>(
+        `*[_type in ["creator","convention"] && _id in $ids]._id`,
+        { ids: mentionIds },
+      )
+    } catch (cause) {
+      console.error('[updates] edit mention check failed', cause)
+    }
+  }
+
+  try {
+    await client
+      .patch(updateId)
+      .set({
+        kind,
+        body: body.slice(0, BODY_LIMIT),
+        mentions: validMentions.map((id) => ({ _type: 'reference', _ref: id, _key: id })),
+      })
+      .commit()
+  } catch (cause) {
+    console.error('[updates] edit failed', cause)
+    return { status: 'error', message: 'That didn’t save — please try again.', nonce: prev.nonce }
+  }
+
+  revalidatePath('/me')
+  return { status: 'success', nonce: prev.nonce + 1 }
+}
+
 export type UpdateActionResult = { ok: boolean }
 
 /**

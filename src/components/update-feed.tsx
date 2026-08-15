@@ -1,6 +1,6 @@
 import { SectionHeading } from '@/components/section-heading'
 import { UpdateItemContent } from '@/components/update-item-content'
-import { UpdateRow, type UpdateOwnerLabels } from '@/components/update-row'
+import { UpdateRow, type UpdateOwnerConfig } from '@/components/update-row'
 import type { UpdateFeedItem } from '@/lib/types'
 
 /**
@@ -18,8 +18,8 @@ export function UpdateFeed({
   heading: string
   emptyLabel: string
   updates: UpdateFeedItem[]
-  /** Present only when the viewer owns these updates — enables delete/undo. */
-  owner?: UpdateOwnerLabels
+  /** Present only when the viewer owns these updates — enables edit + delete/undo. */
+  owner?: UpdateOwnerConfig
 }) {
   return (
     <div>
@@ -32,7 +32,7 @@ export function UpdateFeed({
         <ul className="border-border divide-border divide-y border-t">
           {updates.map((update) =>
             owner ? (
-              <UpdateRow key={update._id} update={update} labels={owner} />
+              <UpdateRow key={update._id} update={update} config={owner} />
             ) : (
               <li key={update._id} className="py-4">
                 <UpdateItemContent update={update} />

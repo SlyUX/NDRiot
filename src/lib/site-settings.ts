@@ -467,6 +467,8 @@ export interface SiteSettings {
     updateDeleteLabel: string
     updateDeletedLabel: string
     updateUndoLabel: string
+    updateEditLabel: string
+    updateEditSubmit: string
     profileOwnerBanner: string
     profileOwnerEditLabel: string
     profileOwnerDashboardLabel: string
@@ -958,6 +960,8 @@ const DEFAULTS: SiteSettings = {
     updateDeleteLabel: 'Delete update',
     updateDeletedLabel: 'Deleted',
     updateUndoLabel: 'Undo',
+    updateEditLabel: 'Edit update',
+    updateEditSubmit: 'Save changes',
     profileOwnerBanner: 'You’re logged into this profile.',
     profileOwnerEditLabel: 'Edit your Profile',
     profileOwnerDashboardLabel: 'My Dashboard',

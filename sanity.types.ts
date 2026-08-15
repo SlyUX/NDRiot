@@ -829,6 +829,8 @@ export type SiteSettings = {
     updateDeleteLabel?: string;
     updateDeletedLabel?: string;
     updateUndoLabel?: string;
+    updateEditLabel?: string;
+    updateEditSubmit?: string;
     profileOwnerBanner?: string;
     profileOwnerEditLabel?: string;
     profileOwnerDashboardLabel?: string;
