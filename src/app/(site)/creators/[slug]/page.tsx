@@ -15,7 +15,6 @@ import { UpdateFeed } from "@/components/update-feed";
 import { ShareBar } from "@/components/share-bar";
 import { GenreBadge } from "@/components/genre-badge";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { externalHref } from "@/lib/utils";
 import { Section } from "@/components/ui/section";
 import { bookToCard, favoriteToCard } from "@/lib/card-mappers";
@@ -96,10 +95,6 @@ export default async function CreatorPage({
     firstName,
   );
   const favoritesHeading = settings.sections.creatorFavoritesHeading.replace(
-    "{name}",
-    firstName,
-  );
-  const worksHeading = settings.sections.creatorWorksHeading.replace(
     "{name}",
     firstName,
   );
@@ -280,6 +275,12 @@ export default async function CreatorPage({
                   </div>
                 )}
 
+                {creator.bio && (
+                  <div className="mt-5">
+                    <PortableTextBody value={creator.bio} />
+                  </div>
+                )}
+
                 <div className="mt-5 flex flex-wrap items-center gap-3">
                   <SaveButton
                     itemType="creator"
@@ -321,13 +322,6 @@ export default async function CreatorPage({
         </div>
       </Section>
 
-      {creator.bio && (
-        // pt-2: tight to the header row above, per design.
-        <Section padding="md" className="pt-2">
-          <PortableTextBody value={creator.bio} />
-        </Section>
-      )}
-
       {!!creator.books?.length && (
         <ContentCardGrid
           heading={booksHeading}
@@ -337,29 +331,6 @@ export default async function CreatorPage({
           padding="md"
           emptyMessage={settings.empty.books}
         />
-      )}
-
-      {/* External works — books the creator listed with a link, not (yet)
-          entered as full documents. The Books section above carries the rich,
-          in-directory ones; this is the "everything else, and where to get it"
-          list. */}
-      {!!creator.works?.length && (
-        <Section padding="md">
-          <SectionHeading size="sm">{worksHeading}</SectionHeading>
-          <div className="flex flex-wrap gap-2">
-            {creator.works.map((work) => (
-              <Button key={work.url} asChild variant="outline" size="sm">
-                <a
-                  href={externalHref(work.url)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {work.label}
-                </a>
-              </Button>
-            ))}
-          </div>
-        </Section>
       )}
 
       {feed && (
