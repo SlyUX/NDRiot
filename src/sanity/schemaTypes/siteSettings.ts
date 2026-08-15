@@ -1084,7 +1084,7 @@ export default defineType({
           title: "Creator page — owner band text",
           type: "string",
           description:
-            'Shown in a thin band when a creator views their own profile — e.g. "You’re logged into this profile.".',
+            'Shown in a thin band when a creator views their own profile. The words "public profile", if present, are emphasized to distinguish this reader-facing page from the private dashboard — e.g. "This is your public profile.".',
         }),
         defineField({
           name: "profileOwnerEditLabel",
@@ -1098,7 +1098,7 @@ export default defineType({
           title: "Creator page — owner dashboard link",
           type: "string",
           description:
-            'Shown under the avatar when the owner views their profile → /me — e.g. "My Dashboard".',
+            'The dashboard link in the owner band → /me — e.g. "Your Dashboard".',
         }),
         defineField({
           name: "profileManageUpdatesLabel",

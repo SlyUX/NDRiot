@@ -38,6 +38,27 @@ import { urlFor } from "@/sanity/image";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Render the owner-band copy with the phrase "public profile" bolded, so the
+ * owner reads it as "this is the reader-facing page, not my dashboard." The copy
+ * stays CMS-editable (§2); if an editor rewrites it without that phrase, it just
+ * renders plain.
+ */
+function ownerBanner(text: string) {
+  const term = "public profile";
+  const i = text.toLowerCase().indexOf(term);
+  if (i === -1) return text;
+  return (
+    <>
+      {text.slice(0, i)}
+      <strong className="font-bold text-white">
+        {text.slice(i, i + term.length)}
+      </strong>
+      {text.slice(i + term.length)}
+    </>
+  );
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -125,11 +146,11 @@ export default async function CreatorPage({
     ? await fetchFeed(creator.feedUrl, { revalidate: 1800 })
     : null;
 
-  // The left column (photo, owner link, socials + website, genre/format chips).
-  // If empty, it collapses so the info column fills the row.
+  // The left column (photo, socials + website, genre/format chips). If empty, it
+  // collapses so the info column fills the row. Owner shortcuts live in the band
+  // above, not here, so ownership no longer forces the column open.
   const hasSidebar = Boolean(
     creator.photo ||
-    isOwner ||
     creator.socials?.length ||
     creator.website ||
     creator.genres?.length ||
@@ -160,19 +181,28 @@ export default async function CreatorPage({
       />
 
       {/* Owner band — only when you're viewing your own profile. A thin notice
-          plus a link to the real edit form (no inline editing here). */}
+          plus the owner's two shortcuts: the dashboard (manage everything) and
+          the edit form. No inline editing on the public page itself. */}
       {isOwner && (
         <div className="bg-charcoal">
-          <div className="mx-auto flex max-w-[90rem] items-center justify-between gap-3 px-6 py-1.5 text-sm">
+          <div className="mx-auto flex max-w-[90rem] flex-wrap items-center justify-between gap-x-4 gap-y-1 px-6 py-1.5 text-sm">
             <span className="text-white/80">
-              {settings.sections.profileOwnerBanner}
+              {ownerBanner(settings.sections.profileOwnerBanner)}
             </span>
-            <Link
-              href={`/join/creators?editing=${encodeURIComponent(creator._id)}`}
-              className="text-primary focus-visible:ring-ring font-bold tracking-wide uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none"
-            >
-              {settings.sections.profileOwnerEditLabel}
-            </Link>
+            <div className="flex shrink-0 items-center gap-4">
+              <Link
+                href="/me"
+                className="text-primary focus-visible:ring-ring font-bold tracking-wide uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none"
+              >
+                {settings.sections.profileOwnerDashboardLabel}
+              </Link>
+              <Link
+                href={`/join/creators?editing=${encodeURIComponent(creator._id)}`}
+                className="text-primary focus-visible:ring-ring font-bold tracking-wide uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none"
+              >
+                {settings.sections.profileOwnerEditLabel}
+              </Link>
+            </div>
           </div>
         </div>
       )}
@@ -209,16 +239,6 @@ export default async function CreatorPage({
                         />
                       </div>
                     )}
-                    {/* Owner-only shortcut to the dashboard, under the avatar. */}
-                    {isOwner && (
-                      <Link
-                        href="/me"
-                        className="text-primary focus-visible:ring-ring text-sm font-bold tracking-wide uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none"
-                      >
-                        {settings.sections.profileOwnerDashboardLabel}
-                      </Link>
-                    )}
-
                     {/* Socials + the website, as icons. */}
                     {(creator.socials?.length || creator.website) && (
                       <div className="-ml-2.5 flex flex-wrap items-center gap-1">
