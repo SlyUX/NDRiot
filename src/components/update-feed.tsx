@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { SectionHeading } from "@/components/section-heading";
 import { UpdateItemContent } from "@/components/update-item-content";
 import { UpdateRow, type UpdateOwnerConfig } from "@/components/update-row";
@@ -6,8 +8,9 @@ import type { UpdateFeedItem } from "@/lib/types";
 /**
  * An update feed, newest first — pure recency, never ranked or counted (§3).
  * Read-only by default (the reader's /me "Your Feed", a creator's public
- * profile). When `owner` labels are passed — a creator viewing their OWN
- * profile — each update becomes an interactive row with a delete + in-place undo.
+ * profile). When `owner` labels are passed — the dashboard's "Your Updates" —
+ * each update becomes an interactive row with an edit + delete/undo. A creator's
+ * own updates are only editable there, never on the public profile.
  */
 export function UpdateFeed({
   heading,
@@ -15,6 +18,7 @@ export function UpdateFeed({
   updates,
   owner,
   scrollCap = false,
+  action,
 }: {
   heading: string;
   emptyLabel: string;
@@ -27,6 +31,8 @@ export function UpdateFeed({
    * rail. The heading stays fixed above the scroll region.
    */
   scrollCap?: boolean;
+  /** Trailing element beside the heading — e.g. the owner's "manage on your dashboard" link on the profile. */
+  action?: ReactNode;
 }) {
   const list = (
     <ul className="border-border divide-border divide-y border-t">
@@ -44,7 +50,7 @@ export function UpdateFeed({
 
   return (
     <div>
-      <SectionHeading as="h2" size="sm">
+      <SectionHeading as="h2" size="sm" action={action}>
         {heading}
       </SectionHeading>
       {updates.length === 0 ? (

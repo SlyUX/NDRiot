@@ -430,13 +430,17 @@ export default async function AccountPage() {
                 />
               )}
               {isCreator && (
-                <UpdateFeed
-                  heading={s.accountMyUpdatesHeading}
-                  emptyLabel={s.accountMyUpdatesEmpty}
-                  updates={myUpdates}
-                  owner={updateOwnerConfig(s, mentionOptions)}
-                  scrollCap
-                />
+                // Anchor target for the "manage your updates" link on a creator's
+                // own profile; scroll-mt clears the fixed nav on the jump.
+                <div id="your-updates" className="scroll-mt-24">
+                  <UpdateFeed
+                    heading={s.accountMyUpdatesHeading}
+                    emptyLabel={s.accountMyUpdatesEmpty}
+                    updates={myUpdates}
+                    owner={updateOwnerConfig(s, mentionOptions)}
+                    scrollCap
+                  />
+                </div>
               )}
             </div>
           </Section>

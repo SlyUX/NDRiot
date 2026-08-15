@@ -1101,6 +1101,13 @@ export default defineType({
             'Shown under the avatar when the owner views their profile → /me — e.g. "My Dashboard".',
         }),
         defineField({
+          name: "profileManageUpdatesLabel",
+          title: "Creator page — owner “manage updates” link",
+          type: "string",
+          description:
+            'Beside the owner’s own updates on their profile — links to the editable “Your Updates” on the dashboard (/me#your-updates). Updates aren’t edited on the public profile. E.g. "Manage on your dashboard".',
+        }),
+        defineField({
           name: "creatorWorksHeading",
           title: "Creator page — external works heading",
           type: "string",

@@ -25,28 +25,15 @@ import { auth } from "@/auth";
 import { isSaved } from "@/sanity/reader-client";
 import { ownsCreator } from "@/sanity/ownership-client";
 import { fetchFeed } from "@/lib/feed-parse";
-import {
-  safeFetch,
-  CREATOR_QUERY,
-  CREATOR_UPDATES_QUERY,
-  CREATORS_QUERY,
-  CONVENTIONS_QUERY,
-} from "@/lib/queries";
+import { safeFetch, CREATOR_QUERY, CREATOR_UPDATES_QUERY } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
-import { updateOwnerConfig } from "@/lib/composer-labels";
-import type { MentionOption } from "@/components/update-composer";
 import { absoluteUrl } from "@/lib/site-url";
 import {
   breadcrumbSchema,
   comicMakerSchema,
   jsonLdGraph,
 } from "@/lib/structured-data";
-import type {
-  ConventionSummary,
-  CreatorDetail,
-  CreatorSummary,
-  UpdateFeedItem,
-} from "@/lib/types";
+import type { CreatorDetail, UpdateFeedItem } from "@/lib/types";
 import { urlFor } from "@/sanity/image";
 
 export const dynamic = "force-dynamic";
@@ -123,33 +110,14 @@ export default async function CreatorPage({
   );
 
   // Their ND Riot updates — posts targeting this creator or one of their comics.
+  // Read-only here, for everyone including the owner: posting and editing live on
+  // the dashboard's "Your Updates" (one home for that), which the owner reaches
+  // via the anchor link beside this feed.
   const creatorUpdates = await safeFetch<UpdateFeedItem[]>(
     CREATOR_UPDATES_QUERY,
     { creatorId: creator._id, limit: 20 },
     [],
   );
-
-  // For the owner: the mention options (creators + conventions) the edit dialog
-  // needs. Only fetched when the viewer owns this profile.
-  let ownerMentions: MentionOption[] = [];
-  if (isOwner) {
-    const [allCreators, allConventions] = await Promise.all([
-      safeFetch<CreatorSummary[]>(CREATORS_QUERY, {}, []),
-      safeFetch<ConventionSummary[]>(CONVENTIONS_QUERY, {}, []),
-    ]);
-    ownerMentions = [
-      ...allCreators.map((c) => ({
-        id: c._id,
-        label: c.name ?? "Unknown",
-        group: "creator" as const,
-      })),
-      ...allConventions.map((c) => ({
-        id: c._id,
-        label: c.name,
-        group: "convention" as const,
-      })),
-    ];
-  }
 
   // Their own feed (blog, webcomic updates), if they gave one and it's live.
   // Cached for half an hour; a dead or moved feed returns null and shows nothing.
@@ -381,10 +349,17 @@ export default async function CreatorPage({
                     heading={updatesHeading}
                     emptyLabel=""
                     updates={creatorUpdates}
-                    owner={
-                      isOwner
-                        ? updateOwnerConfig(settings.sections, ownerMentions)
-                        : undefined
+                    // Read-only for everyone; the owner gets a link to manage them
+                    // on the dashboard, where posting + editing live.
+                    action={
+                      isOwner ? (
+                        <Link
+                          href="/me#your-updates"
+                          className="text-primary focus-visible:ring-ring text-xs font-bold tracking-wide uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none"
+                        >
+                          {settings.sections.profileManageUpdatesLabel}
+                        </Link>
+                      ) : undefined
                     }
                   />
                 </div>

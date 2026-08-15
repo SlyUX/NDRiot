@@ -475,6 +475,8 @@ export interface SiteSettings {
     profileOwnerBanner: string;
     profileOwnerEditLabel: string;
     profileOwnerDashboardLabel: string;
+    /** Owner-only link beside their profile's updates → the editable "Your Updates" on the dashboard. */
+    profileManageUpdatesLabel: string;
     creatorWorksHeading: string;
     creatorOrganizationsHeading: string;
     creatorFavoritesHeading: string;
@@ -993,6 +995,7 @@ const DEFAULTS: SiteSettings = {
     profileOwnerBanner: "You’re logged into this profile.",
     profileOwnerEditLabel: "Edit your Profile",
     profileOwnerDashboardLabel: "My Dashboard",
+    profileManageUpdatesLabel: "Manage on your dashboard",
     creatorWorksHeading: "Where to find {name}’s work",
     creatorOrganizationsHeading: "Member of",
     creatorFavoritesHeading: "{name}’s Cosigns",

@@ -836,6 +836,7 @@ export type SiteSettings = {
     profileOwnerBanner?: string;
     profileOwnerEditLabel?: string;
     profileOwnerDashboardLabel?: string;
+    profileManageUpdatesLabel?: string;
     creatorWorksHeading?: string;
     creatorOrganizationsHeading?: string;
     openToCollaborationLabel?: string;
