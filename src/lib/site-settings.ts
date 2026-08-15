@@ -71,6 +71,8 @@ export interface HeroSettings {
 
 export interface JoinSettings {
   heading: string;
+  /** The page title when a returning owner is editing — e.g. "Update Profile". */
+  editHeading: string;
   body?: RichText;
   ctaLabel: string;
   /** Absent means the page renders without a button rather than a dead link. */
@@ -102,6 +104,9 @@ export interface JoinSettings {
 export type CreatorIntakeSettings = {
   heading: string;
   editHeading: string;
+  /** One-profile-per-account explanation, shown when an owner asks to create another. */
+  oneProfileHeading: string;
+  oneProfileBody: string;
   intro: string;
   updatePrompt: string;
   updateSelectLabel: string;
@@ -112,7 +117,6 @@ export type CreatorIntakeSettings = {
   sectionYou: string;
   sectionWork: string;
   sectionFind: string;
-  sectionPictures: string;
   sectionPermission: string;
   nameLabel: string;
   slugLabel: string;
@@ -633,6 +637,7 @@ const DEFAULTS: SiteSettings = {
   },
   join: {
     heading: "Get listed",
+    editHeading: "Update Profile",
     // Now labels the fallback link under the native form, not a primary CTA.
     ctaLabel: "Form not working? Submit via Google Forms",
     formUrl: "https://forms.gle/STbaVMQ8a6Ap8rL1A",
@@ -657,6 +662,9 @@ const DEFAULTS: SiteSettings = {
   creatorIntake: {
     heading: "Create a Comic Creator Profile",
     editHeading: "Update your profile",
+    oneProfileHeading: "One profile per account",
+    oneProfileBody:
+      "Your Google account already has a creator profile, and each account can have just one. To create a separate profile, sign out and sign back in with a different Google account — or head back to edit the profile you already have.",
     intro:
       "Only a name, a note about your work, and permission to publish are required — skip anything else or add it later.",
     updatePrompt: "Already on ND Riot and updating your profile?",
@@ -669,7 +677,6 @@ const DEFAULTS: SiteSettings = {
     sectionYou: "Who you are",
     sectionWork: "Your work",
     sectionFind: "Where to find you",
-    sectionPictures: "Pictures",
     sectionPermission: "Permission",
     nameLabel: "Name you want to be credited by",
     slugLabel: "Preferred ND Riot address",
@@ -1071,7 +1078,7 @@ export const SITE_SETTINGS_QUERY = `*[_id=="siteSettings"][0]{
   about{heading,body,faqHeading,faq[]{question,answer},seoTitle,seoDescription},aiLetter,
   home,sections,empty,creatorIntake,bookIntake,mediaIntake,notifications,
   hero{background,headline,body,tagline,featureCtaLabel,featuredHeading,newHeading,ctas[]{label,href}},
-  join{heading,body,ctaLabel,formUrl,funnelHeading,funnelIntro,creatorsLabel,creatorsDesc,contactLabel,contactDesc,mediaLabel,mediaDesc,readersLabel,readersDesc,readersBadge,terms,termsWhy},
+  join{heading,editHeading,body,ctaLabel,formUrl,funnelHeading,funnelIntro,creatorsLabel,creatorsDesc,contactLabel,contactDesc,mediaLabel,mediaDesc,readersLabel,readersDesc,readersBadge,terms,termsWhy},
   contact{heading,linkLabel,body,nameLabel,emailLabel,subjectLabel,messageLabel,submitLabel,successMessage,errorMessage},
   nav[]{_type,label,href,groups[]{heading,useGenres,links[]{label,href}}}
 }`;
@@ -1144,6 +1151,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     },
     join: {
       heading: data.join?.heading?.trim() || DEFAULTS.join.heading,
+      editHeading: data.join?.editHeading?.trim() || DEFAULTS.join.editHeading,
       body: data.join?.body?.length ? data.join.body : undefined,
       ctaLabel: data.join?.ctaLabel?.trim() || DEFAULTS.join.ctaLabel,
       formUrl: data.join?.formUrl?.trim() || DEFAULTS.join.formUrl,

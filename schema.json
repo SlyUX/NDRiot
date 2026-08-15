@@ -5566,6 +5566,13 @@
               },
               "optional": true
             },
+            "editHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "body": {
               "type": "objectAttribute",
               "value": {
@@ -5720,6 +5727,20 @@
               },
               "optional": true
             },
+            "oneProfileHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "oneProfileBody": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "intro": {
               "type": "objectAttribute",
               "value": {
@@ -5784,13 +5805,6 @@
               "optional": true
             },
             "sectionFind": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
-            "sectionPictures": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

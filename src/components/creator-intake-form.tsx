@@ -1,24 +1,31 @@
-'use client'
+"use client";
 
-import Image from 'next/image'
-import { useActionState, useEffect, useRef, useState } from 'react'
+import Image from "next/image";
+import { useActionState, useEffect, useRef, useState } from "react";
 
-import { submitCreator, type CreatorIntakeState } from '@/app/actions/creator-intake'
-import { Button } from '@/components/ui/button'
-import { PairedRowsField } from '@/components/paired-rows-field'
-import { ALLOWED_IMAGE_TYPES, MAX_PICK_BYTES, downscaleImage } from '@/lib/intake/downscale'
-import { slugify } from '@/lib/intake/mapping'
+import {
+  submitCreator,
+  type CreatorIntakeState,
+} from "@/app/actions/creator-intake";
+import { Button } from "@/components/ui/button";
+import { PairedRowsField } from "@/components/paired-rows-field";
+import {
+  ALLOWED_IMAGE_TYPES,
+  MAX_PICK_BYTES,
+  downscaleImage,
+} from "@/lib/intake/downscale";
+import { slugify } from "@/lib/intake/mapping";
 import {
   GENRES,
   FORMATS,
   SOCIAL_PLATFORMS,
   SOCIAL_PROFILE_PREFIX,
   type SocialPlatform,
-} from '@/lib/taxonomy'
-import { urlFor } from '@/sanity/image'
-import { cn } from '@/lib/utils'
-import type { CreatorIntakeSettings } from '@/lib/site-settings'
-import type { SanityImage } from '@/lib/types'
+} from "@/lib/taxonomy";
+import { urlFor } from "@/sanity/image";
+import { cn } from "@/lib/utils";
+import type { CreatorIntakeSettings } from "@/lib/site-settings";
+import type { SanityImage } from "@/lib/types";
 
 /**
  * On-site creator intake — Stage 3. Presentational: every label is passed in
@@ -36,40 +43,40 @@ import type { SanityImage } from '@/lib/types'
  * never creates one, keeping every anonymous write a single creator draft.
  */
 
-const INITIAL: CreatorIntakeState = { status: 'idle' }
+const INITIAL: CreatorIntakeState = { status: "idle" };
 
 const fieldClass =
-  'focus-visible:ring-ring w-full border border-white/20 bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:outline-none aria-[invalid=true]:border-destructive'
+  "focus-visible:ring-ring w-full border border-white/20 bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:outline-none aria-[invalid=true]:border-destructive";
 
-const labelClass = 'block text-xs tracking-widest uppercase'
-const hintClass = 'text-muted-foreground text-xs'
+const labelClass = "block text-xs tracking-widest uppercase";
+const hintClass = "text-muted-foreground text-xs";
 
 export interface CreatorIntakeOrg {
-  _id: string
-  name: string
+  _id: string;
+  name: string;
 }
 
 /** The editable values used to prepopulate the form on an update. */
 export interface CreatorIntakeInitial {
-  updateId: string
-  name: string
-  slug: string
-  location: string
-  website: string
-  feedUrl: string
-  bio: string
-  socials: { platform: string; url: string }[]
-  works: { label: string; url: string }[]
-  genres: string[]
-  formats: string[]
-  collab: boolean
-  photo: SanityImage | null
-  photoAlt: string
-  studioId: string | null
-  studioName: string
-  studioWebsite: string
-  studioLogo: SanityImage | null
-  orgIds: string[]
+  updateId: string;
+  name: string;
+  slug: string;
+  location: string;
+  website: string;
+  feedUrl: string;
+  bio: string;
+  socials: { platform: string; url: string }[];
+  works: { label: string; url: string }[];
+  genres: string[];
+  formats: string[];
+  collab: boolean;
+  photo: SanityImage | null;
+  photoAlt: string;
+  studioId: string | null;
+  studioName: string;
+  studioWebsite: string;
+  studioLogo: SanityImage | null;
+  orgIds: string[];
 }
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
@@ -77,11 +84,15 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
     <h2 className="border-primary/40 text-primary border-b pb-2 text-sm font-black tracking-widest uppercase">
       {children}
     </h2>
-  )
+  );
 }
 
 function Optional({ label }: { label: string }) {
-  return <span className="text-muted-foreground ml-2 text-[0.65rem] tracking-wider normal-case">({label})</span>
+  return (
+    <span className="text-muted-foreground ml-2 text-[0.65rem] tracking-wider normal-case">
+      ({label})
+    </span>
+  );
 }
 
 /**
@@ -94,12 +105,14 @@ function CreatorSearchPicker({
   creators,
   copy,
 }: {
-  creators: CreatorIntakeOrg[]
-  copy: CreatorIntakeSettings
+  creators: CreatorIntakeOrg[];
+  copy: CreatorIntakeSettings;
 }) {
-  const [query, setQuery] = useState('')
-  const q = query.trim().toLowerCase()
-  const matches = q ? creators.filter((c) => c.name.toLowerCase().includes(q)) : creators
+  const [query, setQuery] = useState("");
+  const q = query.trim().toLowerCase();
+  const matches = q
+    ? creators.filter((c) => c.name.toLowerCase().includes(q))
+    : creators;
 
   return (
     <div className="space-y-2">
@@ -113,11 +126,13 @@ function CreatorSearchPicker({
         onChange={(e) => setQuery(e.target.value)}
         placeholder={copy.updateSelectLabel}
         autoComplete="off"
-        className={cn(fieldClass, 'sm:max-w-sm')}
+        className={cn(fieldClass, "sm:max-w-sm")}
       />
       <ul className="border-primary/20 max-h-56 divide-y divide-white/10 overflow-y-auto border">
         {matches.length === 0 ? (
-          <li className="text-muted-foreground px-3 py-2 text-sm">{copy.updateNoMatchLabel}</li>
+          <li className="text-muted-foreground px-3 py-2 text-sm">
+            {copy.updateNoMatchLabel}
+          </li>
         ) : (
           matches.map((c) => (
             <li key={c._id}>
@@ -133,7 +148,7 @@ function CreatorSearchPicker({
       </ul>
       <p className={hintClass}>{copy.updateSkipHint}</p>
     </div>
-  )
+  );
 }
 
 /**
@@ -148,37 +163,51 @@ function SocialLinksField({
   copy,
   initial,
 }: {
-  copy: CreatorIntakeSettings
-  initial?: { platform: string; url: string }[]
+  copy: CreatorIntakeSettings;
+  initial?: { platform: string; url: string }[];
 }) {
   // Stored socials hold a full URL; show just the handle where the platform has
   // a prefix, so editing stays account-name based.
   const toRow = (s: { platform: string; url: string }) => {
-    const prefix = SOCIAL_PROFILE_PREFIX[s.platform as SocialPlatform]
+    const prefix = SOCIAL_PROFILE_PREFIX[s.platform as SocialPlatform];
     // Strip the prefix AND a trailing slash so the shown handle is clean.
-    const value = prefix && s.url.startsWith(prefix)
-      ? s.url.slice(prefix.length).replace(/\/+$/, '')
-      : s.url
-    return { platform: s.platform, value }
-  }
-  const [rows, setRows] = useState<{ platform: string; value: string; key: number }[]>(() =>
-    (initial && initial.length ? initial.map(toRow) : [{ platform: '', value: '' }]).map((r, i) => ({
+    const value =
+      prefix && s.url.startsWith(prefix)
+        ? s.url.slice(prefix.length).replace(/\/+$/, "")
+        : s.url;
+    return { platform: s.platform, value };
+  };
+  const [rows, setRows] = useState<
+    { platform: string; value: string; key: number }[]
+  >(() =>
+    (initial && initial.length
+      ? initial.map(toRow)
+      : [{ platform: "", value: "" }]
+    ).map((r, i) => ({
       ...r,
       key: i,
     })),
-  )
+  );
 
   const addRow = () =>
     setRows((prev) => [
       ...prev,
-      { platform: '', value: '', key: prev.reduce((m, r) => Math.max(m, r.key), -1) + 1 },
-    ])
+      {
+        platform: "",
+        value: "",
+        key: prev.reduce((m, r) => Math.max(m, r.key), -1) + 1,
+      },
+    ]);
   const removeRow = (key: number) =>
-    setRows((prev) => (prev.length > 1 ? prev.filter((r) => r.key !== key) : prev))
-  const update = (key: number, field: 'platform' | 'value', value: string) =>
-    setRows((prev) => prev.map((r) => (r.key === key ? { ...r, [field]: value } : r)))
+    setRows((prev) =>
+      prev.length > 1 ? prev.filter((r) => r.key !== key) : prev,
+    );
+  const update = (key: number, field: "platform" | "value", value: string) =>
+    setRows((prev) =>
+      prev.map((r) => (r.key === key ? { ...r, [field]: value } : r)),
+    );
 
-  const used = new Set(rows.map((r) => r.platform).filter(Boolean))
+  const used = new Set(rows.map((r) => r.platform).filter(Boolean));
 
   return (
     <fieldset className="space-y-3">
@@ -189,19 +218,23 @@ function SocialLinksField({
       <p className={hintClass}>{copy.socialsHint}</p>
       <div className="space-y-2">
         {rows.map((row) => {
-          const prefix = SOCIAL_PROFILE_PREFIX[row.platform as SocialPlatform]
-          const shownPrefix = prefix ? prefix.replace(/^https?:\/\/(www\.)?/, '') : null
+          const prefix = SOCIAL_PROFILE_PREFIX[row.platform as SocialPlatform];
+          const shownPrefix = prefix
+            ? prefix.replace(/^https?:\/\/(www\.)?/, "")
+            : null;
           return (
             <div key={row.key} className="flex flex-col gap-2 sm:flex-row">
               <select
                 name="socialPlatform"
                 value={row.platform}
-                onChange={(e) => update(row.key, 'platform', e.target.value)}
+                onChange={(e) => update(row.key, "platform", e.target.value)}
                 aria-label={copy.socialPlatformPlaceholder}
-                className={cn(fieldClass, 'appearance-none sm:w-1/3')}
+                className={cn(fieldClass, "appearance-none sm:w-1/3")}
               >
                 <option value="">{copy.socialPlatformPlaceholder}</option>
-                {SOCIAL_PLATFORMS.filter((p) => p === row.platform || !used.has(p)).map((p) => (
+                {SOCIAL_PLATFORMS.filter(
+                  (p) => p === row.platform || !used.has(p),
+                ).map((p) => (
                   <option key={p} value={p}>
                     {p}
                   </option>
@@ -220,8 +253,12 @@ function SocialLinksField({
                     type="text"
                     name="socialValue"
                     value={row.value}
-                    onChange={(e) => update(row.key, 'value', e.target.value)}
-                    placeholder={prefix ? copy.socialHandlePlaceholder : copy.workUrlPlaceholder}
+                    onChange={(e) => update(row.key, "value", e.target.value)}
+                    placeholder={
+                      prefix
+                        ? copy.socialHandlePlaceholder
+                        : copy.workUrlPlaceholder
+                    }
                     aria-label={copy.socialsLabel}
                     autoCapitalize="none"
                     autoCorrect="off"
@@ -241,7 +278,7 @@ function SocialLinksField({
                 )}
               </div>
             </div>
-          )
+          );
         })}
       </div>
       {rows.length < SOCIAL_PLATFORMS.length && (
@@ -254,7 +291,7 @@ function SocialLinksField({
         </button>
       )}
     </fieldset>
-  )
+  );
 }
 
 export function CreatorIntakeForm({
@@ -264,96 +301,101 @@ export function CreatorIntakeForm({
   creators,
   initial,
 }: {
-  copy: CreatorIntakeSettings
+  copy: CreatorIntakeSettings;
   /** All orgs — the studio dropdown. */
-  organizations: CreatorIntakeOrg[]
+  organizations: CreatorIntakeOrg[];
   /** Orgs that are NOT used as a studio — the Collectives checkboxes. */
-  collectives: CreatorIntakeOrg[]
-  creators: CreatorIntakeOrg[]
-  initial?: CreatorIntakeInitial
+  collectives: CreatorIntakeOrg[];
+  creators: CreatorIntakeOrg[];
+  initial?: CreatorIntakeInitial;
 }) {
-  const [state, action, pending] = useActionState(submitCreator, INITIAL)
-  const editing = Boolean(initial)
+  const [state, action, pending] = useActionState(submitCreator, INITIAL);
+  const editing = Boolean(initial);
 
-  const timingRef = useRef<HTMLInputElement>(null)
+  const timingRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    if (timingRef.current) timingRef.current.value = String(Date.now())
-  }, [])
+    if (timingRef.current) timingRef.current.value = String(Date.now());
+  }, []);
 
   // Live three-genre cap; the server enforces it regardless. Seeded from the
   // loaded profile on an update.
-  const [genres, setGenres] = useState<string[]>(initial?.genres ?? [])
-  const atGenreMax = genres.length >= 3
+  const [genres, setGenres] = useState<string[]>(initial?.genres ?? []);
+  const atGenreMax = genres.length >= 3;
   const toggleGenre = (genre: string, checked: boolean) =>
-    setGenres((prev) => (checked ? [...prev, genre] : prev.filter((g) => g !== genre)))
+    setGenres((prev) =>
+      checked ? [...prev, genre] : prev.filter((g) => g !== genre),
+    );
 
   // Name + web address are controlled so the address can be suggested from the
   // name (create only) and constrained to URL-safe characters as typed. The
   // suggestion stops the moment the address is edited by hand. The server runs
   // the same slugify on submit, so this is a live preview of that, not a
   // second source of truth.
-  const [name, setName] = useState(state.values?.name ?? initial?.name ?? '')
-  const [slug, setSlug] = useState(state.values?.slug ?? '')
-  const [slugTouched, setSlugTouched] = useState(Boolean(state.values?.slug))
+  const [name, setName] = useState(state.values?.name ?? initial?.name ?? "");
+  const [slug, setSlug] = useState(state.values?.slug ?? "");
+  const [slugTouched, setSlugTouched] = useState(Boolean(state.values?.slug));
   const sanitizeSlug = (v: string) =>
     v
       .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^a-z0-9-]/g, '')
-      .replace(/-{2,}/g, '-')
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "")
+      .replace(/-{2,}/g, "-");
   const onNameChange = (v: string) => {
-    setName(v)
-    if (!editing && !slugTouched) setSlug(slugify(v))
-  }
+    setName(v);
+    if (!editing && !slugTouched) setSlug(slugify(v));
+  };
   const onSlugChange = (v: string) => {
-    setSlug(sanitizeSlug(v))
-    setSlugTouched(true)
-  }
+    setSlug(sanitizeSlug(v));
+    setSlugTouched(true);
+  };
 
   // Validate a picked image (type + a hard size cap) with a visible message,
   // then downscale it in place so a smaller file is what submits. Keyed by
   // input name so the photo and studio-logo fields show their own error.
-  const [imageErrors, setImageErrors] = useState<Record<string, string>>({})
+  const [imageErrors, setImageErrors] = useState<Record<string, string>>({});
   const onImagePick = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.currentTarget
-    const name = input.name
-    const file = input.files?.[0]
-    setImageErrors((prev) => ({ ...prev, [name]: '' }))
-    if (!file) return
+    const input = e.currentTarget;
+    const name = input.name;
+    const file = input.files?.[0];
+    setImageErrors((prev) => ({ ...prev, [name]: "" }));
+    if (!file) return;
     if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      input.value = ''
-      setImageErrors((prev) => ({ ...prev, [name]: copy.imageTypeError }))
-      return
+      input.value = "";
+      setImageErrors((prev) => ({ ...prev, [name]: copy.imageTypeError }));
+      return;
     }
     if (file.size > MAX_PICK_BYTES) {
-      input.value = ''
-      setImageErrors((prev) => ({ ...prev, [name]: copy.imageSizeError }))
-      return
+      input.value = "";
+      setImageErrors((prev) => ({ ...prev, [name]: copy.imageSizeError }));
+      return;
     }
-    const resized = await downscaleImage(file)
+    const resized = await downscaleImage(file);
     if (resized !== file) {
-      const dt = new DataTransfer()
-      dt.items.add(resized)
-      input.files = dt.files
+      const dt = new DataTransfer();
+      dt.items.add(resized);
+      input.files = dt.files;
     }
-  }
+  };
 
-  if (state.status === 'success') {
+  if (state.status === "success") {
     return (
-      <p role="status" className="border-primary text-foreground border-l-2 py-2 pl-4 text-sm">
+      <p
+        role="status"
+        className="border-primary text-foreground border-l-2 py-2 pl-4 text-sm"
+      >
         {copy.successMessage}
       </p>
-    )
+    );
   }
 
-  const errors = state.fieldErrors ?? {}
-  const values = state.values
+  const errors = state.fieldErrors ?? {};
+  const values = state.values;
   // On a validation error, the echoed submission wins; otherwise the loaded
   // profile (update) or empty (new).
   const initialText = (
-    field: keyof NonNullable<CreatorIntakeState['values']>,
+    field: keyof NonNullable<CreatorIntakeState["values"]>,
     fromInitial?: string,
-  ) => values?.[field] ?? fromInitial ?? ''
+  ) => values?.[field] ?? fromInitial ?? "";
 
   return (
     <>
@@ -367,27 +409,105 @@ export function CreatorIntakeForm({
 
       {editing && (
         <div className="border-primary/40 mb-10 border-l-2 py-2 pl-4">
-          <p className="text-sm">{copy.editingNotice.replace('{name}', initial!.name)}</p>
-          <a href="/join/creators?new" className="text-primary mt-1 inline-block text-xs underline underline-offset-4">
+          <p className="text-sm">
+            {copy.editingNotice.replace("{name}", initial!.name)}
+          </p>
+          <a
+            href="/join/creators?new"
+            className="text-primary mt-1 inline-block text-xs underline underline-offset-4"
+          >
             {copy.editingResetLabel}
           </a>
         </div>
       )}
 
-      <form action={action} encType="multipart/form-data" className="space-y-10" noValidate>
+      <form
+        action={action}
+        encType="multipart/form-data"
+        className="space-y-10"
+        noValidate
+      >
         {/* Honeypot + timing gate, mirroring the contact form. */}
-        <div aria-hidden="true" className="absolute left-[-9999px] h-0 w-0 overflow-hidden">
+        <div
+          aria-hidden="true"
+          className="absolute left-[-9999px] h-0 w-0 overflow-hidden"
+        >
           <label htmlFor="company">Company</label>
-          <input id="company" name="company" type="text" tabIndex={-1} autoComplete="off" />
+          <input
+            id="company"
+            name="company"
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+          />
         </div>
         <input ref={timingRef} type="hidden" name="t" />
         {/* Present only on an update — the action keys off it to patch the right
             profile's draft. */}
-        {editing && <input type="hidden" name="updateId" value={initial!.updateId} />}
+        {editing && (
+          <input type="hidden" name="updateId" value={initial!.updateId} />
+        )}
 
         {/* — Who you are — */}
         <fieldset className="space-y-5">
           <SectionHeading>{copy.sectionYou}</SectionHeading>
+
+          {/* Avatar leads — the face of the profile. Moved up from a later
+              "Pictures" section so identity (photo, name, studio) comes first. */}
+          <div className="space-y-1.5">
+            <label htmlFor="photo" className={labelClass}>
+              {copy.photoLabel}
+              <Optional label={copy.optionalLabel} />
+            </label>
+            {/* On an update, show the existing avatar so the creator knows a
+                re-upload is optional. */}
+            {initial?.photo && (
+              <div className="mb-2 flex items-center gap-3">
+                <Image
+                  src={urlFor(initial.photo)
+                    .width(128)
+                    .height(128)
+                    .fit("crop")
+                    .url()}
+                  alt={initial.photoAlt || ""}
+                  width={64}
+                  height={64}
+                  className="size-16 shrink-0 object-cover"
+                />
+                <p className={hintClass}>{copy.photoCurrentHint}</p>
+              </div>
+            )}
+            <input
+              id="photo"
+              name="photo"
+              type="file"
+              accept="image/*"
+              onChange={onImagePick}
+              className={cn(
+                fieldClass,
+                "file:mr-3 file:border-0 file:bg-transparent file:text-xs file:uppercase file:text-primary",
+              )}
+            />
+            {imageErrors.photo && (
+              <p className="text-destructive text-xs">{imageErrors.photo}</p>
+            )}
+            <p className={hintClass}>{copy.photoHint}</p>
+          </div>
+
+          <div className="space-y-1.5">
+            <label htmlFor="photoAlt" className={labelClass}>
+              {copy.photoAltLabel}
+              <Optional label={copy.optionalLabel} />
+            </label>
+            <input
+              id="photoAlt"
+              name="photoAlt"
+              type="text"
+              defaultValue={initialText("photoAlt", initial?.photoAlt)}
+              className={fieldClass}
+            />
+            <p className={hintClass}>{copy.photoAltHint}</p>
+          </div>
 
           <div className="space-y-1.5">
             <label htmlFor="name" className={labelClass}>
@@ -402,7 +522,7 @@ export function CreatorIntakeForm({
               value={name}
               onChange={(e) => onNameChange(e.target.value)}
               aria-invalid={Boolean(errors.name)}
-              aria-describedby={errors.name ? 'name-error' : undefined}
+              aria-describedby={errors.name ? "name-error" : undefined}
               className={fieldClass}
             />
             {errors.name && (
@@ -411,32 +531,6 @@ export function CreatorIntakeForm({
               </p>
             )}
           </div>
-
-          {/* The address is fixed once a profile exists — hidden on update so it
-              reads as unchangeable, matching the action preserving it. Suggested
-              from the name, and constrained to URL-safe characters as typed. */}
-          {!editing && (
-            <div className="space-y-1.5">
-              <label htmlFor="slug" className={labelClass}>
-                {copy.slugLabel}
-                <Optional label={copy.optionalLabel} />
-              </label>
-              <input
-                id="slug"
-                name="slug"
-                type="text"
-                inputMode="url"
-                autoCapitalize="none"
-                autoCorrect="off"
-                spellCheck={false}
-                pattern="[a-z0-9-]*"
-                value={slug}
-                onChange={(e) => onSlugChange(e.target.value)}
-                className={fieldClass}
-              />
-              <p className={hintClass}>{copy.slugHint}</p>
-            </div>
-          )}
 
           {/* Studio: pick an existing one (create only), or enter your studio's
               name + URL + logo. On an update the fields prefill with your current
@@ -450,9 +544,9 @@ export function CreatorIntakeForm({
               <select
                 id="studio"
                 name="studio"
-                defaultValue={initial?.studioId ?? ''}
+                defaultValue={initial?.studioId ?? ""}
                 aria-label={copy.studioLabel}
-                className={cn(fieldClass, 'appearance-none')}
+                className={cn(fieldClass, "appearance-none")}
               >
                 <option value="">{copy.studioSelectPlaceholder}</option>
                 {organizations.map((org) => (
@@ -467,7 +561,7 @@ export function CreatorIntakeForm({
               <input
                 type="text"
                 name="studioName"
-                defaultValue={initial?.studioName ?? ''}
+                defaultValue={initial?.studioName ?? ""}
                 placeholder={copy.studioNamePlaceholder}
                 aria-label={copy.studioNamePlaceholder}
                 className={fieldClass}
@@ -475,7 +569,7 @@ export function CreatorIntakeForm({
               <input
                 type="url"
                 name="studioUrl"
-                defaultValue={initial?.studioWebsite || 'https://www.'}
+                defaultValue={initial?.studioWebsite || "https://www."}
                 placeholder={copy.studioUrlPlaceholder}
                 aria-label={copy.studioUrlPlaceholder}
                 className={fieldClass}
@@ -504,15 +598,46 @@ export function CreatorIntakeForm({
                   type="file"
                   accept="image/*"
                   onChange={onImagePick}
-                  className={cn(fieldClass, 'file:mr-3 file:border-0 file:bg-transparent file:text-xs file:uppercase file:text-primary')}
+                  className={cn(
+                    fieldClass,
+                    "file:mr-3 file:border-0 file:bg-transparent file:text-xs file:uppercase file:text-primary",
+                  )}
                 />
                 {imageErrors.studioLogo && (
-                  <p className="text-destructive text-xs">{imageErrors.studioLogo}</p>
+                  <p className="text-destructive text-xs">
+                    {imageErrors.studioLogo}
+                  </p>
                 )}
                 <p className={hintClass}>{copy.studioLogoHint}</p>
               </div>
             </div>
           </fieldset>
+
+          {/* The address (URL slug) is fixed once a profile exists — hidden on
+              update so it reads as unchangeable, matching the action preserving
+              it. Suggested from the name, constrained to URL-safe characters. */}
+          {!editing && (
+            <div className="space-y-1.5">
+              <label htmlFor="slug" className={labelClass}>
+                {copy.slugLabel}
+                <Optional label={copy.optionalLabel} />
+              </label>
+              <input
+                id="slug"
+                name="slug"
+                type="text"
+                inputMode="url"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                pattern="[a-z0-9-]*"
+                value={slug}
+                onChange={(e) => onSlugChange(e.target.value)}
+                className={fieldClass}
+              />
+              <p className={hintClass}>{copy.slugHint}</p>
+            </div>
+          )}
 
           {/* Collectives excludes studios (orgs used as someone's studio), so a
               trading name doesn't show up as a group to join. */}
@@ -524,7 +649,10 @@ export function CreatorIntakeForm({
               </legend>
               <div className="grid gap-2 sm:grid-cols-2">
                 {collectives.map((org) => (
-                  <label key={org._id} className="flex items-center gap-2 text-sm">
+                  <label
+                    key={org._id}
+                    className="flex items-center gap-2 text-sm"
+                  >
                     <input
                       type="checkbox"
                       name="orgs"
@@ -563,7 +691,7 @@ export function CreatorIntakeForm({
               id="location"
               name="location"
               type="text"
-              defaultValue={initialText('location', initial?.location)}
+              defaultValue={initialText("location", initial?.location)}
               className={fieldClass}
             />
           </div>
@@ -583,10 +711,10 @@ export function CreatorIntakeForm({
               required
               rows={5}
               maxLength={8000}
-              defaultValue={initialText('bio', initial?.bio)}
+              defaultValue={initialText("bio", initial?.bio)}
               aria-invalid={Boolean(errors.bio)}
-              aria-describedby={errors.bio ? 'bio-error' : undefined}
-              className={cn(fieldClass, 'resize-y')}
+              aria-describedby={errors.bio ? "bio-error" : undefined}
+              className={cn(fieldClass, "resize-y")}
             />
             {errors.bio && (
               <p id="bio-error" className="text-destructive text-xs">
@@ -624,11 +752,14 @@ export function CreatorIntakeForm({
             <p className={hintClass}>{copy.genresHint}</p>
             <div className="grid gap-2 sm:grid-cols-2">
               {GENRES.map((genre) => {
-                const checked = genres.includes(genre)
+                const checked = genres.includes(genre);
                 return (
                   <label
                     key={genre}
-                    className={cn('flex items-center gap-2 text-sm', !checked && atGenreMax && 'opacity-40')}
+                    className={cn(
+                      "flex items-center gap-2 text-sm",
+                      !checked && atGenreMax && "opacity-40",
+                    )}
                   >
                     <input
                       type="checkbox"
@@ -641,7 +772,7 @@ export function CreatorIntakeForm({
                     />
                     {genre}
                   </label>
-                )
+                );
               })}
             </div>
           </fieldset>
@@ -689,7 +820,9 @@ export function CreatorIntakeForm({
               id="website"
               name="website"
               type="url"
-              defaultValue={initialText('website', initial?.website) || 'https://www.'}
+              defaultValue={
+                initialText("website", initial?.website) || "https://www."
+              }
               className={fieldClass}
             />
           </div>
@@ -703,7 +836,7 @@ export function CreatorIntakeForm({
               id="feedUrl"
               name="feedUrl"
               type="url"
-              defaultValue={initialText('feedUrl', initial?.feedUrl)}
+              defaultValue={initialText("feedUrl", initial?.feedUrl)}
               aria-describedby="feedUrl-hint"
               className={fieldClass}
             />
@@ -725,60 +858,11 @@ export function CreatorIntakeForm({
             rightDefault="https://www."
             addLabel={copy.workAddLabel}
             removeLabel={copy.workRemoveLabel}
-            initial={initial?.works.map((w) => ({ left: w.label, right: w.url }))}
+            initial={initial?.works.map((w) => ({
+              left: w.label,
+              right: w.url,
+            }))}
           />
-        </fieldset>
-
-        {/* — Pictures — */}
-        <fieldset className="space-y-5">
-          <SectionHeading>{copy.sectionPictures}</SectionHeading>
-
-          <div className="space-y-1.5">
-            <label htmlFor="photo" className={labelClass}>
-              {copy.photoLabel}
-              <Optional label={copy.optionalLabel} />
-            </label>
-            {/* On an update, show the existing avatar so the creator knows a
-                re-upload is optional. alt is their own image's alt, or empty
-                (decorative) — the note beside it carries the meaning. */}
-            {initial?.photo && (
-              <div className="mb-2 flex items-center gap-3">
-                <Image
-                  src={urlFor(initial.photo).width(128).height(128).fit('crop').url()}
-                  alt={initial.photoAlt || ''}
-                  width={64}
-                  height={64}
-                  className="size-16 shrink-0 object-cover"
-                />
-                <p className={hintClass}>{copy.photoCurrentHint}</p>
-              </div>
-            )}
-            <input
-              id="photo"
-              name="photo"
-              type="file"
-              accept="image/*"
-              onChange={onImagePick}
-              className={cn(fieldClass, 'file:mr-3 file:border-0 file:bg-transparent file:text-xs file:uppercase file:text-primary')}
-            />
-            {imageErrors.photo && <p className="text-destructive text-xs">{imageErrors.photo}</p>}
-            <p className={hintClass}>{copy.photoHint}</p>
-          </div>
-
-          <div className="space-y-1.5">
-            <label htmlFor="photoAlt" className={labelClass}>
-              {copy.photoAltLabel}
-              <Optional label={copy.optionalLabel} />
-            </label>
-            <input
-              id="photoAlt"
-              name="photoAlt"
-              type="text"
-              defaultValue={initialText('photoAlt', initial?.photoAlt)}
-              className={fieldClass}
-            />
-            <p className={hintClass}>{copy.photoAltHint}</p>
-          </div>
         </fieldset>
 
         {/* — Permission — */}
@@ -793,7 +877,9 @@ export function CreatorIntakeForm({
                 value="yes"
                 required
                 aria-invalid={Boolean(errors.permission)}
-                aria-describedby={errors.permission ? 'permission-error' : undefined}
+                aria-describedby={
+                  errors.permission ? "permission-error" : undefined
+                }
                 className="mt-0.5 size-4 accent-[var(--primary)]"
               />
               <span>{copy.permissionStatement}</span>
@@ -828,22 +914,27 @@ export function CreatorIntakeForm({
               id="anythingElse"
               name="anythingElse"
               rows={3}
-              defaultValue={initialText('anythingElse')}
-              className={cn(fieldClass, 'resize-y')}
+              defaultValue={initialText("anythingElse")}
+              className={cn(fieldClass, "resize-y")}
             />
           </div>
         </fieldset>
 
-        {state.status === 'error' && !state.fieldErrors && (
+        {state.status === "error" && !state.fieldErrors && (
           <p role="alert" className="text-destructive text-sm">
             {state.message ?? copy.errorMessage}
           </p>
         )}
 
-        <Button type="submit" size="lg" disabled={pending} className="font-black tracking-wide uppercase">
+        <Button
+          type="submit"
+          size="lg"
+          disabled={pending}
+          className="font-black tracking-wide uppercase"
+        >
           {copy.submitLabel}
         </Button>
       </form>
     </>
-  )
+  );
 }

@@ -1367,7 +1367,15 @@ export default defineType({
           name: "heading",
           title: "Creator form · Heading",
           type: "string",
-          description: "The h1 on /join/creators.",
+          description:
+            'The h1 on /join/creators for a NEW profile — e.g. "Get Listed".',
+        }),
+        defineField({
+          name: "editHeading",
+          title: "Creator form · Heading (editing)",
+          type: "string",
+          description:
+            'The h1 on /join/creators when a returning owner is editing their profile — e.g. "Update Profile".',
         }),
         defineField({
           name: "body",
@@ -1428,6 +1436,21 @@ export default defineType({
             "Shown instead of the create heading when a signed-in creator is editing their own profile.",
         }),
         defineField({
+          name: "oneProfileHeading",
+          title: "One-profile-per-account — heading",
+          type: "string",
+          description:
+            'Shown when an owner tries to create a SECOND profile on the same Google account (only one is allowed) — e.g. "One profile per account".',
+        }),
+        defineField({
+          name: "oneProfileBody",
+          title: "One-profile-per-account — explanation",
+          type: "text",
+          rows: 3,
+          description:
+            "Explains that each Google account has one profile, and that a separate profile needs a different Google account (sign out to switch). Shown with a Sign out button and a link back to editing.",
+        }),
+        defineField({
           name: "intro",
           title: "Form intro line",
           type: "string",
@@ -1484,11 +1507,6 @@ export default defineType({
         defineField({
           name: "sectionFind",
           title: "Section: where to find you",
-          type: "string",
-        }),
-        defineField({
-          name: "sectionPictures",
-          title: "Section: pictures",
           type: "string",
         }),
         defineField({

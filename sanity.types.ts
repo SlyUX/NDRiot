@@ -884,6 +884,7 @@ export type SiteSettings = {
     terms?: string;
     termsWhy?: string;
     heading?: string;
+    editHeading?: string;
     body?: Array<{
       children?: Array<{
         marks?: Array<string>;
@@ -904,6 +905,8 @@ export type SiteSettings = {
   creatorIntake?: {
     heading?: string;
     editHeading?: string;
+    oneProfileHeading?: string;
+    oneProfileBody?: string;
     intro?: string;
     updatePrompt?: string;
     updateSelectLabel?: string;
@@ -914,7 +917,6 @@ export type SiteSettings = {
     sectionYou?: string;
     sectionWork?: string;
     sectionFind?: string;
-    sectionPictures?: string;
     sectionPermission?: string;
     nameLabel?: string;
     slugLabel?: string;
