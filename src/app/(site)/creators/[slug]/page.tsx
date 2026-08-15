@@ -10,6 +10,7 @@ import { OrganizationLink } from "@/components/organization-link";
 import PortableTextBody from "@/components/PortableTextBody";
 import { SaveButton } from "@/components/save-button";
 import SocialLinks from "@/components/SocialLinks";
+import { SocialIcon } from "@/components/social-icon";
 import { SectionHeading } from "@/components/section-heading";
 import { UpdateFeed } from "@/components/update-feed";
 import { ShareBar } from "@/components/share-bar";
@@ -120,6 +121,18 @@ export default async function CreatorPage({
     ? await fetchFeed(creator.feedUrl, { revalidate: 1800 })
     : null;
 
+  // The left column (photo, owner link, socials + website, genre/format chips).
+  // If empty, it collapses so the info column fills the row.
+  const hasSidebar = Boolean(
+    creator.photo ||
+    isOwner ||
+    creator.socials?.length ||
+    creator.website ||
+    creator.genres?.length ||
+    creator.formats?.length ||
+    creator.audience,
+  );
+
   return (
     <div>
       <JsonLd
@@ -170,8 +183,10 @@ export default async function CreatorPage({
             {/* items-start so the portrait's top aligns with the creator name,
                 rather than its bottom aligning with the last line of info. */}
             <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-              {(creator.photo || isOwner) && (
-                <div className="flex shrink-0 flex-col items-center gap-2 sm:items-start">
+              {hasSidebar && (
+                // Left-aligned on every size (no mobile centering), sized to the
+                // portrait so the contacts and chips stack neatly beneath it.
+                <div className="flex shrink-0 flex-col items-start gap-3 sm:w-40">
                   {creator.photo && (
                     <div className="relative h-40 w-40 overflow-hidden">
                       <Image
@@ -191,6 +206,54 @@ export default async function CreatorPage({
                     >
                       {settings.sections.profileOwnerDashboardLabel}
                     </Link>
+                  )}
+
+                  {/* Socials + the website, as icons. */}
+                  {(creator.socials?.length || creator.website) && (
+                    <div className="-ml-2.5 flex flex-wrap items-center gap-1">
+                      <SocialLinks socials={creator.socials} />
+                      {creator.website && (
+                        <a
+                          href={externalHref(creator.website)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="Website"
+                          title="Website"
+                          className="text-muted-foreground hover:text-primary focus-visible:ring-ring flex size-10 items-center justify-center transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                        >
+                          <SocialIcon platform="Website" />
+                        </a>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Genres link out to their category page; formats and audience
+                      have no page, so they stay unlinked. */}
+                  {(creator.genres?.length ||
+                    creator.formats?.length ||
+                    creator.audience) && (
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {creator.genres?.map((genre) => (
+                        <GenreBadge key={genre} genre={genre} size="md" />
+                      ))}
+                      {creator.formats?.map((format) => (
+                        <Badge
+                          key={format}
+                          variant="outline"
+                          className="text-muted-foreground px-2.5 py-0.5 text-[10px] tracking-wider uppercase"
+                        >
+                          {format}
+                        </Badge>
+                      ))}
+                      {creator.audience && (
+                        <Badge
+                          variant="outline"
+                          className="text-muted-foreground px-2.5 py-0.5 text-[10px] tracking-wider uppercase"
+                        >
+                          {creator.audience}
+                        </Badge>
+                      )}
+                    </div>
                   )}
                 </div>
               )}
@@ -213,52 +276,7 @@ export default async function CreatorPage({
                   <p className="text-muted-foreground">{creator.location}</p>
                 )}
 
-                {/* Genres link out to the category page, which lists creators as
-                well as books — so the badge goes somewhere useful rather than
-                being decoration. Formats and audience do not have pages, so
-                they stay unlinked. */}
-                {(creator.genres?.length ||
-                  creator.formats?.length ||
-                  creator.audience) && (
-                  <div className="mt-4 flex flex-wrap items-center gap-1.5">
-                    {creator.genres?.map((genre) => (
-                      <GenreBadge key={genre} genre={genre} size="md" />
-                    ))}
-                    {creator.formats?.map((format) => (
-                      <Badge
-                        key={format}
-                        variant="outline"
-                        className="text-muted-foreground px-2.5 py-0.5 text-[10px] tracking-wider uppercase"
-                      >
-                        {format}
-                      </Badge>
-                    ))}
-                    {creator.audience && (
-                      <Badge
-                        variant="outline"
-                        className="text-muted-foreground px-2.5 py-0.5 text-[10px] tracking-wider uppercase"
-                      >
-                        {creator.audience}
-                      </Badge>
-                    )}
-                  </div>
-                )}
-
-                <div className="mt-3">
-                  <SocialLinks socials={creator.socials} />
-                </div>
-                {creator.website && (
-                  <a
-                    href={externalHref(creator.website)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary mt-1 block text-sm hover:underline"
-                  >
-                    {creator.website}
-                  </a>
-                )}
-
-                {/* Below the contact links, deliberately: "here's where to find me"
+                {/* Deliberately: "here's where to find me"
                 then "and I'm open to collaborate" reads as one thought, so the
                 reader connects the invitation to the means of reaching out — no
                 icon needed. Only for an explicit yes: `false` and "never
