@@ -1,223 +1,303 @@
-import type { Metadata } from 'next'
-import Image from 'next/image'
-import { notFound } from 'next/navigation'
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 
-import { ContentCardGrid } from '@/components/content-card-grid'
-import { FeedPreview } from '@/components/feed-preview'
-import { JsonLd } from '@/components/json-ld'
-import { OrganizationLink } from '@/components/organization-link'
-import PortableTextBody from '@/components/PortableTextBody'
-import { SaveButton } from '@/components/save-button'
-import SocialLinks from '@/components/SocialLinks'
-import { SectionHeading } from '@/components/section-heading'
-import { UpdateFeed } from '@/components/update-feed'
-import { ShareBar } from '@/components/share-bar'
-import { GenreBadge } from '@/components/genre-badge'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { externalHref } from '@/lib/utils'
-import { Section } from '@/components/ui/section'
-import { bookToCard, favoriteToCard } from '@/lib/card-mappers'
-import { pageMetadata } from '@/lib/page-metadata'
-import { auth } from '@/auth'
-import { isSaved } from '@/sanity/reader-client'
-import { fetchFeed } from '@/lib/feed-parse'
-import { safeFetch, CREATOR_QUERY, CREATOR_UPDATES_QUERY } from '@/lib/queries'
-import { getSiteSettings } from '@/lib/site-settings'
-import { absoluteUrl } from '@/lib/site-url'
-import { breadcrumbSchema, comicMakerSchema, jsonLdGraph } from '@/lib/structured-data'
-import type { CreatorDetail, UpdateFeedItem } from '@/lib/types'
-import { urlFor } from '@/sanity/image'
+import { ContentCardGrid } from "@/components/content-card-grid";
+import { FeedPreview } from "@/components/feed-preview";
+import { JsonLd } from "@/components/json-ld";
+import { OrganizationLink } from "@/components/organization-link";
+import PortableTextBody from "@/components/PortableTextBody";
+import { SaveButton } from "@/components/save-button";
+import SocialLinks from "@/components/SocialLinks";
+import { SectionHeading } from "@/components/section-heading";
+import { UpdateFeed } from "@/components/update-feed";
+import { ShareBar } from "@/components/share-bar";
+import { GenreBadge } from "@/components/genre-badge";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { externalHref } from "@/lib/utils";
+import { Section } from "@/components/ui/section";
+import { bookToCard, favoriteToCard } from "@/lib/card-mappers";
+import { pageMetadata } from "@/lib/page-metadata";
+import { auth } from "@/auth";
+import { isSaved } from "@/sanity/reader-client";
+import { ownsCreator } from "@/sanity/ownership-client";
+import { fetchFeed } from "@/lib/feed-parse";
+import { safeFetch, CREATOR_QUERY, CREATOR_UPDATES_QUERY } from "@/lib/queries";
+import { getSiteSettings } from "@/lib/site-settings";
+import { absoluteUrl } from "@/lib/site-url";
+import {
+  breadcrumbSchema,
+  comicMakerSchema,
+  jsonLdGraph,
+} from "@/lib/structured-data";
+import type { CreatorDetail, UpdateFeedItem } from "@/lib/types";
+import { urlFor } from "@/sanity/image";
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params
+  const { slug } = await params;
   const [creator, settings] = await Promise.all([
     safeFetch<CreatorDetail | null>(CREATOR_QUERY, { slug }, null),
     getSiteSettings(),
-  ])
-  if (!creator) return {}
+  ]);
+  if (!creator) return {};
   return pageMetadata({
-    title: creator.name ?? 'Comic Creator',
+    title: creator.name ?? "Comic Creator",
     description: creator.bioText,
     path: `/creators/${slug}`,
     siteTitle: settings.siteTitle,
-  })
+  });
 }
 
-export default async function CreatorPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
+export default async function CreatorPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
   const [creator, settings, session] = await Promise.all([
     safeFetch<CreatorDetail | null>(CREATOR_QUERY, { slug }, null),
     getSiteSettings(),
     auth(),
-  ])
+  ]);
 
   // Real 404 rather than a 200 that says "not found" — search engines and
   // monitoring both read the status code, not the copy.
-  if (!creator) notFound()
+  if (!creator) notFound();
 
-  const email = session?.user?.email
-  const saved = email ? await isSaved(email, creator._id) : false
+  const email = session?.user?.email;
+  // Saved state + whether the viewer owns this profile (for the owner band).
+  // The page is already dynamic + authed, so this is free.
+  const [saved, isOwner] = email
+    ? await Promise.all([
+        isSaved(email, creator._id),
+        ownsCreator(email, creator._id),
+      ])
+    : [false, false];
 
   // Favorites are shown as horizontal creator cards. All on-site in practice;
   // any without a profile or link are dropped.
   const favoriteCards = (creator.favoriteCreators ?? [])
     .map(favoriteToCard)
-    .filter((card): card is NonNullable<typeof card> => card !== null)
+    .filter((card): card is NonNullable<typeof card> => card !== null);
 
   // Possessive, personal headings on this page — favorites and works — take the
   // creator's first name via the {name} placeholder in their CMS copy.
-  const firstName = (creator.name ?? '').split(' ')[0] || (creator.name ?? '')
-  const booksHeading = settings.sections.creatorBooksHeading.replace('{name}', firstName)
-  const favoritesHeading = settings.sections.creatorFavoritesHeading.replace('{name}', firstName)
-  const worksHeading = settings.sections.creatorWorksHeading.replace('{name}', firstName)
-  const feedHeading = settings.sections.feedHeading.replace('{name}', firstName)
-  const updatesHeading = settings.sections.creatorUpdatesHeading.replace('{name}', firstName)
+  const firstName = (creator.name ?? "").split(" ")[0] || (creator.name ?? "");
+  const booksHeading = settings.sections.creatorBooksHeading.replace(
+    "{name}",
+    firstName,
+  );
+  const favoritesHeading = settings.sections.creatorFavoritesHeading.replace(
+    "{name}",
+    firstName,
+  );
+  const worksHeading = settings.sections.creatorWorksHeading.replace(
+    "{name}",
+    firstName,
+  );
+  const feedHeading = settings.sections.feedHeading.replace(
+    "{name}",
+    firstName,
+  );
+  const updatesHeading = settings.sections.creatorUpdatesHeading.replace(
+    "{name}",
+    firstName,
+  );
 
   // Their ND Riot updates — posts targeting this creator or one of their comics.
   const creatorUpdates = await safeFetch<UpdateFeedItem[]>(
     CREATOR_UPDATES_QUERY,
     { creatorId: creator._id, limit: 20 },
     [],
-  )
+  );
 
   // Their own feed (blog, webcomic updates), if they gave one and it's live.
   // Cached for half an hour; a dead or moved feed returns null and shows nothing.
-  const feed = creator.feedUrl ? await fetchFeed(creator.feedUrl, { revalidate: 1800 }) : null
+  const feed = creator.feedUrl
+    ? await fetchFeed(creator.feedUrl, { revalidate: 1800 })
+    : null;
 
   return (
     <div>
       <JsonLd
         data={jsonLdGraph(
           comicMakerSchema({
-            name: creator.name ?? 'Comic Creator',
+            name: creator.name ?? "Comic Creator",
             url: absoluteUrl(`/creators/${slug}`),
             photo: creator.photo,
             bio: creator.bioText,
             socials: creator.socials,
           }),
           breadcrumbSchema([
-            { name: 'Home', path: '/' },
-            { name: 'Comic Creators', path: '/creators' },
-            { name: creator.name ?? 'Comic Creator', path: `/creators/${slug}` },
+            { name: "Home", path: "/" },
+            { name: "Comic Creators", path: "/creators" },
+            {
+              name: creator.name ?? "Comic Creator",
+              path: `/creators/${slug}`,
+            },
           ]),
         )}
       />
+
+      {/* Owner band — only when you're viewing your own profile. A thin notice
+          plus a link to the real edit form (no inline editing here). */}
+      {isOwner && (
+        <div className="bg-charcoal">
+          <div className="mx-auto flex max-w-[90rem] items-center justify-between gap-3 px-6 py-1.5 text-sm">
+            <span className="text-white/80">
+              {settings.sections.profileOwnerBanner}
+            </span>
+            <Link
+              href={`/join/creators?editing=${encodeURIComponent(creator._id)}`}
+              className="text-primary focus-visible:ring-ring font-bold tracking-wide uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none"
+            >
+              {settings.sections.profileOwnerEditLabel}
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* pb-4, not the full md bottom padding: the bio sits close beneath. */}
       <Section as="header" padding="md" className="pb-4">
-        {/* items-start so the portrait's top aligns with the creator name,
-            rather than its bottom aligning with the last line of info. */}
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-          {creator.photo && (
-            <div className="relative h-40 w-40 shrink-0 overflow-hidden">
-              <Image
-                src={urlFor(creator.photo).width(320).height(320).url()}
-                alt={creator.photo.alt ?? `Portrait of ${creator.name}`}
-                fill
-                sizes="160px"
-                className="object-cover"
-              />
-            </div>
-          )}
-          <div>
-            <h1 className="text-4xl font-black tracking-tighter uppercase">{creator.name}</h1>
-            {creator.studio && (
-              <div className="mt-1">
-                {/* Studio shown as text, not its logo: sitting directly beneath
+        {/* The identity block and the creator's updates share a row on desktop. */}
+        <div className="lg:flex lg:items-start lg:gap-8">
+          <div className="lg:flex-1">
+            {/* items-start so the portrait's top aligns with the creator name,
+                rather than its bottom aligning with the last line of info. */}
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+              {creator.photo && (
+                <div className="relative h-40 w-40 shrink-0 overflow-hidden">
+                  <Image
+                    src={urlFor(creator.photo).width(320).height(320).url()}
+                    alt={creator.photo.alt ?? `Portrait of ${creator.name}`}
+                    fill
+                    sizes="160px"
+                    className="object-cover"
+                  />
+                </div>
+              )}
+              <div>
+                <h1 className="text-4xl font-black tracking-tighter uppercase">
+                  {creator.name}
+                </h1>
+                {creator.studio && (
+                  <div className="mt-1">
+                    {/* Studio shown as text, not its logo: sitting directly beneath
                     the portrait, a logo competes with the photo above it. */}
-                <OrganizationLink organization={creator.studio} size="md" display="text" />
-              </div>
-            )}
-            {creator.location && <p className="text-muted-foreground">{creator.location}</p>}
+                    <OrganizationLink
+                      organization={creator.studio}
+                      size="md"
+                      display="text"
+                    />
+                  </div>
+                )}
+                {creator.location && (
+                  <p className="text-muted-foreground">{creator.location}</p>
+                )}
 
-            {/* Genres link out to the category page, which lists creators as
+                {/* Genres link out to the category page, which lists creators as
                 well as books — so the badge goes somewhere useful rather than
                 being decoration. Formats and audience do not have pages, so
                 they stay unlinked. */}
-            {(creator.genres?.length || creator.formats?.length || creator.audience) && (
-              <div className="mt-4 flex flex-wrap items-center gap-1.5">
-                {creator.genres?.map((genre) => (
-                  <GenreBadge key={genre} genre={genre} size="md" />
-                ))}
-                {creator.formats?.map((format) => (
-                  <Badge
-                    key={format}
-                    variant="outline"
-                    className="text-muted-foreground px-2.5 py-0.5 text-[10px] tracking-wider uppercase"
-                  >
-                    {format}
-                  </Badge>
-                ))}
-                {creator.audience && (
-                  <Badge
-                    variant="outline"
-                    className="text-muted-foreground px-2.5 py-0.5 text-[10px] tracking-wider uppercase"
-                  >
-                    {creator.audience}
-                  </Badge>
+                {(creator.genres?.length ||
+                  creator.formats?.length ||
+                  creator.audience) && (
+                  <div className="mt-4 flex flex-wrap items-center gap-1.5">
+                    {creator.genres?.map((genre) => (
+                      <GenreBadge key={genre} genre={genre} size="md" />
+                    ))}
+                    {creator.formats?.map((format) => (
+                      <Badge
+                        key={format}
+                        variant="outline"
+                        className="text-muted-foreground px-2.5 py-0.5 text-[10px] tracking-wider uppercase"
+                      >
+                        {format}
+                      </Badge>
+                    ))}
+                    {creator.audience && (
+                      <Badge
+                        variant="outline"
+                        className="text-muted-foreground px-2.5 py-0.5 text-[10px] tracking-wider uppercase"
+                      >
+                        {creator.audience}
+                      </Badge>
+                    )}
+                  </div>
                 )}
-              </div>
-            )}
 
-            <div className="mt-3">
-              <SocialLinks socials={creator.socials} />
-            </div>
-            {creator.website && (
-              <a
-                href={externalHref(creator.website)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary mt-1 block text-sm hover:underline"
-              >
-                {creator.website}
-              </a>
-            )}
+                <div className="mt-3">
+                  <SocialLinks socials={creator.socials} />
+                </div>
+                {creator.website && (
+                  <a
+                    href={externalHref(creator.website)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary mt-1 block text-sm hover:underline"
+                  >
+                    {creator.website}
+                  </a>
+                )}
 
-            {/* Below the contact links, deliberately: "here's where to find me"
+                {/* Below the contact links, deliberately: "here's where to find me"
                 then "and I'm open to collaborate" reads as one thought, so the
                 reader connects the invitation to the means of reaching out — no
                 icon needed. Only for an explicit yes: `false` and "never
                 answered" both mean no badge, since claiming availability nobody
                 offered is worse than staying quiet. */}
-            {creator.openToCollaboration && (
-              <div className="mt-3">
-                <Badge
-                  variant="outline"
-                  className="border-primary/60 text-primary px-2.5 py-0.5 text-[10px] tracking-widest uppercase"
-                >
-                  {settings.sections.openToCollaborationLabel}
-                </Badge>
-              </div>
-            )}
+                {creator.openToCollaboration && (
+                  <div className="mt-3">
+                    <Badge
+                      variant="outline"
+                      className="border-primary/60 text-primary px-2.5 py-0.5 text-[10px] tracking-widest uppercase"
+                    >
+                      {settings.sections.openToCollaborationLabel}
+                    </Badge>
+                  </div>
+                )}
 
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-              <SaveButton
-                itemType="creator"
-                itemId={creator._id}
-                initialSaved={saved}
-                signedIn={Boolean(email)}
-                saveLabel={settings.sections.saveLabel}
-                savedLabel={settings.sections.savedLabel}
-                signInCopy={{
-                  title: settings.sections.accountSignInTitle,
-                  body: settings.sections.accountSignInBody,
-                  cta: settings.sections.accountSignInCta,
-                }}
-              />
-              <ShareBar
-                title={creator.name ?? ''}
-                url={absoluteUrl(`/creators/${slug}`)}
-                label={settings.sections.shareLabel}
-                copiedLabel={settings.sections.linkCopiedLabel}
-              />
+                <div className="mt-5 flex flex-wrap items-center gap-3">
+                  <SaveButton
+                    itemType="creator"
+                    itemId={creator._id}
+                    initialSaved={saved}
+                    signedIn={Boolean(email)}
+                    saveLabel={settings.sections.saveLabel}
+                    savedLabel={settings.sections.savedLabel}
+                    signInCopy={{
+                      title: settings.sections.accountSignInTitle,
+                      body: settings.sections.accountSignInBody,
+                      cta: settings.sections.accountSignInCta,
+                    }}
+                  />
+                  <ShareBar
+                    title={creator.name ?? ""}
+                    url={absoluteUrl(`/creators/${slug}`)}
+                    label={settings.sections.shareLabel}
+                    copiedLabel={settings.sections.linkCopiedLabel}
+                  />
+                </div>
+              </div>
             </div>
           </div>
+          {creatorUpdates.length > 0 && (
+            <div className="punk-scroll mt-8 lg:mt-0 lg:max-h-[30rem] lg:w-80 lg:shrink-0 lg:overflow-y-auto lg:pr-2">
+              <UpdateFeed
+                heading={updatesHeading}
+                emptyLabel=""
+                updates={creatorUpdates}
+              />
+            </div>
+          )}
         </div>
       </Section>
 
@@ -225,14 +305,6 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
         // pt-2: tight to the header row above, per design.
         <Section padding="md" className="pt-2">
           <PortableTextBody value={creator.bio} />
-        </Section>
-      )}
-
-      {/* Their ND Riot updates — recent news, read-only here (managed from the
-          dashboard). Only shown when there are any. */}
-      {creatorUpdates.length > 0 && (
-        <Section padding="md">
-          <UpdateFeed heading={updatesHeading} emptyLabel="" updates={creatorUpdates} />
         </Section>
       )}
 
@@ -257,7 +329,11 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
           <div className="flex flex-wrap gap-2">
             {creator.works.map((work) => (
               <Button key={work.url} asChild variant="outline" size="sm">
-                <a href={externalHref(work.url)} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={externalHref(work.url)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   {work.label}
                 </a>
               </Button>
@@ -277,7 +353,9 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
           between them. */}
       {!!creator.organizations?.length && (
         <Section padding="md" background="charcoal">
-          <SectionHeading size="sm">{settings.sections.creatorOrganizationsHeading}</SectionHeading>
+          <SectionHeading size="sm">
+            {settings.sections.creatorOrganizationsHeading}
+          </SectionHeading>
           <ul className="flex flex-wrap items-center gap-4">
             {creator.organizations.map((org) => (
               <li key={org._id}>
@@ -302,5 +380,5 @@ export default async function CreatorPage({ params }: { params: Promise<{ slug: 
         />
       )}
     </div>
-  )
+  );
 }

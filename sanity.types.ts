@@ -822,6 +822,8 @@ export type SiteSettings = {
     navJoinLabel?: string;
     creatorBooksHeading?: string;
     creatorUpdatesHeading?: string;
+    profileOwnerBanner?: string;
+    profileOwnerEditLabel?: string;
     creatorWorksHeading?: string;
     creatorOrganizationsHeading?: string;
     openToCollaborationLabel?: string;

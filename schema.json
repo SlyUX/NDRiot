@@ -5142,6 +5142,20 @@
               },
               "optional": true
             },
+            "profileOwnerBanner": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "profileOwnerEditLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "creatorWorksHeading": {
               "type": "objectAttribute",
               "value": {

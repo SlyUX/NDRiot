@@ -460,6 +460,8 @@ export interface SiteSettings {
     navJoinLabel: string
     creatorBooksHeading: string
     creatorUpdatesHeading: string
+    profileOwnerBanner: string
+    profileOwnerEditLabel: string
     creatorWorksHeading: string
     creatorOrganizationsHeading: string
     creatorFavoritesHeading: string
@@ -941,6 +943,8 @@ const DEFAULTS: SiteSettings = {
     navJoinLabel: 'Join',
     creatorBooksHeading: '{name}’s Comics',
     creatorUpdatesHeading: '{name}’s Updates',
+    profileOwnerBanner: 'You’re logged into this profile.',
+    profileOwnerEditLabel: 'Edit your Profile',
     creatorWorksHeading: 'Where to find {name}’s work',
     creatorOrganizationsHeading: 'Member of',
     creatorFavoritesHeading: '{name}’s Cosigns',
