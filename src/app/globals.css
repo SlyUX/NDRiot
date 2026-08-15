@@ -149,6 +149,24 @@
   }
 }
 
+/* A persistent, square, pink scrollbar for capped scroll regions (the hero
+   rail). Styling ::-webkit-scrollbar opts out of macOS overlay scrollbars, so
+   the indicator stays visible instead of fading. Square to match --radius: 0. */
+.punk-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) color-mix(in srgb, var(--foreground) 10%, transparent);
+}
+.punk-scroll::-webkit-scrollbar {
+  width: 10px;
+}
+.punk-scroll::-webkit-scrollbar-track {
+  background: color-mix(in srgb, var(--foreground) 10%, transparent);
+}
+.punk-scroll::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 0;
+}
+
 /* AGENTS.md §10 — honor reduced-motion globally so individual components
    don't each have to remember to. */
 @media (prefers-reduced-motion: reduce) {

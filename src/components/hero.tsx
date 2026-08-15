@@ -276,7 +276,7 @@ function FeedRail({
         </h2>
         <span className="h-px flex-1 bg-white/20" aria-hidden="true" />
       </div>
-      <ul className="max-h-[26rem] space-y-4 overflow-y-auto pr-1">
+      <ul className="space-y-4">
         {items.map((item) => (
           <FeedRow key={item._id} item={item} />
         ))}
@@ -380,7 +380,7 @@ export function Hero({
         {/* The split: featured book left, updates rail right (new arrivals when
             there are no updates yet). */}
         {(feature || feedItems.length > 0 || newItems.length > 0) && (
-          <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_350px] lg:gap-8">
+          <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_350px] lg:items-start lg:gap-8">
             {feature && (
               <div className="flex h-full flex-col">
                 {/* Heading row: the section name left, the Spin control right —
@@ -410,9 +410,17 @@ export function Hero({
             )}
 
             {/* Rail: a reader's followed updates (when any) stacked over the
-                new-arrivals list, which is always there to keep it populated. */}
+                new-arrivals list, which is always there to keep it populated. On
+                desktop the two scroll as one capped unit (a persistent pink
+                scrollbar) so the hero doesn't dominate the fold; on phones it
+                just flows, to avoid trapping touch-scroll. */}
             {(feedItems.length > 0 || newItems.length > 0) && (
-              <div className={cn('space-y-8', !feature && 'lg:col-span-full')}>
+              <div
+                className={cn(
+                  'punk-scroll space-y-8 lg:max-h-[500px] lg:overflow-y-scroll lg:pr-2',
+                  !feature && 'lg:col-span-full',
+                )}
+              >
                 {feedItems.length > 0 && (
                   <FeedRail heading={feedHeading} items={feedItems} userType={feedUserType} />
                 )}
