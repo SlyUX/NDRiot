@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Pencil } from 'lucide-react'
+import { Eye, Pencil } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 
@@ -69,36 +69,32 @@ export function YourComics({
         <ul
           id="your-comics-rail"
           className={cn(
-            'punk-scroll mt-4 flex gap-4 overflow-x-auto pb-3',
+            'punk-scroll mt-4 flex gap-3 overflow-x-auto pb-3',
             !open && 'hidden lg:flex',
           )}
         >
           {books.map((book) => (
-            <li key={book.id} className="w-[300px] max-w-[300px] shrink-0">
-              <div className="relative aspect-[2/3] w-full overflow-hidden bg-white/10">
-                {book.coverUrl && (
-                  <Image
-                    src={book.coverUrl}
-                    alt=""
-                    fill
-                    sizes="300px"
-                    className="object-cover"
-                  />
-                )}
-              </div>
-              {book.href ? (
-                <Link href={book.href} className="mt-2 block font-bold text-white hover:underline">
-                  {book.title}
+            <li key={book.id} className="relative aspect-[2/3] w-[70px] shrink-0 overflow-hidden bg-white/10">
+              {book.coverUrl && (
+                <Image src={book.coverUrl} alt="" fill sizes="70px" className="object-cover" />
+              )}
+              {/* Actions on chips so they stay visible over any cover: view the
+                  public page (lower-left), edit (lower-right). */}
+              {book.href && (
+                <Link
+                  href={book.href}
+                  aria-label={book.title}
+                  className="focus-visible:ring-ring absolute bottom-0 left-0 inline-flex bg-black/70 p-1.5 text-white transition-colors hover:text-white/70 focus-visible:ring-2 focus-visible:-outline-offset-2 focus-visible:outline-none"
+                >
+                  <Eye aria-hidden="true" className="size-3.5" />
                 </Link>
-              ) : (
-                <span className="mt-2 block font-bold text-white">{book.title}</span>
               )}
               <Link
                 href={book.editHref}
                 aria-label={`${editLabel} — ${book.title}`}
-                className="focus-visible:ring-ring mt-1 inline-flex text-white transition-colors hover:text-white/70 focus-visible:ring-2 focus-visible:outline-none"
+                className="focus-visible:ring-ring absolute right-0 bottom-0 inline-flex bg-black/70 p-1.5 text-white transition-colors hover:text-white/70 focus-visible:ring-2 focus-visible:-outline-offset-2 focus-visible:outline-none"
               >
-                <Pencil aria-hidden="true" className="size-4" />
+                <Pencil aria-hidden="true" className="size-3.5" />
               </Link>
             </li>
           ))}

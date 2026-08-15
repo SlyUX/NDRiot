@@ -348,22 +348,25 @@ export default async function AccountPage() {
                 <SectionHeading as="h2" size="sm">
                   {s.accountSavedComicsHeading}
                 </SectionHeading>
-                <ul>
+                {/* A wrapping grid of covers — each links to the book, Remove in
+                    the corner. */}
+                <ul className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))] gap-3">
                   {savedBooks.map((book) => (
                     <SavedItemRow
                       key={book._id}
+                      layout="tile"
                       itemId={book._id}
                       title={book.title ?? 'Untitled'}
                       href={book.slug ? `/books/${book.slug}` : null}
                       removeLabel={s.accountRemoveLabel}
                       thumb={
-                        <div className="bg-muted relative aspect-[2/3] w-9 shrink-0 overflow-hidden">
+                        <div className="bg-muted relative aspect-[2/3] w-full overflow-hidden">
                           {book.cover && (
                             <Image
-                              src={urlFor(book.cover).width(72).url()}
+                              src={urlFor(book.cover).width(200).url()}
                               alt=""
                               fill
-                              sizes="36px"
+                              sizes="6rem"
                               className="object-cover"
                             />
                           )}

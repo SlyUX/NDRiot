@@ -900,7 +900,7 @@ const DEFAULTS: SiteSettings = {
     accountEditLabel: 'Edit',
     accountViewCreatorLabel: 'Creator Profile',
     accountViewMediaLabel: 'Media Page',
-    accountSavedComicsHeading: 'Saved Comics',
+    accountSavedComicsHeading: 'Your Saved Comics',
     accountSavedCreatorsHeading: 'Favorite Creators',
     accountRemoveLabel: 'Remove',
     accountPostHeading: 'Post an Update',
