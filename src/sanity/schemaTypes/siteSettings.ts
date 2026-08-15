@@ -446,6 +446,8 @@ export default defineType({
         defineField({ name: 'accountPostSuccess', title: 'Reader home — post-update success message', type: 'string', description: 'Shown after a successful post — e.g. "Posted. Your followers will see it.".' }),
         defineField({ name: 'accountFeedHeading', title: 'Reader home — update feed heading', type: 'string', description: 'Heading over updates from saved comics/creators — e.g. "From Who You Follow".' }),
         defineField({ name: 'accountFeedEmpty', title: 'Reader home — update feed empty line', type: 'text', rows: 2, description: 'Shown when a reader follows people but there are no updates yet.' }),
+        defineField({ name: 'accountMyUpdatesHeading', title: 'Reader home — your own updates heading', type: 'string', description: 'Heading over a creator’s own posted updates on the dashboard — e.g. "Your Updates".' }),
+        defineField({ name: 'accountMyUpdatesEmpty', title: 'Reader home — your own updates empty line', type: 'text', rows: 2, description: 'Shown when a creator hasn’t posted any updates yet.' }),
         defineField({ name: 'accountSignInTitle', title: 'Reader home — signed-out title', type: 'string' }),
         defineField({ name: 'accountSignInBody', title: 'Reader home — signed-out body', type: 'text', rows: 2 }),
         defineField({ name: 'accountSignInCta', title: 'Reader home — sign-in button', type: 'string' }),

@@ -808,6 +808,8 @@ export type SiteSettings = {
     accountPostSuccess?: string;
     accountFeedHeading?: string;
     accountFeedEmpty?: string;
+    accountMyUpdatesHeading?: string;
+    accountMyUpdatesEmpty?: string;
     accountSignInTitle?: string;
     accountSignInBody?: string;
     accountSignInCta?: string;

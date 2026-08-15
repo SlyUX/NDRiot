@@ -5044,6 +5044,20 @@
               },
               "optional": true
             },
+            "accountMyUpdatesHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "accountMyUpdatesEmpty": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "accountSignInTitle": {
               "type": "objectAttribute",
               "value": {

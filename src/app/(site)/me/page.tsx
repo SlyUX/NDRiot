@@ -121,6 +121,13 @@ export default async function AccountPage() {
   const isCreator = ownedCreators.length > 0
   const hasSaves = savedBooks.length > 0 || savedCreators.length > 0
 
+  // Your Updates — the creator's own posts (updates targeting a creator or comic
+  // they own), for the dashboard. Owner-editable, same as on the profile.
+  const ownedTargetIds = [...ownedCreatorIds, ...ownedBooks.map((book) => book._id)]
+  const myUpdates = ownedTargetIds.length
+    ? await safeFetch<UpdateFeedItem[]>(UPDATES_FEED_QUERY, { ids: ownedTargetIds, limit: 30 }, [])
+    : []
+
   // Precomputed for the Your Comics rail (a client component takes plain data).
   const yourComicsBooks: YourComicsBook[] = ownedBooks.map((book) => ({
     id: book._id,
@@ -331,8 +338,8 @@ export default async function AccountPage() {
         </Section>
       )}
 
-      {/* Your Feed + Saved Comics, side by side; Favorite Creators below. */}
-      {(followIds.length > 0 || savedBooks.length > 0) && (
+      {/* Your Feed (who you follow) + Your Updates (your own posts). */}
+      {(followIds.length > 0 || isCreator) && (
         <Section padding="md">
           <div className="grid gap-8 lg:grid-cols-2">
             {followIds.length > 0 && (
@@ -341,6 +348,60 @@ export default async function AccountPage() {
                 emptyLabel={s.accountFeedEmpty}
                 updates={updates}
               />
+            )}
+            {isCreator && (
+              <UpdateFeed
+                heading={s.accountMyUpdatesHeading}
+                emptyLabel={s.accountMyUpdatesEmpty}
+                updates={myUpdates}
+                owner={{
+                  deleteLabel: s.updateDeleteLabel,
+                  deletedLabel: s.updateDeletedLabel,
+                  undoLabel: s.updateUndoLabel,
+                }}
+              />
+            )}
+          </div>
+        </Section>
+      )}
+
+      {/* Favorite Creators + Your Saved Comics, side by side. */}
+      {(savedCreators.length > 0 || savedBooks.length > 0) && (
+        <Section padding="md">
+          <div className="grid gap-8 lg:grid-cols-2">
+            {savedCreators.length > 0 && (
+              <div>
+                <SectionHeading as="h2" size="sm">
+                  {s.accountSavedCreatorsHeading}
+                </SectionHeading>
+                <ul className="mt-4">
+                  {savedCreators.map((creator) => (
+                    <SavedItemRow
+                      key={creator._id}
+                      itemId={creator._id}
+                      itemType="creator"
+                      title={creator.name ?? 'Comic Creator'}
+                      href={creator.slug ? `/creators/${creator.slug}` : null}
+                      removeLabel={s.accountRemoveLabel}
+                      removedLabel={s.accountRemovedLabel}
+                      undoLabel={s.accountUndoLabel}
+                      thumb={
+                        <div className="bg-muted relative aspect-square w-9 shrink-0 overflow-hidden">
+                          {creator.photo && (
+                            <Image
+                              src={urlFor(creator.photo).width(72).url()}
+                              alt=""
+                              fill
+                              sizes="36px"
+                              className="object-cover"
+                            />
+                          )}
+                        </div>
+                      }
+                    />
+                  ))}
+                </ul>
+              </div>
             )}
             {savedBooks.length > 0 && (
               <div>
@@ -380,41 +441,6 @@ export default async function AccountPage() {
               </div>
             )}
           </div>
-        </Section>
-      )}
-
-      {savedCreators.length > 0 && (
-        <Section padding="md">
-          <SectionHeading as="h2" size="sm">
-            {s.accountSavedCreatorsHeading}
-          </SectionHeading>
-          <ul className={FEED_GRID}>
-            {savedCreators.map((creator) => (
-              <SavedItemRow
-                key={creator._id}
-                itemId={creator._id}
-                itemType="creator"
-                title={creator.name ?? 'Comic Creator'}
-                href={creator.slug ? `/creators/${creator.slug}` : null}
-                removeLabel={s.accountRemoveLabel}
-                removedLabel={s.accountRemovedLabel}
-                undoLabel={s.accountUndoLabel}
-                thumb={
-                  <div className="bg-muted relative aspect-square w-9 shrink-0 overflow-hidden">
-                    {creator.photo && (
-                      <Image
-                        src={urlFor(creator.photo).width(72).url()}
-                        alt=""
-                        fill
-                        sizes="36px"
-                        className="object-cover"
-                      />
-                    )}
-                  </div>
-                }
-              />
-            ))}
-          </ul>
         </Section>
       )}
 

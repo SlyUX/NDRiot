@@ -82,9 +82,9 @@ export function UpdateRow({
             onClick={onDelete}
             disabled={pending}
             aria-label={labels.deleteLabel}
-            className="hover:text-destructive focus-visible:ring-ring transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
+            className="text-muted-foreground hover:text-destructive focus-visible:ring-ring transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
           >
-            <Trash2 aria-hidden="true" className="size-3.5" />
+            <Trash2 aria-hidden="true" className="size-4" />
           </button>
         }
       />

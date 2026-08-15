@@ -445,6 +445,8 @@ export interface SiteSettings {
     /** Reader update feed (/me). */
     accountFeedHeading: string
     accountFeedEmpty: string
+    accountMyUpdatesHeading: string
+    accountMyUpdatesEmpty: string
     accountSignInTitle: string
     accountSignInBody: string
     accountSignInCta: string
@@ -933,6 +935,8 @@ const DEFAULTS: SiteSettings = {
     accountPostSuccess: 'Posted. Your followers will see it.',
     accountFeedHeading: 'Your Feed',
     accountFeedEmpty: 'Nothing yet. Updates from comics and creators you’ve saved show up here.',
+    accountMyUpdatesHeading: 'Your Updates',
+    accountMyUpdatesEmpty: 'You haven’t posted an update yet.',
     accountSignInTitle: 'Sign in to save comics and creators',
     accountSignInBody:
       'ND Riot uses Google sign-in — it only confirms it’s you, and your saves stay private.',
