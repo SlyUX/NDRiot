@@ -1,16 +1,33 @@
-import type { Metadata } from 'next'
-import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
-import { ContentCardGrid } from '@/components/content-card-grid'
-import { Section } from '@/components/ui/section'
-import { conventionToCard, mediaToCard, resourceToCard } from '@/lib/card-mappers'
-import type { SearchParams } from '@/lib/filters'
-import { RESOURCE_CATEGORY_DESCRIPTIONS, type ResourceCategory } from '@/lib/taxonomy'
-import { pageMetadata } from '@/lib/page-metadata'
-import { safeFetch, CONVENTIONS_QUERY, MEDIA_QUERY, RESOURCES_QUERY } from '@/lib/queries'
-import { getSiteSettings } from '@/lib/site-settings'
-import type { ConventionSummary, MediaSummary, ResourceSummary } from '@/lib/types'
+import { AlternatingSections } from "@/components/alternating-sections";
+import { ContentCardGrid } from "@/components/content-card-grid";
+import { Section } from "@/components/ui/section";
+import {
+  conventionToCard,
+  mediaToCard,
+  resourceToCard,
+} from "@/lib/card-mappers";
+import type { SearchParams } from "@/lib/filters";
+import {
+  RESOURCE_CATEGORY_DESCRIPTIONS,
+  type ResourceCategory,
+} from "@/lib/taxonomy";
+import { pageMetadata } from "@/lib/page-metadata";
+import {
+  safeFetch,
+  CONVENTIONS_QUERY,
+  MEDIA_QUERY,
+  RESOURCES_QUERY,
+} from "@/lib/queries";
+import { getSiteSettings } from "@/lib/site-settings";
+import type {
+  ConventionSummary,
+  MediaSummary,
+  ResourceSummary,
+} from "@/lib/types";
 
 /**
  * Resources — help for indie creators and readers, organized as a hub of rows:
@@ -23,47 +40,50 @@ import type { ConventionSummary, MediaSummary, ResourceSummary } from '@/lib/typ
  * `?category=` narrows to a single category's full grid — the destination each
  * category row's "more" link points to.
  */
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";
 
 /** How many cards a row shows before "more" takes over. */
-const ROW_CAP = 12
+const ROW_CAP = 12;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const settings = await getSiteSettings()
+  const settings = await getSiteSettings();
   return pageMetadata({
     title: settings.sections.resourcesPageTitle,
     description: settings.sections.resourcesPageDescription,
-    path: '/resources',
+    path: "/resources",
     siteTitle: settings.siteTitle,
-  })
+  });
 }
 
 export default async function ResourcesPage({
   searchParams,
 }: {
-  searchParams: Promise<SearchParams>
+  searchParams: Promise<SearchParams>;
 }) {
-  const params = await searchParams
+  const params = await searchParams;
   const [resources, conventions, media, settings] = await Promise.all([
     safeFetch<ResourceSummary[]>(RESOURCES_QUERY, {}, []),
     safeFetch<ConventionSummary[]>(CONVENTIONS_QUERY, {}, []),
     safeFetch<MediaSummary[]>(MEDIA_QUERY, {}, []),
     getSiteSettings(),
-  ])
-  const s = settings.sections
+  ]);
+  const s = settings.sections;
 
   // Group resources by category, preserving the query's alphabetical order.
-  const byCategory = new Map<string, ResourceSummary[]>()
+  const byCategory = new Map<string, ResourceSummary[]>();
   for (const resource of resources) {
-    if (!resource.category) continue
-    const bucket = byCategory.get(resource.category) ?? []
-    bucket.push(resource)
-    byCategory.set(resource.category, bucket)
+    if (!resource.category) continue;
+    const bucket = byCategory.get(resource.category) ?? [];
+    bucket.push(resource);
+    byCategory.set(resource.category, bucket);
   }
 
-  const rawCategory = params.category
-  const requested = (Array.isArray(rawCategory) ? rawCategory[0] : rawCategory)?.trim()
-  const activeCategory = requested && byCategory.has(requested) ? requested : null
+  const rawCategory = params.category;
+  const requested = (
+    Array.isArray(rawCategory) ? rawCategory[0] : rawCategory
+  )?.trim();
+  const activeCategory =
+    requested && byCategory.has(requested) ? requested : null;
 
   // Single-category view — where a row's "more" lands: that category in full.
   if (activeCategory) {
@@ -82,7 +102,9 @@ export default async function ResourcesPage({
           headingAs="h1"
           headingSize="lg"
           heading={activeCategory}
-          subtitle={RESOURCE_CATEGORY_DESCRIPTIONS[activeCategory as ResourceCategory]}
+          subtitle={
+            RESOURCE_CATEGORY_DESCRIPTIONS[activeCategory as ResourceCategory]
+          }
           cards={(byCategory.get(activeCategory) ?? []).map(resourceToCard)}
           layout="vertical"
           columns={3}
@@ -92,7 +114,7 @@ export default async function ResourcesPage({
           emptyMessage={settings.empty.resources}
         />
       </>
-    )
+    );
   }
 
   // Hub: a row per category, then the neighboring directories. Only sections
@@ -103,37 +125,39 @@ export default async function ResourcesPage({
       heading: category,
       subtitle: RESOURCE_CATEGORY_DESCRIPTIONS[category as ResourceCategory],
       cards: items.slice(0, ROW_CAP).map(resourceToCard),
-      aspectRatio: 'landscape' as const,
+      aspectRatio: "landscape" as const,
       href: `/resources?category=${encodeURIComponent(category)}`,
     })),
     ...(conventions.length
       ? [
           {
-            key: 'conventions',
+            key: "conventions",
             heading: s.conventionsPageTitle,
             subtitle: s.conventionsRowSubtitle,
             cards: conventions.slice(0, ROW_CAP).map(conventionToCard),
-            aspectRatio: 'square' as const,
-            href: '/conventions',
+            aspectRatio: "square" as const,
+            href: "/conventions",
           },
         ]
       : []),
     ...(media.length
       ? [
           {
-            key: 'media',
+            key: "media",
             heading: settings.home.mediaHeading,
             subtitle: s.mediaRowSubtitle,
             cards: media.slice(0, ROW_CAP).map(mediaToCard),
-            aspectRatio: 'square' as const,
-            href: '/media',
+            aspectRatio: "square" as const,
+            href: "/media",
           },
         ]
       : []),
-  ]
+  ];
 
   return (
-    <>
+    // The header and every row share the alternating --background / --surface-alt
+    // rhythm (§9), same as home — AlternatingSections injects each one's band.
+    <AlternatingSections>
       <Section as="header" padding="md" className="pb-2">
         <h1 className="text-3xl font-black tracking-tighter uppercase md:text-4xl">
           {s.resourcesPageTitle}
@@ -145,11 +169,12 @@ export default async function ResourcesPage({
 
       {rows.length === 0 ? (
         <Section padding="md">
-          <p className="text-muted-foreground text-sm">{settings.empty.resources}</p>
+          <p className="text-muted-foreground text-sm">
+            {settings.empty.resources}
+          </p>
         </Section>
       ) : (
-        // Alternating charcoal bands separate one row from the next, as on home.
-        rows.map((row, i) => (
+        rows.map((row) => (
           <ContentCardGrid
             key={row.key}
             heading={row.heading}
@@ -162,13 +187,12 @@ export default async function ResourcesPage({
             summaryLines={3}
             scroll
             padding="md"
-            background={i % 2 === 1 ? 'charcoal' : undefined}
             viewAllHref={row.href}
             viewAllLabel={s.resourcesMoreLabel}
             emptyMessage=""
           />
         ))
       )}
-    </>
-  )
+    </AlternatingSections>
+  );
 }

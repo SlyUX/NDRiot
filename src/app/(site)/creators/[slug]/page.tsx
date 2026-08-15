@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { AlternatingSections } from "@/components/alternating-sections";
 import { ContentCardGrid } from "@/components/content-card-grid";
 import { FeedPreview } from "@/components/feed-preview";
 import { JsonLd } from "@/components/json-ld";
@@ -208,226 +209,230 @@ export default async function CreatorPage({
         </div>
       )}
 
-      {/* pb-4, not the full md bottom padding: the bio sits close beneath. */}
-      <Section as="header" padding="md" className="pb-4">
-        {/* The identity block and the creator's updates split the row 50/50 from
+      {/* Everything below the owner band shares the alternating rhythm (§9). */}
+      <AlternatingSections>
+        {/* pb-4, not the full md bottom padding: the bio sits close beneath. */}
+        <Section as="header" padding="md" className="pb-4">
+          {/* The identity block and the creator's updates split the row 50/50 from
             tablet up (stretch, so the updates column can match this one's
             height); they stack on phones. */}
-        <div className="md:flex md:gap-8">
-          <div className="md:w-1/2 md:min-w-0">
-            {/* items-start so the portrait's top aligns with the creator name,
+          <div className="md:flex md:gap-8">
+            <div className="md:w-1/2 md:min-w-0">
+              {/* items-start so the portrait's top aligns with the creator name,
                 rather than its bottom aligning with the last line of info. */}
-            <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-              {hasSidebar && (
-                // Left-aligned on every size (no mobile centering), sized to the
-                // portrait so the contacts and chips stack neatly beneath it.
-                <div className="flex shrink-0 flex-col items-start gap-3 sm:w-40">
-                  {creator.photo && (
-                    <div className="relative h-40 w-40 overflow-hidden">
-                      <Image
-                        src={urlFor(creator.photo).width(320).height(320).url()}
-                        alt={creator.photo.alt ?? `Portrait of ${creator.name}`}
-                        fill
-                        sizes="160px"
-                        className="object-cover"
+              <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+                {hasSidebar && (
+                  // Left-aligned on every size (no mobile centering), sized to the
+                  // portrait so the contacts and chips stack neatly beneath it.
+                  <div className="flex shrink-0 flex-col items-start gap-3 sm:w-40">
+                    {creator.photo && (
+                      <div className="relative h-40 w-40 overflow-hidden">
+                        <Image
+                          src={urlFor(creator.photo)
+                            .width(320)
+                            .height(320)
+                            .url()}
+                          alt={
+                            creator.photo.alt ?? `Portrait of ${creator.name}`
+                          }
+                          fill
+                          sizes="160px"
+                          className="object-cover"
+                        />
+                      </div>
+                    )}
+                    {/* Owner-only shortcut to the dashboard, under the avatar. */}
+                    {isOwner && (
+                      <Link
+                        href="/me"
+                        className="text-primary focus-visible:ring-ring text-sm font-bold tracking-wide uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none"
+                      >
+                        {settings.sections.profileOwnerDashboardLabel}
+                      </Link>
+                    )}
+
+                    {/* Socials + the website, as icons. */}
+                    {(creator.socials?.length || creator.website) && (
+                      <div className="-ml-2.5 flex flex-wrap items-center gap-1">
+                        <SocialLinks socials={creator.socials} />
+                        {creator.website && (
+                          <a
+                            href={externalHref(creator.website)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="Website"
+                            title="Website"
+                            className="text-muted-foreground hover:text-primary focus-visible:ring-ring flex size-10 items-center justify-center transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                          >
+                            <SocialIcon platform="Website" />
+                          </a>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Genres link out to their category page; formats and audience
+                      have no page, so they stay unlinked. */}
+                    {(creator.genres?.length ||
+                      creator.formats?.length ||
+                      creator.audience) && (
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {creator.genres?.map((genre) => (
+                          <GenreBadge key={genre} genre={genre} size="md" />
+                        ))}
+                        {creator.formats?.map((format) => (
+                          <Badge
+                            key={format}
+                            variant="outline"
+                            className="text-muted-foreground px-2.5 py-0.5 text-[10px] tracking-wider uppercase"
+                          >
+                            {format}
+                          </Badge>
+                        ))}
+                        {creator.audience && (
+                          <Badge
+                            variant="outline"
+                            className="text-muted-foreground px-2.5 py-0.5 text-[10px] tracking-wider uppercase"
+                          >
+                            {creator.audience}
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+                <div>
+                  <h1 className="text-4xl font-black tracking-tighter uppercase">
+                    {creator.name}
+                  </h1>
+                  {creator.studio && (
+                    <div className="mt-1">
+                      {/* Studio shown as text, not its logo: sitting directly beneath
+                    the portrait, a logo competes with the photo above it. */}
+                      <OrganizationLink
+                        organization={creator.studio}
+                        size="md"
+                        display="text"
                       />
                     </div>
                   )}
-                  {/* Owner-only shortcut to the dashboard, under the avatar. */}
-                  {isOwner && (
-                    <Link
-                      href="/me"
-                      className="text-primary focus-visible:ring-ring text-sm font-bold tracking-wide uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none"
-                    >
-                      {settings.sections.profileOwnerDashboardLabel}
-                    </Link>
+                  {creator.location && (
+                    <p className="text-muted-foreground">{creator.location}</p>
                   )}
 
-                  {/* Socials + the website, as icons. */}
-                  {(creator.socials?.length || creator.website) && (
-                    <div className="-ml-2.5 flex flex-wrap items-center gap-1">
-                      <SocialLinks socials={creator.socials} />
-                      {creator.website && (
-                        <a
-                          href={externalHref(creator.website)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label="Website"
-                          title="Website"
-                          className="text-muted-foreground hover:text-primary focus-visible:ring-ring flex size-10 items-center justify-center transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                        >
-                          <SocialIcon platform="Website" />
-                        </a>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Genres link out to their category page; formats and audience
-                      have no page, so they stay unlinked. */}
-                  {(creator.genres?.length ||
-                    creator.formats?.length ||
-                    creator.audience) && (
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      {creator.genres?.map((genre) => (
-                        <GenreBadge key={genre} genre={genre} size="md" />
-                      ))}
-                      {creator.formats?.map((format) => (
-                        <Badge
-                          key={format}
-                          variant="outline"
-                          className="text-muted-foreground px-2.5 py-0.5 text-[10px] tracking-wider uppercase"
-                        >
-                          {format}
-                        </Badge>
-                      ))}
-                      {creator.audience && (
-                        <Badge
-                          variant="outline"
-                          className="text-muted-foreground px-2.5 py-0.5 text-[10px] tracking-wider uppercase"
-                        >
-                          {creator.audience}
-                        </Badge>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-              <div>
-                <h1 className="text-4xl font-black tracking-tighter uppercase">
-                  {creator.name}
-                </h1>
-                {creator.studio && (
-                  <div className="mt-1">
-                    {/* Studio shown as text, not its logo: sitting directly beneath
-                    the portrait, a logo competes with the photo above it. */}
-                    <OrganizationLink
-                      organization={creator.studio}
-                      size="md"
-                      display="text"
-                    />
-                  </div>
-                )}
-                {creator.location && (
-                  <p className="text-muted-foreground">{creator.location}</p>
-                )}
-
-                {/* Deliberately: "here's where to find me"
+                  {/* Deliberately: "here's where to find me"
                 then "and I'm open to collaborate" reads as one thought, so the
                 reader connects the invitation to the means of reaching out — no
                 icon needed. Only for an explicit yes: `false` and "never
                 answered" both mean no badge, since claiming availability nobody
                 offered is worse than staying quiet. */}
-                {creator.openToCollaboration && (
-                  <div className="mt-3">
-                    <Badge
-                      variant="outline"
-                      className="border-primary/60 text-primary px-2.5 py-0.5 text-[10px] tracking-widest uppercase"
-                    >
-                      {settings.sections.openToCollaborationLabel}
-                    </Badge>
-                  </div>
-                )}
+                  {creator.openToCollaboration && (
+                    <div className="mt-3">
+                      <Badge
+                        variant="outline"
+                        className="border-primary/60 text-primary px-2.5 py-0.5 text-[10px] tracking-widest uppercase"
+                      >
+                        {settings.sections.openToCollaborationLabel}
+                      </Badge>
+                    </div>
+                  )}
 
-                {creator.bio && (
-                  <div className="mt-5">
-                    <PortableTextBody value={creator.bio} />
-                  </div>
-                )}
+                  {creator.bio && (
+                    <div className="mt-5">
+                      <PortableTextBody value={creator.bio} />
+                    </div>
+                  )}
 
-                <div className="mt-5 flex flex-wrap items-center gap-3">
-                  <SaveButton
-                    itemType="creator"
-                    itemId={creator._id}
-                    initialSaved={saved}
-                    signedIn={Boolean(email)}
-                    saveLabel={settings.sections.saveLabel}
-                    savedLabel={settings.sections.savedLabel}
-                    signInCopy={{
-                      title: settings.sections.accountSignInTitle,
-                      body: settings.sections.accountSignInBody,
-                      cta: settings.sections.accountSignInCta,
-                    }}
-                  />
-                  <ShareBar
-                    title={creator.name ?? ""}
-                    url={absoluteUrl(`/creators/${slug}`)}
-                    label={settings.sections.shareLabel}
-                    copiedLabel={settings.sections.linkCopiedLabel}
-                  />
+                  <div className="mt-5 flex flex-wrap items-center gap-3">
+                    <SaveButton
+                      itemType="creator"
+                      itemId={creator._id}
+                      initialSaved={saved}
+                      signedIn={Boolean(email)}
+                      saveLabel={settings.sections.saveLabel}
+                      savedLabel={settings.sections.savedLabel}
+                      signInCopy={{
+                        title: settings.sections.accountSignInTitle,
+                        body: settings.sections.accountSignInBody,
+                        cta: settings.sections.accountSignInCta,
+                      }}
+                    />
+                    <ShareBar
+                      title={creator.name ?? ""}
+                      url={absoluteUrl(`/creators/${slug}`)}
+                      label={settings.sections.shareLabel}
+                      copiedLabel={settings.sections.linkCopiedLabel}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          {creatorUpdates.length > 0 && (
-            <div className="relative mt-8 md:mt-0 md:w-1/2 md:min-w-0">
-              {/* Absolute on md+ so this column doesn't drive the row height —
+            {creatorUpdates.length > 0 && (
+              <div className="relative mt-8 md:mt-0 md:w-1/2 md:min-w-0">
+                {/* Absolute on md+ so this column doesn't drive the row height —
                   the info block does, and the feed scrolls to match it (same
                   pink scrollbar as My Feed on home). */}
-              <div className="punk-scroll md:absolute md:inset-0 md:overflow-y-auto md:pr-2">
-                <UpdateFeed
-                  heading={updatesHeading}
-                  emptyLabel=""
-                  updates={creatorUpdates}
-                  owner={
-                    isOwner
-                      ? updateOwnerConfig(settings.sections, ownerMentions)
-                      : undefined
-                  }
-                />
+                <div className="punk-scroll md:absolute md:inset-0 md:overflow-y-auto md:pr-2">
+                  <UpdateFeed
+                    heading={updatesHeading}
+                    emptyLabel=""
+                    updates={creatorUpdates}
+                    owner={
+                      isOwner
+                        ? updateOwnerConfig(settings.sections, ownerMentions)
+                        : undefined
+                    }
+                  />
+                </div>
               </div>
-            </div>
-          )}
-        </div>
-      </Section>
-
-      {!!creator.books?.length && (
-        <ContentCardGrid
-          heading={booksHeading}
-          headingSize="sm"
-          cards={creator.books.map(bookToCard)}
-          columns={5}
-          padding="md"
-          emptyMessage={settings.empty.books}
-        />
-      )}
-
-      {feed && (
-        <Section padding="md">
-          <FeedPreview heading={feedHeading} entries={feed.entries} />
+            )}
+          </div>
         </Section>
-      )}
 
-      {/* Organizations and favorites share a charcoal band. They are adjacent,
-          so two charcoal sections read as one continuous background with no gap
-          between them. */}
-      {!!creator.organizations?.length && (
-        <Section padding="md" background="charcoal">
-          <SectionHeading size="sm">
-            {settings.sections.creatorOrganizationsHeading}
-          </SectionHeading>
-          <ul className="flex flex-wrap items-center gap-4">
-            {creator.organizations.map((org) => (
-              <li key={org._id}>
-                <OrganizationLink organization={org} display="badge" />
-              </li>
-            ))}
-          </ul>
-        </Section>
-      )}
+        {!!creator.books?.length && (
+          <ContentCardGrid
+            heading={booksHeading}
+            headingSize="sm"
+            cards={creator.books.map(bookToCard)}
+            columns={5}
+            padding="md"
+            emptyMessage={settings.empty.books}
+          />
+        )}
 
-      {favoriteCards.length > 0 && (
-        <ContentCardGrid
-          heading={favoritesHeading}
-          headingSize="sm"
-          cards={favoriteCards}
-          layout="horizontal"
-          columns={4}
-          summaryLines={4}
-          padding="md"
-          background="charcoal"
-          emptyMessage=""
-        />
-      )}
+        {feed && (
+          <Section padding="md">
+            <FeedPreview heading={feedHeading} entries={feed.entries} />
+          </Section>
+        )}
+
+        {!!creator.organizations?.length && (
+          <Section padding="md">
+            <SectionHeading size="sm">
+              {settings.sections.creatorOrganizationsHeading}
+            </SectionHeading>
+            <ul className="flex flex-wrap items-center gap-4">
+              {creator.organizations.map((org) => (
+                <li key={org._id}>
+                  <OrganizationLink organization={org} display="badge" />
+                </li>
+              ))}
+            </ul>
+          </Section>
+        )}
+
+        {favoriteCards.length > 0 && (
+          <ContentCardGrid
+            heading={favoritesHeading}
+            headingSize="sm"
+            cards={favoriteCards}
+            layout="horizontal"
+            columns={4}
+            summaryLines={4}
+            padding="md"
+            emptyMessage=""
+          />
+        )}
+      </AlternatingSections>
     </div>
   );
 }

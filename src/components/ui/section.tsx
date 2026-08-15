@@ -1,7 +1,7 @@
-import type { ReactNode } from 'react'
-import { cva, type VariantProps } from 'class-variance-authority'
+import type { ReactNode } from "react";
+import { cva, type VariantProps } from "class-variance-authority";
 
-import { cn } from '@/lib/utils'
+import { cn } from "@/lib/utils";
 
 /**
  * Layout backbone. Replaces the repeated
@@ -11,45 +11,47 @@ import { cn } from '@/lib/utils'
  * (so backgrounds run full-bleed), the inner div owns the max-width.
  */
 
-const sectionVariants = cva('', {
+const sectionVariants = cva("", {
   variants: {
     background: {
-      none: '',
-      background: 'bg-background',
-      card: 'bg-card',
-      muted: 'bg-muted',
-      charcoal: 'bg-charcoal',
-      primary: 'bg-primary text-primary-foreground',
-      creator: 'bg-creator text-creator-foreground',
+      none: "",
+      background: "bg-background",
+      /** The raised band in the alternating section rhythm (§9). */
+      alt: "bg-surface-alt",
+      card: "bg-card",
+      muted: "bg-muted",
+      charcoal: "bg-charcoal",
+      primary: "bg-primary text-primary-foreground",
+      creator: "bg-creator text-creator-foreground",
     },
     padding: {
-      none: '',
-      xs: 'px-6 py-4',
+      none: "",
+      xs: "px-6 py-4",
       /**
        * For sections meant to read as one group rather than as separate
        * bands — a filter row and the results it governs, say. Off the
        * 4/8/12/16 rhythm deliberately: it exists to halve the gap between
        * two `md` sections, which lands on 6.
        */
-      tight: 'px-6 py-6',
-      sm: 'px-6 py-8',
-      md: 'px-6 py-12',
-      lg: 'px-6 py-16',
-      hero: 'px-6 pt-32 pb-10',
+      tight: "px-6 py-6",
+      sm: "px-6 py-8",
+      md: "px-6 py-12",
+      lg: "px-6 py-16",
+      hero: "px-6 pt-32 pb-10",
     },
     border: {
-      none: '',
-      top: 'border-t',
-      bottom: 'border-b',
-      both: 'border-y',
+      none: "",
+      top: "border-t",
+      bottom: "border-b",
+      both: "border-y",
     },
   },
   defaultVariants: {
-    background: 'none',
-    padding: 'lg',
-    border: 'none',
+    background: "none",
+    padding: "lg",
+    border: "none",
   },
-})
+});
 
 /**
  * Container widths, narrow to wide.
@@ -65,39 +67,40 @@ const sectionVariants = cva('', {
  * correct rather than a bug — there is no container width that fills an
  * ultrawide monitor without the content becoming unreadable.
  */
-const innerVariants = cva('mx-auto w-full', {
+const innerVariants = cva("mx-auto w-full", {
   variants: {
     maxWidth: {
-      '2xl': 'max-w-2xl',
-      '3xl': 'max-w-3xl',
-      '4xl': 'max-w-4xl',
-      '6xl': 'max-w-6xl',
-      wide: 'max-w-[90rem]',
-      full: 'max-w-none',
+      "2xl": "max-w-2xl",
+      "3xl": "max-w-3xl",
+      "4xl": "max-w-4xl",
+      "6xl": "max-w-6xl",
+      wide: "max-w-[90rem]",
+      full: "max-w-none",
     },
   },
   defaultVariants: {
-    maxWidth: 'wide',
+    maxWidth: "wide",
   },
-})
+});
 
 export interface SectionProps
-  extends VariantProps<typeof sectionVariants>,
+  extends
+    VariantProps<typeof sectionVariants>,
     VariantProps<typeof innerVariants> {
-  children: ReactNode
+  children: ReactNode;
   /** Render as a different element. Use `div` when already inside a <section>. */
-  as?: 'section' | 'div' | 'aside' | 'header' | 'footer' | 'article'
+  as?: "section" | "div" | "aside" | "header" | "footer" | "article";
   /** Anchor target for in-page links. */
-  id?: string
+  id?: string;
   /** Classes for the outer, full-bleed element. */
-  className?: string
+  className?: string;
   /** Classes for the inner, max-width-constrained container. */
-  innerClassName?: string
+  innerClassName?: string;
 }
 
 export function Section({
   children,
-  as: Tag = 'section',
+  as: Tag = "section",
   background,
   padding,
   border,
@@ -110,11 +113,16 @@ export function Section({
     <Tag
       id={id}
       data-slot="section"
-      className={cn(sectionVariants({ background, padding, border }), className)}
+      className={cn(
+        sectionVariants({ background, padding, border }),
+        className,
+      )}
     >
-      <div className={cn(innerVariants({ maxWidth }), innerClassName)}>{children}</div>
+      <div className={cn(innerVariants({ maxWidth }), innerClassName)}>
+        {children}
+      </div>
     </Tag>
-  )
+  );
 }
 
-export { sectionVariants }
+export { sectionVariants };

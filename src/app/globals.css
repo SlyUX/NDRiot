@@ -50,6 +50,7 @@
   --color-creator: var(--creator);
   --color-creator-foreground: var(--creator-foreground);
   --color-reader: var(--reader);
+  --color-surface-alt: var(--surface-alt);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
@@ -92,6 +93,12 @@
   --muted: #18181b;
   /* Charcoal band behind grouped sections — a shade darker than #36454F.
      White text 12.4:1, muted-foreground 4.82:1: both clear AA. */
+  /* The raised band in the alternating section rhythm — a clear step up from
+     --background. White 14.7:1 and --muted-foreground 5.75:1 both clear AA.
+     --primary is only 3.99:1 here, so pink is an ACCENT / large-text color on
+     this band, never small body text: a small pink label that may land on it
+     (the update "kind") sits on a --card chip instead (5.36:1). Surface only. */
+  --surface-alt: #282828;
   --charcoal: #2a3640;
   /* "Currently funding" badge. Black text 11.8:1 (white fails at 1.8:1). */
   --funding: #2bde73;
