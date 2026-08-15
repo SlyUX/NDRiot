@@ -5156,6 +5156,13 @@
               },
               "optional": true
             },
+            "profileOwnerDashboardLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "creatorWorksHeading": {
               "type": "objectAttribute",
               "value": {

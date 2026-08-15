@@ -462,6 +462,7 @@ export interface SiteSettings {
     creatorUpdatesHeading: string
     profileOwnerBanner: string
     profileOwnerEditLabel: string
+    profileOwnerDashboardLabel: string
     creatorWorksHeading: string
     creatorOrganizationsHeading: string
     creatorFavoritesHeading: string
@@ -945,6 +946,7 @@ const DEFAULTS: SiteSettings = {
     creatorUpdatesHeading: '{name}’s Updates',
     profileOwnerBanner: 'You’re logged into this profile.',
     profileOwnerEditLabel: 'Edit your Profile',
+    profileOwnerDashboardLabel: 'My Dashboard',
     creatorWorksHeading: 'Where to find {name}’s work',
     creatorOrganizationsHeading: 'Member of',
     creatorFavoritesHeading: '{name}’s Cosigns',

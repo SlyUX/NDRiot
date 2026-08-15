@@ -167,21 +167,36 @@ export default async function CreatorPage({
 
       {/* pb-4, not the full md bottom padding: the bio sits close beneath. */}
       <Section as="header" padding="md" className="pb-4">
-        {/* The identity block and the creator's updates share a row on desktop. */}
-        <div className="lg:flex lg:items-start lg:gap-8">
-          <div className="lg:flex-1">
+        {/* The identity block and the creator's updates split the row 50/50 from
+            tablet up (stretch, so the updates column can match this one's
+            height); they stack on phones. */}
+        <div className="md:flex md:gap-8">
+          <div className="md:w-1/2 md:min-w-0">
             {/* items-start so the portrait's top aligns with the creator name,
                 rather than its bottom aligning with the last line of info. */}
             <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-              {creator.photo && (
-                <div className="relative h-40 w-40 shrink-0 overflow-hidden">
-                  <Image
-                    src={urlFor(creator.photo).width(320).height(320).url()}
-                    alt={creator.photo.alt ?? `Portrait of ${creator.name}`}
-                    fill
-                    sizes="160px"
-                    className="object-cover"
-                  />
+              {(creator.photo || isOwner) && (
+                <div className="flex shrink-0 flex-col items-center gap-2 sm:items-start">
+                  {creator.photo && (
+                    <div className="relative h-40 w-40 overflow-hidden">
+                      <Image
+                        src={urlFor(creator.photo).width(320).height(320).url()}
+                        alt={creator.photo.alt ?? `Portrait of ${creator.name}`}
+                        fill
+                        sizes="160px"
+                        className="object-cover"
+                      />
+                    </div>
+                  )}
+                  {/* Owner-only shortcut to the dashboard, under the avatar. */}
+                  {isOwner && (
+                    <Link
+                      href="/me"
+                      className="text-primary focus-visible:ring-ring text-sm font-bold tracking-wide uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none"
+                    >
+                      {settings.sections.profileOwnerDashboardLabel}
+                    </Link>
+                  )}
                 </div>
               )}
               <div>
@@ -290,12 +305,17 @@ export default async function CreatorPage({
             </div>
           </div>
           {creatorUpdates.length > 0 && (
-            <div className="punk-scroll mt-8 lg:mt-0 lg:max-h-[30rem] lg:w-80 lg:shrink-0 lg:overflow-y-auto lg:pr-2">
-              <UpdateFeed
-                heading={updatesHeading}
-                emptyLabel=""
-                updates={creatorUpdates}
-              />
+            <div className="relative mt-8 md:mt-0 md:w-1/2 md:min-w-0">
+              {/* Absolute on md+ so this column doesn't drive the row height —
+                  the info block does, and the feed scrolls to match it (same
+                  pink scrollbar as My Feed on home). */}
+              <div className="punk-scroll md:absolute md:inset-0 md:overflow-y-auto md:pr-2">
+                <UpdateFeed
+                  heading={updatesHeading}
+                  emptyLabel=""
+                  updates={creatorUpdates}
+                />
+              </div>
             </div>
           )}
         </div>

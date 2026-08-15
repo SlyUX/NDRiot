@@ -472,6 +472,7 @@ export default defineType({
         }),
         defineField({ name: 'profileOwnerBanner', title: 'Creator page — owner band text', type: 'string', description: 'Shown in a thin band when a creator views their own profile — e.g. "You’re logged into this profile.".' }),
         defineField({ name: 'profileOwnerEditLabel', title: 'Creator page — owner edit link', type: 'string', description: 'The edit link in the owner band → the full edit form — e.g. "Edit your Profile".' }),
+        defineField({ name: 'profileOwnerDashboardLabel', title: 'Creator page — owner dashboard link', type: 'string', description: 'Shown under the avatar when the owner views their profile → /me — e.g. "My Dashboard".' }),
         defineField({
           name: 'creatorWorksHeading',
           title: 'Creator page — external works heading',
