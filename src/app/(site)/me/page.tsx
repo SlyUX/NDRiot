@@ -426,6 +426,7 @@ export default async function AccountPage() {
                   heading={s.accountFeedHeading}
                   emptyLabel={s.accountFeedEmpty}
                   updates={updates}
+                  scrollCap
                 />
               )}
               {isCreator && (
@@ -434,6 +435,7 @@ export default async function AccountPage() {
                   emptyLabel={s.accountMyUpdatesEmpty}
                   updates={myUpdates}
                   owner={updateOwnerConfig(s, mentionOptions)}
+                  scrollCap
                 />
               )}
             </div>
@@ -449,10 +451,15 @@ export default async function AccountPage() {
                   <SectionHeading as="h2" size="sm">
                     {s.accountSavedCreatorsHeading}
                   </SectionHeading>
-                  <ul className="mt-4">
+                  {/* A wrapping grid of square portraits, name beneath — mirrors
+                      Your Saved Comics, but a face needs its name to be legible. */}
+                  <ul className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))] gap-3">
                     {savedCreators.map((creator) => (
                       <SavedItemRow
                         key={creator._id}
+                        layout="tile"
+                        tileAspect="square"
+                        caption
                         itemId={creator._id}
                         itemType="creator"
                         title={creator.name ?? "Comic Creator"}
@@ -461,13 +468,13 @@ export default async function AccountPage() {
                         removedLabel={s.accountRemovedLabel}
                         undoLabel={s.accountUndoLabel}
                         thumb={
-                          <div className="bg-muted relative aspect-square w-9 shrink-0 overflow-hidden">
+                          <div className="bg-muted relative aspect-square w-full overflow-hidden">
                             {creator.photo && (
                               <Image
-                                src={urlFor(creator.photo).width(72).url()}
+                                src={urlFor(creator.photo).width(200).url()}
                                 alt=""
                                 fill
-                                sizes="36px"
+                                sizes="6rem"
                                 className="object-cover"
                               />
                             )}

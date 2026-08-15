@@ -4827,6 +4827,20 @@
               },
               "optional": true
             },
+            "followLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "followingLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "accountTitle": {
               "type": "objectAttribute",
               "value": {

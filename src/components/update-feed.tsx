@@ -1,7 +1,7 @@
-import { SectionHeading } from '@/components/section-heading'
-import { UpdateItemContent } from '@/components/update-item-content'
-import { UpdateRow, type UpdateOwnerConfig } from '@/components/update-row'
-import type { UpdateFeedItem } from '@/lib/types'
+import { SectionHeading } from "@/components/section-heading";
+import { UpdateItemContent } from "@/components/update-item-content";
+import { UpdateRow, type UpdateOwnerConfig } from "@/components/update-row";
+import type { UpdateFeedItem } from "@/lib/types";
 
 /**
  * An update feed, newest first — pure recency, never ranked or counted (§3).
@@ -14,13 +14,34 @@ export function UpdateFeed({
   emptyLabel,
   updates,
   owner,
+  scrollCap = false,
 }: {
-  heading: string
-  emptyLabel: string
-  updates: UpdateFeedItem[]
+  heading: string;
+  emptyLabel: string;
+  updates: UpdateFeedItem[];
   /** Present only when the viewer owns these updates — enables edit + delete/undo. */
-  owner?: UpdateOwnerConfig
+  owner?: UpdateOwnerConfig;
+  /**
+   * Cap the list at 450px and scroll the overflow (the dashboard's Your Feed /
+   * Your Updates columns), with the same persistent pink scrollbar as the hero
+   * rail. The heading stays fixed above the scroll region.
+   */
+  scrollCap?: boolean;
 }) {
+  const list = (
+    <ul className="border-border divide-border divide-y border-t">
+      {updates.map((update) =>
+        owner ? (
+          <UpdateRow key={update._id} update={update} config={owner} />
+        ) : (
+          <li key={update._id} className="py-4">
+            <UpdateItemContent update={update} />
+          </li>
+        ),
+      )}
+    </ul>
+  );
+
   return (
     <div>
       <SectionHeading as="h2" size="sm">
@@ -28,19 +49,13 @@ export function UpdateFeed({
       </SectionHeading>
       {updates.length === 0 ? (
         <p className="text-muted-foreground text-sm">{emptyLabel}</p>
+      ) : scrollCap ? (
+        <div className="punk-scroll max-h-[450px] overflow-y-auto pr-2">
+          {list}
+        </div>
       ) : (
-        <ul className="border-border divide-border divide-y border-t">
-          {updates.map((update) =>
-            owner ? (
-              <UpdateRow key={update._id} update={update} config={owner} />
-            ) : (
-              <li key={update._id} className="py-4">
-                <UpdateItemContent update={update} />
-              </li>
-            ),
-          )}
-        </ul>
+        list
       )}
     </div>
-  )
+  );
 }

@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Section } from "@/components/ui/section";
 import { auth } from "@/auth";
 import { isSaved } from "@/sanity/reader-client";
+import { ownsCreator } from "@/sanity/ownership-client";
 import { bookToCard } from "@/lib/card-mappers";
 import { pageMetadata } from "@/lib/page-metadata";
 import { safeFetch, BOOK_QUERY } from "@/lib/queries";
@@ -73,7 +74,16 @@ export default async function BookPage({
   if (!book) notFound();
 
   const email = session?.user?.email;
-  const saved = email ? await isSaved(email, book._id) : false;
+  // A creator can't save their own comic — hide the button on a book whose
+  // creator this viewer owns. Both reads are cheap on an already-dynamic page.
+  const [saved, isOwner] = email
+    ? await Promise.all([
+        isSaved(email, book._id),
+        book.creatorId
+          ? ownsCreator(email, book.creatorId)
+          : Promise.resolve(false),
+      ])
+    : [false, false];
 
   const creator = book.creator;
   // The creator, shown as a card after the description rather than as a byline
@@ -221,19 +231,22 @@ export default async function BookPage({
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <SaveButton
-                itemType="book"
-                itemId={book._id}
-                initialSaved={saved}
-                signedIn={Boolean(email)}
-                saveLabel={settings.sections.saveLabel}
-                savedLabel={settings.sections.savedLabel}
-                signInCopy={{
-                  title: settings.sections.accountSignInTitle,
-                  body: settings.sections.accountSignInBody,
-                  cta: settings.sections.accountSignInCta,
-                }}
-              />
+              {/* Hidden on your own comic — you can't save what you publish. */}
+              {!isOwner && (
+                <SaveButton
+                  itemType="book"
+                  itemId={book._id}
+                  initialSaved={saved}
+                  signedIn={Boolean(email)}
+                  saveLabel={settings.sections.saveLabel}
+                  savedLabel={settings.sections.savedLabel}
+                  signInCopy={{
+                    title: settings.sections.accountSignInTitle,
+                    body: settings.sections.accountSignInBody,
+                    cta: settings.sections.accountSignInCta,
+                  }}
+                />
+              )}
               <ShareBar
                 title={book.title}
                 url={absoluteUrl(`/books/${slug}`)}

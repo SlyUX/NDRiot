@@ -1,12 +1,12 @@
-'use client'
+"use client";
 
-import type { ReactNode } from 'react'
-import { useRef, useState, useTransition } from 'react'
-import { usePathname } from 'next/navigation'
-import Link from 'next/link'
-import { X } from 'lucide-react'
+import type { ReactNode } from "react";
+import { useRef, useState, useTransition } from "react";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { X } from "lucide-react";
 
-import { removeSaveAction, toggleSaveAction } from '@/app/actions/saves'
+import { removeSaveAction, toggleSaveAction } from "@/app/actions/saves";
 
 /**
  * A saved item on the dashboard with a destructive Remove. Two layouts: `row` (a
@@ -19,7 +19,7 @@ import { removeSaveAction, toggleSaveAction } from '@/app/actions/saves'
  * and re-saves; otherwise it commits and the slot disappears. The thumbnail is a
  * slot so the server page keeps using next/image.
  */
-const UNDO_MS = 6000
+const UNDO_MS = 6000;
 
 export function SavedItemRow({
   itemId,
@@ -30,46 +30,57 @@ export function SavedItemRow({
   removeLabel,
   removedLabel,
   undoLabel,
-  layout = 'row',
+  layout = "row",
+  tileAspect = "portrait",
+  caption = false,
 }: {
-  itemId: string
-  itemType: 'book' | 'creator'
-  title: string
-  href: string | null
-  thumb: ReactNode
-  removeLabel: string
-  removedLabel: string
-  undoLabel: string
-  layout?: 'row' | 'tile'
+  itemId: string;
+  itemType: "book" | "creator";
+  title: string;
+  href: string | null;
+  thumb: ReactNode;
+  removeLabel: string;
+  removedLabel: string;
+  undoLabel: string;
+  layout?: "row" | "tile";
+  /** Tile thumbnail shape — `portrait` (2:3 covers) or `square` (creator photos). */
+  tileAspect?: "portrait" | "square";
+  /** Tile only: show the title beneath the thumbnail (creators, whose covers alone don't identify them). */
+  caption?: boolean;
 }) {
-  const [state, setState] = useState<'visible' | 'undo' | 'gone'>('visible')
-  const [pending, startTransition] = useTransition()
-  const pathname = usePathname()
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [state, setState] = useState<"visible" | "undo" | "gone">("visible");
+  const [pending, startTransition] = useTransition();
+  const pathname = usePathname();
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  if (state === 'gone') return null
+  const tileAspectClass =
+    tileAspect === "square" ? "aspect-square" : "aspect-[2/3]";
+
+  if (state === "gone") return null;
 
   function onRemove() {
-    setState('undo')
+    setState("undo");
     startTransition(async () => {
-      await removeSaveAction(itemId)
-    })
-    timer.current = setTimeout(() => setState('gone'), UNDO_MS)
+      await removeSaveAction(itemId);
+    });
+    timer.current = setTimeout(() => setState("gone"), UNDO_MS);
   }
 
   function onUndo() {
-    if (timer.current) clearTimeout(timer.current)
-    setState('visible')
+    if (timer.current) clearTimeout(timer.current);
+    setState("visible");
     startTransition(async () => {
-      await toggleSaveAction(itemType, itemId, pathname)
-    })
+      await toggleSaveAction(itemType, itemId, pathname);
+    });
   }
 
   // The in-place undo notice, shaped to the slot it replaces.
-  if (state === 'undo') {
-    if (layout === 'tile') {
+  if (state === "undo") {
+    if (layout === "tile") {
       return (
-        <li className="border-primary flex aspect-[2/3] flex-col items-center justify-center gap-1 border-2 p-1 text-center">
+        <li
+          className={`border-primary flex ${tileAspectClass} flex-col items-center justify-center gap-1 border-2 p-1 text-center`}
+        >
           <span className="text-muted-foreground text-[10px] tracking-widest uppercase">
             {removedLabel}
           </span>
@@ -81,12 +92,13 @@ export function SavedItemRow({
             {undoLabel}
           </button>
         </li>
-      )
+      );
     }
     return (
       <li className="border-primary flex items-center justify-between gap-3 border-b-2 py-3">
         <span className="text-muted-foreground min-w-0 flex-1 truncate text-sm">
-          <span className="text-foreground font-bold">{removedLabel}</span> {title}
+          <span className="text-foreground font-bold">{removedLabel}</span>{" "}
+          {title}
         </span>
         <button
           type="button"
@@ -96,10 +108,10 @@ export function SavedItemRow({
           {undoLabel}
         </button>
       </li>
-    )
+    );
   }
 
-  if (layout === 'tile') {
+  if (layout === "tile") {
     return (
       <li className="relative">
         {href ? (
@@ -113,6 +125,11 @@ export function SavedItemRow({
         ) : (
           thumb
         )}
+        {caption && (
+          <p className="text-muted-foreground mt-1 line-clamp-2 text-center text-[11px] leading-tight">
+            {title}
+          </p>
+        )}
         <button
           type="button"
           onClick={onRemove}
@@ -123,7 +140,7 @@ export function SavedItemRow({
           <X aria-hidden="true" className="size-3.5" />
         </button>
       </li>
-    )
+    );
   }
 
   return (
@@ -137,7 +154,9 @@ export function SavedItemRow({
           {title}
         </Link>
       ) : (
-        <span className="min-w-0 flex-1 truncate text-sm font-bold">{title}</span>
+        <span className="min-w-0 flex-1 truncate text-sm font-bold">
+          {title}
+        </span>
       )}
       <button
         type="button"
@@ -149,5 +168,5 @@ export function SavedItemRow({
         <X aria-hidden="true" className="size-4" />
       </button>
     </li>
-  )
+  );
 }

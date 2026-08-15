@@ -343,19 +343,24 @@ export default async function CreatorPage({
                   )}
 
                   <div className="mt-5 flex flex-wrap items-center gap-3">
-                    <SaveButton
-                      itemType="creator"
-                      itemId={creator._id}
-                      initialSaved={saved}
-                      signedIn={Boolean(email)}
-                      saveLabel={settings.sections.saveLabel}
-                      savedLabel={settings.sections.savedLabel}
-                      signInCopy={{
-                        title: settings.sections.accountSignInTitle,
-                        body: settings.sections.accountSignInBody,
-                        cta: settings.sections.accountSignInCta,
-                      }}
-                    />
+                    {/* No Follow on your own profile — you can't follow yourself.
+                        For everyone else it's "Follow", not "Save": truer for a
+                        person, and the same underlying saved signal (§3). */}
+                    {!isOwner && (
+                      <SaveButton
+                        itemType="creator"
+                        itemId={creator._id}
+                        initialSaved={saved}
+                        signedIn={Boolean(email)}
+                        saveLabel={settings.sections.followLabel}
+                        savedLabel={settings.sections.followingLabel}
+                        signInCopy={{
+                          title: settings.sections.accountSignInTitle,
+                          body: settings.sections.accountSignInBody,
+                          cta: settings.sections.accountSignInCta,
+                        }}
+                      />
+                    )}
                     <ShareBar
                       title={creator.name ?? ""}
                       url={absoluteUrl(`/creators/${slug}`)}

@@ -189,12 +189,16 @@ export default async function Home({
   // Per-session, so who you follow never leaks past the request; no follow counts.
   let followedUpdates: RailUpdate[] = [];
   let isCreator = false;
+  // Hoisted so the hero's save slot can check whether the featured comic is the
+  // viewer's own — a creator can't save what they publish.
+  let ownedCreatorIds: string[] = [];
   if (email) {
-    const [saves, ownedCreatorIds] = await Promise.all([
+    const [saves, owned] = await Promise.all([
       savedItems(email),
       creatorsOwnedBy(email),
     ]);
-    isCreator = ownedCreatorIds.length > 0;
+    ownedCreatorIds = owned;
+    isCreator = owned.length > 0;
     const savedIds = saves.map((save) => save.itemId);
     if (savedIds.length) {
       followedUpdates = await safeFetch<RailUpdate[]>(
@@ -212,25 +216,30 @@ export default async function Home({
   const feedUserType: "reader" | "creator" = isCreator ? "creator" : "reader";
   const featureSaved =
     feature && email ? await isSaved(email, feature._id) : false;
-  const featureSave = feature ? (
-    <SaveButton
-      // Keyed by the book so Discover swapping the feature remounts the button
-      // (its saved state lives in useState, which only reads initialSaved once).
-      key={feature._id}
-      itemType="book"
-      itemId={feature._id}
-      initialSaved={featureSaved}
-      signedIn={Boolean(email)}
-      variant="outline"
-      saveLabel={settings.sections.saveLabel}
-      savedLabel={settings.sections.savedLabel}
-      signInCopy={{
-        title: settings.sections.accountSignInTitle,
-        body: settings.sections.accountSignInBody,
-        cta: settings.sections.accountSignInCta,
-      }}
-    />
-  ) : null;
+  // No save on your own comic, even in the random hero spotlight.
+  const featureOwned = Boolean(
+    feature?.creatorId && ownedCreatorIds.includes(feature.creatorId),
+  );
+  const featureSave =
+    feature && !featureOwned ? (
+      <SaveButton
+        // Keyed by the book so Discover swapping the feature remounts the button
+        // (its saved state lives in useState, which only reads initialSaved once).
+        key={feature._id}
+        itemType="book"
+        itemId={feature._id}
+        initialSaved={featureSaved}
+        signedIn={Boolean(email)}
+        variant="outline"
+        saveLabel={settings.sections.saveLabel}
+        savedLabel={settings.sections.savedLabel}
+        signInCopy={{
+          title: settings.sections.accountSignInTitle,
+          body: settings.sections.accountSignInBody,
+          cta: settings.sections.accountSignInCta,
+        }}
+      />
+    ) : null;
 
   // Both rows offer the same genres — the set a book actually uses.
   const genres = genreOptions(genresWithBooks);
