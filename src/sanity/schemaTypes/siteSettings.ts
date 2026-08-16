@@ -574,6 +574,20 @@ export default defineType({
             'Opens the mark-attendance modal for this con (creators only) — e.g. "I\'m Attending".',
         }),
         defineField({
+          name: "conventionManageAttendingLabel",
+          title: "Convention page — manage-attendance button",
+          type: "string",
+          description:
+            'Replaces "I\'m Attending" once every owned profile already attends — e.g. "Manage Attendance".',
+        }),
+        defineField({
+          name: "conventionCancelAttendingLabel",
+          title: "Convention page — cancel-attendance link",
+          type: "string",
+          description:
+            'Removes an appearance from inside the modal (delists the creator) — e.g. "Cancel attendance".',
+        }),
+        defineField({
           name: "conventionTablersHeading",
           title: "Convention page — creators-with-tables heading",
           type: "string",

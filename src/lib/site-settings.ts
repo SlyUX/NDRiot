@@ -389,6 +389,8 @@ export interface SiteSettings {
     conventionsPageDescription: string;
     conventionVisitLabel: string;
     conventionAttendingLabel: string;
+    conventionManageAttendingLabel: string;
+    conventionCancelAttendingLabel: string;
     /** "Creators with tables" list on a convention page + the table-number prefix. */
     conventionTablersHeading: string;
     tableLabel: string;
@@ -957,6 +959,8 @@ const DEFAULTS: SiteSettings = {
       "Comics conventions worth a creator’s table — where to show your work, meet readers, and find your scene. Independent-comics focused.",
     conventionVisitLabel: "Official site",
     conventionAttendingLabel: "I'm Attending",
+    conventionManageAttendingLabel: "Manage Attendance",
+    conventionCancelAttendingLabel: "Cancel attendance",
     conventionTablersHeading: "Creators with tables",
     tableLabel: "Table",
     creatorEventsHeading: "Upcoming events",

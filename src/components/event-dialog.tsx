@@ -27,19 +27,17 @@ export function EventDialog({
   conventions = [],
   labels,
   lockedConvention,
-  initial,
+  existingByCreator,
   trigger,
 }: {
   creators: { id: string; name: string }[];
   conventions?: { id: string; name: string }[];
   labels: EventAddFormLabels;
   lockedConvention?: { id: string; name: string };
-  initial?: {
-    creatorId?: string;
-    status?: string;
-    tableNumber?: string | null;
-    note?: string | null;
-  };
+  existingByCreator?: Record<
+    string,
+    { status: string; tableNumber: string | null; note: string | null }
+  >;
   /** The clickable element (asChild). Defaults to the "+ Add an Event" button. */
   trigger?: ReactNode;
 }) {
@@ -64,7 +62,7 @@ export function EventDialog({
           conventions={conventions}
           labels={labels}
           lockedConvention={lockedConvention}
-          initial={initial}
+          existingByCreator={existingByCreator}
           onSaved={() => setOpen(false)}
         />
       </DialogContent>

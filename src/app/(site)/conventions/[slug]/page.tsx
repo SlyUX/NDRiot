@@ -96,6 +96,10 @@ export default async function ConventionPage({
   // "I'm Attending" for this con.
   const email = session?.user?.email;
   let raters: RatingEligibleCreator[] = [];
+  const attendingByCreator: Record<
+    string,
+    { status: string; tableNumber: string | null; note: string | null }
+  > = {};
   if (email) {
     const ownedIds = await creatorsOwnedBy(email);
     if (ownedIds.length) {
@@ -109,9 +113,24 @@ export default async function ConventionPage({
         name: c.name ?? "Your profile",
         rating: c.rating,
       }));
+      // Which owned profiles already have an appearance here — prefills the
+      // "I'm Attending" modal and offers Cancel (which delists them).
+      for (const c of context) {
+        if (c.appearance) {
+          attendingByCreator[c._id] = {
+            status: c.appearance.status,
+            tableNumber: c.appearance.tableNumber,
+            note: c.appearance.note,
+          };
+        }
+      }
     }
   }
   const eventCreators = raters.map((r) => ({ id: r.id, name: r.name }));
+  // If every owned profile is already attending, the button manages rather than adds.
+  const allAttending =
+    eventCreators.length > 0 &&
+    eventCreators.every((c) => attendingByCreator[c.id]);
 
   // Location and timing, joined for the meta line under the title.
   const meta = [formatPlace(convention.place), convention.whenHint]
@@ -177,12 +196,16 @@ export default async function ConventionPage({
             <EventDialog
               creators={eventCreators}
               lockedConvention={{ id: convention._id, name: convention.name }}
+              existingByCreator={attendingByCreator}
               labels={{
-                addHeading: settings.sections.conventionAttendingLabel,
+                addHeading: allAttending
+                  ? settings.sections.conventionManageAttendingLabel
+                  : settings.sections.conventionAttendingLabel,
                 conventionLabel: settings.sections.accountEventConventionLabel,
                 tableFieldLabel: settings.sections.accountEventTableLabel,
                 noteFieldLabel: settings.sections.accountEventNoteLabel,
                 saveLabel: settings.sections.accountEventSaveLabel,
+                removeLabel: settings.sections.conventionCancelAttendingLabel,
                 postingLabel: settings.sections.accountPostingLabel,
                 postedLabel: settings.sections.accountEventPosted,
               }}
@@ -192,7 +215,9 @@ export default async function ConventionPage({
                   variant="inverse"
                   className="font-black tracking-wide uppercase"
                 >
-                  {settings.sections.conventionAttendingLabel}
+                  {allAttending
+                    ? settings.sections.conventionManageAttendingLabel
+                    : settings.sections.conventionAttendingLabel}
                 </Button>
               }
             />

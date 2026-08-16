@@ -297,6 +297,7 @@ export default async function AccountPage() {
     tableFieldLabel: s.accountEventTableLabel,
     noteFieldLabel: s.accountEventNoteLabel,
     saveLabel: s.accountEventSaveLabel,
+    removeLabel: s.accountRemoveLabel,
     postingLabel: s.accountPostingLabel,
     postedLabel: s.accountEventPosted,
   };

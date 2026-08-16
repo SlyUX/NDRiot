@@ -87,7 +87,9 @@ export function EventsManager({
                 <span className="flex items-center gap-2">
                   {editForm && (
                     <EventDialog
-                      creators={editForm.creators}
+                      creators={editForm.creators.filter(
+                        (c) => c.id === appearance.creatorId,
+                      )}
                       labels={{
                         ...editForm.labels,
                         addHeading: labels.editLabel,
@@ -96,11 +98,12 @@ export function EventsManager({
                         id: appearance.venueId,
                         name: appearance.venue.name,
                       }}
-                      initial={{
-                        creatorId: appearance.creatorId,
-                        status: appearance.status,
-                        tableNumber: appearance.tableNumber,
-                        note: appearance.note,
+                      existingByCreator={{
+                        [appearance.creatorId]: {
+                          status: appearance.status,
+                          tableNumber: appearance.tableNumber,
+                          note: appearance.note,
+                        },
                       }}
                       trigger={
                         <button

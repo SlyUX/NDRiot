@@ -403,7 +403,7 @@ export const CONVENTION_RATINGS_QUERY =
 export const CON_RATING_CONTEXT_QUERY =
   defineQuery(`*[_type=="creator" && _id in $creatorIds]{
   _id,name,
-  "hasAppearance": count(*[_type=="conventionAppearance" && creator._ref==^._id && venue._ref==$conId]) > 0,
+  "appearance": *[_type=="conventionAppearance" && creator._ref==^._id && venue._ref==$conId][0]{status,tableNumber,note},
   "rating": *[_type=="venueRating" && creator._ref==^._id && target._ref==$conId][0]{benefits,celebrityFocused,tableCost,note}
 }`);
 
