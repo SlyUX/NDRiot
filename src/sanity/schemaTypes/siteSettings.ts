@@ -609,6 +609,13 @@ export default defineType({
           description: 'e.g. "Save rating".',
         }),
         defineField({
+          name: "conventionRateUpdateLabel",
+          title: "Convention page — update-my-ratings link",
+          type: "string",
+          description:
+            'Shown once a creator has rated; clicking it reveals the form again — e.g. "Update my ratings".',
+        }),
+        defineField({
           name: "conventionRateNoteLabel",
           title: "Convention page — rating note label",
           type: "string",

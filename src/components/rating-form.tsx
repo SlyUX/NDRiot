@@ -25,6 +25,7 @@ export type RatingEligibleCreator = {
 export interface RatingFormLabels {
   heading: string;
   saveLabel: string;
+  updateLabel: string;
   removeLabel: string;
   noteLabel: string;
   notePlaceholder: string;
@@ -76,6 +77,9 @@ export function RatingForm({
   );
   const [tableCost, setTableCost] = useState(current?.rating?.tableCost ?? "");
   const [note, setNote] = useState(current?.rating?.note ?? "");
+  // Collapsed to an "update my ratings" link once a rating exists; open (the
+  // full form) when there's nothing yet. A save refreshes → back to collapsed.
+  const [open, setOpen] = useState(!current?.rating);
 
   function loadCreator(id: string) {
     setCreatorId(id);
@@ -120,6 +124,19 @@ export function RatingForm({
         setError(result.error ?? "Something went wrong.");
       }
     });
+  }
+
+  // A creator who's already rated sees just a link, not the whole form.
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="text-primary focus-visible:ring-ring text-sm underline underline-offset-4 hover:no-underline focus-visible:ring-2 focus-visible:outline-none"
+      >
+        {labels.updateLabel}
+      </button>
+    );
   }
 
   return (

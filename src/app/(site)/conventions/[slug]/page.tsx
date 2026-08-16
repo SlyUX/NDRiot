@@ -201,6 +201,7 @@ export default async function ConventionPage({
           labels={{
             heading: settings.sections.conventionRateHeading,
             saveLabel: settings.sections.conventionRateSaveLabel,
+            updateLabel: settings.sections.conventionRateUpdateLabel,
             removeLabel: settings.sections.accountRemoveLabel,
             noteLabel: settings.sections.conventionRateNoteLabel,
             notePlaceholder: settings.sections.conventionRateNotePlaceholder,

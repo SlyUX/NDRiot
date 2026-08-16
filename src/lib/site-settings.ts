@@ -396,6 +396,7 @@ export interface SiteSettings {
     conventionRatingsHeading: string;
     conventionRatingsCountLabel: string;
     conventionRateSaveLabel: string;
+    conventionRateUpdateLabel: string;
     conventionRateNoteLabel: string;
     conventionRateNotePlaceholder: string;
     conventionRateCelebrityLabel: string;
@@ -946,6 +947,7 @@ const DEFAULTS: SiteSettings = {
     conventionRatingsHeading: "What creators say",
     conventionRatingsCountLabel: "{n} creator ratings",
     conventionRateSaveLabel: "Save rating",
+    conventionRateUpdateLabel: "Update my ratings",
     conventionRateNoteLabel: "Your note",
     conventionRateNotePlaceholder:
       "What should other creators know before they table here?",
