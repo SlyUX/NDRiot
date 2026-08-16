@@ -333,15 +333,23 @@ export default async function AccountPage() {
                   {ownedCreators.map((creator) => {
                     const sub =
                       creator.studio?.name ?? formatPlace(creator.place);
+                    // Join month + year, for the "Rioting since" tenure line.
+                    const joined = creator.joinedAt
+                      ? new Date(creator.joinedAt).toLocaleDateString("en-US", {
+                          month: "long",
+                          year: "numeric",
+                        })
+                      : null;
                     return (
                       <div key={creator._id} className="flex gap-3 sm:gap-4">
-                        <div className="relative aspect-square w-14 shrink-0 overflow-hidden bg-black/10 sm:w-20">
+                        {/* Avatar sized to the Your Comics covers beside it (105px). */}
+                        <div className="relative aspect-square w-[105px] shrink-0 overflow-hidden bg-black/10">
                           {creator.photo && (
                             <Image
-                              src={urlFor(creator.photo).width(160).url()}
+                              src={urlFor(creator.photo).width(320).url()}
                               alt=""
                               fill
-                              sizes="(max-width: 640px) 56px, 80px"
+                              sizes="105px"
                               className="object-cover"
                             />
                           )}
@@ -353,6 +361,11 @@ export default async function AccountPage() {
                           {sub && (
                             <p className="truncate text-sm text-black/70">
                               {sub}
+                            </p>
+                          )}
+                          {joined && (
+                            <p className="truncate text-xs text-black/60">
+                              {s.accountRiotingSince.replace("{date}", joined)}
                             </p>
                           )}
                           <div className="mt-2 flex flex-wrap gap-2">

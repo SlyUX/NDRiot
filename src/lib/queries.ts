@@ -33,7 +33,7 @@ export async function freshFetch<T>(
 }
 
 export const CREATORS_QUERY = defineQuery(
-  `*[_type=="creator"]|order(name asc){_id,name,"slug":slug.current,place,photo,genres,openToCollaboration,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}`,
+  `*[_type=="creator"]|order(name asc){_id,name,"slug":slug.current,place,photo,genres,openToCollaboration,"joinedAt":_createdAt,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}`,
 );
 export const CREATOR_QUERY =
   defineQuery(`*[_type=="creator" && slug.current==$slug][0]{
@@ -227,7 +227,7 @@ export const SAVED_BOOKS_QUERY = defineQuery(
 );
 
 export const SAVED_CREATORS_QUERY = defineQuery(
-  `*[_type=="creator" && _id in $ids && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,place,photo,genres,openToCollaboration,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}`,
+  `*[_type=="creator" && _id in $ids && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,place,photo,genres,openToCollaboration,"joinedAt":_createdAt,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}`,
 );
 
 /** The docs a signed-in owner can manage — creators and media they own. */

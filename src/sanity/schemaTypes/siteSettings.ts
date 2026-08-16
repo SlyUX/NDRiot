@@ -831,30 +831,17 @@ export default defineType({
             'Over a creator’s or outlet’s syndicated RSS feed on their profile. Use {name} for their name — e.g. "Latest from {name}".',
         }),
         defineField({
-          name: "saveLabel",
-          title: "Save button label",
-          type: "string",
-          description: 'The bookmark toggle on a comic — e.g. "Save".',
-        }),
-        defineField({
-          name: "savedLabel",
-          title: "Saved button label",
-          type: "string",
-          description: 'The comic bookmark toggle once saved — e.g. "Saved".',
-        }),
-        defineField({
           name: "followLabel",
-          title: "Follow button label (creators)",
+          title: "Follow button label",
           type: "string",
           description:
-            'The same toggle on a creator — "follow" reads truer for a person than "save". E.g. "Follow".',
+            'The reader\'s follow toggle, on comics and creators alike — e.g. "Follow".',
         }),
         defineField({
           name: "followingLabel",
-          title: "Following button label (creators)",
+          title: "Following button label",
           type: "string",
-          description:
-            'The creator follow toggle once followed — e.g. "Following".',
+          description: 'The follow toggle once following — e.g. "Following".',
         }),
         defineField({
           name: "accountTitle",
@@ -897,6 +884,13 @@ export default defineType({
           type: "string",
           description:
             'Links to the public creator page — e.g. "Creator Profile".',
+        }),
+        defineField({
+          name: "accountRiotingSince",
+          title: "Reader home — creator tenure line",
+          type: "string",
+          description:
+            'Under a creator\'s name on the dashboard. Use "{date}" for their join month/year — e.g. "Rioting since {date}".',
         }),
         defineField({
           name: "accountViewMediaLabel",

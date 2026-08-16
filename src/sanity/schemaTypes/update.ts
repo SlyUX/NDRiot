@@ -48,10 +48,10 @@ export default defineType({
     }),
     defineField({
       name: 'mentions',
-      title: 'Mentions',
+      title: 'Tags',
       type: 'array',
       description:
-        'Other comics, creators, conventions, or outlets this update references — a collaborator, a comic you’re plugging, a con you’re tabling at, a podcast that covered you. Shown as links in the note.',
+        'Comics, creators, conventions, or outlets this update tags — a collaborator, a comic you’re plugging, a con you’re tabling at, a podcast that covered you. Typed inline with @ and shown as links in the note.',
       of: [
         {
           type: 'reference',

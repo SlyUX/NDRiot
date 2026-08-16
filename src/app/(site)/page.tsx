@@ -246,8 +246,8 @@ export default async function Home({
         initialSaved={featureSaved}
         signedIn={Boolean(email)}
         variant="outline"
-        saveLabel={settings.sections.saveLabel}
-        savedLabel={settings.sections.savedLabel}
+        saveLabel={settings.sections.followLabel}
+        savedLabel={settings.sections.followingLabel}
         signInCopy={{
           title: settings.sections.accountSignInTitle,
           body: settings.sections.accountSignInBody,

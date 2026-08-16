@@ -440,10 +440,8 @@ export interface SiteSettings {
     buyHeading: string;
     /** Heading over a profile's syndicated feed. `{name}` → the outlet/creator name. */
     feedHeading: string;
-    /** SaveButton — the reader's explicit bookmark toggle (§3). */
-    saveLabel: string;
-    savedLabel: string;
-    /** SaveButton for a creator — "follow" reads truer than "save" for a person. */
+    /** SaveButton — the reader's one explicit signal (§3). "Follow" throughout,
+     *  for comics and creators alike. */
     followLabel: string;
     followingLabel: string;
     /** The signed-in reader home (/me). */
@@ -454,6 +452,8 @@ export interface SiteSettings {
     accountMediaHeading: string;
     accountEditLabel: string;
     accountViewCreatorLabel: string;
+    /** Creator tenure line under the name — "{date}" becomes the join month/year. */
+    accountRiotingSince: string;
     accountViewMediaLabel: string;
     accountSavedComicsHeading: string;
     accountSavedCreatorsHeading: string;
@@ -569,7 +569,7 @@ const DEFAULTS: SiteSettings = {
   siteDescription: "Independent comics discovery. Support indie comics.",
   footer: "Support indie comics. · ND Riot",
   newsletter: {
-    heading: "Get the ND Riot newsletter",
+    heading: "Get ND Noise",
     description:
       "Monthly updates about indie comics, creators, campaigns, and community.",
     placeholder: "you@email.com",
@@ -676,7 +676,7 @@ const DEFAULTS: SiteSettings = {
   },
   join: {
     heading: "Get listed",
-    editHeading: "Update Profile",
+    editHeading: "Edit Profile",
     // Now labels the fallback link under the native form, not a primary CTA.
     ctaLabel: "Form not working? Submit via Google Forms",
     formUrl: "https://forms.gle/STbaVMQ8a6Ap8rL1A",
@@ -691,7 +691,7 @@ const DEFAULTS: SiteSettings = {
     mediaDesc:
       "Cover indie comics — a podcast, channel, review site, or newsletter? List your outlet.",
     readersLabel: "Reader profiles",
-    readersDesc: "Save and follow the comic creators and comics you love.",
+    readersDesc: "Follow the comic creators and comics you love.",
     readersBadge: "Coming soon",
     terms:
       "ND Riot is free. No fees, no cut, no rights grab, nothing exclusive — we link readers straight to wherever you sell, and never host or sell your work ourselves. A real person reviews every submission before it goes live.",
@@ -700,7 +700,7 @@ const DEFAULTS: SiteSettings = {
   },
   creatorIntake: {
     heading: "Create a Comic Creator Profile",
-    editHeading: "Update your profile",
+    editHeading: "Edit your profile",
     oneProfileHeading: "One profile per account",
     oneProfileBody:
       "Your Google account already has a creator profile, and each account can have just one. To create a separate profile, sign out and sign back in with a different Google account — or head back to edit the profile you already have.",
@@ -789,7 +789,7 @@ const DEFAULTS: SiteSettings = {
   },
   bookIntake: {
     heading: "Add a comic",
-    editHeading: "Update a comic",
+    editHeading: "Edit a comic",
     intro:
       "One form per comic. Only a title, a comic creator you’ve added, and permission are required.",
     signInPrompt: "Sign in to add or manage your comics",
@@ -857,7 +857,7 @@ const DEFAULTS: SiteSettings = {
   },
   mediaIntake: {
     heading: "List your outlet",
-    editHeading: "Update your listing",
+    editHeading: "Edit your listing",
     intro:
       "For podcasts, channels, review sites, and newsletters covering independent comics — so comic creators making aligned work can find you. Only a name, a kind, and permission are required.",
     signInPrompt: "Sign in to list or manage your outlet",
@@ -957,7 +957,7 @@ const DEFAULTS: SiteSettings = {
     conventionVisitLabel: "Official site",
     conventionTablersHeading: "Creators with tables",
     tableLabel: "Table",
-    creatorEventsHeading: "Upcoming shows",
+    creatorEventsHeading: "Upcoming events",
     eventDateTba: "Dates TBA",
     conventionRateHeading: "Rate this convention",
     conventionRatingsHeading: "What creators say",
@@ -990,7 +990,7 @@ const DEFAULTS: SiteSettings = {
     everythingElseHeading: "While you are here",
     discoverLabel: "Discover",
     spinLabel: "Spin the rack",
-    feedMineHeading: "My Feed",
+    feedMineHeading: "Your Feed",
     searchHomeLabel: "Search comics and comic creators",
     searchBooksLabel: "Search titles and comic creators",
     searchCreatorsLabel: "Search comic creators and studios",
@@ -998,8 +998,6 @@ const DEFAULTS: SiteSettings = {
     previewCta: "Read a preview (PDF)",
     buyHeading: "Get it here",
     feedHeading: "Latest from {name}",
-    saveLabel: "Save",
-    savedLabel: "Saved",
     followLabel: "Follow",
     followingLabel: "Following",
     accountTitle: "Your ND Riot",
@@ -1009,17 +1007,18 @@ const DEFAULTS: SiteSettings = {
     accountMediaHeading: "Your Media",
     accountEditLabel: "Edit",
     accountViewCreatorLabel: "Public Profile",
+    accountRiotingSince: "Rioting since {date}",
     accountViewMediaLabel: "Media Page",
-    accountSavedComicsHeading: "Your Saved Comics",
-    accountSavedCreatorsHeading: "Favorite Creators",
+    accountSavedComicsHeading: "Comics You Follow",
+    accountSavedCreatorsHeading: "Creators You Follow",
     accountRemoveLabel: "Remove",
     accountRemovedLabel: "Removed",
     accountUndoLabel: "Undo",
     accountPostHeading: "Post an Update",
     accountPostIntro:
-      "A quick note to your followers — a new page, a con, a campaign. Everyone who saved this comic or your profile sees it. Use @ to tag a creator, convention, or outlet. Keep it short; 200 characters.",
+      "A quick note to your followers — a new page, a con, a campaign. Everyone who follows this comic or your profile sees it. Use @ to tag a creator, convention, or outlet. Keep it short; 200 characters.",
     accountPostTargetLabel: "About",
-    accountPostTargetPlaceholder: "Profile or Book update?",
+    accountPostTargetPlaceholder: "Profile or Comic update?",
     accountPostCreatorsGroup: "Your Profiles",
     accountPostComicsGroup: "Your Comics",
     accountPostKindLabel: "Type of Update",
@@ -1036,7 +1035,7 @@ const DEFAULTS: SiteSettings = {
     accountPostSuccess: "Your update has posted.",
     accountFeedHeading: "Your Feed",
     accountFeedEmpty:
-      "Nothing yet. Updates from comics and creators you’ve saved show up here.",
+      "Nothing yet. Updates from comics and creators you follow show up here.",
     accountMyUpdatesHeading: "Your Updates",
     accountMyUpdatesEmpty: "You haven’t posted an update yet.",
     accountEventsHeading: "Your events",
@@ -1048,11 +1047,11 @@ const DEFAULTS: SiteSettings = {
     accountEventNoteLabel: "Note — a booth spot, a signing time (optional)",
     accountEventSaveLabel: "Save event",
     accountEventPosted: "Your event has posted.",
-    accountSignInTitle: "Sign in to save comics and creators",
+    accountSignInTitle: "Sign in to follow comics and creators",
     accountSignInBody:
       "ND Riot uses Google sign-in — it only confirms it’s you, and your saves stay private.",
     accountSignInCta: "Sign in with Google",
-    accountNewsletterHeading: "Monthly Updates",
+    accountNewsletterHeading: "ND Noise",
     accountNewsletterBody:
       "New comics, creators, and indie-comics resources — once a month, no more. Confirm by email; unsubscribe anytime.",
     accountNewsletterCta: "Sign me up",
@@ -1109,7 +1108,7 @@ const DEFAULTS: SiteSettings = {
     ragIssues: "The first issue is on its way — check back soon.",
     media: "No media listed yet.",
     saved:
-      "Nothing saved yet — tap Save on any comic or creator and it lands here.",
+      "Nothing yet — tap Follow on any comic or creator and it lands here.",
   },
   // All top-level plain links — on-page filters cover browsing, so there's no
   // mega-menu. Resources is a single listing (downloads folded in as a resource

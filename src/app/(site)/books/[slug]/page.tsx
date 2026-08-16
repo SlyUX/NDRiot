@@ -239,8 +239,8 @@ export default async function BookPage({
                   itemId={book._id}
                   initialSaved={saved}
                   signedIn={Boolean(email)}
-                  saveLabel={settings.sections.saveLabel}
-                  savedLabel={settings.sections.savedLabel}
+                  saveLabel={settings.sections.followLabel}
+                  savedLabel={settings.sections.followingLabel}
                   signInCopy={{
                     title: settings.sections.accountSignInTitle,
                     body: settings.sections.accountSignInBody,
