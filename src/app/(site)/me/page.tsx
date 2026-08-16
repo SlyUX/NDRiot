@@ -54,10 +54,10 @@ import type {
 /**
  * The signed-in reader's home.
  *
- * A creator's identity + comics live together in a darker-pink "creator zone"
- * (--creator, §9) up top; media they own and their saved shelf follow on the
- * plain surface. Every list is a compact two-column feed; saved items carry a
- * destructive Remove. Nothing inferred, ranked, or recommended (§3). Never
+ * A creator's identity + comics live together in a personalization-teal "creator
+ * zone" (--personalize, §9) up top; media they own and their saved shelf follow
+ * on the plain surface. Every list is a compact two-column feed; saved items
+ * carry a Remove. Nothing inferred, ranked, or recommended (§3). Never
  * indexed.
  */
 export const dynamic = "force-dynamic";
@@ -284,10 +284,10 @@ export default async function AccountPage() {
           AlternatingSections leaves any section with an explicit background
           alone. Everything after it alternates --background / --surface-alt (§9). */}
       <AlternatingSections>
-        {/* Profile — a creator gets the darker-pink zone holding their identity
-            beside their comics (on ND Riot pink); a plain reader gets the charcoal
-            band with just their details. */}
-        <Section padding="md" background={isCreator ? "creator" : "charcoal"}>
+        {/* Profile — a creator gets the personalization-teal zone holding their
+            identity beside their comics; a plain reader gets the charcoal band
+            with just their details. Teal is a black-text surface (§9). */}
+        <Section padding="md" background={isCreator ? "personalize" : "charcoal"}>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h1 className="text-2xl font-black tracking-tighter uppercase sm:text-4xl">
@@ -310,7 +310,7 @@ export default async function AccountPage() {
               label={settings.creatorIntake.signOutLabel}
               redirectTo="/"
               className={
-                isCreator ? "text-white/80 hover:text-white" : undefined
+                isCreator ? "text-black/70 hover:text-black" : undefined
               }
             />
           </div>
@@ -326,7 +326,7 @@ export default async function AccountPage() {
                       creator.studio?.name ?? formatPlace(creator.place);
                     return (
                       <div key={creator._id} className="flex gap-3 sm:gap-4">
-                        <div className="relative aspect-square w-14 shrink-0 overflow-hidden bg-white/10 sm:w-20">
+                        <div className="relative aspect-square w-14 shrink-0 overflow-hidden bg-black/10 sm:w-20">
                           {creator.photo && (
                             <Image
                               src={urlFor(creator.photo).width(160).url()}
@@ -338,11 +338,11 @@ export default async function AccountPage() {
                           )}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate font-bold text-white">
+                          <p className="truncate font-bold text-black">
                             {creator.name}
                           </p>
                           {sub && (
-                            <p className="truncate text-sm text-white/80">
+                            <p className="truncate text-sm text-black/70">
                               {sub}
                             </p>
                           )}

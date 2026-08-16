@@ -47,9 +47,8 @@
   --color-muted: var(--muted);
   --color-charcoal: var(--charcoal);
   --color-funding: var(--funding);
-  --color-creator: var(--creator);
-  --color-creator-foreground: var(--creator-foreground);
-  --color-reader: var(--reader);
+  --color-personalize: var(--personalize);
+  --color-personalize-foreground: var(--personalize-foreground);
   --color-surface-alt: var(--surface-alt);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
@@ -102,16 +101,13 @@
   --charcoal: #2a3640;
   /* "Currently funding" badge. Black text 11.8:1 (white fails at 1.8:1). */
   --funding: #2bde73;
-  /* Darker pink — the secondary "creator / owner controls" brand color. A
-     WHITE-text surface: white 6.19:1 (clears AA), black 3.39:1 (fails). It's a
-     surface/button fill, not body text on dark (3.33:1 there). */
-  --creator: #aa336a;
-  --creator-foreground: #ffffff;
-  /* Base-reader secondary — the electric cyan for reader zones, mirroring
-     --creator for creators. Used as an ACCENT (text/border/graphic) on
-     --background, never a fill: 16.2:1 as text on #030303 (clears AAA). As a
-     fill it would need black text (16.6:1); white on it fails (1.26:1). */
-  --reader: #00feff;
+  /* Personalization teal — the secondary that marks a section as tuned to the
+     signed-in person (the /me creator band, the home My Feed rail), used in
+     place of brand pink. A BLACK-text surface: black 7.11:1 (clears AA), white
+     2.96:1 (fails — do not use white on it). As an accent on --background it's
+     6.88:1 (clears AA). Replaced the former --creator pink and --reader cyan. */
+  --personalize: #2fa4b6;
+  --personalize-foreground: #000000;
   /* zinc-400 is the floor for muted text — zinc-500 is 4.27:1 and fails AA. */
   --muted-foreground: #a1a1aa;
   --accent: #18181b;

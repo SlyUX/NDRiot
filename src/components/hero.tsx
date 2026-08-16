@@ -35,8 +35,6 @@ export interface HeroProps {
   feedItems: RailFeedItem[];
   /** Rail heading for the feed — reflects which feed is shown (§2 copy). */
   feedHeading: string;
-  /** Whose accent colors the feed rail — the viewer's type. */
-  feedUserType: "reader" | "creator";
   /** URL that re-rolls the feature to a different random book. Omit to hide. */
   discoverHref?: string;
   /** Label for that button — CMS copy (AGENTS.md §2). */
@@ -270,28 +268,21 @@ function FeedRow({ item }: { item: RailFeedItem }) {
 
 /**
  * The updates section of the rail — updates from creators the reader follows, a
- * scrollable recency list. A thin user-type bar (cyan for a reader, pink for a
- * creator) accents the heading; each followed update is boxed with its avatar.
+ * scrollable recency list. A thin personalization-teal bar accents the heading
+ * (this is the reader's own feed); each followed update is boxed with its avatar.
  */
 function FeedRail({
   heading,
   items,
-  userType,
 }: {
   heading: string;
   items: RailFeedItem[];
-  userType: "reader" | "creator";
 }) {
   return (
     <div>
       <div className="mb-4 flex items-center gap-3">
-        <span
-          aria-hidden="true"
-          className={cn(
-            "h-4 w-1 shrink-0",
-            userType === "creator" ? "bg-creator" : "bg-reader",
-          )}
-        />
+        {/* Personalization-teal tick: this rail is the reader's own feed (§3). */}
+        <span aria-hidden="true" className="bg-personalize h-4 w-1 shrink-0" />
         <h2 className="text-primary text-xs leading-tight font-black tracking-[0.2em] uppercase">
           {heading}
         </h2>
@@ -342,7 +333,6 @@ export function Hero({
   newItems,
   feedItems,
   feedHeading,
-  feedUserType,
   discoverHref,
   discoverLabel,
   saveSlot,
@@ -467,11 +457,7 @@ export function Hero({
                 )}
               >
                 {feedItems.length > 0 && (
-                  <FeedRail
-                    heading={feedHeading}
-                    items={feedItems}
-                    userType={feedUserType}
-                  />
+                  <FeedRail heading={feedHeading} items={feedItems} />
                 )}
                 {/* New arrivals — hidden on phones to keep the mobile hero short. */}
                 {newItems.length > 0 && (

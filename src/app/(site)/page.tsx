@@ -191,7 +191,6 @@ export default async function Home({
   // reader with follows; everyone else gets the New Creators & Books rail alone.
   // Per-session, so who you follow never leaks past the request; no follow counts.
   let followedUpdates: RailUpdate[] = [];
-  let isCreator = false;
   // Hoisted so the hero's save slot can check whether the featured comic is the
   // viewer's own — a creator can't save what they publish.
   let ownedCreatorIds: string[] = [];
@@ -201,7 +200,6 @@ export default async function Home({
       creatorsOwnedBy(email),
     ]);
     ownedCreatorIds = owned;
-    isCreator = owned.length > 0;
     const savedIds = saves.map((save) => save.itemId);
     if (savedIds.length) {
       // Updates + convention appearances by followed creators, merged newest-first.
@@ -231,7 +229,6 @@ export default async function Home({
     followed: true,
   }));
   const feedHeading = settings.sections.feedMineHeading;
-  const feedUserType: "reader" | "creator" = isCreator ? "creator" : "reader";
   const featureSaved =
     feature && email ? await isSaved(email, feature._id) : false;
   // No save on your own comic, even in the random hero spotlight.
@@ -345,7 +342,6 @@ export default async function Home({
         newItems={newItems}
         feedItems={feedItems}
         feedHeading={feedHeading}
-        feedUserType={feedUserType}
         discoverHref={feature ? `?${discoverParams.toString()}` : undefined}
         discoverLabel={settings.sections.spinLabel}
         saveSlot={featureSave}

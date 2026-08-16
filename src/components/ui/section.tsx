@@ -22,7 +22,7 @@ const sectionVariants = cva("", {
       muted: "bg-muted",
       charcoal: "bg-charcoal",
       primary: "bg-primary text-primary-foreground",
-      creator: "bg-creator text-creator-foreground",
+      personalize: "bg-personalize text-personalize-foreground",
     },
     padding: {
       none: "",
