@@ -21,10 +21,11 @@ export function composerLabelsFrom(s: SiteSettings['sections']): ComposerLabels 
     kindPlaceholder: s.accountPostKindPlaceholder,
     placeholder: s.accountPostPlaceholder,
     mentionsLabel: s.accountPostMentionsLabel,
-    mentionSearchPlaceholder: s.accountPostMentionSearch,
+    mentionHint: s.accountPostMentionHint,
     mentionNoMatch: s.accountPostMentionNoMatch,
     mentionCreatorsGroup: s.accountPostMentionCreators,
     mentionConventionsGroup: s.accountPostMentionConventions,
+    mentionMediaGroup: s.accountPostMentionMedia,
     submit: s.accountPostSubmitLabel,
     success: s.accountPostSuccess,
   }

@@ -82,13 +82,13 @@ export async function postUpdate(
   if (!(await ownsTarget(client, email, targetId)))
     return { status: 'error', message: 'You can only post to a creator or comic you own.', nonce: prev.nonce }
 
-  // Keep only mention ids that are real creators/conventions — no dangling refs
-  // from a tampered form.
+  // Keep only mention ids that are real creators/conventions/media — no dangling
+  // refs from a tampered form.
   let validMentions: string[] = []
   if (mentionIds.length) {
     try {
       validMentions = await client.fetch<string[]>(
-        `*[_type in ["creator","convention"] && _id in $ids]._id`,
+        `*[_type in ["creator","convention","media"] && _id in $ids]._id`,
         { ids: mentionIds },
       )
     } catch (cause) {

@@ -15,7 +15,7 @@ import {
 import { PostUpdateDialog } from "@/components/post-update-dialog";
 import { UpdateFeed } from "@/components/update-feed";
 import { YourComics, type YourComicsBook } from "@/components/your-comics";
-import { updateOwnerConfig } from "@/lib/composer-labels";
+import { composerLabelsFrom, updateOwnerConfig } from "@/lib/composer-labels";
 import { formatPlace } from "@/lib/place";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/ui/section";
@@ -26,6 +26,7 @@ import {
   freshFetch,
   CONVENTIONS_QUERY,
   CREATORS_QUERY,
+  MEDIA_QUERY,
   OWNED_APPEARANCES_QUERY,
   OWNED_BOOKS_QUERY,
   OWNED_DOCS_QUERY,
@@ -235,25 +236,38 @@ export default async function AccountPage() {
   let eventConventions: { id: string; name: string }[] = [];
   let ownedAppearances: OwnedAppearance[] = [];
   if (composerTargets.length > 0) {
-    const [allCreators, allConventions, appearances] = await Promise.all([
-      safeFetch<CreatorSummary[]>(CREATORS_QUERY, {}, []),
-      safeFetch<ConventionSummary[]>(CONVENTIONS_QUERY, {}, []),
-      freshFetch<OwnedAppearance[]>(
-        OWNED_APPEARANCES_QUERY,
-        { creatorIds: ownedCreatorIds },
-        [],
-      ),
-    ]);
+    const [allCreators, allConventions, allMedia, appearances] =
+      await Promise.all([
+        safeFetch<CreatorSummary[]>(CREATORS_QUERY, {}, []),
+        safeFetch<ConventionSummary[]>(CONVENTIONS_QUERY, {}, []),
+        safeFetch<MediaSummary[]>(MEDIA_QUERY, {}, []),
+        freshFetch<OwnedAppearance[]>(
+          OWNED_APPEARANCES_QUERY,
+          { creatorIds: ownedCreatorIds },
+          [],
+        ),
+      ]);
+    // A small square thumb for the @ menu — helps tell near-identical names apart.
+    const thumb = (image: Parameters<typeof urlFor>[0] | null | undefined) =>
+      image ? urlFor(image).width(64).height(64).fit("crop").url() : null;
     mentionOptions = [
       ...allCreators.map((creator) => ({
         id: creator._id,
         label: creator.name ?? "Unknown",
         group: "creator" as const,
+        thumb: thumb(creator.photo),
       })),
       ...allConventions.map((convention) => ({
         id: convention._id,
         label: convention.name,
         group: "convention" as const,
+        thumb: thumb(convention.image),
+      })),
+      ...allMedia.map((outlet) => ({
+        id: outlet._id,
+        label: outlet.name,
+        group: "media" as const,
+        thumb: thumb(outlet.logo),
       })),
     ];
     eventConventions = allConventions.map((convention) => ({
@@ -367,25 +381,7 @@ export default async function AccountPage() {
                       targets={composerTargets}
                       kinds={UPDATE_KINDS}
                       mentions={mentionOptions}
-                      labels={{
-                        heading: s.accountPostHeading,
-                        intro: s.accountPostIntro,
-                        targetLabel: s.accountPostTargetLabel,
-                        targetPlaceholder: s.accountPostTargetPlaceholder,
-                        creatorsGroupLabel: s.accountPostCreatorsGroup,
-                        comicsGroupLabel: s.accountPostComicsGroup,
-                        kindLabel: s.accountPostKindLabel,
-                        kindPlaceholder: s.accountPostKindPlaceholder,
-                        placeholder: s.accountPostPlaceholder,
-                        mentionsLabel: s.accountPostMentionsLabel,
-                        mentionSearchPlaceholder: s.accountPostMentionSearch,
-                        mentionNoMatch: s.accountPostMentionNoMatch,
-                        mentionCreatorsGroup: s.accountPostMentionCreators,
-                        mentionConventionsGroup:
-                          s.accountPostMentionConventions,
-                        submit: s.accountPostSubmitLabel,
-                        success: s.accountPostSuccess,
-                      }}
+                      labels={composerLabelsFrom(s)}
                     />
                   </div>
                 )}

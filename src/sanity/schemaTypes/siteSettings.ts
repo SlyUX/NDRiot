@@ -999,24 +999,24 @@ export default defineType({
         }),
         defineField({
           name: "accountPostMentionsLabel",
-          title: "Reader home — update mentions label",
+          title: "Reader home — tagged-mentions label",
           type: "string",
           description:
-            'Label over the optional creator/convention references — e.g. "Mention (optional)".',
+            'Label over the tagged creators/conventions/outlets chips — e.g. "Tagged".',
         }),
         defineField({
-          name: "accountPostMentionSearch",
-          title: "Reader home — mentions search placeholder",
+          name: "accountPostMentionHint",
+          title: "Reader home — @ mention hint",
           type: "string",
           description:
-            'Placeholder in the mentions search box — e.g. "Search creators and conventions…".',
+            'Shown under the update text once "@" is typed, before 3 letters land — e.g. "Keep typing to find a creator, convention, or outlet…".',
         }),
         defineField({
           name: "accountPostMentionNoMatch",
           title: "Reader home — mentions no-match line",
           type: "string",
           description:
-            'Shown when a mentions search finds nothing — e.g. "No matches.".',
+            'Shown when an @ search finds nothing — e.g. "No matches.".',
         }),
         defineField({
           name: "accountPostMentionCreators",
@@ -1030,6 +1030,12 @@ export default defineType({
           type: "string",
           description:
             'Heading for the convention results — e.g. "Conventions".',
+        }),
+        defineField({
+          name: "accountPostMentionMedia",
+          title: "Reader home — mentions: outlets group",
+          type: "string",
+          description: 'Heading for the media/outlet results — e.g. "Outlets".',
         }),
         defineField({
           name: "accountPostSubmitLabel",

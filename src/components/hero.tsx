@@ -6,6 +6,7 @@ import { ArrowRight, Shuffle } from "lucide-react";
 import { TaxonomyRow } from "@/components/content-card";
 import PortableTextBody from "@/components/PortableTextBody";
 import { Button } from "@/components/ui/button";
+import { mentionHref } from "@/lib/mentions";
 import type { HeroSettings } from "@/lib/site-settings";
 import type { HeroBook, HomeNewItem, RailFeedItem } from "@/lib/types";
 import { cn, truncate } from "@/lib/utils";
@@ -253,11 +254,7 @@ function FeedRow({ item }: { item: RailFeedItem }) {
             {item.mentions.map((mention) => (
               <li key={mention._id}>
                 <Link
-                  href={
-                    mention._type === "convention"
-                      ? `/conventions/${mention.slug}`
-                      : `/creators/${mention.slug}`
-                  }
+                  href={mentionHref(mention)}
                   className="border-border hover:border-primary hover:text-primary inline-block border px-1.5 py-0.5 text-[10px] text-white/85 transition-colors"
                 >
                   {mention.name}

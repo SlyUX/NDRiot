@@ -1,8 +1,9 @@
 'use client'
 
-import { useActionState, useEffect, useRef, useState } from 'react'
+import { useActionState, useEffect, useRef } from 'react'
 
 import { editUpdate, postUpdate, type PostUpdateState } from '@/app/actions/updates'
+import { MentionTextarea } from '@/components/mention-textarea'
 import { SectionHeading } from '@/components/section-heading'
 import { Button } from '@/components/ui/button'
 
@@ -25,8 +26,14 @@ const fieldClass =
 /** A creator or comic the signed-in owner can post about. */
 export type ComposerTarget = { id: string; label: string; group: 'creator' | 'comic' }
 
-/** A creator or convention an update can reference. */
-export type MentionOption = { id: string; label: string; group: 'creator' | 'convention' }
+/** A creator, convention, or outlet an update can @-mention. `thumb` is a small
+ *  square image URL, shown in the @ menu so near-duplicate names are legible. */
+export type MentionOption = {
+  id: string
+  label: string
+  group: 'creator' | 'convention' | 'media'
+  thumb?: string | null
+}
 
 export type ComposerLabels = {
   heading: string
@@ -39,141 +46,18 @@ export type ComposerLabels = {
   kindPlaceholder: string
   placeholder: string
   mentionsLabel: string
-  mentionSearchPlaceholder: string
+  /** Shown under the textarea once an @ is typed but before 3 letters land. */
+  mentionHint: string
   mentionNoMatch: string
   mentionCreatorsGroup: string
   mentionConventionsGroup: string
+  mentionMediaGroup: string
   submit: string
   success: string
 }
 
 /** An update being edited — the composer pre-fills from this and patches it. */
 export type EditUpdate = { updateId: string; kind: string; body: string; mentionIds: string[] }
-
-const groupHeadingClass =
-  'text-muted-foreground mb-1.5 text-[10px] font-bold tracking-widest uppercase'
-const optionClass =
-  'hover:bg-primary/10 hover:text-primary focus-visible:bg-primary/10 block w-full px-2 py-1 text-left text-sm focus-visible:outline-none'
-
-/**
- * Searchable multi-select for the update's references. Creators and conventions
- * share one control (grouped in the results), so it scales to long lists — the
- * results only render once you type. Selected items become removable chips
- * backed by hidden inputs named `mentions`, so the plain form action still
- * receives them. Remounts (and clears) with the form on a successful post.
- */
-function MentionPicker({
-  options,
-  labels,
-  initialSelected,
-}: {
-  options: MentionOption[]
-  labels: Pick<
-    ComposerLabels,
-    'mentionsLabel' | 'mentionSearchPlaceholder' | 'mentionNoMatch' | 'mentionCreatorsGroup' | 'mentionConventionsGroup'
-  >
-  initialSelected?: MentionOption[]
-}) {
-  const [selected, setSelected] = useState<MentionOption[]>(initialSelected ?? [])
-  const [query, setQuery] = useState('')
-
-  const selectedIds = new Set(selected.map((option) => option.id))
-  const q = query.trim().toLowerCase()
-  const matches = q
-    ? options.filter((option) => !selectedIds.has(option.id) && option.label.toLowerCase().includes(q))
-    : []
-  const creators = matches.filter((option) => option.group === 'creator').slice(0, 25)
-  const conventions = matches.filter((option) => option.group === 'convention').slice(0, 25)
-
-  const add = (option: MentionOption) => {
-    setSelected((prev) => [...prev, option])
-    setQuery('')
-  }
-  const remove = (id: string) => setSelected((prev) => prev.filter((option) => option.id !== id))
-
-  return (
-    <div className="space-y-2">
-      <span className="block text-xs tracking-widest uppercase">{labels.mentionsLabel}</span>
-
-      {/* The selection, carried into the form action. */}
-      {selected.map((option) => (
-        <input key={option.id} type="hidden" name="mentions" value={option.id} />
-      ))}
-
-      {selected.length > 0 && (
-        <ul className="flex flex-wrap gap-2">
-          {selected.map((option) => (
-            <li key={option.id}>
-              <button
-                type="button"
-                onClick={() => remove(option.id)}
-                className="border-primary text-primary hover:bg-primary hover:text-primary-foreground focus-visible:ring-ring inline-flex items-center gap-1 border px-2 py-0.5 text-xs transition-colors focus-visible:ring-2 focus-visible:outline-none"
-              >
-                {option.label}
-                <span aria-hidden="true">×</span>
-                <span className="sr-only">— remove</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <input
-        type="search"
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        onKeyDown={(event) => {
-          // Enter in a field inside the form would post the update; instead add
-          // the top match (or just swallow it).
-          if (event.key === 'Enter') {
-            event.preventDefault()
-            const top = creators[0] ?? conventions[0]
-            if (top) add(top)
-          }
-        }}
-        placeholder={labels.mentionSearchPlaceholder}
-        autoComplete="off"
-        className={fieldClass}
-      />
-
-      {q !== '' &&
-        (creators.length > 0 || conventions.length > 0 ? (
-          <div className="max-h-44 space-y-3 overflow-y-auto border border-white/20 p-3">
-            {creators.length > 0 && (
-              <div>
-                <p className={groupHeadingClass}>{labels.mentionCreatorsGroup}</p>
-                <ul>
-                  {creators.map((option) => (
-                    <li key={option.id}>
-                      <button type="button" onClick={() => add(option)} className={optionClass}>
-                        {option.label}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {conventions.length > 0 && (
-              <div>
-                <p className={groupHeadingClass}>{labels.mentionConventionsGroup}</p>
-                <ul>
-                  {conventions.map((option) => (
-                    <li key={option.id}>
-                      <button type="button" onClick={() => add(option)} className={optionClass}>
-                        {option.label}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        ) : (
-          <p className="text-muted-foreground text-sm">{labels.mentionNoMatch}</p>
-        ))}
-    </div>
-  )
-}
 
 export function UpdateComposer({
   targets,
@@ -274,21 +158,18 @@ export function UpdateComposer({
           </div>
         </div>
 
-        <textarea
+        {/* The body + inline @-mentions. Type "@" and three letters to tag a
+            creator, convention, or outlet; each becomes a chip whose id rides a
+            hidden `mentions` input into the action, which validates the ids. */}
+        <MentionTextarea
           name="body"
-          required
-          rows={3}
-          maxLength={BODY_LIMIT}
           defaultValue={edit?.body}
           placeholder={labels.placeholder}
-          className={`${fieldClass} resize-y`}
+          maxLength={BODY_LIMIT}
+          options={mentions}
+          initialSelected={editMentions}
+          labels={labels}
         />
-
-        {/* Optional references to other creators/conventions, shown as links in
-            the feed. Searchable so it scales; the action validates ids. */}
-        {mentions.length > 0 && (
-          <MentionPicker options={mentions} labels={labels} initialSelected={editMentions} />
-        )}
 
         <div className="flex flex-wrap items-center gap-4">
           <Button type="submit" disabled={pending} className="font-black tracking-wide uppercase">

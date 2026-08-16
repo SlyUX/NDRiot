@@ -471,10 +471,11 @@ export interface SiteSettings {
     accountPostKindPlaceholder: string;
     accountPostPlaceholder: string;
     accountPostMentionsLabel: string;
-    accountPostMentionSearch: string;
+    accountPostMentionHint: string;
     accountPostMentionNoMatch: string;
     accountPostMentionCreators: string;
     accountPostMentionConventions: string;
+    accountPostMentionMedia: string;
     accountPostSubmitLabel: string;
     accountPostSuccess: string;
     /** Reader update feed (/me). */
@@ -1022,11 +1023,12 @@ const DEFAULTS: SiteSettings = {
     accountPostKindLabel: "Type of Update",
     accountPostKindPlaceholder: "Select One",
     accountPostPlaceholder: "What’s new?",
-    accountPostMentionsLabel: "Mention (optional)",
-    accountPostMentionSearch: "Search creators and conventions…",
+    accountPostMentionsLabel: "Tagged",
+    accountPostMentionHint: "Keep typing to find a creator, convention, or outlet…",
     accountPostMentionNoMatch: "No matches.",
     accountPostMentionCreators: "Creators",
     accountPostMentionConventions: "Conventions",
+    accountPostMentionMedia: "Outlets",
     accountPostSubmitLabel: "Post Update",
     accountPostSuccess: "Posted. Your followers will see it.",
     accountFeedHeading: "Your Feed",

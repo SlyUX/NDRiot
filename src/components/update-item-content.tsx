@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
 import { formatDate } from "@/lib/card-mappers";
+import { mentionHref } from "@/lib/mentions";
 import { externalHref } from "@/lib/utils";
 import type { UpdateFeedItem } from "@/lib/types";
 
@@ -60,11 +61,7 @@ export function UpdateItemContent({
           {update.mentions.map((mention) => (
             <li key={mention._id} className="inline-flex items-stretch">
               <Link
-                href={
-                  mention._type === "convention"
-                    ? `/conventions/${mention.slug}`
-                    : `/creators/${mention.slug}`
-                }
+                href={mentionHref(mention)}
                 className="border-border hover:border-primary hover:text-primary inline-block border px-2 py-0.5 text-xs transition-colors"
               >
                 {mention.name}

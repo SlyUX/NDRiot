@@ -51,8 +51,13 @@ export default defineType({
       title: 'Mentions',
       type: 'array',
       description:
-        'Other creators or conventions this update references — a collaborator, a con you’re tabling at. Shown as links under the note.',
-      of: [{ type: 'reference', to: [{ type: 'creator' }, { type: 'convention' }] }],
+        'Other creators, conventions, or outlets this update references — a collaborator, a con you’re tabling at, a podcast that covered you. Shown as links under the note.',
+      of: [
+        {
+          type: 'reference',
+          to: [{ type: 'creator' }, { type: 'convention' }, { type: 'media' }],
+        },
+      ],
     }),
     defineField({
       name: 'publishedAt',
