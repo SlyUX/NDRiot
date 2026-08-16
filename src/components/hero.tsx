@@ -1,15 +1,15 @@
-import type { ReactNode } from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { ArrowRight, Shuffle } from 'lucide-react'
+import type { ReactNode } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, Shuffle } from "lucide-react";
 
-import { TaxonomyRow } from '@/components/content-card'
-import PortableTextBody from '@/components/PortableTextBody'
-import { Button } from '@/components/ui/button'
-import type { HeroSettings } from '@/lib/site-settings'
-import type { HeroBook, HomeNewItem, RailFeedItem } from '@/lib/types'
-import { cn, truncate } from '@/lib/utils'
-import { urlFor } from '@/sanity/image'
+import { TaxonomyRow } from "@/components/content-card";
+import PortableTextBody from "@/components/PortableTextBody";
+import { Button } from "@/components/ui/button";
+import type { HeroSettings } from "@/lib/site-settings";
+import type { HeroBook, HomeNewItem, RailFeedItem } from "@/lib/types";
+import { cn, truncate } from "@/lib/utils";
+import { urlFor } from "@/sanity/image";
 
 /**
  * Homepage hero — a split, not a carousel.
@@ -24,25 +24,25 @@ import { urlFor } from '@/sanity/image'
  */
 
 export interface HeroProps {
-  hero: HeroSettings
+  hero: HeroSettings;
   /** One random book, chosen per request — the spotlight. */
-  feature: HeroBook | null
+  feature: HeroBook | null;
   /** Newest books and creators — the rail's fallback when there are no updates. */
-  newItems: HomeNewItem[]
+  newItems: HomeNewItem[];
   /** The updates rail: My Feed (with follows) or the global Latest Updates. When
    *  non-empty it takes the rail; otherwise `newItems` does. */
-  feedItems: RailFeedItem[]
+  feedItems: RailFeedItem[];
   /** Rail heading for the feed — reflects which feed is shown (§2 copy). */
-  feedHeading: string
+  feedHeading: string;
   /** Whose accent colors the feed rail — the viewer's type. */
-  feedUserType: 'reader' | 'creator'
+  feedUserType: "reader" | "creator";
   /** URL that re-rolls the feature to a different random book. Omit to hide. */
-  discoverHref?: string
+  discoverHref?: string;
   /** Label for that button — CMS copy (AGENTS.md §2). */
-  discoverLabel?: string
+  discoverLabel?: string;
   /** Save control for the featured comic — a client component passed as a slot
    *  so the server hero doesn't import it. Rendered over the cover. */
-  saveSlot?: ReactNode
+  saveSlot?: ReactNode;
 }
 
 /**
@@ -50,7 +50,7 @@ export interface HeroProps {
  * still wins — this just keeps the hero from being a bare black box on first
  * load, the way an empty singleton would otherwise render.
  */
-const BACKGROUND_FALLBACK = '/nd-riot-hero-bkgrd.jpg'
+const BACKGROUND_FALLBACK = "/nd-riot-hero-bkgrd.jpg";
 
 /**
  * The featured book — the full cover flush left, filling the panel's height at
@@ -62,12 +62,13 @@ function FeatureBook({
   ctaLabel,
   saveSlot,
 }: {
-  book: HeroBook
-  ctaLabel: string
-  saveSlot?: ReactNode
+  book: HeroBook;
+  ctaLabel: string;
+  saveSlot?: ReactNode;
 }) {
-  const preview = truncate(book.descriptionText, 280) ?? truncate(book.shortDescription, 280)
-  const href = `/books/${book.slug}`
+  const preview =
+    truncate(book.descriptionText, 280) ?? truncate(book.shortDescription, 280);
+  const href = `/books/${book.slug}`;
 
   // Not one big <Link> anymore: Save is a <button> and lives in the text column,
   // which can't sit inside an anchor. So the cover, title, and CTA each link to
@@ -83,7 +84,7 @@ function FeatureBook({
         {book.cover ? (
           <Image
             src={urlFor(book.cover).width(800).url()}
-            alt={book.cover.alt ?? ''}
+            alt={book.cover.alt ?? ""}
             fill
             sizes="(max-width: 640px) 100vw, 320px"
             className="object-cover"
@@ -107,7 +108,10 @@ function FeatureBook({
             {book.creatorName}
           </p>
         )}
-        <Link href={href} className="focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none">
+        <Link
+          href={href}
+          className="focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none"
+        >
           <h2 className="text-base leading-tight font-black tracking-tight text-white uppercase group-hover:underline sm:text-2xl lg:text-3xl">
             {book.title}
           </h2>
@@ -131,7 +135,11 @@ function FeatureBook({
         )}
         {/* Primary CTA — "read it" is the point of the hero, so it's the pink
             button; Save (over the cover) is the outline secondary beside it. */}
-        <Button asChild size="sm" className="mt-1 self-start font-black tracking-widest uppercase">
+        <Button
+          asChild
+          size="sm"
+          className="mt-1 self-start font-black tracking-widest uppercase"
+        >
           <Link href={href}>
             {ctaLabel}
             <ArrowRight
@@ -142,7 +150,7 @@ function FeatureBook({
         </Button>
       </div>
     </div>
-  )
+  );
 }
 
 /**
@@ -151,15 +159,15 @@ function FeatureBook({
  * blurb, and up to three genres — the same shape for either type.
  */
 function NewRow({ item }: { item: HomeNewItem }) {
-  const isBook = item._type === 'book'
-  const href = isBook ? `/books/${item.slug}` : `/creators/${item.slug}`
-  const title = isBook ? item.title : item.name
+  const isBook = item._type === "book";
+  const href = isBook ? `/books/${item.slug}` : `/creators/${item.slug}`;
+  const title = isBook ? item.title : item.name;
   const line = isBook
     ? item.creatorName
       ? `a new comic by ${item.creatorName}`
-      : 'a new comic'
-    : 'a new comic creator'
-  const blurb = truncate(isBook ? item.descriptionText : item.bioText, 90)
+      : "a new comic"
+    : "a new comic creator";
+  const blurb = truncate(isBook ? item.descriptionText : item.bioText, 90);
 
   return (
     <li>
@@ -174,14 +182,16 @@ function NewRow({ item }: { item: HomeNewItem }) {
             gives it a clear rung below the title. */}
         <p className="mt-0.5 text-xs text-white italic">{line}</p>
         {blurb && (
-          <p className="text-muted-foreground mt-1 text-xs leading-snug">{blurb}</p>
+          <p className="text-muted-foreground mt-1 text-xs leading-snug">
+            {blurb}
+          </p>
         )}
         {item.genres?.length ? (
           <TaxonomyRow genres={item.genres.slice(0, 3)} className="mt-1.5" />
         ) : null}
       </Link>
     </li>
-  )
+  );
 }
 
 /**
@@ -191,20 +201,25 @@ function NewRow({ item }: { item: HomeNewItem }) {
  */
 function FeedRow({ item }: { item: RailFeedItem }) {
   const href = item.targetSlug
-    ? item.targetType === 'book'
+    ? item.targetType === "book"
       ? `/books/${item.targetSlug}`
       : `/creators/${item.targetSlug}`
-    : null
+    : null;
   return (
     // A followed update is boxed in a hot-pink border with the creator's avatar,
     // so it stands out where it naturally falls in the recency order.
-    <li className={cn('flex gap-2.5', item.followed && 'border-primary border p-2.5')}>
+    <li
+      className={cn(
+        "flex gap-2.5",
+        item.followed && "border-primary border p-2.5",
+      )}
+    >
       {item.followed && (
         <div className="bg-muted relative size-7 shrink-0 overflow-hidden">
           {item.photo && (
             <Image
               src={urlFor(item.photo).width(56).url()}
-              alt={item.authorName ?? ''}
+              alt={item.authorName ?? ""}
               fill
               sizes="28px"
               className="object-cover"
@@ -213,7 +228,9 @@ function FeedRow({ item }: { item: RailFeedItem }) {
         </div>
       )}
       <div className="min-w-0 flex-1">
-        <p className="text-primary text-[10px] font-black tracking-widest uppercase">{item.kind}</p>
+        <p className="text-primary text-[10px] font-black tracking-widest uppercase">
+          {item.kind}
+        </p>
         {href ? (
           <Link
             href={href}
@@ -224,16 +241,20 @@ function FeedRow({ item }: { item: RailFeedItem }) {
             </span>
           </Link>
         ) : (
-          <span className="block truncate text-xs font-bold text-white">{item.targetName}</span>
+          <span className="block truncate text-xs font-bold text-white">
+            {item.targetName}
+          </span>
         )}
-        <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-white/85">{item.body}</p>
+        <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-white/85">
+          {item.body}
+        </p>
         {item.mentions && item.mentions.length > 0 && (
           <ul className="mt-1.5 flex flex-wrap gap-1">
             {item.mentions.map((mention) => (
               <li key={mention._id}>
                 <Link
                   href={
-                    mention._type === 'convention'
+                    mention._type === "convention"
                       ? `/conventions/${mention.slug}`
                       : `/creators/${mention.slug}`
                   }
@@ -247,7 +268,7 @@ function FeedRow({ item }: { item: RailFeedItem }) {
         )}
       </div>
     </li>
-  )
+  );
 }
 
 /**
@@ -260,16 +281,19 @@ function FeedRail({
   items,
   userType,
 }: {
-  heading: string
-  items: RailFeedItem[]
-  userType: 'reader' | 'creator'
+  heading: string;
+  items: RailFeedItem[];
+  userType: "reader" | "creator";
 }) {
   return (
     <div>
       <div className="mb-4 flex items-center gap-3">
         <span
           aria-hidden="true"
-          className={cn('h-4 w-1 shrink-0', userType === 'creator' ? 'bg-creator' : 'bg-reader')}
+          className={cn(
+            "h-4 w-1 shrink-0",
+            userType === "creator" ? "bg-creator" : "bg-reader",
+          )}
         />
         <h2 className="text-primary text-xs leading-tight font-black tracking-[0.2em] uppercase">
           {heading}
@@ -282,7 +306,7 @@ function FeedRail({
         ))}
       </ul>
     </div>
-  )
+  );
 }
 
 /**
@@ -290,7 +314,13 @@ function FeedRail({
  * Always present, so the rail stays populated while updates are sparse; it sits
  * beneath the followed-updates section when there is one.
  */
-function NewArrivals({ heading, items }: { heading: string; items: HomeNewItem[] }) {
+function NewArrivals({
+  heading,
+  items,
+}: {
+  heading: string;
+  items: HomeNewItem[];
+}) {
   return (
     <div>
       <div className="mb-4 flex items-center gap-3">
@@ -306,7 +336,7 @@ function NewArrivals({ heading, items }: { heading: string; items: HomeNewItem[]
         ))}
       </ul>
     </div>
-  )
+  );
 }
 
 export function Hero({
@@ -323,9 +353,16 @@ export function Hero({
   return (
     // Hand-rolled rather than <Section> so the background layers can span the
     // full bleed while the content stays at the site width.
-    <section data-slot="section" className="relative isolate overflow-hidden px-6 pt-12 pb-10">
+    <section
+      data-slot="section"
+      className="relative isolate overflow-hidden px-6 pt-12 pb-10"
+    >
       <Image
-        src={hero.background ? urlFor(hero.background).width(2400).url() : BACKGROUND_FALLBACK}
+        src={
+          hero.background
+            ? urlFor(hero.background).width(2400).url()
+            : BACKGROUND_FALLBACK
+        }
         alt=""
         fill
         sizes="100vw"
@@ -354,8 +391,8 @@ export function Hero({
               </div>
             ) : (
               <p className="max-w-xl text-sm leading-relaxed text-white/85 sm:text-base">
-                Graphic novels, single issues, and webcomics from real indie creators — across
-                every genre.
+                Graphic novels, single issues, and webcomics from real indie
+                creators — across every genre.
               </p>
             )}
           </div>
@@ -367,7 +404,7 @@ export function Hero({
                   asChild
                   size="lg"
                   // First is the pink primary, second the white inverse.
-                  variant={i === 0 ? 'default' : 'inverse'}
+                  variant={i === 0 ? "default" : "inverse"}
                   className="font-black tracking-wide uppercase"
                 >
                   <Link href={cta.href}>{cta.label}</Link>
@@ -389,22 +426,33 @@ export function Hero({
                   <h2 className="text-primary text-xs font-black tracking-[0.2em] uppercase">
                     {hero.featuredHeading}
                   </h2>
-                  <span className="h-px flex-1 bg-white/20" aria-hidden="true" />
+                  <span
+                    className="h-px flex-1 bg-white/20"
+                    aria-hidden="true"
+                  />
                   {discoverHref && (
                     <Link
                       href={discoverHref}
                       scroll={false}
-                      aria-label={discoverLabel ?? 'Spin the rack'}
+                      aria-label={discoverLabel ?? "Spin the rack"}
                       className="focus-visible:ring-ring border-border text-foreground hover:border-primary hover:text-primary inline-flex shrink-0 items-center gap-1.5 border px-3 py-1 text-xs font-bold tracking-widest uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none"
                     >
-                      {discoverLabel ?? 'Spin the rack'}
-                      <Shuffle aria-hidden="true" strokeWidth={2.5} className="size-3.5" />
+                      {discoverLabel ?? "Spin the rack"}
+                      <Shuffle
+                        aria-hidden="true"
+                        strokeWidth={2.5}
+                        className="size-3.5"
+                      />
                     </Link>
                   )}
                 </div>
 
                 <div className="flex-1">
-                  <FeatureBook book={feature} ctaLabel={hero.featureCtaLabel} saveSlot={saveSlot} />
+                  <FeatureBook
+                    book={feature}
+                    ctaLabel={hero.featureCtaLabel}
+                    saveSlot={saveSlot}
+                  />
                 </div>
               </div>
             )}
@@ -417,19 +465,28 @@ export function Hero({
             {(feedItems.length > 0 || newItems.length > 0) && (
               <div
                 className={cn(
-                  'punk-scroll space-y-8 lg:max-h-[500px] lg:overflow-y-scroll lg:pr-2',
-                  !feature && 'lg:col-span-full',
+                  "punk-scroll space-y-8 lg:max-h-[500px] lg:overflow-y-scroll lg:pr-2",
+                  !feature && "lg:col-span-full",
                 )}
               >
                 {feedItems.length > 0 && (
-                  <FeedRail heading={feedHeading} items={feedItems} userType={feedUserType} />
+                  <FeedRail
+                    heading={feedHeading}
+                    items={feedItems}
+                    userType={feedUserType}
+                  />
                 )}
-                {newItems.length > 0 && <NewArrivals heading={hero.newHeading} items={newItems} />}
+                {/* New arrivals — hidden on phones to keep the mobile hero short. */}
+                {newItems.length > 0 && (
+                  <div className="max-md:hidden">
+                    <NewArrivals heading={hero.newHeading} items={newItems} />
+                  </div>
+                )}
               </div>
             )}
           </div>
         )}
       </div>
     </section>
-  )
+  );
 }

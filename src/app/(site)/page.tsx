@@ -295,6 +295,24 @@ export default async function Home({
   }
   if (feature) discoverParams.set("notf", feature._id);
 
+  // The pink newsletter band, rendered in two positions and toggled by
+  // breakpoint: after the hero on desktop, after the Comics row on phones.
+  const newsletterBand = (
+    <div className="mx-auto flex max-w-[90rem] flex-col items-center gap-6 px-6 py-10 text-center sm:flex-row sm:justify-center sm:gap-12 lg:px-0">
+      <div className="max-w-xl">
+        <h2 className="text-2xl font-black tracking-tighter uppercase sm:text-3xl">
+          {settings.newsletter.heading}
+        </h2>
+        <p className="mt-1 text-sm text-black">
+          {settings.newsletter.description}
+        </p>
+      </div>
+      <div className="w-full sm:max-w-md">
+        <NewsletterForm copy={settings.newsletter} variant="band" />
+      </div>
+    </div>
+  );
+
   return (
     <div>
       <JsonLd
@@ -315,22 +333,10 @@ export default async function Home({
         saveSlot={featureSave}
       />
 
-      {/* Newsletter — a full-width pink band directly beneath the hero.
-          Black text on the pink (§9); the signup goes straight to MailerLite. */}
-      <section className="bg-primary text-primary-foreground">
-        <div className="mx-auto flex max-w-[90rem] flex-col items-center gap-6 px-6 py-10 text-center sm:flex-row sm:justify-center sm:gap-12 lg:px-0">
-          <div className="max-w-xl">
-            <h2 className="text-2xl font-black tracking-tighter uppercase sm:text-3xl">
-              {settings.newsletter.heading}
-            </h2>
-            <p className="mt-1 text-sm text-black">
-              {settings.newsletter.description}
-            </p>
-          </div>
-          <div className="w-full sm:max-w-md">
-            <NewsletterForm copy={settings.newsletter} variant="band" />
-          </div>
-        </div>
+      {/* Newsletter band — beneath the hero on desktop; on phones it moves below
+          the Comics row (the mobile copy inside AlternatingSections). §9 pink. */}
+      <section className="bg-primary text-primary-foreground max-md:hidden">
+        {newsletterBand}
       </section>
 
       {/* The content rows alternate --background / --surface-alt (§9), Comics
@@ -365,6 +371,12 @@ export default async function Home({
             booksFiltering ? settings.empty.filteredBooks : settings.empty.books
           }
         />
+
+        {/* Newsletter band on phones only — sits after Comics. A raw <section>,
+            so AlternatingSections passes it through and the row rhythm is unbroken. */}
+        <section className="bg-primary text-primary-foreground md:hidden">
+          {newsletterBand}
+        </section>
 
         {/* Creators: wide horizontal cards. Same browse-scroll / search-grid split
             as the books row above. */}
