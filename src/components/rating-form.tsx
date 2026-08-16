@@ -108,8 +108,10 @@ export function RatingForm({
         tableCost: tableCost || null,
         note,
       });
-      if (result.ok) router.refresh();
-      else setError(result.error ?? "Something went wrong.");
+      if (result.ok) {
+        setOpen(false); // collapse to the "update my ratings" link
+        router.refresh();
+      } else setError(result.error ?? "Something went wrong.");
     });
   }
 
@@ -118,7 +120,12 @@ export function RatingForm({
     startTransition(async () => {
       const result = await removeVenueRating({ creatorId, conventionId });
       if (result.ok) {
-        loadCreator(creatorId);
+        // Clear the fields and collapse; the link becomes a "rate" CTA again.
+        setBenefits(benefitsFrom(null));
+        setCelebrity("");
+        setTableCost("");
+        setNote("");
+        setOpen(false);
         router.refresh();
       } else {
         setError(result.error ?? "Something went wrong.");
@@ -126,7 +133,8 @@ export function RatingForm({
     });
   }
 
-  // A creator who's already rated sees just a link, not the whole form.
+  // Collapsed: an already-rated creator gets "update my ratings"; after a remove
+  // (no rating) the same link becomes the "rate this convention" CTA.
   if (!open) {
     return (
       <button
@@ -134,7 +142,7 @@ export function RatingForm({
         onClick={() => setOpen(true)}
         className="text-primary focus-visible:ring-ring text-sm underline underline-offset-4 hover:no-underline focus-visible:ring-2 focus-visible:outline-none"
       >
-        {labels.updateLabel}
+        {current?.rating ? labels.updateLabel : labels.heading}
       </button>
     );
   }
