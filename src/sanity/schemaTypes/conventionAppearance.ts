@@ -50,6 +50,14 @@ export default defineType({
       description: "Only meaningful when tabling.",
     }),
     defineField({
+      name: "note",
+      title: "Note",
+      type: "string",
+      description:
+        "A short line shown on the appearance card — a booth location, a signing time, what you're bringing. Up to 100 characters.",
+      validation: (rule) => rule.max(100),
+    }),
+    defineField({
       name: "forDate",
       title: "For occurrence date",
       type: "date",

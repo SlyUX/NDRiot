@@ -24,6 +24,7 @@ export interface EventsManagerLabels {
   empty: string;
   conventionLabel: string;
   tableFieldLabel: string;
+  noteFieldLabel: string;
   tablePrefix: string;
   saveLabel: string;
   removeLabel: string;
@@ -56,6 +57,7 @@ export function EventsManager({
   const [conventionId, setConventionId] = useState("");
   const [status, setStatus] = useState("attending");
   const [tableNumber, setTableNumber] = useState("");
+  const [note, setNote] = useState("");
 
   function save() {
     setError(null);
@@ -69,10 +71,12 @@ export function EventsManager({
         conventionId,
         status,
         tableNumber,
+        note,
       });
       if (result.ok) {
         setConventionId("");
         setTableNumber("");
+        setNote("");
         setStatus("attending");
         router.refresh();
       } else {
@@ -196,6 +200,16 @@ export function EventsManager({
               className={cn(field, "sm:max-w-xs")}
             />
           )}
+          {/* An optional short line shown on the appearance card (~100 chars). */}
+          <input
+            type="text"
+            value={note}
+            maxLength={100}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder={labels.noteFieldLabel}
+            aria-label={labels.noteFieldLabel}
+            className={field}
+          />
           <Button
             type="button"
             onClick={save}

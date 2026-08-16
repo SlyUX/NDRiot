@@ -420,6 +420,7 @@ export default async function AccountPage() {
                 empty: s.accountEventsEmpty,
                 conventionLabel: s.accountEventConventionLabel,
                 tableFieldLabel: s.accountEventTableLabel,
+                noteFieldLabel: s.accountEventNoteLabel,
                 tablePrefix: s.tableLabel,
                 saveLabel: s.accountEventSaveLabel,
                 removeLabel: s.accountRemoveLabel,

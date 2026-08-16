@@ -588,6 +588,13 @@ export default defineType({
             'Above a creator’s upcoming conventions on their profile — e.g. "Upcoming shows".',
         }),
         defineField({
+          name: "eventDateTba",
+          title: "Appearance card — dates-TBA tile label",
+          type: "string",
+          description:
+            'Shown on the date tile of an appearance card when it has no date yet — e.g. "Dates TBA".',
+        }),
+        defineField({
           name: "conventionRateHeading",
           title: "Convention page — rate-this heading",
           type: "string",
@@ -1099,6 +1106,13 @@ export default defineType({
           type: "string",
           description:
             'Label for the table-number input — e.g. "Table number".',
+        }),
+        defineField({
+          name: "accountEventNoteLabel",
+          title: "Reader home — event note field label",
+          type: "string",
+          description:
+            "Placeholder/label for the optional ~100-character note shown on the appearance card.",
         }),
         defineField({
           name: "accountEventSaveLabel",

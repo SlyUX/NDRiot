@@ -54,6 +54,7 @@ export async function setAppearance(input: {
   conventionId: string;
   status: string;
   tableNumber?: string;
+  note?: string;
 }): Promise<AppearanceResult> {
   const denied = await guard(input.creatorId);
   if (denied) return denied;
@@ -66,6 +67,7 @@ export async function setAppearance(input: {
     status === "tabling"
       ? input.tableNumber?.trim().slice(0, 40) || undefined
       : undefined;
+  const note = input.note?.trim().slice(0, 100) || undefined;
   const client = getWriteClient();
 
   // Stamp the occurrence date so a marker for a past show auto-expires. Best
@@ -89,6 +91,7 @@ export async function setAppearance(input: {
       venue: { _type: "reference", _ref: input.conventionId },
       status,
       ...(table ? { tableNumber: table } : {}),
+      ...(note ? { note } : {}),
       ...(forDate ? { forDate } : {}),
     });
   } catch (cause) {

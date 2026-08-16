@@ -434,6 +434,7 @@ export default async function CreatorPage({
               appearances={appearances}
               heading={settings.sections.creatorEventsHeading}
               tableLabel={settings.sections.tableLabel}
+              tbaLabel={settings.sections.eventDateTba}
             />
           </Section>
         )}

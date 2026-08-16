@@ -393,6 +393,8 @@ export interface SiteSettings {
     tableLabel: string;
     /** A creator's upcoming conventions on their profile. */
     creatorEventsHeading: string;
+    /** Date-tile label on an appearance card when it has no date yet. */
+    eventDateTba: string;
     /** Convention ratings — the creator rate form + the aggregate display. */
     conventionRateHeading: string;
     conventionRatingsHeading: string;
@@ -486,6 +488,7 @@ export interface SiteSettings {
     accountEventsEmpty: string;
     accountEventConventionLabel: string;
     accountEventTableLabel: string;
+    accountEventNoteLabel: string;
     accountEventSaveLabel: string;
     accountSignInTitle: string;
     accountSignInBody: string;
@@ -952,6 +955,7 @@ const DEFAULTS: SiteSettings = {
     conventionTablersHeading: "Creators with tables",
     tableLabel: "Table",
     creatorEventsHeading: "Upcoming shows",
+    eventDateTba: "Dates TBA",
     conventionRateHeading: "Rate this convention",
     conventionRatingsHeading: "What creators say",
     conventionRatingsCountLabel: "{n} creator ratings",
@@ -1036,6 +1040,7 @@ const DEFAULTS: SiteSettings = {
       "No events yet — add a convention you’re attending or tabling at.",
     accountEventConventionLabel: "Convention",
     accountEventTableLabel: "Table number",
+    accountEventNoteLabel: "Note — a booth spot, a signing time (optional)",
     accountEventSaveLabel: "Save event",
     accountSignInTitle: "Sign in to save comics and creators",
     accountSignInBody:

@@ -48,14 +48,14 @@ export const CREATOR_QUERY =
 // profile Events row. The caller filters to upcoming by forDate/venue dates.
 export const CREATOR_APPEARANCES_QUERY =
   defineQuery(`*[_type=="conventionAppearance" && creator._ref==$creatorId && defined(venue)]{
-  _id,status,tableNumber,forDate,
+  _id,status,tableNumber,note,forDate,
   "venue":venue->{_id,name,"slug":slug.current,website,startDate,endDate,place}
 }`);
 // Appearances across a set of owned creators — for the dashboard events manager.
 export const OWNED_APPEARANCES_QUERY =
   defineQuery(`*[_type=="conventionAppearance" && creator._ref in $creatorIds && defined(venue)]
   | order(venue->name asc){
-  status,tableNumber,forDate,
+  status,tableNumber,note,forDate,
   "creatorId":creator._ref,"creatorName":creator->name,
   "venueId":venue._ref,"venueName":venue->name
 }`);
