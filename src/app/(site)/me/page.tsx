@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { AlternatingSections } from "@/components/alternating-sections";
 import { SignInButton, SignOutButton } from "@/components/auth-controls";
+import { EventDialog } from "@/components/event-dialog";
 import { EventsManager } from "@/components/events-manager";
 import { NewsletterOptIn } from "@/components/newsletter-opt-in";
 import { SavedItemRow } from "@/components/saved-item-row";
@@ -374,14 +375,29 @@ export default async function AccountPage() {
                     );
                   })}
                 </div>
-                {/* Post an Update — a modal, its trigger filling the creator column. */}
+                {/* Post an Update + Add an Event — modals, their triggers stacked
+                    to fill the creator column. */}
                 {composerTargets.length > 0 && (
-                  <div className="mt-4">
+                  <div className="mt-4 space-y-3">
                     <PostUpdateDialog
                       targets={composerTargets}
                       kinds={UPDATE_KINDS}
                       mentions={mentionOptions}
                       labels={composerLabelsFrom(s)}
+                    />
+                    <EventDialog
+                      creators={ownedCreators.map((creator) => ({
+                        id: creator._id,
+                        name: creator.name ?? "Your profile",
+                      }))}
+                      conventions={eventConventions}
+                      labels={{
+                        addHeading: s.accountEventAddHeading,
+                        conventionLabel: s.accountEventConventionLabel,
+                        tableFieldLabel: s.accountEventTableLabel,
+                        noteFieldLabel: s.accountEventNoteLabel,
+                        saveLabel: s.accountEventSaveLabel,
+                      }}
                     />
                   </div>
                 )}
@@ -404,21 +420,11 @@ export default async function AccountPage() {
         {isCreator && (
           <Section padding="md">
             <EventsManager
-              creators={ownedCreators.map((creator) => ({
-                id: creator._id,
-                name: creator.name ?? "Your profile",
-              }))}
-              conventions={eventConventions}
               current={ownedAppearances}
               labels={{
                 heading: s.accountEventsHeading,
-                addHeading: s.accountEventAddHeading,
                 empty: s.accountEventsEmpty,
-                conventionLabel: s.accountEventConventionLabel,
-                tableFieldLabel: s.accountEventTableLabel,
-                noteFieldLabel: s.accountEventNoteLabel,
                 tablePrefix: s.tableLabel,
-                saveLabel: s.accountEventSaveLabel,
                 removeLabel: s.accountRemoveLabel,
               }}
             />
