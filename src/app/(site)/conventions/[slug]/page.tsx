@@ -66,10 +66,7 @@ export default async function ConventionPage({
   );
 
   // Location and timing, joined for the meta line under the title.
-  const meta = [
-    formatPlace(convention.place, convention.location),
-    convention.whenHint,
-  ]
+  const meta = [formatPlace(convention.place), convention.whenHint]
     .filter(Boolean)
     .join(" · ");
 

@@ -45,7 +45,7 @@ export function CreatorEvents({
           const when =
             formatOccurrence(venue.startDate, venue.endDate) ??
             formatOccurrence(appearance.forDate);
-          const where = formatPlace(venue.place, venue.location);
+          const where = formatPlace(venue.place);
           const meta = [when, where].filter(Boolean).join(" · ");
           return (
             <li

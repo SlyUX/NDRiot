@@ -87,7 +87,7 @@ export function favoriteToCard(
       href: `/creators/${c.slug}`,
       image: c.photo,
       imageAlt: `Portrait of ${c.name ?? "creator"}`,
-      eyebrow: c.studio?.name ?? c.location,
+      eyebrow: c.studio?.name ?? formatPlace(c.place),
       summary: truncate(c.bioText, 160),
       aspectRatio: "square",
     };
@@ -110,10 +110,8 @@ export function creatorToCard(creator: CreatorSummary): ContentCardProps {
     image: creator.photo,
     imageAlt: `Portrait of ${creator.name}`,
     // Studio name identifies a creator more usefully than a city does, and
-    // makes the card findable by studio. Location is the fallback (structured
-    // place, or the legacy string until backfilled).
-    eyebrow:
-      creator.studio?.name ?? formatPlace(creator.place, creator.location),
+    // makes the card findable by studio. Structured place is the fallback.
+    eyebrow: creator.studio?.name ?? formatPlace(creator.place),
     // A short bio preview for the horizontal card (the homepage creators row).
     // Only the horizontal layout renders summary, so this is inert on the
     // vertical listing cards. bioText is pt::text(bio) — see the queries.
@@ -132,7 +130,11 @@ export function creatorToCard(creator: CreatorSummary): ContentCardProps {
 export interface CreatorRef {
   name?: string | null;
   slug?: string | null;
-  location?: string | null;
+  place?: {
+    city?: string | null;
+    region?: string | null;
+    country?: string | null;
+  } | null;
   photo?: SanityImage | null;
   bioText?: string | null;
   studio?: { name?: string | null } | null;
@@ -147,7 +149,7 @@ export function creatorRefToCard(
     href: `/creators/${creator.slug}`,
     image: creator.photo ?? null,
     imageAlt: `Portrait of ${creator.name ?? "creator"}`,
-    eyebrow: creator.studio?.name ?? creator.location ?? undefined,
+    eyebrow: creator.studio?.name ?? formatPlace(creator.place) ?? undefined,
     summary: truncate(creator.bioText, 160),
     aspectRatio: "square",
   };
@@ -225,7 +227,7 @@ export function conventionToCard(
     // Real alt if the editor gave it (a logo/banner); the name sits beside it,
     // so a blank falls back to a plain box.
     imageAlt: convention.image?.alt ?? "",
-    eyebrow: formatPlace(convention.place, convention.location) ?? undefined,
+    eyebrow: formatPlace(convention.place) ?? undefined,
     summary: truncate(convention.description, 160),
     date: convention.whenHint ?? undefined,
     aspectRatio: "square",

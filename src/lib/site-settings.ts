@@ -132,7 +132,8 @@ export type CreatorIntakeSettings = {
   orgAddLabel: string;
   orgAddHint: string;
   orgNamePlaceholder: string;
-  locationLabel: string;
+  cityLabel: string;
+  stateLabel: string;
   bioLabel: string;
   formatsLabel: string;
   genresLabel: string;
@@ -707,7 +708,8 @@ const DEFAULTS: SiteSettings = {
     orgAddHint:
       "Give its name and link. We’ll add it to the directory when your profile is reviewed.",
     orgNamePlaceholder: "Organization name",
-    locationLabel: "Where you’re based",
+    cityLabel: "City",
+    stateLabel: "State",
     bioLabel: "Tell us about your work",
     formatsLabel: "What do you make?",
     genresLabel: "What genres do you work in?",

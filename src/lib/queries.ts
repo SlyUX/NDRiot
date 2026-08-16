@@ -15,15 +15,15 @@ export async function safeFetch<T>(
 }
 
 export const CREATORS_QUERY = defineQuery(
-  `*[_type=="creator"]|order(name asc){_id,name,"slug":slug.current,location,place,photo,genres,openToCollaboration,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}`,
+  `*[_type=="creator"]|order(name asc){_id,name,"slug":slug.current,place,photo,genres,openToCollaboration,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}`,
 );
 export const CREATOR_QUERY =
   defineQuery(`*[_type=="creator" && slug.current==$slug][0]{
-  _id,name,location,place,website,feedUrl,bio,"bioText":pt::text(bio),photo,socials,openToCollaboration,genres,formats,audience,
+  _id,name,place,website,feedUrl,bio,"bioText":pt::text(bio),photo,socials,openToCollaboration,genres,formats,audience,
   works[]{label,url},
   studio->{_id,name,"slug":slug.current,website,logo},
   organizations[]->{_id,name,"slug":slug.current,website,logo},
-  favoriteCreators[]{name,url,onSite->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}}},
+  favoriteCreators[]{name,url,onSite->{name,"slug":slug.current,place,photo,"bioText":pt::text(bio),studio->{name}}},
   "books": *[_type=="book" && references(^._id)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}
 }`);
 // A creator's convention appearances (separate docs), venue resolved — for the
@@ -31,7 +31,7 @@ export const CREATOR_QUERY =
 export const CREATOR_APPEARANCES_QUERY =
   defineQuery(`*[_type=="conventionAppearance" && creator._ref==$creatorId && defined(venue)]{
   _id,status,tableNumber,forDate,
-  "venue":venue->{_id,name,"slug":slug.current,website,startDate,endDate,place,location}
+  "venue":venue->{_id,name,"slug":slug.current,website,startDate,endDate,place}
 }`);
 // Appearances across a set of owned creators — for the dashboard events manager.
 export const OWNED_APPEARANCES_QUERY =
@@ -101,7 +101,7 @@ export const FILTERED_CREATORS_QUERY = defineQuery(`{
     && (!defined($collaborating) || openToCollaboration == true)
     && (!defined($q) || name match $q || studio->name match $q || pt::text(bio) match $q)
   ]|order(name asc)[0...$limit]{
-    _id,name,"slug":slug.current,location,place,photo,genres,openToCollaboration,
+    _id,name,"slug":slug.current,place,photo,genres,openToCollaboration,
     "bioText":pt::text(bio),
     studio->{_id,name,"slug":slug.current,website,logo}
   },
@@ -120,7 +120,7 @@ export const BOOK_QUERY =
   links[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},
   "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,
   "creatorId": creator._ref,
-  creator->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}},
+  creator->{name,"slug":slug.current,place,photo,"bioText":pt::text(bio),studio->{name}},
   "otherBooks": *[_type=="book" && _id != ^._id && creator._ref == ^.creator._ref]|order(title asc){
     _id,title,"slug":slug.current,status,genres,format,maturity,cover,
     "descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name
@@ -158,13 +158,13 @@ export const COLUMNS_QUERY = defineQuery(
   `*[_type=="column"]|order(publishedAt desc){_id,title,"slug":slug.current,excerpt,cover,thumbnail,publishedAt,"authorName":author->name}`,
 );
 export const COLUMN_QUERY = defineQuery(
-  `*[_type=="column" && slug.current==$slug][0]{_id,title,excerpt,body,publishedAt,cover,"authorName":author->name,"author":author->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}}}`,
+  `*[_type=="column" && slug.current==$slug][0]{_id,title,excerpt,body,publishedAt,cover,"authorName":author->name,"author":author->{name,"slug":slug.current,place,photo,"bioText":pt::text(bio),studio->{name}}}`,
 );
 export const INTERVIEWS_QUERY = defineQuery(
   `*[_type=="interview"]|order(publishedAt desc){_id,title,"slug":slug.current,excerpt,cover,thumbnail,publishedAt,"interviewerName":interviewer->name,"subjectName":subject->name}`,
 );
 export const INTERVIEW_QUERY = defineQuery(
-  `*[_type=="interview" && slug.current==$slug][0]{_id,title,excerpt,body,publishedAt,cover,"interviewerName":interviewer->name,"subjectName":subject->name,"interviewer":interviewer->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}}}`,
+  `*[_type=="interview" && slug.current==$slug][0]{_id,title,excerpt,body,publishedAt,cover,"interviewerName":interviewer->name,"subjectName":subject->name,"interviewer":interviewer->{name,"slug":slug.current,place,photo,"bioText":pt::text(bio),studio->{name}}}`,
 );
 
 /**
@@ -206,7 +206,7 @@ export const SAVED_BOOKS_QUERY = defineQuery(
 );
 
 export const SAVED_CREATORS_QUERY = defineQuery(
-  `*[_type=="creator" && _id in $ids && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,location,place,photo,genres,openToCollaboration,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}`,
+  `*[_type=="creator" && _id in $ids && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,place,photo,genres,openToCollaboration,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}`,
 );
 
 /** The docs a signed-in owner can manage — creators and media they own. */
@@ -332,12 +332,12 @@ export const RESOURCE_CATEGORIES_WITH_CONTENT_QUERY = defineQuery(
 // Directory cards — every convention, alphabetical (neutral order, never by
 // rating; §3). A venue creators table at, not a contributor.
 export const CONVENTIONS_QUERY = defineQuery(
-  `*[_type=="convention" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,location,place,whenHint,description,image}`,
+  `*[_type=="convention" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,place,whenHint,description,image}`,
 );
 // A single convention page.
 export const CONVENTION_QUERY =
   defineQuery(`*[_type=="convention" && slug.current==$slug][0]{
-  _id,name,"slug":slug.current,location,place,whenHint,website,description,image
+  _id,name,"slug":slug.current,place,whenHint,website,description,image
 }`);
 // Creators tabling at a convention — from the appearance docs, creator resolved.
 // Neutral (alphabetical) order, never by anything rank-like (§3). The caller
@@ -463,7 +463,7 @@ export const INTAKE_OWNED_CREATORS_QUERY = defineQuery(
  */
 export const INTAKE_CREATOR_EDIT_QUERY =
   defineQuery(`*[_type=="creator" && _id==$id][0]{
-  _id,name,"slug":slug.current,location,website,feedUrl,
+  _id,name,"slug":slug.current,place,website,feedUrl,
   "bioText":pt::text(bio),
   socials[]{platform,url},
   works[]{label,url},
@@ -556,7 +556,7 @@ export const INTAKE_MEDIA_EDIT_QUERY =
 /** Creators who list a genre, for the category pages. */
 export const GENRE_CREATORS_QUERY = defineQuery(`{
   "items": *[_type=="creator" && $genre in genres]|order(name asc)[0...$limit]{
-    _id,name,"slug":slug.current,location,place,photo,genres,openToCollaboration,
+    _id,name,"slug":slug.current,place,photo,genres,openToCollaboration,
     "bioText":pt::text(bio),
     studio->{_id,name,"slug":slug.current,website,logo}
   },

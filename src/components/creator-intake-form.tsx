@@ -20,6 +20,7 @@ import {
   FORMATS,
   SOCIAL_PLATFORMS,
   SOCIAL_PROFILE_PREFIX,
+  US_STATES,
   type SocialPlatform,
 } from "@/lib/taxonomy";
 import { urlFor } from "@/sanity/image";
@@ -61,7 +62,8 @@ export interface CreatorIntakeInitial {
   updateId: string;
   name: string;
   slug: string;
-  location: string;
+  city: string;
+  region: string;
   website: string;
   feedUrl: string;
   bio: string;
@@ -682,18 +684,42 @@ export function CreatorIntakeForm({
             removeLabel={copy.workRemoveLabel}
           />
 
-          <div className="space-y-1.5">
-            <label htmlFor="location" className={labelClass}>
-              {copy.locationLabel}
-              <Optional label={copy.optionalLabel} />
-            </label>
-            <input
-              id="location"
-              name="location"
-              type="text"
-              defaultValue={initialText("location", initial?.location)}
-              className={fieldClass}
-            />
+          {/* Region-level location — city (free text) + state (a controlled list
+              so it stays consistent and can join to mapping later). */}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <label htmlFor="city" className={labelClass}>
+                {copy.cityLabel}
+                <Optional label={copy.optionalLabel} />
+              </label>
+              <input
+                id="city"
+                name="city"
+                type="text"
+                defaultValue={initialText("city", initial?.city)}
+                className={fieldClass}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label htmlFor="region" className={labelClass}>
+                {copy.stateLabel}
+                <Optional label={copy.optionalLabel} />
+              </label>
+              <select
+                id="region"
+                name="region"
+                defaultValue={initial?.region ?? ""}
+                aria-label={copy.stateLabel}
+                className={cn(fieldClass, "appearance-none")}
+              >
+                <option value="">{copy.stateLabel}…</option>
+                {US_STATES.map((state) => (
+                  <option key={state.code} value={state.code}>
+                    {state.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </fieldset>
 

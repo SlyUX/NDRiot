@@ -329,9 +329,9 @@ export default async function CreatorPage({
                       />
                     </div>
                   )}
-                  {formatPlace(creator.place, creator.location) && (
+                  {formatPlace(creator.place) && (
                     <p className="text-muted-foreground">
-                      {formatPlace(creator.place, creator.location)}
+                      {formatPlace(creator.place)}
                     </p>
                   )}
 

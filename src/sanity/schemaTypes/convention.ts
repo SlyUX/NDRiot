@@ -36,13 +36,6 @@ export default defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
-      name: "location",
-      title: "Location (legacy text)",
-      type: "string",
-      description:
-        "Old free-text location. Being replaced by the structured Location below; kept as a display fallback until backfilled. Prefer the structured field.",
-    }),
-    defineField({
       name: "place",
       title: "Location",
       type: "place",
@@ -124,6 +117,16 @@ export default defineType({
     { name: "alpha", title: "Name", by: [{ field: "name", direction: "asc" }] },
   ],
   preview: {
-    select: { title: "name", subtitle: "location", media: "image" },
+    select: {
+      title: "name",
+      city: "place.city",
+      region: "place.region",
+      media: "image",
+    },
+    prepare: ({ title, city, region, media }) => ({
+      title,
+      subtitle: [city, region].filter(Boolean).join(", "),
+      media,
+    }),
   },
 });

@@ -120,13 +120,6 @@ export default defineType({
       description: "Their story, in their voice. Shown on the creator page.",
     }),
     defineField({
-      name: "location",
-      title: "Location (legacy text)",
-      type: "string",
-      description:
-        "Old free-text location. Being replaced by the structured Location below; kept as a display fallback until backfilled. Prefer the structured field.",
-    }),
-    defineField({
       name: "place",
       title: "Location",
       type: "place",
@@ -198,14 +191,15 @@ export default defineType({
     select: {
       title: "name",
       studioName: "studio.name",
-      location: "location",
+      city: "place.city",
+      region: "place.region",
       media: "photo",
     },
     // Studio is the more useful disambiguator when two creators share a
-    // location; fall back to location when there is no studio.
-    prepare: ({ title, studioName, location, media }) => ({
+    // location; fall back to place when there is no studio.
+    prepare: ({ title, studioName, city, region, media }) => ({
       title,
-      subtitle: studioName || location,
+      subtitle: studioName || [city, region].filter(Boolean).join(", "),
       media,
     }),
   },

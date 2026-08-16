@@ -39,7 +39,7 @@ type EditProfile = {
   _id: string;
   name: string | null;
   slug: string | null;
-  location: string | null;
+  place: { city: string | null; region: string | null } | null;
   website: string | null;
   feedUrl: string | null;
   bioText: string | null;
@@ -63,7 +63,8 @@ function toInitial(p: EditProfile): CreatorIntakeInitial {
     updateId: p._id,
     name: p.name ?? "",
     slug: p.slug ?? "",
-    location: p.location ?? "",
+    city: p.place?.city ?? "",
+    region: p.place?.region ?? "",
     website: p.website ?? "",
     feedUrl: p.feedUrl ?? "",
     bio: p.bioText ?? "",

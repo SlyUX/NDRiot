@@ -1640,8 +1640,13 @@ export default defineType({
           type: "string",
         }),
         defineField({
-          name: "locationLabel",
-          title: "Location label",
+          name: "cityLabel",
+          title: "City field label",
+          type: "string",
+        }),
+        defineField({
+          name: "stateLabel",
+          title: "State field label",
           type: "string",
         }),
         defineField({

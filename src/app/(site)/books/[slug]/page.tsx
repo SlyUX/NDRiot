@@ -24,6 +24,7 @@ import { auth } from "@/auth";
 import { isSaved } from "@/sanity/reader-client";
 import { ownsCreator } from "@/sanity/ownership-client";
 import { bookToCard } from "@/lib/card-mappers";
+import { formatPlace } from "@/lib/place";
 import { pageMetadata } from "@/lib/page-metadata";
 import { safeFetch, BOOK_QUERY } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
@@ -95,7 +96,7 @@ export default async function BookPage({
           href: `/creators/${creator.slug}`,
           image: creator.photo,
           imageAlt: `Portrait of ${creator.name ?? "comic creator"}`,
-          eyebrow: creator.studio?.name ?? creator.location,
+          eyebrow: creator.studio?.name ?? formatPlace(creator.place),
           summary: truncate(creator.bioText, 160),
           aspectRatio: "square" as const,
         }

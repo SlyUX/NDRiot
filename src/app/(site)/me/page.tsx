@@ -289,8 +289,7 @@ export default async function AccountPage() {
                 <div className="space-y-4">
                   {ownedCreators.map((creator) => {
                     const sub =
-                      creator.studio?.name ??
-                      formatPlace(creator.place, creator.location);
+                      creator.studio?.name ?? formatPlace(creator.place);
                     return (
                       <div key={creator._id} className="flex gap-3 sm:gap-4">
                         <div className="relative aspect-square w-14 shrink-0 overflow-hidden bg-white/10 sm:w-20">

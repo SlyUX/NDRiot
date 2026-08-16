@@ -1314,13 +1314,6 @@
         },
         "optional": false
       },
-      "location": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        },
-        "optional": true
-      },
       "place": {
         "type": "objectAttribute",
         "value": {
@@ -4166,13 +4159,6 @@
         },
         "optional": true
       },
-      "location": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        },
-        "optional": true
-      },
       "place": {
         "type": "objectAttribute",
         "value": {
@@ -6489,7 +6475,14 @@
               },
               "optional": true
             },
-            "locationLabel": {
+            "cityLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "stateLabel": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

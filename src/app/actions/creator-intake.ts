@@ -63,7 +63,8 @@ export type CreatorIntakeState = {
     name: string;
     bio: string;
     slug: string;
-    location: string;
+    city: string;
+    region: string;
     website: string;
     feedUrl: string;
     photoAlt: string;
@@ -220,7 +221,8 @@ export async function submitCreator(
     name: String(formData.get("name") ?? "").trim(),
     bio: String(formData.get("bio") ?? "").trim(),
     slug: String(formData.get("slug") ?? "").trim(),
-    location: String(formData.get("location") ?? "").trim(),
+    city: String(formData.get("city") ?? "").trim(),
+    region: String(formData.get("region") ?? "").trim(),
     website: String(formData.get("website") ?? "").trim(),
     feedUrl: String(formData.get("feedUrl") ?? "").trim(),
     photoAlt: String(formData.get("photoAlt") ?? "").trim(),
@@ -421,7 +423,14 @@ export async function submitCreator(
   const fields: Record<string, unknown> = {
     openToCollaboration: isYes(String(formData.get("collab") ?? "")),
   };
-  if (values.location) fields.location = values.location;
+  if (values.city || values.region) {
+    fields.place = {
+      _type: "place",
+      ...(values.city ? { city: values.city } : {}),
+      ...(values.region ? { region: values.region } : {}),
+      country: "United States",
+    };
+  }
   if (website) fields.website = website;
   if (feedUrl) fields.feedUrl = feedUrl;
   if (values.bio) fields.bio = toPortableText(values.bio);
