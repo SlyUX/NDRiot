@@ -42,7 +42,13 @@ export interface HeroProps {
   /** Save control for the featured comic — a client component passed as a slot
    *  so the server hero doesn't import it. Rendered over the cover. */
   saveSlot?: ReactNode;
+  /** When signed in: greets the reader and shows their own CTAs in place of the
+   *  evangelism tagline/subhead/buttons. */
+  account?: { greeting: string; ctas: Cta[] };
 }
+
+/** A hero call-to-action (label + path). */
+type Cta = { label: string; href: string };
 
 /**
  * Shipped artwork, used when Sanity has no hero background. The Sanity field
@@ -325,7 +331,9 @@ export function Hero({
   discoverHref,
   discoverLabel,
   saveSlot,
+  account,
 }: HeroProps) {
+  const ctas = account?.ctas ?? hero.ctas;
   return (
     // Hand-rolled rather than <Section> so the background layers can span the
     // full bleed while the content stays at the site width.
@@ -351,17 +359,18 @@ export function Hero({
       <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
 
       <div className="mx-auto w-full max-w-[90rem]">
-        {/* Identity strip — the site's line and its calls to action. Outward
-            evangelism, so it leads the page. */}
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        {/* Identity strip — the site's line and its calls to action, stacked so
+            the buttons left-align under the heading. Signed in, the reader's own
+            greeting + CTAs replace the outward evangelism. */}
+        <div className="flex flex-col gap-5">
           <div className="space-y-3">
             <h1 className="text-3xl leading-none font-black tracking-tight text-white uppercase sm:text-4xl lg:text-5xl">
-              {hero.tagline}
+              {account ? account.greeting : hero.tagline}
             </h1>
-            {/* Subhead — supporting copy under the H1. The editor writes
-                hero.body; until then this fallback carries the head terms
-                (graphic novels, webcomics) that the H1 keeps out of its punch. */}
-            {hero.body?.length ? (
+            {/* Subhead — supporting copy under the H1 (blank when signed in). The
+                editor writes hero.body; until then this fallback carries the head
+                terms (graphic novels, webcomics) the H1 keeps out of its punch. */}
+            {account ? null : hero.body?.length ? (
               <div className="max-w-xl text-sm leading-relaxed text-white/85 sm:text-base">
                 <PortableTextBody value={hero.body} />
               </div>
@@ -372,9 +381,9 @@ export function Hero({
               </p>
             )}
           </div>
-          {hero.ctas.length > 0 && (
+          {ctas.length > 0 && (
             <div className="flex flex-wrap gap-3">
-              {hero.ctas.map((cta, i) => (
+              {ctas.map((cta, i) => (
                 <Button
                   key={cta.href}
                   asChild

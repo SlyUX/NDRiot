@@ -61,6 +61,11 @@ export interface HeroSettings {
   /** The hero's identity line — evangelism, not the pitch. */
   tagline: string;
   ctas: Cta[];
+  /** Signed-in hero: greets the reader ("{name}" → their name) with a blank
+   *  subhead and their own CTAs, in place of the evangelism above. */
+  loggedInGreeting: string;
+  loggedInDashboardLabel: string;
+  loggedInProfileLabel: string;
   /** "Read more" affordance on the featured book. */
   featureCtaLabel: string;
   /** Label over the featured book — e.g. "Featured". */
@@ -676,6 +681,9 @@ const DEFAULTS: SiteSettings = {
       { label: "All Comic Creators", href: "/creators" },
       { label: "All Comics", href: "/books" },
     ],
+    loggedInGreeting: "Welcome back, {name}",
+    loggedInDashboardLabel: "Your Dashboard",
+    loggedInProfileLabel: "Your Public Profile",
   },
   join: {
     heading: "Get listed",
@@ -1226,6 +1234,14 @@ export async function getSiteSettings(): Promise<SiteSettings> {
         data.hero?.featuredHeading?.trim() || DEFAULTS.hero.featuredHeading,
       newHeading: data.hero?.newHeading?.trim() || DEFAULTS.hero.newHeading,
       ctas: data.hero?.ctas?.length ? data.hero.ctas : DEFAULTS.hero.ctas,
+      loggedInGreeting:
+        data.hero?.loggedInGreeting?.trim() || DEFAULTS.hero.loggedInGreeting,
+      loggedInDashboardLabel:
+        data.hero?.loggedInDashboardLabel?.trim() ||
+        DEFAULTS.hero.loggedInDashboardLabel,
+      loggedInProfileLabel:
+        data.hero?.loggedInProfileLabel?.trim() ||
+        DEFAULTS.hero.loggedInProfileLabel,
     },
     join: {
       heading: data.join?.heading?.trim() || DEFAULTS.join.heading,

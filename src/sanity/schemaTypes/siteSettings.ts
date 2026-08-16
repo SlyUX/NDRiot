@@ -377,6 +377,26 @@ export default defineType({
             },
           ],
         }),
+        defineField({
+          name: "loggedInGreeting",
+          title: "Hero — signed-in greeting",
+          type: "string",
+          description:
+            'Replaces the tagline for a signed-in reader. Use "{name}" for their name — e.g. "Welcome back, {name}". The subhead is left blank.',
+        }),
+        defineField({
+          name: "loggedInDashboardLabel",
+          title: "Hero — signed-in dashboard button",
+          type: "string",
+          description: 'Links to /me — e.g. "Your Dashboard".',
+        }),
+        defineField({
+          name: "loggedInProfileLabel",
+          title: "Hero — signed-in public-profile button",
+          type: "string",
+          description:
+            'Links to the creator\'s public page (shown only if they own one) — e.g. "Your Public Profile".',
+        }),
       ],
     }),
 

@@ -46,6 +46,7 @@ import {
   FILTERED_CREATORS_QUERY,
   RAIL_UPDATES_QUERY,
   APPEARANCE_FEED_QUERY,
+  CREATOR_SLUG_QUERY,
 } from "@/lib/queries";
 import { appearanceToRailItem, mergeFeed } from "@/lib/feed-mappers";
 import { getSiteSettings } from "@/lib/site-settings";
@@ -194,12 +195,21 @@ export default async function Home({
   // Hoisted so the hero's save slot can check whether the featured comic is the
   // viewer's own — a creator can't save what they publish.
   let ownedCreatorIds: string[] = [];
+  // The signed-in creator's public slug, for the hero's "Your Public Profile".
+  let profileSlug: string | null = null;
   if (email) {
     const [saves, owned] = await Promise.all([
       savedItems(email),
       creatorsOwnedBy(email),
     ]);
     ownedCreatorIds = owned;
+    if (ownedCreatorIds.length) {
+      profileSlug = await safeFetch<string | null>(
+        CREATOR_SLUG_QUERY,
+        { id: ownedCreatorIds[0] },
+        null,
+      );
+    }
     const savedIds = saves.map((save) => save.itemId);
     if (savedIds.length) {
       // Updates + convention appearances by followed creators, merged newest-first.
@@ -229,6 +239,27 @@ export default async function Home({
     followed: true,
   }));
   const feedHeading = settings.sections.feedMineHeading;
+  // Signed-in hero: greet the reader; give them a Dashboard link, plus their
+  // public profile when they own one. Replaces the evangelism tagline/CTAs.
+  const account = email
+    ? {
+        greeting: settings.hero.loggedInGreeting
+          .replace("{name}", session?.user?.name ?? "")
+          .replace(/,\s*$/, "")
+          .trim(),
+        ctas: [
+          { label: settings.hero.loggedInDashboardLabel, href: "/me" },
+          ...(profileSlug
+            ? [
+                {
+                  label: settings.hero.loggedInProfileLabel,
+                  href: `/creators/${profileSlug}`,
+                },
+              ]
+            : []),
+        ],
+      }
+    : undefined;
   const featureSaved =
     feature && email ? await isSaved(email, feature._id) : false;
   // No save on your own comic, even in the random hero spotlight.
@@ -345,6 +376,7 @@ export default async function Home({
         discoverHref={feature ? `?${discoverParams.toString()}` : undefined}
         discoverLabel={settings.sections.spinLabel}
         saveSlot={featureSave}
+        account={account}
       />
 
       {/* Newsletter band — beneath the hero on desktop; on phones it moves below

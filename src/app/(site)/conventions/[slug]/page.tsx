@@ -145,12 +145,14 @@ export default async function ConventionPage({
       innerClassName="space-y-6"
     >
       {convention.image && (
-        <div className="bg-muted relative aspect-video overflow-hidden">
+        // Square + object-contain, matching the cards (no odd cropping), just
+        // shown larger. Capped so the letterboxed square never dominates.
+        <div className="bg-muted relative aspect-square w-full max-w-md overflow-hidden">
           <Image
-            src={urlFor(convention.image).width(1200).url()}
+            src={urlFor(convention.image).width(900).url()}
             alt={convention.image.alt ?? ""}
             fill
-            sizes="(max-width: 768px) 100vw, 768px"
+            sizes="(max-width: 768px) 100vw, 448px"
             className="object-contain"
             priority
           />
