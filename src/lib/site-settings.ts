@@ -385,6 +385,11 @@ export interface SiteSettings {
     conventionsPageTitle: string;
     conventionsPageDescription: string;
     conventionVisitLabel: string;
+    /** "Creators with tables" list on a convention page + the table-number prefix. */
+    conventionTablersHeading: string;
+    tableLabel: string;
+    /** A creator's upcoming conventions on their profile. */
+    creatorEventsHeading: string;
     ragPageTitle: string;
     ragPageDescription: string;
     ragArchiveHeading: string;
@@ -914,6 +919,9 @@ const DEFAULTS: SiteSettings = {
     conventionsPageDescription:
       "Comics conventions worth a creator’s table — where to show your work, meet readers, and find your scene. Independent-comics focused.",
     conventionVisitLabel: "Official site",
+    conventionTablersHeading: "Creators with tables",
+    tableLabel: "Table",
+    creatorEventsHeading: "Upcoming shows",
     ragPageTitle: "ND Riot Rag",
     ragPageDescription:
       "The ND Riot Rag — our magazine. Read each issue online or download the PDF free; other editions are linked where you can get them.",

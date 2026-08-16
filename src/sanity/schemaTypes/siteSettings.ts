@@ -562,6 +562,27 @@ export default defineType({
             'Links out to the convention’s website — e.g. "Official site".',
         }),
         defineField({
+          name: "conventionTablersHeading",
+          title: "Convention page — creators-with-tables heading",
+          type: "string",
+          description:
+            'Above the list of creators tabling at this convention — e.g. "Creators with tables".',
+        }),
+        defineField({
+          name: "tableLabel",
+          title: "Table-number prefix",
+          type: "string",
+          description:
+            'Prefixes a creator’s table number wherever it shows — e.g. "Table" → "Table 42".',
+        }),
+        defineField({
+          name: "creatorEventsHeading",
+          title: "Creator page — upcoming shows heading",
+          type: "string",
+          description:
+            'Above a creator’s upcoming conventions on their profile — e.g. "Upcoming shows".',
+        }),
+        defineField({
           name: "ragPageTitle",
           title: "Rag (magazine) — page title (H1)",
           type: "string",

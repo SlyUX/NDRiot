@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 
 import { AlternatingSections } from "@/components/alternating-sections";
 import { ContentCardGrid } from "@/components/content-card-grid";
+import { CreatorEvents } from "@/components/creator-events";
 import { FeedPreview } from "@/components/feed-preview";
 import { JsonLd } from "@/components/json-ld";
 import { OrganizationLink } from "@/components/organization-link";
@@ -21,6 +22,7 @@ import { externalHref } from "@/lib/utils";
 import { Section } from "@/components/ui/section";
 import { bookToCard, favoriteToCard } from "@/lib/card-mappers";
 import { formatPlace } from "@/lib/place";
+import { isUpcomingDate } from "@/lib/conventions";
 import { pageMetadata } from "@/lib/page-metadata";
 import { auth } from "@/auth";
 import { isSaved } from "@/sanity/reader-client";
@@ -150,6 +152,11 @@ export default async function CreatorPage({
   // The left column (photo, socials + website, genre/format chips). If empty, it
   // collapses so the info column fills the row. Owner shortcuts live in the band
   // above, not here, so ownership no longer forces the column open.
+  // Any upcoming convention appearance → show the Events row (auto-expires past).
+  const hasEvents = (creator.appearances ?? []).some(
+    (appearance) => appearance.venue && isUpcomingDate(appearance.forDate),
+  );
+
   const hasSidebar = Boolean(
     creator.photo ||
     creator.socials?.length ||
@@ -402,6 +409,16 @@ export default async function CreatorPage({
             padding="md"
             emptyMessage={settings.empty.books}
           />
+        )}
+
+        {hasEvents && (
+          <Section padding="md">
+            <CreatorEvents
+              appearances={creator.appearances ?? []}
+              heading={settings.sections.creatorEventsHeading}
+              tableLabel={settings.sections.tableLabel}
+            />
+          </Section>
         )}
 
         {feed && (

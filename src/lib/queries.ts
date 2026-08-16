@@ -24,7 +24,8 @@ export const CREATOR_QUERY =
   studio->{_id,name,"slug":slug.current,website,logo},
   organizations[]->{_id,name,"slug":slug.current,website,logo},
   favoriteCreators[]{name,url,onSite->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}}},
-  "books": *[_type=="book" && references(^._id)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}
+  "books": *[_type=="book" && references(^._id)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},
+  "appearances": appearances[defined(venue)]{status,tableNumber,forDate,"venue":venue->{_id,name,"slug":slug.current,website,startDate,endDate,place,location}}
 }`);
 
 export const BOOKS_QUERY = defineQuery(
@@ -323,6 +324,15 @@ export const CONVENTIONS_QUERY = defineQuery(
 export const CONVENTION_QUERY =
   defineQuery(`*[_type=="convention" && slug.current==$slug][0]{
   _id,name,"slug":slug.current,location,place,whenHint,website,description,image
+}`);
+// Creators tabling at a convention — for the "Creators tabling here" list.
+// Neutral (alphabetical) order, never by anything rank-like (§3). The caller
+// filters to the active occurrence by forDate; table number rides along.
+export const CONVENTION_TABLERS_QUERY =
+  defineQuery(`*[_type=="creator" && defined(slug.current) && count(appearances[venue._ref==$conId && status=="tabling"]) > 0]|order(name asc){
+  _id,name,"slug":slug.current,photo,
+  "tableNumber": appearances[venue._ref==$conId && status=="tabling"][0].tableNumber,
+  "forDate": appearances[venue._ref==$conId && status=="tabling"][0].forDate
 }`);
 
 // ---- ND Riot Rag (magazine) ----

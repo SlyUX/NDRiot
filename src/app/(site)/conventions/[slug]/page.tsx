@@ -4,13 +4,18 @@ import { notFound } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { ConventionTablers } from "@/components/convention-tablers";
 import { Section } from "@/components/ui/section";
 import { pageMetadata } from "@/lib/page-metadata";
-import { safeFetch, CONVENTION_QUERY } from "@/lib/queries";
+import {
+  safeFetch,
+  CONVENTION_QUERY,
+  CONVENTION_TABLERS_QUERY,
+} from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
 import { externalHref } from "@/lib/utils";
 import { formatPlace } from "@/lib/place";
-import type { ConventionDetail } from "@/lib/types";
+import type { ConventionDetail, ConventionTabler } from "@/lib/types";
 import { urlFor } from "@/sanity/image";
 
 /**
@@ -51,6 +56,14 @@ export default async function ConventionPage({
   ]);
 
   if (!convention) notFound();
+
+  // Creators tabling at the upcoming occurrence — neutral order, filtered to
+  // active by the component (§3).
+  const tablers = await safeFetch<ConventionTabler[]>(
+    CONVENTION_TABLERS_QUERY,
+    { conId: convention._id },
+    [],
+  );
 
   // Location and timing, joined for the meta line under the title.
   const meta = [
@@ -112,6 +125,12 @@ export default async function ConventionPage({
           </a>
         </Button>
       )}
+
+      <ConventionTablers
+        tablers={tablers}
+        heading={settings.sections.conventionTablersHeading}
+        tableLabel={settings.sections.tableLabel}
+      />
     </Section>
   );
 }

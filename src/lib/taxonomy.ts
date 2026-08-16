@@ -404,11 +404,16 @@ export type UsStateCode = (typeof US_STATES)[number]["code"];
 
 /** A creator's relationship to a convention occurrence. Tabling implies attending. */
 export const APPEARANCE_STATUSES = [
-  { value: "attending", title: "Attending" },
-  { value: "tabling", title: "I’ll have a table" },
+  { value: "attending", title: "Attending", display: "Attending" },
+  { value: "tabling", title: "I’ll have a table", display: "Tabling" },
 ] as const;
 
 export type AppearanceStatus = (typeof APPEARANCE_STATUSES)[number]["value"];
+
+/** Third-person badge for an appearance status ("Tabling"), vs the form's first-person option. */
+export function appearanceStatusDisplay(status?: string | null): string {
+  return APPEARANCE_STATUSES.find((s) => s.value === status)?.display ?? "";
+}
 
 /**
  * Convention rating — "benefit" aspects, each scored 1–5, all framed so
