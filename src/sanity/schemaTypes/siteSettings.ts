@@ -970,6 +970,40 @@ export default defineType({
           description: "Shown when a creator hasn’t posted any updates yet.",
         }),
         defineField({
+          name: "accountEventsHeading",
+          title: "Reader home — events manager heading",
+          type: "string",
+          description:
+            'The convention-appearances manager on the dashboard — e.g. "Your events".',
+        }),
+        defineField({
+          name: "accountEventsEmpty",
+          title: "Reader home — events empty line",
+          type: "text",
+          rows: 2,
+          description:
+            "Shown when a creator has marked no convention appearances.",
+        }),
+        defineField({
+          name: "accountEventConventionLabel",
+          title: "Reader home — event convention field label",
+          type: "string",
+          description: 'Label for the convention picker — e.g. "Convention".',
+        }),
+        defineField({
+          name: "accountEventTableLabel",
+          title: "Reader home — event table-number field label",
+          type: "string",
+          description:
+            'Label for the table-number input — e.g. "Table number".',
+        }),
+        defineField({
+          name: "accountEventSaveLabel",
+          title: "Reader home — save-event button",
+          type: "string",
+          description: 'Saves an appearance — e.g. "Save event".',
+        }),
+        defineField({
           name: "accountSignInTitle",
           title: "Reader home — signed-out title",
           type: "string",

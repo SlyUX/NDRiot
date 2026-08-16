@@ -8,6 +8,7 @@ import resource from "./resource";
 import ragIssue from "./ragIssue";
 import update from "./update";
 import convention from "./convention";
+import conventionAppearance from "./conventionAppearance";
 import venueRating from "./venueRating";
 import homepageFeature from "./homepageFeature";
 import hubPage from "./hubPage";
@@ -32,6 +33,7 @@ export const schemaTypes = [
   ragIssue,
   update,
   convention,
+  conventionAppearance,
   venueRating,
   homepageFeature,
   hubPage,

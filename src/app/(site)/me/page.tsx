@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { AlternatingSections } from "@/components/alternating-sections";
 import { SignInButton, SignOutButton } from "@/components/auth-controls";
+import { EventsManager } from "@/components/events-manager";
 import { NewsletterOptIn } from "@/components/newsletter-opt-in";
 import { SavedItemRow } from "@/components/saved-item-row";
 import { SectionHeading } from "@/components/section-heading";
@@ -24,6 +25,7 @@ import {
   safeFetch,
   CONVENTIONS_QUERY,
   CREATORS_QUERY,
+  OWNED_APPEARANCES_QUERY,
   OWNED_BOOKS_QUERY,
   OWNED_DOCS_QUERY,
   OWNED_MEDIA_QUERY,
@@ -40,6 +42,7 @@ import type {
   ConventionSummary,
   CreatorSummary,
   MediaSummary,
+  OwnedAppearance,
   UpdateFeedItem,
 } from "@/lib/types";
 
@@ -205,13 +208,21 @@ export default async function AccountPage() {
     })),
   ];
 
-  // Mentionable creators + conventions for the composer — only fetched when the
-  // composer is shown (i.e. this reader is a creator).
+  // Mentionable creators + conventions for the composer, the events-manager's
+  // convention list, and the creator's current appearances — only fetched when
+  // this reader is a creator (the composer + manager are shown).
   let mentionOptions: MentionOption[] = [];
+  let eventConventions: { id: string; name: string }[] = [];
+  let ownedAppearances: OwnedAppearance[] = [];
   if (composerTargets.length > 0) {
-    const [allCreators, allConventions] = await Promise.all([
+    const [allCreators, allConventions, appearances] = await Promise.all([
       safeFetch<CreatorSummary[]>(CREATORS_QUERY, {}, []),
       safeFetch<ConventionSummary[]>(CONVENTIONS_QUERY, {}, []),
+      safeFetch<OwnedAppearance[]>(
+        OWNED_APPEARANCES_QUERY,
+        { creatorIds: ownedCreatorIds },
+        [],
+      ),
     ]);
     mentionOptions = [
       ...allCreators.map((creator) => ({
@@ -225,6 +236,11 @@ export default async function AccountPage() {
         group: "convention" as const,
       })),
     ];
+    eventConventions = allConventions.map((convention) => ({
+      id: convention._id,
+      name: convention.name,
+    }));
+    ownedAppearances = appearances;
   }
 
   return (
@@ -361,6 +377,29 @@ export default async function AccountPage() {
             </div>
           )}
         </Section>
+
+        {/* Your events — the creator's convention appearances (attending/tabling). */}
+        {isCreator && (
+          <Section padding="md">
+            <EventsManager
+              creators={ownedCreators.map((creator) => ({
+                id: creator._id,
+                name: creator.name ?? "Your profile",
+              }))}
+              conventions={eventConventions}
+              current={ownedAppearances}
+              labels={{
+                heading: s.accountEventsHeading,
+                empty: s.accountEventsEmpty,
+                conventionLabel: s.accountEventConventionLabel,
+                tableFieldLabel: s.accountEventTableLabel,
+                tablePrefix: s.tableLabel,
+                saveLabel: s.accountEventSaveLabel,
+                removeLabel: s.accountRemoveLabel,
+              }}
+            />
+          </Section>
+        )}
 
         {/* Your Media — owners of an outlet (creator or not). Plain feed rows. */}
         {ownedMedia.length > 0 && (

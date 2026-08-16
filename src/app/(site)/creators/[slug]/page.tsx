@@ -28,7 +28,12 @@ import { auth } from "@/auth";
 import { isSaved } from "@/sanity/reader-client";
 import { ownsCreator } from "@/sanity/ownership-client";
 import { fetchFeed } from "@/lib/feed-parse";
-import { safeFetch, CREATOR_QUERY, CREATOR_UPDATES_QUERY } from "@/lib/queries";
+import {
+  safeFetch,
+  CREATOR_QUERY,
+  CREATOR_UPDATES_QUERY,
+  CREATOR_APPEARANCES_QUERY,
+} from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
 import { absoluteUrl } from "@/lib/site-url";
 import {
@@ -36,7 +41,11 @@ import {
   comicMakerSchema,
   jsonLdGraph,
 } from "@/lib/structured-data";
-import type { CreatorDetail, UpdateFeedItem } from "@/lib/types";
+import type {
+  CreatorAppearance,
+  CreatorDetail,
+  UpdateFeedItem,
+} from "@/lib/types";
 import { urlFor } from "@/sanity/image";
 
 export const dynamic = "force-dynamic";
@@ -143,6 +152,13 @@ export default async function CreatorPage({
     [],
   );
 
+  // Their convention appearances (own docs) — for the Events row, upcoming only.
+  const appearances = await safeFetch<CreatorAppearance[]>(
+    CREATOR_APPEARANCES_QUERY,
+    { creatorId: creator._id },
+    [],
+  );
+
   // Their own feed (blog, webcomic updates), if they gave one and it's live.
   // Cached for half an hour; a dead or moved feed returns null and shows nothing.
   const feed = creator.feedUrl
@@ -153,7 +169,7 @@ export default async function CreatorPage({
   // collapses so the info column fills the row. Owner shortcuts live in the band
   // above, not here, so ownership no longer forces the column open.
   // Any upcoming convention appearance → show the Events row (auto-expires past).
-  const hasEvents = (creator.appearances ?? []).some(
+  const hasEvents = appearances.some(
     (appearance) => appearance.venue && isUpcomingDate(appearance.forDate),
   );
 
@@ -414,7 +430,7 @@ export default async function CreatorPage({
         {hasEvents && (
           <Section padding="md">
             <CreatorEvents
-              appearances={creator.appearances ?? []}
+              appearances={appearances}
               heading={settings.sections.creatorEventsHeading}
               tableLabel={settings.sections.tableLabel}
             />

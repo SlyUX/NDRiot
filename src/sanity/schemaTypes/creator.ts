@@ -1,7 +1,6 @@
 import { defineType, defineField } from "sanity";
 
 import {
-  APPEARANCE_STATUSES,
   FORMATS,
   FORMAT_DESCRIPTIONS,
   GENRES,
@@ -193,62 +192,6 @@ export default defineType({
       of: [{ type: "favoriteCreator" }],
       description:
         "Who they want to shout out. This is how the directory grows — link to an ND Riot profile where one already exists.",
-    }),
-    defineField({
-      name: "appearances",
-      title: "Convention appearances",
-      type: "array",
-      description:
-        "Conventions this creator is attending or tabling at. Normally set by the creator on their dashboard; editable here too. Each is stamped with the occurrence date so a marker for a past show expires rather than silently claiming next year’s.",
-      of: [
-        {
-          type: "object",
-          name: "appearance",
-          fields: [
-            defineField({
-              name: "venue",
-              title: "Convention",
-              type: "reference",
-              to: [{ type: "convention" }],
-              validation: (rule) => rule.required(),
-            }),
-            defineField({
-              name: "status",
-              title: "Status",
-              type: "string",
-              options: { list: [...APPEARANCE_STATUSES], layout: "radio" },
-              initialValue: "attending",
-              validation: (rule) => rule.required(),
-            }),
-            defineField({
-              name: "tableNumber",
-              title: "Table number",
-              type: "string",
-              description: "Only meaningful when tabling.",
-            }),
-            defineField({
-              name: "forDate",
-              title: "For occurrence date",
-              type: "date",
-              description:
-                "The occurrence this marks — auto-set from the convention when the creator marks it. Drives auto-expiry (a marker is active only while this date is in the future).",
-            }),
-          ],
-          preview: {
-            select: {
-              venue: "venue.name",
-              status: "status",
-              table: "tableNumber",
-            },
-            prepare: ({ venue, status, table }) => ({
-              title: venue ?? "Convention",
-              subtitle: [status, table && `table ${table}`]
-                .filter(Boolean)
-                .join(" · "),
-            }),
-          },
-        },
-      ],
     }),
   ],
   preview: {

@@ -459,6 +459,12 @@ export interface SiteSettings {
     accountFeedEmpty: string;
     accountMyUpdatesHeading: string;
     accountMyUpdatesEmpty: string;
+    /** Dashboard "your events" manager — convention appearances. */
+    accountEventsHeading: string;
+    accountEventsEmpty: string;
+    accountEventConventionLabel: string;
+    accountEventTableLabel: string;
+    accountEventSaveLabel: string;
     accountSignInTitle: string;
     accountSignInBody: string;
     accountSignInCta: string;
@@ -984,6 +990,12 @@ const DEFAULTS: SiteSettings = {
       "Nothing yet. Updates from comics and creators you’ve saved show up here.",
     accountMyUpdatesHeading: "Your Updates",
     accountMyUpdatesEmpty: "You haven’t posted an update yet.",
+    accountEventsHeading: "Your events",
+    accountEventsEmpty:
+      "No events yet — add a convention you’re attending or tabling at.",
+    accountEventConventionLabel: "Convention",
+    accountEventTableLabel: "Table number",
+    accountEventSaveLabel: "Save event",
     accountSignInTitle: "Sign in to save comics and creators",
     accountSignInBody:
       "ND Riot uses Google sign-in — it only confirms it’s you, and your saves stay private.",

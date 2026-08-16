@@ -5,6 +5,8 @@ import type {
   COLUMN_QUERY_RESULT,
   CONVENTION_TABLERS_QUERY_RESULT,
   CREATORS_QUERY_RESULT,
+  CREATOR_APPEARANCES_QUERY_RESULT,
+  OWNED_APPEARANCES_QUERY_RESULT,
   CREATOR_QUERY_RESULT,
   DOWNLOADS_QUERY_RESULT,
   DOWNLOAD_QUERY_RESULT,
@@ -54,9 +56,8 @@ export type RagIssueDetail = NonNullable<RAG_ISSUE_QUERY_RESULT>;
 export type ConventionSummary = CONVENTIONS_QUERY_RESULT[number];
 export type ConventionDetail = NonNullable<CONVENTION_QUERY_RESULT>;
 export type ConventionTabler = CONVENTION_TABLERS_QUERY_RESULT[number];
-export type CreatorAppearance = NonNullable<
-  CreatorDetail["appearances"]
->[number];
+export type CreatorAppearance = CREATOR_APPEARANCES_QUERY_RESULT[number];
+export type OwnedAppearance = OWNED_APPEARANCES_QUERY_RESULT[number];
 
 export type UpdateFeedItem = UPDATES_FEED_QUERY_RESULT[number];
 /** A hero-rail update. `followed` is added at assembly time, not from the query. */

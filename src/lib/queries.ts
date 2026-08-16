@@ -24,8 +24,22 @@ export const CREATOR_QUERY =
   studio->{_id,name,"slug":slug.current,website,logo},
   organizations[]->{_id,name,"slug":slug.current,website,logo},
   favoriteCreators[]{name,url,onSite->{name,"slug":slug.current,location,photo,"bioText":pt::text(bio),studio->{name}}},
-  "books": *[_type=="book" && references(^._id)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},
-  "appearances": appearances[defined(venue)]{status,tableNumber,forDate,"venue":venue->{_id,name,"slug":slug.current,website,startDate,endDate,place,location}}
+  "books": *[_type=="book" && references(^._id)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}
+}`);
+// A creator's convention appearances (separate docs), venue resolved — for the
+// profile Events row. The caller filters to upcoming by forDate/venue dates.
+export const CREATOR_APPEARANCES_QUERY =
+  defineQuery(`*[_type=="conventionAppearance" && creator._ref==$creatorId && defined(venue)]{
+  _id,status,tableNumber,forDate,
+  "venue":venue->{_id,name,"slug":slug.current,website,startDate,endDate,place,location}
+}`);
+// Appearances across a set of owned creators — for the dashboard events manager.
+export const OWNED_APPEARANCES_QUERY =
+  defineQuery(`*[_type=="conventionAppearance" && creator._ref in $creatorIds && defined(venue)]
+  | order(venue->name asc){
+  status,tableNumber,forDate,
+  "creatorId":creator._ref,"creatorName":creator->name,
+  "venueId":venue._ref,"venueName":venue->name
 }`);
 
 export const BOOKS_QUERY = defineQuery(
@@ -325,14 +339,14 @@ export const CONVENTION_QUERY =
   defineQuery(`*[_type=="convention" && slug.current==$slug][0]{
   _id,name,"slug":slug.current,location,place,whenHint,website,description,image
 }`);
-// Creators tabling at a convention — for the "Creators tabling here" list.
+// Creators tabling at a convention — from the appearance docs, creator resolved.
 // Neutral (alphabetical) order, never by anything rank-like (§3). The caller
 // filters to the active occurrence by forDate; table number rides along.
 export const CONVENTION_TABLERS_QUERY =
-  defineQuery(`*[_type=="creator" && defined(slug.current) && count(appearances[venue._ref==$conId && status=="tabling"]) > 0]|order(name asc){
-  _id,name,"slug":slug.current,photo,
-  "tableNumber": appearances[venue._ref==$conId && status=="tabling"][0].tableNumber,
-  "forDate": appearances[venue._ref==$conId && status=="tabling"][0].forDate
+  defineQuery(`*[_type=="conventionAppearance" && venue._ref==$conId && status=="tabling" && defined(creator->slug.current)]
+  | order(creator->name asc){
+  "_id": creator->_id,"name": creator->name,"slug": creator->slug.current,"photo": creator->photo,
+  tableNumber,forDate
 }`);
 
 // ---- ND Riot Rag (magazine) ----
