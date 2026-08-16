@@ -1018,6 +1018,12 @@ export default defineType({
           description: 'Heading for the creator results — e.g. "Creators".',
         }),
         defineField({
+          name: "accountPostMentionBooks",
+          title: "Reader home — mentions: comics group",
+          type: "string",
+          description: 'Heading for the comic/book results — e.g. "Comics".',
+        }),
+        defineField({
           name: "accountPostMentionConventions",
           title: "Reader home — mentions: conventions group",
           type: "string",

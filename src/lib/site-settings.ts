@@ -473,6 +473,7 @@ export interface SiteSettings {
     accountPostMentionHint: string;
     accountPostMentionNoMatch: string;
     accountPostMentionCreators: string;
+    accountPostMentionBooks: string;
     accountPostMentionConventions: string;
     accountPostMentionMedia: string;
     accountPostSubmitLabel: string;
@@ -1025,6 +1026,7 @@ const DEFAULTS: SiteSettings = {
     accountPostMentionHint: "Keep typing to find a creator, convention, or outlet…",
     accountPostMentionNoMatch: "No matches.",
     accountPostMentionCreators: "Creators",
+    accountPostMentionBooks: "Comics",
     accountPostMentionConventions: "Conventions",
     accountPostMentionMedia: "Outlets",
     accountPostSubmitLabel: "Post Update",

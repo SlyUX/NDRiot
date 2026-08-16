@@ -31,7 +31,7 @@ export type ComposerTarget = { id: string; label: string; group: 'creator' | 'co
 export type MentionOption = {
   id: string
   label: string
-  group: 'creator' | 'convention' | 'media'
+  group: 'creator' | 'book' | 'convention' | 'media'
   thumb?: string | null
 }
 
@@ -49,6 +49,7 @@ export type ComposerLabels = {
   mentionHint: string
   mentionNoMatch: string
   mentionCreatorsGroup: string
+  mentionBooksGroup: string
   mentionConventionsGroup: string
   mentionMediaGroup: string
   submit: string

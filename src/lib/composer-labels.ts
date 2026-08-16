@@ -23,6 +23,7 @@ export function composerLabelsFrom(s: SiteSettings['sections']): ComposerLabels 
     mentionHint: s.accountPostMentionHint,
     mentionNoMatch: s.accountPostMentionNoMatch,
     mentionCreatorsGroup: s.accountPostMentionCreators,
+    mentionBooksGroup: s.accountPostMentionBooks,
     mentionConventionsGroup: s.accountPostMentionConventions,
     mentionMediaGroup: s.accountPostMentionMedia,
     submit: s.accountPostSubmitLabel,

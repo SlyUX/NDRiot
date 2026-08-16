@@ -31,6 +31,7 @@ export type MentionTextareaLabels = {
   mentionHint: string;
   mentionNoMatch: string;
   mentionCreatorsGroup: string;
+  mentionBooksGroup: string;
   mentionConventionsGroup: string;
   mentionMediaGroup: string;
 };
@@ -104,6 +105,7 @@ export function MentionTextarea({
     : [];
   const groups = [
     { key: "creator", label: labels.mentionCreatorsGroup },
+    { key: "book", label: labels.mentionBooksGroup },
     { key: "convention", label: labels.mentionConventionsGroup },
     { key: "media", label: labels.mentionMediaGroup },
   ]

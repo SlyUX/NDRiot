@@ -51,11 +51,16 @@ export default defineType({
       title: 'Mentions',
       type: 'array',
       description:
-        'Other creators, conventions, or outlets this update references — a collaborator, a con you’re tabling at, a podcast that covered you. Shown as links under the note.',
+        'Other comics, creators, conventions, or outlets this update references — a collaborator, a comic you’re plugging, a con you’re tabling at, a podcast that covered you. Shown as links in the note.',
       of: [
         {
           type: 'reference',
-          to: [{ type: 'creator' }, { type: 'convention' }, { type: 'media' }],
+          to: [
+            { type: 'creator' },
+            { type: 'book' },
+            { type: 'convention' },
+            { type: 'media' },
+          ],
         },
       ],
     }),

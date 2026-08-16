@@ -262,7 +262,7 @@ export const RAIL_UPDATES_QUERY =
   "targetSlug":target->slug.current,
   "authorName":coalesce(target->name,target->creator->name),
   "photo":coalesce(target->photo,target->creator->photo),
-  "mentions":mentions[]->{_id,_type,name,"slug":slug.current,website}
+  "mentions":mentions[]->{_id,_type,"name":coalesce(name,title),"slug":slug.current,website}
 }`);
 
 /**
@@ -292,7 +292,7 @@ export const UPDATES_FEED_QUERY =
   "targetType":target->_type,
   "targetName":coalesce(target->title,target->name),
   "targetSlug":target->slug.current,
-  "mentions":mentions[]->{_id,_type,name,"slug":slug.current,website}
+  "mentions":mentions[]->{_id,_type,"name":coalesce(name,title),"slug":slug.current,website}
 }`);
 
 /**
@@ -307,7 +307,7 @@ export const CREATOR_UPDATES_QUERY =
   "targetType":target->_type,
   "targetName":coalesce(target->title,target->name),
   "targetSlug":target->slug.current,
-  "mentions":mentions[]->{_id,_type,name,"slug":slug.current,website}
+  "mentions":mentions[]->{_id,_type,"name":coalesce(name,title),"slug":slug.current,website}
 }`);
 
 /* ---------------------------------------------------- RSS feeds

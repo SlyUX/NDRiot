@@ -25,6 +25,7 @@ import { UPDATE_KINDS } from "@/lib/taxonomy";
 import {
   safeFetch,
   freshFetch,
+  BOOKS_QUERY,
   CONVENTIONS_QUERY,
   CREATORS_QUERY,
   MEDIA_QUERY,
@@ -237,9 +238,10 @@ export default async function AccountPage() {
   let eventConventions: { id: string; name: string }[] = [];
   let ownedAppearances: OwnedAppearance[] = [];
   if (composerTargets.length > 0) {
-    const [allCreators, allConventions, allMedia, appearances] =
+    const [allCreators, allBooks, allConventions, allMedia, appearances] =
       await Promise.all([
         safeFetch<CreatorSummary[]>(CREATORS_QUERY, {}, []),
+        safeFetch<BookSummary[]>(BOOKS_QUERY, {}, []),
         safeFetch<ConventionSummary[]>(CONVENTIONS_QUERY, {}, []),
         safeFetch<MediaSummary[]>(MEDIA_QUERY, {}, []),
         freshFetch<OwnedAppearance[]>(
@@ -257,6 +259,12 @@ export default async function AccountPage() {
         label: creator.name ?? "Unknown",
         group: "creator" as const,
         thumb: thumb(creator.photo),
+      })),
+      ...allBooks.map((book) => ({
+        id: book._id,
+        label: book.title ?? "Untitled",
+        group: "book" as const,
+        thumb: thumb(book.cover),
       })),
       ...allConventions.map((convention) => ({
         id: convention._id,
