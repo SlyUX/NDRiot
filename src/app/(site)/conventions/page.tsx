@@ -37,7 +37,9 @@ export default async function ConventionsPage() {
       headingSize="lg"
       heading={settings.sections.conventionsPageTitle}
       subtitle={settings.sections.conventionsPageDescription}
-      cards={conventions.map(conventionToCard)}
+      cards={conventions.map((c) =>
+        conventionToCard(c, settings.sections.conventionRatingCardEmpty),
+      )}
       layout="vertical"
       columns={4}
       aspectRatio="square"

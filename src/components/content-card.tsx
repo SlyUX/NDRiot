@@ -78,6 +78,12 @@ export interface ContentCardProps {
   hoverText?: string | null
   /** Pre-formatted for display, e.g. "12 Mar 2026". */
   date?: string | null
+  /**
+   * A one-line average rating for the card footer (convention cards). `rated`
+   * false is the "no ratings yet" state — `value` is then the CMS empty label,
+   * shown muted and without the star. §3: display only; never an ordering key.
+   */
+  rating?: { value: string; rated: boolean } | null
   layout?: 'vertical' | 'horizontal' | 'overlay'
   aspectRatio?: keyof typeof ASPECT
   /** Fill the grid cell's height, for equal-height rows. */
@@ -234,6 +240,7 @@ export function ContentCard({
   summaryLines = 2,
   hoverText,
   date,
+  rating,
   layout = 'vertical',
   aspectRatio = 'cover',
   stretch = false,
@@ -241,6 +248,32 @@ export function ContentCard({
 }: ContentCardProps) {
   // Static map — Tailwind scans source text, so the class must appear whole.
   const clampClass = { 2: 'line-clamp-2', 3: 'line-clamp-3', 4: 'line-clamp-4' }[summaryLines]
+
+  // Footer meta shared by both list and grid layouts: the date, then the
+  // average rating. A rated con shows a pink star + value; the unrated state
+  // shows the muted CMS empty label. (aria-label is a §2-permitted exception —
+  // it names the unit the bare number can't.)
+  const meta =
+    date || rating ? (
+      <div className="text-muted-foreground mt-auto flex flex-wrap items-center gap-x-2 gap-y-0.5 pt-2 text-xs">
+        {date && <span>{date}</span>}
+        {date && rating && <span aria-hidden="true">·</span>}
+        {rating &&
+          (rating.rated ? (
+            <span
+              className="whitespace-nowrap"
+              aria-label={`Average rating ${rating.value} out of 5`}
+            >
+              <span aria-hidden="true" className="text-primary">
+                ★
+              </span>{' '}
+              {rating.value}
+            </span>
+          ) : (
+            <span>{rating.value}</span>
+          ))}
+      </div>
+    ) : null
   if (layout === 'overlay') {
     return (
       <Link
@@ -292,7 +325,7 @@ export function ContentCard({
           <h3 className="leading-tight font-bold group-hover:underline">{title}</h3>
           <TaxonomyRow genres={genres} format={format} className="pt-1" />
           {summary && <p className={cn('text-muted-foreground text-sm', clampClass)}>{summary}</p>}
-          {date && <p className="text-muted-foreground text-xs">{date}</p>}
+          {meta}
         </div>
       </Link>
     )
@@ -354,7 +387,7 @@ export function ContentCard({
           <h3 className="leading-tight font-bold group-hover:underline">{title}</h3>
           {eyebrow && <p className="text-primary text-xs tracking-wide uppercase">{eyebrow}</p>}
           {summary && <p className="text-muted-foreground line-clamp-2 text-sm">{summary}</p>}
-          {date && <p className="text-muted-foreground mt-auto pt-2 text-xs">{date}</p>}
+          {meta}
         </CardContent>
       </Link>
     </Card>

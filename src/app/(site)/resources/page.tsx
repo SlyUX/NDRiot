@@ -134,7 +134,9 @@ export default async function ResourcesPage({
             key: "conventions",
             heading: s.conventionsPageTitle,
             subtitle: s.conventionsRowSubtitle,
-            cards: conventions.slice(0, ROW_CAP).map(conventionToCard),
+            cards: conventions
+              .slice(0, ROW_CAP)
+              .map((c) => conventionToCard(c, s.conventionRatingCardEmpty)),
             aspectRatio: "square" as const,
             href: "/conventions",
           },

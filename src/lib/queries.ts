@@ -350,7 +350,7 @@ export const RESOURCE_CATEGORIES_WITH_CONTENT_QUERY = defineQuery(
 // Directory cards — every convention, alphabetical (neutral order, never by
 // rating; §3). A venue creators table at, not a contributor.
 export const CONVENTIONS_QUERY = defineQuery(
-  `*[_type=="convention" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,place,whenHint,description,image}`,
+  `*[_type=="convention" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,place,whenHint,startDate,endDate,description,image,"ratings":*[_type=="venueRating" && target._ref==^._id]{benefits}}`,
 );
 // A single convention page.
 export const CONVENTION_QUERY =
@@ -550,13 +550,6 @@ export const INTAKE_BOOK_EDIT_QUERY =
 /** Media outlets, for the /media card listing — alphabetical, unranked (§3). */
 export const MEDIA_QUERY = defineQuery(
   `*[_type=="media" && defined(slug.current)]|order(name asc){
-    _id,name,"slug":slug.current,kinds,logo,about,genresCovered
-  }`,
-);
-
-/** A sample of media for the home page row — newest first, so new additions surface. */
-export const MEDIA_HOME_QUERY = defineQuery(
-  `*[_type=="media" && defined(slug.current)]|order(_createdAt desc)[0...8]{
     _id,name,"slug":slug.current,kinds,logo,about,genresCovered
   }`,
 );

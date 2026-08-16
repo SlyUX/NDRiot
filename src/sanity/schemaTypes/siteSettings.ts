@@ -413,8 +413,13 @@ export default defineType({
           type: "string",
         }),
         defineField({
+          name: "conventionsHeading",
+          title: "Conventions section heading (home row)",
+          type: "string",
+        }),
+        defineField({
           name: "mediaHeading",
-          title: "Media section heading (home row)",
+          title: "Media section heading (/resources row)",
           type: "string",
         }),
         defineField({
@@ -659,6 +664,13 @@ export default defineType({
           rows: 2,
           description:
             "Shown when a convention has no ratings; signed-out visitors clicking it get the sign-in prompt.",
+        }),
+        defineField({
+          name: "conventionRatingCardEmpty",
+          title: "Convention card — no-ratings-yet label",
+          type: "string",
+          description:
+            'Short muted line on convention cards (home row + directory) when it has no ratings — e.g. "Not yet rated".',
         }),
         defineField({
           name: "ragPageTitle",

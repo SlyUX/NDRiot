@@ -1,5 +1,6 @@
 import type { ContentCardProps } from "@/components/content-card";
 import { formatPlace } from "@/lib/place";
+import { conventionRatingAverage } from "@/lib/ratings";
 import type {
   BookSummary,
   ColumnSummary,
@@ -219,7 +220,27 @@ export function mediaToCard(media: MediaSummary): ContentCardProps {
 
 export function conventionToCard(
   convention: ConventionSummary,
+  /** CMS "no ratings yet" copy, shown muted when a con has no ratings. Omit to
+   *  hide the rating line entirely (contexts that don't surface it). */
+  ratingEmptyLabel?: string,
 ): ContentCardProps {
+  // Prefer the real occurrence date; fall back to the free-text hint.
+  const start = formatDate(convention.startDate);
+  const end = formatDate(convention.endDate);
+  const date = start
+    ? end && end !== start
+      ? `${start} – ${end}`
+      : start
+    : (convention.whenHint ?? undefined);
+
+  const average = conventionRatingAverage(convention.ratings);
+  const rating =
+    average != null
+      ? { value: average.toFixed(1), rated: true }
+      : ratingEmptyLabel
+        ? { value: ratingEmptyLabel, rated: false }
+        : undefined;
+
   return {
     title: convention.name,
     href: `/conventions/${convention.slug}`,
@@ -229,7 +250,8 @@ export function conventionToCard(
     imageAlt: convention.image?.alt ?? "",
     eyebrow: formatPlace(convention.place) ?? undefined,
     summary: truncate(convention.description, 160),
-    date: convention.whenHint ?? undefined,
+    date,
+    rating,
     aspectRatio: "square",
   };
 }

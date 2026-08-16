@@ -1,5 +1,26 @@
 import { CONVENTION_RATING_ASPECTS } from "@/lib/taxonomy";
-import type { ConventionRatingRow } from "@/lib/types";
+import type { ConventionRatingRow, ConventionSummary } from "@/lib/types";
+
+/**
+ * A single "overall" average across every benefit value in every rating — the
+ * grand mean shown on convention cards. §3: a display signal only; the directory
+ * is never ordered by it. Null when a con has no ratings.
+ */
+export function conventionRatingAverage(
+  ratings: ConventionSummary["ratings"] | null | undefined,
+): number | null {
+  if (!ratings?.length) return null;
+  const values: number[] = [];
+  for (const rating of ratings) {
+    for (const aspect of CONVENTION_RATING_ASPECTS) {
+      const value = rating.benefits?.[aspect.code];
+      if (typeof value === "number") values.push(value);
+    }
+  }
+  return values.length
+    ? values.reduce((sum, v) => sum + v, 0) / values.length
+    : null;
+}
 
 /**
  * Aggregate creator ratings of a convention for display.

@@ -17,7 +17,7 @@ import {
 import {
   bookToCard,
   creatorToCard,
-  mediaToCard,
+  conventionToCard,
   resourceToCard,
 } from "@/lib/card-mappers";
 import {
@@ -41,7 +41,7 @@ import {
   HERO_BOOKS_QUERY,
   HOME_NEW_QUERY,
   HOME_RESOURCES_QUERY,
-  MEDIA_HOME_QUERY,
+  CONVENTIONS_QUERY,
   FILTERED_BOOKS_QUERY,
   FILTERED_CREATORS_QUERY,
   RAIL_UPDATES_QUERY,
@@ -56,7 +56,7 @@ import type {
   CreatorSummary,
   HeroBook,
   HomeNewItem,
-  MediaSummary,
+  ConventionSummary,
   Paginated,
   RailFeedItem,
   RailUpdate,
@@ -150,7 +150,7 @@ export default async function Home({
     creatorsResult,
     genresWithBooks,
     newItems,
-    mediaItems,
+    conventions,
     homeResources,
     settings,
     session,
@@ -171,7 +171,7 @@ export default async function Home({
     ),
     safeFetch<string[]>(GENRES_WITH_BOOKS_QUERY, {}, []),
     safeFetch<HomeNewItem[]>(HOME_NEW_QUERY, {}, []),
-    safeFetch<MediaSummary[]>(MEDIA_HOME_QUERY, {}, []),
+    safeFetch<ConventionSummary[]>(CONVENTIONS_QUERY, {}, []),
     safeFetch<ResourceSummary[]>(HOME_RESOURCES_QUERY, {}, []),
     getSiteSettings(),
     auth(),
@@ -427,20 +427,25 @@ export default async function Home({
           />
         )}
 
-        {/* Media: independent outlets covering indie comics. Bottom row, a
-            scrolling taste; the full list (and the disclaimer) is on /media.
+        {/* Conventions: shows worth a creator's table. Bottom row, a scrolling
+            taste; the full directory (with ratings) is on /conventions. Each
+            card carries the average creator rating — §3: shown, never sorted on.
             Hidden when there is none, like editorial. */}
-        {mediaItems.length > 0 && (
+        {conventions.length > 0 && (
           <ContentCardGrid
-            heading={settings.home.mediaHeading}
-            cards={mediaItems.map(mediaToCard)}
+            heading={settings.home.conventionsHeading}
+            cards={conventions
+              .slice(0, 8)
+              .map((c) =>
+                conventionToCard(c, settings.sections.conventionRatingCardEmpty),
+              )}
             layout="horizontal"
             columns={4}
             aspectRatio="square"
             summaryLines={3}
             scroll
             padding="md"
-            viewAllHref="/media"
+            viewAllHref="/conventions"
             viewAllLabel={settings.home.viewAllLabel}
             emptyMessage=""
           />

@@ -358,6 +358,8 @@ export interface SiteSettings {
     creatorsHeading: string;
     editorialHeading: string;
     resourcesHeading: string;
+    conventionsHeading: string;
+    /** Still used by the /resources hub's Media row (home no longer shows it). */
     mediaHeading: string;
     viewAllLabel: string;
     viewMoreLabel: string;
@@ -404,6 +406,8 @@ export interface SiteSettings {
     conventionRateNoOpinion: string;
     conventionRatingsScaleNote: string;
     conventionRatingsEmpty: string;
+    /** Short "no ratings yet" line on convention cards (home + directory). */
+    conventionRatingCardEmpty: string;
     ragPageTitle: string;
     ragPageDescription: string;
     ragArchiveHeading: string;
@@ -910,6 +914,7 @@ const DEFAULTS: SiteSettings = {
     creatorsHeading: "Comic Creators",
     editorialHeading: "Editorial",
     resourcesHeading: "Resources",
+    conventionsHeading: "Conventions",
     mediaHeading: "Media Outlets",
     viewAllLabel: "View all",
     viewMoreLabel: "View more",
@@ -958,6 +963,7 @@ const DEFAULTS: SiteSettings = {
     conventionRatingsScaleNote: "(5 point scale)",
     conventionRatingsEmpty:
       "No creator ratings yet — be the first to weigh in on this convention.",
+    conventionRatingCardEmpty: "Not yet rated",
     ragPageTitle: "ND Riot Rag",
     ragPageDescription:
       "The ND Riot Rag — our magazine. Read each issue online or download the PDF free; other editions are linked where you can get them.",
