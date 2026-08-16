@@ -94,7 +94,7 @@ function toInitial(p: EditProfile): CreatorIntakeInitial {
  *
  * Google sign-in is required to create or manage a profile — it establishes
  * ownership so a profile stays in its owner's hands (the reputational point).
- * Signed out, the page shows the sign-in prompt and the Google Form fallback.
+ * Signed out, the page shows the sign-in prompt (Google sign-in is the only way in).
  * Signed in, the update picker lists only the profiles this email owns, and the
  * form writes a review draft a human still publishes.
  */
@@ -115,24 +115,11 @@ export default async function JoinPage({
   const wantsNew = params.new !== undefined;
 
   const [settings, session] = await Promise.all([getSiteSettings(), auth()]);
-  const { heading, editHeading, body, ctaLabel, formUrl } = settings.join;
+  const { heading, editHeading, body } = settings.join;
   const intake = settings.creatorIntake;
   const email = session?.user?.email ?? null;
 
-  const fallback = formUrl ? (
-    <p className="border-primary/20 text-muted-foreground mt-14 border-t pt-6 text-xs">
-      <a
-        href={formUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="hover:text-primary underline underline-offset-4"
-      >
-        {ctaLabel}
-      </a>
-    </p>
-  ) : null;
-
-  // Signed out: prompt to sign in, keep the Google Form as a no-login fallback.
+  // Signed out: prompt to sign in (the native, signed-in flow is the only way in).
   if (!email) {
     return (
       <Section padding="md" maxWidth="3xl">
@@ -158,7 +145,6 @@ export default async function JoinPage({
             redirectTo="/join/creators"
           />
         </div>
-        {fallback}
       </Section>
     );
   }
@@ -287,8 +273,6 @@ export default async function JoinPage({
           initial={initial}
         />
       </div>
-
-      {fallback}
     </Section>
   );
 }

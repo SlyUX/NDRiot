@@ -256,7 +256,7 @@ export function RatingForm({
             type="button"
             onClick={remove}
             disabled={pending}
-            className="text-destructive focus-visible:ring-ring text-xs font-bold tracking-wide uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
+            className="text-primary focus-visible:ring-ring text-xs font-bold tracking-wide uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
           >
             {labels.removeLabel}
           </button>

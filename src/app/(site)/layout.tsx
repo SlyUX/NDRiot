@@ -54,22 +54,20 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <header className="border-primary/40 bg-background sticky top-0 z-50 border-b">
         {/* px-6 on phone/tablet; flush to the edge only on desktop. */}
         <nav className="mx-auto flex max-w-[90rem] items-center justify-between gap-3 px-6 py-4 lg:px-0">
-          <Link
-            href="/"
-            aria-label={`${settings.siteTitle} — home`}
-            className="focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none"
-          >
-            {/* alt="" — the link is already labelled above, so a filled alt
-                would make a screen reader announce the brand twice. */}
-            <Logo size="nav" alt="" priority />
-          </Link>
-          <div className="flex items-center gap-3 lg:gap-5">
-            <MainNav nav={settings.nav} genres={navGenres} resourceCategories={navCategories} />
-            {/* Account. Signed in: the Google avatar (the "you're logged in"
-                signal) linking to /me — a plain <img> since the image host isn't
-                in next/image's allowlist and there's no CSP to block it. Signed
-                out: Login (starts Google sign-in) | Join (the hub). */}
-            {avatar ? (
+          {/* Brand lockup: the logo, and — when signed in — the account avatar
+              right beside it, sized to the logo's height so the "you're logged
+              in" signal reads as part of the masthead and links to /me. */}
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              aria-label={`${settings.siteTitle} — home`}
+              className="focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none"
+            >
+              {/* alt="" — the link is already labelled above, so a filled alt
+                  would make a screen reader announce the brand twice. */}
+              <Logo size="nav" alt="" priority />
+            </Link>
+            {avatar && (
               <Link
                 href="/me"
                 aria-label={s.accountTitle}
@@ -80,10 +78,16 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
                   src={avatar}
                   alt=""
                   referrerPolicy="no-referrer"
-                  className="border-primary/50 size-6 border object-cover"
+                  className="border-primary/50 size-8 border object-cover sm:size-9"
                 />
               </Link>
-            ) : (
+            )}
+          </div>
+          <div className="flex items-center gap-3 lg:gap-5">
+            <MainNav nav={settings.nav} genres={navGenres} resourceCategories={navCategories} />
+            {/* Account, signed out only (the signed-in avatar now sits by the
+                logo): Login (starts Google sign-in) | Join (the hub). */}
+            {!avatar && (
               <div className="text-foreground/80 flex items-center gap-2 text-sm font-bold tracking-wide uppercase">
                 <form
                   action={async () => {

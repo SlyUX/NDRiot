@@ -98,7 +98,7 @@ export function PairedRowsField({
                   type="button"
                   onClick={() => removeRow(row.key)}
                   aria-label={removeLabel}
-                  className="text-muted-foreground hover:text-destructive focus-visible:ring-ring shrink-0 px-2 focus-visible:ring-2 focus-visible:outline-none"
+                  className="text-muted-foreground hover:text-primary focus-visible:ring-ring shrink-0 px-2 focus-visible:ring-2 focus-visible:outline-none"
                 >
                   ✕
                 </button>

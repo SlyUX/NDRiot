@@ -128,7 +128,7 @@ export function EventsManager({
                     type="button"
                     onClick={() => remove(appearance)}
                     disabled={pending}
-                    className="text-destructive focus-visible:ring-ring shrink-0 text-xs font-bold tracking-wide uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
+                    className="text-primary focus-visible:ring-ring shrink-0 text-xs font-bold tracking-wide uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
                   >
                     {labels.removeLabel}
                   </button>
