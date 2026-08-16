@@ -348,6 +348,23 @@ export const CONVENTION_TABLERS_QUERY =
   "_id": creator->_id,"name": creator->name,"slug": creator->slug.current,"photo": creator->photo,
   tableNumber,forDate
 }`);
+// All creator ratings of a convention — raw, aggregated in JS (per-aspect
+// averages only, §3 — never a composite score, never orders discovery). Notes
+// are attributed to their creator.
+export const CONVENTION_RATINGS_QUERY =
+  defineQuery(`*[_type=="venueRating" && target._ref==$conId]{
+  benefits,celebrityFocused,tableCost,note,
+  "creatorName":creator->name,"creatorSlug":creator->slug.current
+}`);
+// The viewer's rating context for a con: which of their owned creators has an
+// appearance here (rating is gated on attendance) and each one's existing
+// rating, to prefill the form.
+export const CON_RATING_CONTEXT_QUERY =
+  defineQuery(`*[_type=="creator" && _id in $creatorIds]{
+  _id,name,
+  "hasAppearance": count(*[_type=="conventionAppearance" && creator._ref==^._id && venue._ref==$conId]) > 0,
+  "rating": *[_type=="venueRating" && creator._ref==^._id && target._ref==$conId][0]{benefits,celebrityFocused,tableCost,note}
+}`);
 
 // ---- ND Riot Rag (magazine) ----
 // Archive cards — every issue, newest (highest number) first.

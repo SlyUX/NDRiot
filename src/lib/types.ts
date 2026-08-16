@@ -4,6 +4,8 @@ import type {
   COLUMNS_QUERY_RESULT,
   COLUMN_QUERY_RESULT,
   CONVENTION_TABLERS_QUERY_RESULT,
+  CONVENTION_RATINGS_QUERY_RESULT,
+  CON_RATING_CONTEXT_QUERY_RESULT,
   CREATORS_QUERY_RESULT,
   CREATOR_APPEARANCES_QUERY_RESULT,
   OWNED_APPEARANCES_QUERY_RESULT,
@@ -58,6 +60,8 @@ export type ConventionDetail = NonNullable<CONVENTION_QUERY_RESULT>;
 export type ConventionTabler = CONVENTION_TABLERS_QUERY_RESULT[number];
 export type CreatorAppearance = CREATOR_APPEARANCES_QUERY_RESULT[number];
 export type OwnedAppearance = OWNED_APPEARANCES_QUERY_RESULT[number];
+export type ConventionRatingRow = CONVENTION_RATINGS_QUERY_RESULT[number];
+export type ConRatingContext = CON_RATING_CONTEXT_QUERY_RESULT[number];
 
 export type UpdateFeedItem = UPDATES_FEED_QUERY_RESULT[number];
 /** A hero-rail update. `followed` is added at assembly time, not from the query. */

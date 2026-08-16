@@ -391,6 +391,16 @@ export interface SiteSettings {
     tableLabel: string;
     /** A creator's upcoming conventions on their profile. */
     creatorEventsHeading: string;
+    /** Convention ratings — the creator rate form + the aggregate display. */
+    conventionRateHeading: string;
+    conventionRatingsHeading: string;
+    conventionRatingsCountLabel: string;
+    conventionRateSaveLabel: string;
+    conventionRateNoteLabel: string;
+    conventionRateNotePlaceholder: string;
+    conventionRateCelebrityLabel: string;
+    conventionRateTableCostLabel: string;
+    conventionRateNoOpinion: string;
     ragPageTitle: string;
     ragPageDescription: string;
     ragArchiveHeading: string;
@@ -930,6 +940,16 @@ const DEFAULTS: SiteSettings = {
     conventionTablersHeading: "Creators with tables",
     tableLabel: "Table",
     creatorEventsHeading: "Upcoming shows",
+    conventionRateHeading: "Rate this convention",
+    conventionRatingsHeading: "What creators say",
+    conventionRatingsCountLabel: "{n} creator ratings",
+    conventionRateSaveLabel: "Save rating",
+    conventionRateNoteLabel: "Your note",
+    conventionRateNotePlaceholder:
+      "What should other creators know before they table here?",
+    conventionRateCelebrityLabel: "Celebrity-focused",
+    conventionRateTableCostLabel: "Table cost",
+    conventionRateNoOpinion: "—",
     ragPageTitle: "ND Riot Rag",
     ragPageDescription:
       "The ND Riot Rag — our magazine. Read each issue online or download the PDF free; other editions are linked where you can get them.",

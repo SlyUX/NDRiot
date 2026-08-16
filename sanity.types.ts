@@ -853,6 +853,15 @@ export type SiteSettings = {
     conventionTablersHeading?: string;
     tableLabel?: string;
     creatorEventsHeading?: string;
+    conventionRateHeading?: string;
+    conventionRatingsHeading?: string;
+    conventionRatingsCountLabel?: string;
+    conventionRateSaveLabel?: string;
+    conventionRateNoteLabel?: string;
+    conventionRateNotePlaceholder?: string;
+    conventionRateCelebrityLabel?: string;
+    conventionRateTableCostLabel?: string;
+    conventionRateNoOpinion?: string;
     ragPageTitle?: string;
     ragPageDescription?: string;
     ragArchiveHeading?: string;
@@ -2749,6 +2758,47 @@ export type CONVENTION_TABLERS_QUERY_RESULT = Array<{
 }>;
 
 // Source: src/lib/queries.ts
+// Variable: CONVENTION_RATINGS_QUERY
+// Query: *[_type=="venueRating" && target._ref==$conId]{  benefits,celebrityFocused,tableCost,note,  "creatorName":creator->name,"creatorSlug":creator->slug.current}
+export type CONVENTION_RATINGS_QUERY_RESULT = Array<{
+  benefits: {
+    focusOnComics?: number;
+    tableValue?: number;
+    footTraffic?: number;
+    community?: number;
+    panels?: number;
+    afterHours?: number;
+  } | null;
+  celebrityFocused: boolean | null;
+  tableCost: "high" | "low" | "mid" | null;
+  note: string | null;
+  creatorName: string;
+  creatorSlug: string;
+}>;
+
+// Source: src/lib/queries.ts
+// Variable: CON_RATING_CONTEXT_QUERY
+// Query: *[_type=="creator" && _id in $creatorIds]{  _id,name,  "hasAppearance": count(*[_type=="conventionAppearance" && creator._ref==^._id && venue._ref==$conId]) > 0,  "rating": *[_type=="venueRating" && creator._ref==^._id && target._ref==$conId][0]{benefits,celebrityFocused,tableCost,note}}
+export type CON_RATING_CONTEXT_QUERY_RESULT = Array<{
+  _id: string;
+  name: string;
+  hasAppearance: boolean;
+  rating: {
+    benefits: {
+      focusOnComics?: number;
+      tableValue?: number;
+      footTraffic?: number;
+      community?: number;
+      panels?: number;
+      afterHours?: number;
+    } | null;
+    celebrityFocused: boolean | null;
+    tableCost: "high" | "low" | "mid" | null;
+    note: string | null;
+  } | null;
+}>;
+
+// Source: src/lib/queries.ts
 // Variable: RAG_ISSUES_QUERY
 // Query: *[_type=="ragIssue" && defined(slug.current)]|order(issueNumber desc){_id,title,issueNumber,"slug":slug.current,cover,publishedAt}
 export type RAG_ISSUES_QUERY_RESULT = Array<{
@@ -3371,6 +3421,8 @@ declare module "@sanity/client" {
     '*[_type=="convention" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,place,whenHint,description,image}': CONVENTIONS_QUERY_RESULT;
     '*[_type=="convention" && slug.current==$slug][0]{\n  _id,name,"slug":slug.current,place,whenHint,website,description,image\n}': CONVENTION_QUERY_RESULT;
     '*[_type=="conventionAppearance" && venue._ref==$conId && status=="tabling" && defined(creator->slug.current)]\n  | order(creator->name asc){\n  "_id": creator->_id,"name": creator->name,"slug": creator->slug.current,"photo": creator->photo,\n  tableNumber,forDate\n}': CONVENTION_TABLERS_QUERY_RESULT;
+    '*[_type=="venueRating" && target._ref==$conId]{\n  benefits,celebrityFocused,tableCost,note,\n  "creatorName":creator->name,"creatorSlug":creator->slug.current\n}': CONVENTION_RATINGS_QUERY_RESULT;
+    '*[_type=="creator" && _id in $creatorIds]{\n  _id,name,\n  "hasAppearance": count(*[_type=="conventionAppearance" && creator._ref==^._id && venue._ref==$conId]) > 0,\n  "rating": *[_type=="venueRating" && creator._ref==^._id && target._ref==$conId][0]{benefits,celebrityFocused,tableCost,note}\n}': CON_RATING_CONTEXT_QUERY_RESULT;
     '*[_type=="ragIssue" && defined(slug.current)]|order(issueNumber desc){_id,title,issueNumber,"slug":slug.current,cover,publishedAt}': RAG_ISSUES_QUERY_RESULT;
     '*[_type=="ragIssue" && defined(slug.current)]|order(issueNumber desc)[0]{\n  _id,title,issueNumber,publishedAt,description,cover,"pdfUrl":pdfFile.asset->url,\n  buyLinks[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},\n  toc,\n  contributors[]{_key,section,role,customName,"creatorName":creator->name,"creatorSlug":creator->slug.current}\n}': RAG_LATEST_QUERY_RESULT;
     '*[_type=="ragIssue" && slug.current==$slug][0]{\n  _id,title,issueNumber,publishedAt,description,cover,"pdfUrl":pdfFile.asset->url,\n  buyLinks[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},\n  toc,\n  contributors[]{_key,section,role,customName,"creatorName":creator->name,"creatorSlug":creator->slug.current}\n}': RAG_ISSUE_QUERY_RESULT;

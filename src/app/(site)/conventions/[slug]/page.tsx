@@ -5,17 +5,32 @@ import { ArrowUpRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { ConventionTablers } from "@/components/convention-tablers";
+import { ConventionRatings } from "@/components/convention-ratings";
+import {
+  RatingForm,
+  type RatingEligibleCreator,
+} from "@/components/rating-form";
 import { Section } from "@/components/ui/section";
+import { auth } from "@/auth";
 import { pageMetadata } from "@/lib/page-metadata";
 import {
   safeFetch,
   CONVENTION_QUERY,
   CONVENTION_TABLERS_QUERY,
+  CONVENTION_RATINGS_QUERY,
+  CON_RATING_CONTEXT_QUERY,
 } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
 import { externalHref } from "@/lib/utils";
 import { formatPlace } from "@/lib/place";
-import type { ConventionDetail, ConventionTabler } from "@/lib/types";
+import { aggregateRatings } from "@/lib/ratings";
+import { creatorsOwnedBy } from "@/sanity/ownership-client";
+import type {
+  ConventionDetail,
+  ConventionTabler,
+  ConventionRatingRow,
+  ConRatingContext,
+} from "@/lib/types";
 import { urlFor } from "@/sanity/image";
 
 /**
@@ -50,20 +65,51 @@ export default async function ConventionPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [convention, settings] = await Promise.all([
+  const [convention, settings, session] = await Promise.all([
     safeFetch<ConventionDetail | null>(CONVENTION_QUERY, { slug }, null),
     getSiteSettings(),
+    auth(),
   ]);
 
   if (!convention) notFound();
 
-  // Creators tabling at the upcoming occurrence — neutral order, filtered to
-  // active by the component (§3).
-  const tablers = await safeFetch<ConventionTabler[]>(
-    CONVENTION_TABLERS_QUERY,
-    { conId: convention._id },
-    [],
-  );
+  // Creators tabling at the upcoming occurrence (neutral order, §3) + all
+  // creator ratings, aggregated for display.
+  const [tablers, rawRatings] = await Promise.all([
+    safeFetch<ConventionTabler[]>(
+      CONVENTION_TABLERS_QUERY,
+      { conId: convention._id },
+      [],
+    ),
+    safeFetch<ConventionRatingRow[]>(
+      CONVENTION_RATINGS_QUERY,
+      { conId: convention._id },
+      [],
+    ),
+  ]);
+  const ratings = aggregateRatings(rawRatings);
+
+  // The rate form is shown only to a signed-in creator who's marked an
+  // appearance here (the action re-checks). Prefilled from their existing rating.
+  const email = session?.user?.email;
+  let raters: RatingEligibleCreator[] = [];
+  if (email) {
+    const ownedIds = await creatorsOwnedBy(email);
+    if (ownedIds.length) {
+      const context = await safeFetch<ConRatingContext[]>(
+        CON_RATING_CONTEXT_QUERY,
+        { conId: convention._id, creatorIds: ownedIds },
+        [],
+      );
+      raters = context
+        .filter((c) => c.hasAppearance)
+        .map((c) => ({
+          id: c._id,
+          name: c.name ?? "Your profile",
+          rating: c.rating,
+        }));
+    }
+  }
 
   // Location and timing, joined for the meta line under the title.
   const meta = [formatPlace(convention.place), convention.whenHint]
@@ -128,6 +174,33 @@ export default async function ConventionPage({
         heading={settings.sections.conventionTablersHeading}
         tableLabel={settings.sections.tableLabel}
       />
+
+      <ConventionRatings
+        aggregate={ratings}
+        labels={{
+          heading: settings.sections.conventionRatingsHeading,
+          celebrityLabel: settings.sections.conventionRateCelebrityLabel,
+          tableCostLabel: settings.sections.conventionRateTableCostLabel,
+          countLabel: settings.sections.conventionRatingsCountLabel,
+        }}
+      />
+
+      {raters.length > 0 && (
+        <RatingForm
+          conventionId={convention._id}
+          creators={raters}
+          labels={{
+            heading: settings.sections.conventionRateHeading,
+            saveLabel: settings.sections.conventionRateSaveLabel,
+            removeLabel: settings.sections.accountRemoveLabel,
+            noteLabel: settings.sections.conventionRateNoteLabel,
+            notePlaceholder: settings.sections.conventionRateNotePlaceholder,
+            celebrityLabel: settings.sections.conventionRateCelebrityLabel,
+            tableCostLabel: settings.sections.conventionRateTableCostLabel,
+            noOpinion: settings.sections.conventionRateNoOpinion,
+          }}
+        />
+      )}
     </Section>
   );
 }

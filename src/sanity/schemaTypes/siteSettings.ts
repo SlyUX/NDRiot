@@ -583,6 +583,62 @@ export default defineType({
             'Above a creator’s upcoming conventions on their profile — e.g. "Upcoming shows".',
         }),
         defineField({
+          name: "conventionRateHeading",
+          title: "Convention page — rate-this heading",
+          type: "string",
+          description:
+            'Above the rating form shown to a creator who tabled/attended — e.g. "Rate this convention".',
+        }),
+        defineField({
+          name: "conventionRatingsHeading",
+          title: "Convention page — aggregate ratings heading",
+          type: "string",
+          description:
+            'Above the aggregated creator ratings — e.g. "What creators say".',
+        }),
+        defineField({
+          name: "conventionRatingsCountLabel",
+          title: "Convention page — ratings count",
+          type: "string",
+          description: 'Use {n} for the number — e.g. "{n} creator ratings".',
+        }),
+        defineField({
+          name: "conventionRateSaveLabel",
+          title: "Convention page — save-rating button",
+          type: "string",
+          description: 'e.g. "Save rating".',
+        }),
+        defineField({
+          name: "conventionRateNoteLabel",
+          title: "Convention page — rating note label",
+          type: "string",
+          description: 'Label for the optional note — e.g. "Your note".',
+        }),
+        defineField({
+          name: "conventionRateNotePlaceholder",
+          title: "Convention page — rating note placeholder",
+          type: "string",
+        }),
+        defineField({
+          name: "conventionRateCelebrityLabel",
+          title: "Convention page — celebrity-focused label",
+          type: "string",
+          description: 'Descriptive flag — e.g. "Celebrity-focused".',
+        }),
+        defineField({
+          name: "conventionRateTableCostLabel",
+          title: "Convention page — table-cost label",
+          type: "string",
+          description: 'Descriptive flag — e.g. "Table cost".',
+        }),
+        defineField({
+          name: "conventionRateNoOpinion",
+          title: "Convention page — rating “no opinion” option",
+          type: "string",
+          description:
+            'The blank option in a rating dropdown — e.g. "—" or "No opinion".',
+        }),
+        defineField({
           name: "ragPageTitle",
           title: "Rag (magazine) — page title (H1)",
           type: "string",
