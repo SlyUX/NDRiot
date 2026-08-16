@@ -252,6 +252,8 @@ export function conventionToCard(
     summary: truncate(convention.description, 160),
     date,
     rating,
+    // Con cards read Location · Name · Date · Rating · Description.
+    metaFirst: true,
     aspectRatio: "square",
   };
 }

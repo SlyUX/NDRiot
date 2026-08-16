@@ -26,17 +26,19 @@ const sectionVariants = cva("", {
     },
     padding: {
       none: "",
-      xs: "px-6 py-4",
+      // Vertical padding is halved on phones (mobile-first value), restored from
+      // `md` up — a tighter rhythm on small screens where whitespace is costlier.
+      xs: "px-6 py-2 md:py-4",
       /**
        * For sections meant to read as one group rather than as separate
        * bands — a filter row and the results it governs, say. Off the
        * 4/8/12/16 rhythm deliberately: it exists to halve the gap between
        * two `md` sections, which lands on 6.
        */
-      tight: "px-6 py-6",
-      sm: "px-6 py-8",
-      md: "px-6 py-12",
-      lg: "px-6 py-16",
+      tight: "px-6 py-3 md:py-6",
+      sm: "px-6 py-4 md:py-8",
+      md: "px-6 py-6 md:py-12",
+      lg: "px-6 py-8 md:py-16",
       hero: "px-6 pt-32 pb-10",
     },
     border: {

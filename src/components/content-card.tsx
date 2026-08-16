@@ -84,6 +84,9 @@ export interface ContentCardProps {
    * shown muted and without the star. §3: display only; never an ordering key.
    */
   rating?: { value: string; rated: boolean } | null
+  /** Render the date/rating meta above the summary rather than pinned below it.
+   *  Convention cards want Location · Name · Date · Rating · Description order. */
+  metaFirst?: boolean
   layout?: 'vertical' | 'horizontal' | 'overlay'
   aspectRatio?: keyof typeof ASPECT
   /** Fill the grid cell's height, for equal-height rows. */
@@ -241,6 +244,7 @@ export function ContentCard({
   hoverText,
   date,
   rating,
+  metaFirst = false,
   layout = 'vertical',
   aspectRatio = 'cover',
   stretch = false,
@@ -252,10 +256,16 @@ export function ContentCard({
   // Footer meta shared by both list and grid layouts: the date, then the
   // average rating. A rated con shows a pink star + value; the unrated state
   // shows the muted CMS empty label. (aria-label is a §2-permitted exception —
-  // it names the unit the bare number can't.)
-  const meta =
+  // it names the unit the bare number can't.) `pin` bottom-aligns it in a grid
+  // cell; when `metaFirst` moves it above the summary, it flows inline instead.
+  const metaRow = (pin: boolean) =>
     date || rating ? (
-      <div className="text-muted-foreground mt-auto flex flex-wrap items-center gap-x-2 gap-y-0.5 pt-2 text-xs">
+      <div
+        className={cn(
+          'text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-0.5 pt-2 text-xs',
+          pin && 'mt-auto',
+        )}
+      >
         {date && <span>{date}</span>}
         {date && rating && <span aria-hidden="true">·</span>}
         {rating &&
@@ -324,8 +334,9 @@ export function ContentCard({
           {eyebrow && <p className="text-primary text-xs tracking-wide uppercase">{eyebrow}</p>}
           <h3 className="leading-tight font-bold group-hover:underline">{title}</h3>
           <TaxonomyRow genres={genres} format={format} className="pt-1" />
+          {metaFirst && metaRow(false)}
           {summary && <p className={cn('text-muted-foreground text-sm', clampClass)}>{summary}</p>}
-          {meta}
+          {!metaFirst && metaRow(false)}
         </div>
       </Link>
     )
@@ -386,8 +397,9 @@ export function ContentCard({
           <TaxonomyRow genres={genres} format={format} className="mb-1" />
           <h3 className="leading-tight font-bold group-hover:underline">{title}</h3>
           {eyebrow && <p className="text-primary text-xs tracking-wide uppercase">{eyebrow}</p>}
+          {metaFirst && metaRow(false)}
           {summary && <p className="text-muted-foreground line-clamp-2 text-sm">{summary}</p>}
-          {meta}
+          {!metaFirst && metaRow(true)}
         </CardContent>
       </Link>
     </Card>

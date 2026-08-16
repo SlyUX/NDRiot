@@ -273,11 +273,7 @@ export default async function AccountPage() {
         {/* Profile — a creator gets the darker-pink zone holding their identity
             beside their comics (on ND Riot pink); a plain reader gets the charcoal
             band with just their details. */}
-        <Section
-          padding="md"
-          background={isCreator ? "creator" : "charcoal"}
-          className={isCreator ? "max-md:py-6" : undefined}
-        >
+        <Section padding="md" background={isCreator ? "creator" : "charcoal"}>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h1 className="text-2xl font-black tracking-tighter uppercase sm:text-4xl">
