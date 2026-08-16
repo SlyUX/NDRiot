@@ -63,6 +63,8 @@ export function bookFacets(genres: readonly string[]): Facet[] {
     { param: 'format', label: 'Format', options: FORMATS },
     { param: 'audience', label: 'Audience', options: MATURITY_RATINGS },
     { param: 'status', label: 'Status', options: ['Ongoing', 'Complete', 'Upcoming'] },
+    // "Sample before you buy" — books that carry a free preview PDF.
+    { param: 'preview', label: 'Has preview', options: [], toggle: true },
   ]
 }
 

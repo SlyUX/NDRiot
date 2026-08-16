@@ -201,11 +201,15 @@ function CardImage({
   image,
   alt,
   width,
+  fit = 'cover',
   className,
 }: {
   image?: SanityImage | null
   alt: string
   width: number
+  /** `contain` shows the whole image (horizontal cards, square box) instead of
+   *  cropping it to fill. */
+  fit?: 'cover' | 'contain'
   className?: string
 }) {
   if (!image) {
@@ -224,7 +228,7 @@ function CardImage({
       alt={image.alt ?? alt}
       fill
       sizes={`(max-width: 768px) 100vw, ${width}px`}
-      className={cn('object-cover', className)}
+      className={cn(fit === 'contain' ? 'object-contain' : 'object-cover', className)}
     />
   )
 }
@@ -326,8 +330,11 @@ export function ContentCard({
           className,
         )}
       >
-        <div className={cn('relative w-24 shrink-0 overflow-hidden sm:w-32', ASPECT[aspectRatio])}>
-          <CardImage image={image} alt={imageAlt} width={256} />
+        {/* Horizontal thumbnails are always square, and show the whole image
+            rather than cropping it — a portrait cover or a landscape logo sits
+            letterboxed in the square rather than filling it. */}
+        <div className="bg-muted relative aspect-square w-24 shrink-0 overflow-hidden sm:w-32">
+          <CardImage image={image} alt={imageAlt} width={256} fit="contain" />
           {maturity && <MaturityOverlay maturity={maturity} />}
         </div>
         <div className="min-w-0 flex-1 space-y-1">
