@@ -1,181 +1,263 @@
-import { defineType, defineField } from 'sanity'
+import { defineType, defineField } from "sanity";
 
-import { FORMATS, FORMAT_DESCRIPTIONS, GENRES, MATURITY_DESCRIPTIONS, MATURITY_RATINGS } from '@/lib/taxonomy'
-import { validateFeedUrl } from '../validateFeedUrl'
-import { slugField } from './slugField'
+import {
+  APPEARANCE_STATUSES,
+  FORMATS,
+  FORMAT_DESCRIPTIONS,
+  GENRES,
+  MATURITY_DESCRIPTIONS,
+  MATURITY_RATINGS,
+} from "@/lib/taxonomy";
+import { validateFeedUrl } from "../validateFeedUrl";
+import { slugField } from "./slugField";
 
 export default defineType({
-  name: 'creator',
+  name: "creator",
   // Kept the internal type name `creator` (routes, refs, ownership all key off
   // it); the reader-facing label is "Comic Creator" across the site.
-  title: 'Comic Creator',
-  type: 'document',
+  title: "Comic Creator",
+  type: "document",
   fields: [
     defineField({
-      name: 'name',
-      title: 'Name',
-      type: 'string',
-      description: 'How they want to be credited — a pen name is fine.',
+      name: "name",
+      title: "Name",
+      type: "string",
+      description: "How they want to be credited — a pen name is fine.",
       validation: (rule) => rule.required(),
     }),
-    slugField('name', '/creators/their-slug'),
+    slugField("name", "/creators/their-slug"),
     defineField({
-      name: 'studio',
-      title: 'Studio',
-      type: 'reference',
-      to: [{ type: 'organization' }],
+      name: "studio",
+      title: "Studio",
+      type: "reference",
+      to: [{ type: "organization" }],
       description:
         'The studio they work under, if any — e.g. "Fox Storytelling". One per creator. A reference rather than free text so a studio can have several members and its own page. Create the Organization first if it is not in the list.',
     }),
     defineField({
-      name: 'organizations',
-      title: 'Organizations',
-      type: 'array',
-      of: [{ type: 'reference', to: [{ type: 'organization' }] }],
+      name: "organizations",
+      title: "Organizations",
+      type: "array",
+      of: [{ type: "reference", to: [{ type: "organization" }] }],
       description:
-        'Collectives or guilds they belong to, beyond their own studio. Up to three. Create the Organization first if it is not in the list.',
+        "Collectives or guilds they belong to, beyond their own studio. Up to three. Create the Organization first if it is not in the list.",
       validation: (rule) =>
         rule
           .max(3)
           .unique()
           .custom((organizations, context) => {
-            const studioRef = (context.document?.studio as { _ref?: string } | undefined)?._ref
-            if (!studioRef || !Array.isArray(organizations)) return true
+            const studioRef = (
+              context.document?.studio as { _ref?: string } | undefined
+            )?._ref;
+            if (!studioRef || !Array.isArray(organizations)) return true;
 
             const duplicate = organizations.some(
-              (organization) => (organization as { _ref?: string })?._ref === studioRef,
-            )
+              (organization) =>
+                (organization as { _ref?: string })?._ref === studioRef,
+            );
 
             // Studio and organizations render in separate places on the
             // profile, so listing one in both prints it twice.
             return duplicate
-              ? 'That organization is already set as this creator’s Studio above. Remove it here, or clear the Studio field.'
-              : true
+              ? "That organization is already set as this creator’s Studio above. Remove it here, or clear the Studio field."
+              : true;
           }),
     }),
     defineField({
-      name: 'genres',
-      title: 'Genres they work in',
-      type: 'array',
-      of: [{ type: 'string', options: { list: [...GENRES] } }],
-      options: { layout: 'grid' },
+      name: "genres",
+      title: "Genres they work in",
+      type: "array",
+      of: [{ type: "string", options: { list: [...GENRES] } }],
+      options: { layout: "grid" },
       description:
-        'Up to three, describing their body of work rather than any single book. Books carry their own genres; these make the creator findable.',
+        "Up to three, describing their body of work rather than any single book. Books carry their own genres; these make the creator findable.",
       validation: (rule) => rule.max(3).unique(),
     }),
     defineField({
-      name: 'formats',
-      title: 'What they make',
-      type: 'array',
-      of: [{ type: 'string', options: { list: [...FORMATS] } }],
-      options: { layout: 'grid' },
+      name: "formats",
+      title: "What they make",
+      type: "array",
+      of: [{ type: "string", options: { list: [...FORMATS] } }],
+      options: { layout: "grid" },
       description: Object.entries(FORMAT_DESCRIPTIONS)
         .map(([k, v]) => `${k}: ${v}`)
-        .join(' '),
+        .join(" "),
       validation: (rule) => rule.unique(),
     }),
     defineField({
-      name: 'audience',
-      title: 'Who their work is for',
-      type: 'string',
+      name: "audience",
+      title: "Who their work is for",
+      type: "string",
       options: {
         list: MATURITY_RATINGS.map((value) => ({
           title: `${value} — ${MATURITY_DESCRIPTIONS[value]}`,
           value,
         })),
-        layout: 'radio',
+        layout: "radio",
       },
       description:
-        'A summary of their work overall. Individual books can differ — this is the general signal, not a rule.',
+        "A summary of their work overall. Individual books can differ — this is the general signal, not a rule.",
     }),
     defineField({
-      name: 'openToCollaboration',
-      title: 'Open to collaboration',
-      type: 'boolean',
+      name: "openToCollaboration",
+      title: "Open to collaboration",
+      type: "boolean",
       description:
-        'Shows a badge on their profile saying they are looking for collaborators. Leave off unless they have said yes — this is a claim about them, not a default.',
+        "Shows a badge on their profile saying they are looking for collaborators. Leave off unless they have said yes — this is a claim about them, not a default.",
       initialValue: false,
     }),
     defineField({
-      name: 'photo',
-      title: 'Photo',
-      type: 'imageWithAlt',
-      description: 'Shown as a square. A headshot, avatar, or self-portrait all work.',
-    }),
-    defineField({
-      name: 'bio',
-      title: 'Bio',
-      type: 'array',
-      of: [{ type: 'block' }],
-      description: 'Their story, in their voice. Shown on the creator page.',
-    }),
-    defineField({
-      name: 'location',
-      title: 'Location',
-      type: 'string',
-      description: 'City and country, or however specific they want to be.',
-    }),
-    defineField({
-      name: 'website',
-      title: 'Website',
-      type: 'url',
-      description: 'Their main site or storefront.',
-    }),
-    defineField({
-      name: 'feedUrl',
-      title: 'RSS / Atom feed URL',
-      type: 'url',
+      name: "photo",
+      title: "Photo",
+      type: "imageWithAlt",
       description:
-        'Optional. Their own feed — a blog, or webcomic updates. When set, ND Riot shows their latest posts on this profile, each linking out. Validated live: it must be a real feed.',
+        "Shown as a square. A headshot, avatar, or self-portrait all work.",
+    }),
+    defineField({
+      name: "bio",
+      title: "Bio",
+      type: "array",
+      of: [{ type: "block" }],
+      description: "Their story, in their voice. Shown on the creator page.",
+    }),
+    defineField({
+      name: "location",
+      title: "Location (legacy text)",
+      type: "string",
+      description:
+        "Old free-text location. Being replaced by the structured Location below; kept as a display fallback until backfilled. Prefer the structured field.",
+    }),
+    defineField({
+      name: "place",
+      title: "Location",
+      type: "place",
+      description:
+        'Structured city + state — region-level on purpose (privacy). The state powers "creators / shows in your region".',
+    }),
+    defineField({
+      name: "website",
+      title: "Website",
+      type: "url",
+      description: "Their main site or storefront.",
+    }),
+    defineField({
+      name: "feedUrl",
+      title: "RSS / Atom feed URL",
+      type: "url",
+      description:
+        "Optional. Their own feed — a blog, or webcomic updates. When set, ND Riot shows their latest posts on this profile, each linking out. Validated live: it must be a real feed.",
       validation: (rule) =>
-        rule.uri({ scheme: ['http', 'https'] }).custom((value) => validateFeedUrl(value)),
+        rule
+          .uri({ scheme: ["http", "https"] })
+          .custom((value) => validateFeedUrl(value)),
     }),
     defineField({
-      name: 'socials',
-      title: 'Social links',
-      type: 'array',
-      of: [{ type: 'socialLink' }],
-      description: 'Only the accounts they actually use.',
+      name: "socials",
+      title: "Social links",
+      type: "array",
+      of: [{ type: "socialLink" }],
+      description: "Only the accounts they actually use.",
     }),
     defineField({
-      name: 'works',
-      title: 'Where to find their work',
-      type: 'array',
+      name: "works",
+      title: "Where to find their work",
+      type: "array",
       description:
-        'External links to their books — a shop, a marketplace, a free read — each a title and a URL. Books entered as full documents in the directory appear above this with covers and details; this list carries everything else they have made.',
+        "External links to their books — a shop, a marketplace, a free read — each a title and a URL. Books entered as full documents in the directory appear above this with covers and details; this list carries everything else they have made.",
       of: [
         {
-          type: 'object',
-          name: 'workLink',
+          type: "object",
+          name: "workLink",
           fields: [
             defineField({
-              name: 'label',
-              title: 'Title',
-              type: 'string',
+              name: "label",
+              title: "Title",
+              type: "string",
               validation: (rule) => rule.required(),
             }),
             defineField({
-              name: 'url',
-              title: 'URL',
-              type: 'url',
+              name: "url",
+              title: "URL",
+              type: "url",
               validation: (rule) => rule.required(),
             }),
           ],
-          preview: { select: { title: 'label', subtitle: 'url' } },
+          preview: { select: { title: "label", subtitle: "url" } },
         },
       ],
     }),
     defineField({
-      name: 'favoriteCreators',
-      title: 'Favorite independent creators',
-      type: 'array',
-      of: [{ type: 'favoriteCreator' }],
+      name: "favoriteCreators",
+      title: "Favorite independent creators",
+      type: "array",
+      of: [{ type: "favoriteCreator" }],
       description:
-        'Who they want to shout out. This is how the directory grows — link to an ND Riot profile where one already exists.',
+        "Who they want to shout out. This is how the directory grows — link to an ND Riot profile where one already exists.",
+    }),
+    defineField({
+      name: "appearances",
+      title: "Convention appearances",
+      type: "array",
+      description:
+        "Conventions this creator is attending or tabling at. Normally set by the creator on their dashboard; editable here too. Each is stamped with the occurrence date so a marker for a past show expires rather than silently claiming next year’s.",
+      of: [
+        {
+          type: "object",
+          name: "appearance",
+          fields: [
+            defineField({
+              name: "venue",
+              title: "Convention",
+              type: "reference",
+              to: [{ type: "convention" }],
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "status",
+              title: "Status",
+              type: "string",
+              options: { list: [...APPEARANCE_STATUSES], layout: "radio" },
+              initialValue: "attending",
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: "tableNumber",
+              title: "Table number",
+              type: "string",
+              description: "Only meaningful when tabling.",
+            }),
+            defineField({
+              name: "forDate",
+              title: "For occurrence date",
+              type: "date",
+              description:
+                "The occurrence this marks — auto-set from the convention when the creator marks it. Drives auto-expiry (a marker is active only while this date is in the future).",
+            }),
+          ],
+          preview: {
+            select: {
+              venue: "venue.name",
+              status: "status",
+              table: "tableNumber",
+            },
+            prepare: ({ venue, status, table }) => ({
+              title: venue ?? "Convention",
+              subtitle: [status, table && `table ${table}`]
+                .filter(Boolean)
+                .join(" · "),
+            }),
+          },
+        },
+      ],
     }),
   ],
   preview: {
-    select: { title: 'name', studioName: 'studio.name', location: 'location', media: 'photo' },
+    select: {
+      title: "name",
+      studioName: "studio.name",
+      location: "location",
+      media: "photo",
+    },
     // Studio is the more useful disambiguator when two creators share a
     // location; fall back to location when there is no studio.
     prepare: ({ title, studioName, location, media }) => ({
@@ -184,4 +266,4 @@ export default defineType({
       media,
     }),
   },
-})
+});

@@ -21,6 +21,64 @@ type ArrayOf<T> = Array<
 >;
 
 // Source: schema.json
+export type Place = {
+  _type: "place";
+  city?: string;
+  region?:
+    | "AL"
+    | "AK"
+    | "AZ"
+    | "AR"
+    | "CA"
+    | "CO"
+    | "CT"
+    | "DE"
+    | "DC"
+    | "FL"
+    | "GA"
+    | "HI"
+    | "ID"
+    | "IL"
+    | "IN"
+    | "IA"
+    | "KS"
+    | "KY"
+    | "LA"
+    | "ME"
+    | "MD"
+    | "MA"
+    | "MI"
+    | "MN"
+    | "MS"
+    | "MO"
+    | "MT"
+    | "NE"
+    | "NV"
+    | "NH"
+    | "NJ"
+    | "NM"
+    | "NY"
+    | "NC"
+    | "ND"
+    | "OH"
+    | "OK"
+    | "OR"
+    | "PA"
+    | "RI"
+    | "SC"
+    | "SD"
+    | "TN"
+    | "TX"
+    | "UT"
+    | "VT"
+    | "VA"
+    | "WA"
+    | "WV"
+    | "WI"
+    | "WY";
+  country?: string;
+};
+
 export type SanityImageAssetReference = {
   _ref: string;
   _type: "reference";
@@ -164,32 +222,32 @@ export type HomepageFeature = {
   >;
 };
 
-export type Convention = {
-  _id: string;
-  _type: "convention";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  name: string;
-  slug: Slug;
-  location?: string;
-  whenHint?: string;
-  website?: string;
-  description?: string;
-  image?: ImageWithAlt;
-};
-
-export type Slug = {
-  _type: "slug";
-  current: string;
-  source?: string;
-};
-
 export type ConventionReference = {
   _ref: string;
   _type: "reference";
   _weak?: boolean;
   [internalGroqTypeReferenceTo]?: "convention";
+};
+
+export type VenueRating = {
+  _id: string;
+  _type: "venueRating";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  creator: CreatorReference;
+  target: ConventionReference;
+  benefits?: {
+    focusOnComics?: number;
+    tableValue?: number;
+    footTraffic?: number;
+    community?: number;
+    panels?: number;
+    afterHours?: number;
+  };
+  celebrityFocused?: boolean;
+  tableCost?: "low" | "mid" | "high";
+  note?: string;
 };
 
 export type Update = {
@@ -272,6 +330,12 @@ export type RagIssue = {
     _key: string;
   }>;
   publishedAt?: string;
+};
+
+export type Slug = {
+  _type: "slug";
+  current: string;
+  source?: string;
 };
 
 export type Resource = {
@@ -602,6 +666,7 @@ export type Creator = {
     _key: string;
   }>;
   location?: string;
+  place?: Place;
   website?: string;
   feedUrl?: string;
   socials?: Array<
@@ -620,6 +685,35 @@ export type Creator = {
       _key: string;
     } & FavoriteCreator
   >;
+  appearances?: Array<{
+    venue: ConventionReference;
+    status: "attending" | "tabling";
+    tableNumber?: string;
+    forDate?: string;
+    _type: "appearance";
+    _key: string;
+  }>;
+};
+
+export type Convention = {
+  _id: string;
+  _type: "convention";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  name: string;
+  slug: Slug;
+  location?: string;
+  place?: Place;
+  whenHint?: string;
+  startDate?: string;
+  endDate?: string;
+  datesVerified?: boolean;
+  communitySubmitted?: boolean;
+  imageApproved?: boolean;
+  website?: string;
+  description?: string;
+  image?: ImageWithAlt;
 };
 
 export type Organization = {
@@ -1234,6 +1328,7 @@ export type Geopoint = {
 };
 
 export type AllSanitySchemaTypes =
+  | Place
   | SanityImageAssetReference
   | ImageWithAlt
   | CreatorReference
@@ -1246,12 +1341,12 @@ export type AllSanitySchemaTypes =
   | ColumnReference
   | InterviewReference
   | HomepageFeature
-  | Convention
-  | Slug
   | ConventionReference
+  | VenueRating
   | Update
   | SanityFileAssetReference
   | RagIssue
+  | Slug
   | Resource
   | FreeDownload
   | Interview
@@ -1260,6 +1355,7 @@ export type AllSanitySchemaTypes =
   | Book
   | OrganizationReference
   | Creator
+  | Convention
   | Organization
   | SiteSettings
   | SanityImageCrop

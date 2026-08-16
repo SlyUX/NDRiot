@@ -1,5 +1,248 @@
 [
   {
+    "name": "place",
+    "type": "type",
+    "value": {
+      "type": "object",
+      "attributes": {
+        "_type": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string",
+            "value": "place"
+          }
+        },
+        "city": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string"
+          },
+          "optional": true
+        },
+        "region": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "union",
+            "of": [
+              {
+                "type": "string",
+                "value": "AL"
+              },
+              {
+                "type": "string",
+                "value": "AK"
+              },
+              {
+                "type": "string",
+                "value": "AZ"
+              },
+              {
+                "type": "string",
+                "value": "AR"
+              },
+              {
+                "type": "string",
+                "value": "CA"
+              },
+              {
+                "type": "string",
+                "value": "CO"
+              },
+              {
+                "type": "string",
+                "value": "CT"
+              },
+              {
+                "type": "string",
+                "value": "DE"
+              },
+              {
+                "type": "string",
+                "value": "DC"
+              },
+              {
+                "type": "string",
+                "value": "FL"
+              },
+              {
+                "type": "string",
+                "value": "GA"
+              },
+              {
+                "type": "string",
+                "value": "HI"
+              },
+              {
+                "type": "string",
+                "value": "ID"
+              },
+              {
+                "type": "string",
+                "value": "IL"
+              },
+              {
+                "type": "string",
+                "value": "IN"
+              },
+              {
+                "type": "string",
+                "value": "IA"
+              },
+              {
+                "type": "string",
+                "value": "KS"
+              },
+              {
+                "type": "string",
+                "value": "KY"
+              },
+              {
+                "type": "string",
+                "value": "LA"
+              },
+              {
+                "type": "string",
+                "value": "ME"
+              },
+              {
+                "type": "string",
+                "value": "MD"
+              },
+              {
+                "type": "string",
+                "value": "MA"
+              },
+              {
+                "type": "string",
+                "value": "MI"
+              },
+              {
+                "type": "string",
+                "value": "MN"
+              },
+              {
+                "type": "string",
+                "value": "MS"
+              },
+              {
+                "type": "string",
+                "value": "MO"
+              },
+              {
+                "type": "string",
+                "value": "MT"
+              },
+              {
+                "type": "string",
+                "value": "NE"
+              },
+              {
+                "type": "string",
+                "value": "NV"
+              },
+              {
+                "type": "string",
+                "value": "NH"
+              },
+              {
+                "type": "string",
+                "value": "NJ"
+              },
+              {
+                "type": "string",
+                "value": "NM"
+              },
+              {
+                "type": "string",
+                "value": "NY"
+              },
+              {
+                "type": "string",
+                "value": "NC"
+              },
+              {
+                "type": "string",
+                "value": "ND"
+              },
+              {
+                "type": "string",
+                "value": "OH"
+              },
+              {
+                "type": "string",
+                "value": "OK"
+              },
+              {
+                "type": "string",
+                "value": "OR"
+              },
+              {
+                "type": "string",
+                "value": "PA"
+              },
+              {
+                "type": "string",
+                "value": "RI"
+              },
+              {
+                "type": "string",
+                "value": "SC"
+              },
+              {
+                "type": "string",
+                "value": "SD"
+              },
+              {
+                "type": "string",
+                "value": "TN"
+              },
+              {
+                "type": "string",
+                "value": "TX"
+              },
+              {
+                "type": "string",
+                "value": "UT"
+              },
+              {
+                "type": "string",
+                "value": "VT"
+              },
+              {
+                "type": "string",
+                "value": "VA"
+              },
+              {
+                "type": "string",
+                "value": "WA"
+              },
+              {
+                "type": "string",
+                "value": "WV"
+              },
+              {
+                "type": "string",
+                "value": "WI"
+              },
+              {
+                "type": "string",
+                "value": "WY"
+              }
+            ]
+          },
+          "optional": true
+        },
+        "country": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string"
+          },
+          "optional": true
+        }
+      }
+    }
+  },
+  {
     "type": "type",
     "name": "sanity.imageAsset.reference",
     "value": {
@@ -769,124 +1012,6 @@
     }
   },
   {
-    "name": "convention",
-    "type": "document",
-    "attributes": {
-      "_id": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        }
-      },
-      "_type": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string",
-          "value": "convention"
-        }
-      },
-      "_createdAt": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        }
-      },
-      "_updatedAt": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        }
-      },
-      "_rev": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        }
-      },
-      "name": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        },
-        "optional": false
-      },
-      "slug": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "inline",
-          "name": "slug"
-        },
-        "optional": false
-      },
-      "location": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        },
-        "optional": true
-      },
-      "whenHint": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        },
-        "optional": true
-      },
-      "website": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        },
-        "optional": true
-      },
-      "description": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        },
-        "optional": true
-      },
-      "image": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "inline",
-          "name": "imageWithAlt"
-        },
-        "optional": true
-      }
-    }
-  },
-  {
-    "name": "slug",
-    "type": "type",
-    "value": {
-      "type": "object",
-      "attributes": {
-        "_type": {
-          "type": "objectAttribute",
-          "value": {
-            "type": "string",
-            "value": "slug"
-          }
-        },
-        "current": {
-          "type": "objectAttribute",
-          "value": {
-            "type": "string"
-          },
-          "optional": false
-        },
-        "source": {
-          "type": "objectAttribute",
-          "value": {
-            "type": "string"
-          },
-          "optional": true
-        }
-      }
-    }
-  },
-  {
     "type": "type",
     "name": "convention.reference",
     "value": {
@@ -914,6 +1039,145 @@
         }
       },
       "dereferencesTo": "convention"
+    }
+  },
+  {
+    "name": "venueRating",
+    "type": "document",
+    "attributes": {
+      "_id": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
+      },
+      "_type": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string",
+          "value": "venueRating"
+        }
+      },
+      "_createdAt": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
+      },
+      "_updatedAt": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
+      },
+      "_rev": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
+      },
+      "creator": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "inline",
+          "name": "creator.reference"
+        },
+        "optional": false
+      },
+      "target": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "inline",
+          "name": "convention.reference"
+        },
+        "optional": false
+      },
+      "benefits": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "object",
+          "attributes": {
+            "focusOnComics": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "number"
+              },
+              "optional": true
+            },
+            "tableValue": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "number"
+              },
+              "optional": true
+            },
+            "footTraffic": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "number"
+              },
+              "optional": true
+            },
+            "community": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "number"
+              },
+              "optional": true
+            },
+            "panels": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "number"
+              },
+              "optional": true
+            },
+            "afterHours": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "number"
+              },
+              "optional": true
+            }
+          }
+        },
+        "optional": true
+      },
+      "celebrityFocused": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "boolean"
+        },
+        "optional": true
+      },
+      "tableCost": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "union",
+          "of": [
+            {
+              "type": "string",
+              "value": "low"
+            },
+            {
+              "type": "string",
+              "value": "mid"
+            },
+            {
+              "type": "string",
+              "value": "high"
+            }
+          ]
+        },
+        "optional": true
+      },
+      "note": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      }
     }
   },
   {
@@ -1456,6 +1720,36 @@
           "type": "string"
         },
         "optional": true
+      }
+    }
+  },
+  {
+    "name": "slug",
+    "type": "type",
+    "value": {
+      "type": "object",
+      "attributes": {
+        "_type": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string",
+            "value": "slug"
+          }
+        },
+        "current": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string"
+          },
+          "optional": false
+        },
+        "source": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string"
+          },
+          "optional": true
+        }
       }
     }
   },
@@ -3664,6 +3958,14 @@
         },
         "optional": true
       },
+      "place": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "inline",
+          "name": "place"
+        },
+        "optional": true
+      },
       "website": {
         "type": "objectAttribute",
         "value": {
@@ -3763,6 +4065,206 @@
               "name": "favoriteCreator"
             }
           }
+        },
+        "optional": true
+      },
+      "appearances": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "array",
+          "of": {
+            "type": "object",
+            "attributes": {
+              "venue": {
+                "type": "objectAttribute",
+                "value": {
+                  "type": "inline",
+                  "name": "convention.reference"
+                },
+                "optional": false
+              },
+              "status": {
+                "type": "objectAttribute",
+                "value": {
+                  "type": "union",
+                  "of": [
+                    {
+                      "type": "string",
+                      "value": "attending"
+                    },
+                    {
+                      "type": "string",
+                      "value": "tabling"
+                    }
+                  ]
+                },
+                "optional": false
+              },
+              "tableNumber": {
+                "type": "objectAttribute",
+                "value": {
+                  "type": "string"
+                },
+                "optional": true
+              },
+              "forDate": {
+                "type": "objectAttribute",
+                "value": {
+                  "type": "string"
+                },
+                "optional": true
+              },
+              "_type": {
+                "type": "objectAttribute",
+                "value": {
+                  "type": "string",
+                  "value": "appearance"
+                }
+              }
+            },
+            "rest": {
+              "type": "object",
+              "attributes": {
+                "_key": {
+                  "type": "objectAttribute",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "optional": true
+      }
+    }
+  },
+  {
+    "name": "convention",
+    "type": "document",
+    "attributes": {
+      "_id": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
+      },
+      "_type": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string",
+          "value": "convention"
+        }
+      },
+      "_createdAt": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
+      },
+      "_updatedAt": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
+      },
+      "_rev": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
+      },
+      "name": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": false
+      },
+      "slug": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "inline",
+          "name": "slug"
+        },
+        "optional": false
+      },
+      "location": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
+      "place": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "inline",
+          "name": "place"
+        },
+        "optional": true
+      },
+      "whenHint": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
+      "startDate": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
+      "endDate": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
+      "datesVerified": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "boolean"
+        },
+        "optional": true
+      },
+      "communitySubmitted": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "boolean"
+        },
+        "optional": true
+      },
+      "imageApproved": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "boolean"
+        },
+        "optional": true
+      },
+      "website": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
+      "description": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
+      "image": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "inline",
+          "name": "imageWithAlt"
         },
         "optional": true
       }

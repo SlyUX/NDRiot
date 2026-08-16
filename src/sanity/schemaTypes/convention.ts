@@ -1,4 +1,4 @@
-import { defineType, defineField } from 'sanity'
+import { defineType, defineField } from "sanity";
 
 /**
  * A comics convention — a place creators table, meet readers, and launch work.
@@ -16,59 +16,114 @@ import { defineType, defineField } from 'sanity'
  * type sharing the ratings machinery — see the ratings plan.
  */
 export default defineType({
-  name: 'convention',
-  title: 'Convention',
-  type: 'document',
+  name: "convention",
+  title: "Convention",
+  type: "document",
   fields: [
     defineField({
-      name: 'name',
-      title: 'Name',
-      type: 'string',
+      name: "name",
+      title: "Name",
+      type: "string",
       description: 'The convention’s name — e.g. "Short Run" or "SPX".',
       validation: (rule) => rule.required(),
     }),
     defineField({
-      name: 'slug',
-      title: 'Slug',
-      type: 'slug',
-      description: 'The URL at /conventions/[slug]. Generate it from the name.',
-      options: { source: 'name', maxLength: 96 },
+      name: "slug",
+      title: "Slug",
+      type: "slug",
+      description: "The URL at /conventions/[slug]. Generate it from the name.",
+      options: { source: "name", maxLength: 96 },
       validation: (rule) => rule.required(),
     }),
     defineField({
-      name: 'location',
-      title: 'Location',
-      type: 'string',
-      description: 'City and state/country — e.g. "Seattle, WA". "Touring" if it moves.',
+      name: "location",
+      title: "Location (legacy text)",
+      type: "string",
+      description:
+        "Old free-text location. Being replaced by the structured Location below; kept as a display fallback until backfilled. Prefer the structured field.",
     }),
     defineField({
-      name: 'whenHint',
-      title: 'When',
-      type: 'string',
-      description: 'Roughly when it happens each year — e.g. "Every July". Not a hard date; the con recurs.',
+      name: "place",
+      title: "Location",
+      type: "place",
+      description:
+        'Structured city + state. The state powers "shows in your region".',
     }),
     defineField({
-      name: 'website',
-      title: 'Website',
-      type: 'url',
-      description: 'The official site. Opens in a new tab.',
+      name: "whenHint",
+      title: "When (recurring hint)",
+      type: "string",
+      description:
+        'Roughly when it happens each year — e.g. "Every July". The evergreen fallback shown when no hard dates are set.',
     }),
     defineField({
-      name: 'description',
-      title: 'Description',
-      type: 'text',
+      name: "startDate",
+      title: "Next occurrence — start",
+      type: "date",
+      description:
+        'Start date of the next occurrence. When it passes, the con shows a "dates need verifying" badge and reopens date suggestions.',
+    }),
+    defineField({
+      name: "endDate",
+      title: "Next occurrence — end",
+      type: "date",
+      description:
+        "End date (for multi-day cons). Leave blank for a single-day event.",
+      validation: (rule) =>
+        rule
+          .min(rule.valueOfField("startDate"))
+          .warning("End is before start."),
+    }),
+    defineField({
+      name: "datesVerified",
+      title: "Dates verified",
+      type: "boolean",
+      description:
+        'Admin-confirmed the dates are correct. Only a verified con with a future date is treated as truly "upcoming"; verifying closes date suggestions until the date next passes.',
+      initialValue: false,
+    }),
+    defineField({
+      name: "communitySubmitted",
+      title: "Community-submitted",
+      type: "boolean",
+      description:
+        "A creator added this convention (vs. an editor). Such entries go live but stay flagged until an admin verifies them.",
+      initialValue: false,
+    }),
+    defineField({
+      name: "imageApproved",
+      title: "Image approved",
+      type: "boolean",
+      description:
+        "Gates public display of the logo/banner. Editor-added images are approved; a community-submitted image is held (a placeholder shows) until an admin approves it here.",
+      initialValue: true,
+    }),
+    defineField({
+      name: "website",
+      title: "Website",
+      type: "url",
+      description: "The official site. Opens in a new tab.",
+    }),
+    defineField({
+      name: "description",
+      title: "Description",
+      type: "text",
       rows: 3,
-      description: 'A short line on what it is and who it’s for. Shown on the card and the page.',
+      description:
+        "A short line on what it is and who it’s for. Shown on the card and the page.",
     }),
     defineField({
-      name: 'image',
-      title: 'Logo or banner',
-      type: 'imageWithAlt',
-      description: 'The convention’s logo or a banner. Optional; add real alt text.',
+      name: "image",
+      title: "Logo or banner",
+      type: "imageWithAlt",
+      description:
+        "The convention’s logo or a banner. Optional; add real alt text.",
     }),
   ],
-  orderings: [{ name: 'alpha', title: 'Name', by: [{ field: 'name', direction: 'asc' }] }],
+  orderings: [
+    { name: "alpha", title: "Name", by: [{ field: "name", direction: "asc" }] },
+  ],
   preview: {
-    select: { title: 'name', subtitle: 'location', media: 'image' },
+    select: { title: "name", subtitle: "location", media: "image" },
   },
-})
+});
