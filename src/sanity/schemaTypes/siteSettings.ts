@@ -1043,11 +1043,18 @@ export default defineType({
           description: 'e.g. "Post Update".',
         }),
         defineField({
-          name: "accountPostSuccess",
-          title: "Reader home — post-update success message",
+          name: "accountPostingLabel",
+          title: "Reader home — posting-in-progress label",
           type: "string",
           description:
-            'Shown after a successful post — e.g. "Posted. Your followers will see it.".',
+            'Shown while an update or event is saving — e.g. "Posting…".',
+        }),
+        defineField({
+          name: "accountPostSuccess",
+          title: "Reader home — update-posted confirmation",
+          type: "string",
+          description:
+            'Shown for ~2s after a successful post, then the modal closes — e.g. "Your update has posted.".',
         }),
         defineField({
           name: "accountFeedHeading",
@@ -1124,6 +1131,13 @@ export default defineType({
           title: "Reader home — save-event button",
           type: "string",
           description: 'Saves an appearance — e.g. "Save event".',
+        }),
+        defineField({
+          name: "accountEventPosted",
+          title: "Reader home — event-posted confirmation",
+          type: "string",
+          description:
+            'Shown for ~2s after adding an event, then the modal closes — e.g. "Your event has posted.".',
         }),
         defineField({
           name: "accountSignInTitle",

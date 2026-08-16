@@ -274,7 +274,7 @@ function FeedRail({
       <div className="mb-4 flex items-center gap-3">
         {/* Personalization-teal tick: this rail is the reader's own feed (§3). */}
         <span aria-hidden="true" className="bg-personalize h-4 w-1 shrink-0" />
-        <h2 className="text-primary text-xs leading-tight font-black tracking-[0.2em] uppercase">
+        <h2 className="text-personalize text-xs leading-tight font-black tracking-[0.2em] uppercase">
           {heading}
         </h2>
         <span className="h-px flex-1 bg-white/20" aria-hidden="true" />

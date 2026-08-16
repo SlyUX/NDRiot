@@ -477,6 +477,7 @@ export interface SiteSettings {
     accountPostMentionConventions: string;
     accountPostMentionMedia: string;
     accountPostSubmitLabel: string;
+    accountPostingLabel: string;
     accountPostSuccess: string;
     /** Reader update feed (/me). */
     accountFeedHeading: string;
@@ -491,6 +492,7 @@ export interface SiteSettings {
     accountEventTableLabel: string;
     accountEventNoteLabel: string;
     accountEventSaveLabel: string;
+    accountEventPosted: string;
     accountSignInTitle: string;
     accountSignInBody: string;
     accountSignInCta: string;
@@ -1030,7 +1032,8 @@ const DEFAULTS: SiteSettings = {
     accountPostMentionConventions: "Conventions",
     accountPostMentionMedia: "Outlets",
     accountPostSubmitLabel: "Post Update",
-    accountPostSuccess: "Posted. Your followers will see it.",
+    accountPostingLabel: "Posting…",
+    accountPostSuccess: "Your update has posted.",
     accountFeedHeading: "Your Feed",
     accountFeedEmpty:
       "Nothing yet. Updates from comics and creators you’ve saved show up here.",
@@ -1044,6 +1047,7 @@ const DEFAULTS: SiteSettings = {
     accountEventTableLabel: "Table number",
     accountEventNoteLabel: "Note — a booth spot, a signing time (optional)",
     accountEventSaveLabel: "Save event",
+    accountEventPosted: "Your event has posted.",
     accountSignInTitle: "Sign in to save comics and creators",
     accountSignInBody:
       "ND Riot uses Google sign-in — it only confirms it’s you, and your saves stay private.",

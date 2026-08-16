@@ -53,6 +53,9 @@ export type ComposerLabels = {
   mentionConventionsGroup: string
   mentionMediaGroup: string
   submit: string
+  /** Shown while the post is in flight — e.g. "Posting…". */
+  postingLabel: string
+  /** The confirmation shown after a successful post — e.g. "Your update has posted." */
   success: string
 }
 
@@ -81,15 +84,20 @@ export function UpdateComposer({
   const comics = targets.filter((t) => t.group === 'comic')
   const editMentions = edit ? mentions.filter((m) => edit.mentionIds.includes(m.id)) : undefined
 
-  // Fire onSuccess once per successful submit (guarded by the last-fired nonce,
-  // so an unmemoized callback can't re-trigger it).
+  // On success, hold the "posted" confirmation for a beat, then fire onSuccess
+  // (which closes the dialog). Guarded by the last-fired nonce so it runs once.
   const firedNonce = useRef(0)
   useEffect(() => {
     if (state.status === 'success' && state.nonce !== firedNonce.current) {
       firedNonce.current = state.nonce
-      onSuccess?.()
+      const timer = setTimeout(() => onSuccess?.(), 2000)
+      return () => clearTimeout(timer)
     }
   }, [state.status, state.nonce, onSuccess])
+
+  // While posting (and on the "posted" confirmation) the form is swapped for a
+  // status line, so submitting doesn't leave a live form under the message.
+  const showStatus = pending || state.status === 'success'
 
   return (
     <div>
@@ -98,9 +106,21 @@ export function UpdateComposer({
       </SectionHeading>
       <p className="text-foreground mb-5 max-w-prose text-sm">{labels.intro}</p>
 
+      {showStatus && (
+        <div className="max-w-prose py-10" role="status" aria-live="polite">
+          <p className="text-funding text-lg font-black tracking-wide uppercase">
+            {pending ? labels.postingLabel : labels.success}
+          </p>
+        </div>
+      )}
+
       {/* Post mode keys by nonce to clear on success; edit mode uses a stable key
-          (the dialog closes on success instead). */}
-      <form key={edit ? 'edit' : state.nonce} action={action} className="max-w-prose space-y-4">
+          (the dialog closes on success instead). Hidden while the status shows. */}
+      <form
+        key={edit ? 'edit' : state.nonce}
+        action={action}
+        className={`max-w-prose space-y-4${showStatus ? ' hidden' : ''}`}
+      >
         {edit && <input type="hidden" name="updateId" value={edit.updateId} />}
         <div className="grid gap-4 sm:grid-cols-2">
           {/* Target is fixed when editing — an update is "about" its comic/creator. */}
@@ -175,11 +195,6 @@ export function UpdateComposer({
           <Button type="submit" disabled={pending} className="font-black tracking-wide uppercase">
             {labels.submit}
           </Button>
-          {state.status === 'success' && (
-            <p role="status" className="text-funding text-sm font-bold">
-              {labels.success}
-            </p>
-          )}
           {state.status === 'error' && (
             <p role="alert" className="text-destructive text-sm">
               {state.message}

@@ -8,10 +8,13 @@ import { Eye, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
- * A creator's comics on /me — a horizontal rail of covers on the ND Riot pink,
- * darkened with a black wash (the home-hero technique) so white content stays
- * legible on it (§9: white fails on raw #FF0095). Each card links to the book
- * from its title; a bare pencil under the title opens the edit form.
+ * A creator's comics on /me — a horizontal rail of covers set into the
+ * personalization band. Rather than its own fill, it lays a translucent black
+ * multiply overlay over whatever band it sits on, so it reads as a slightly
+ * darker inset of that color and adapts if the band color ever changes. The
+ * overlay is ~50% because white content (heading, icons) has to clear AA on the
+ * result (§9). Each card links to the book from its title; a bare pencil opens
+ * the edit form.
  *
  * On desktop it sits beside the creator block and the rail always shows. On
  * phones, where it stacks, it's a "+"/"×" accordion (the hamburger's mark) so it
@@ -37,9 +40,14 @@ export function YourComics({
   const [open, setOpen] = useState(false);
 
   return (
-    <section className="bg-primary relative overflow-hidden">
-      {/* Black wash so white text/icons clear AA on the pink (like the hero). */}
-      <div className="absolute inset-0 bg-black/60" aria-hidden="true" />
+    <section className="relative overflow-hidden">
+      {/* Translucent black multiply: darkens the band behind it (adapts to any
+          band color) so the rail reads as a slightly darker inset. ~50% keeps
+          white content clear of AA on the result (§9). */}
+      <div
+        className="absolute inset-0 bg-black/50 mix-blend-multiply"
+        aria-hidden="true"
+      />
       <div className="relative px-4 py-2 sm:p-5">
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-sm font-black tracking-widest text-white uppercase">

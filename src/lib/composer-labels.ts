@@ -27,6 +27,7 @@ export function composerLabelsFrom(s: SiteSettings['sections']): ComposerLabels 
     mentionConventionsGroup: s.accountPostMentionConventions,
     mentionMediaGroup: s.accountPostMentionMedia,
     submit: s.accountPostSubmitLabel,
+    postingLabel: s.accountPostingLabel,
     success: s.accountPostSuccess,
   }
 }

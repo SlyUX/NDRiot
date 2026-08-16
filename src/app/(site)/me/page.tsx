@@ -405,6 +405,8 @@ export default async function AccountPage() {
                         tableFieldLabel: s.accountEventTableLabel,
                         noteFieldLabel: s.accountEventNoteLabel,
                         saveLabel: s.accountEventSaveLabel,
+                        postingLabel: s.accountPostingLabel,
+                        postedLabel: s.accountEventPosted,
                       }}
                     />
                   </div>
@@ -433,6 +435,7 @@ export default async function AccountPage() {
                 heading: s.accountEventsHeading,
                 empty: s.accountEventsEmpty,
                 tablePrefix: s.tableLabel,
+                tbaLabel: s.eventDateTba,
                 removeLabel: s.accountRemoveLabel,
               }}
             />
@@ -442,7 +445,7 @@ export default async function AccountPage() {
         {/* Your Media — owners of an outlet (creator or not). Plain feed rows. */}
         {ownedMedia.length > 0 && (
           <Section padding="md">
-            <SectionHeading as="h2" size="sm">
+            <SectionHeading as="h2" size="sm" tone="personalize">
               {s.accountMediaHeading}
             </SectionHeading>
             <ul className={FEED_GRID}>
@@ -504,6 +507,7 @@ export default async function AccountPage() {
               {followIds.length > 0 && (
                 <UpdateFeed
                   heading={s.accountFeedHeading}
+                  headingTone="personalize"
                   emptyLabel={s.accountFeedEmpty}
                   updates={updates}
                   scrollCap
@@ -515,6 +519,7 @@ export default async function AccountPage() {
                 <div id="your-updates" className="scroll-mt-24">
                   <UpdateFeed
                     heading={s.accountMyUpdatesHeading}
+                    headingTone="personalize"
                     emptyLabel={s.accountMyUpdatesEmpty}
                     updates={myUpdates}
                     owner={updateOwnerConfig(s, mentionOptions)}
@@ -532,7 +537,7 @@ export default async function AccountPage() {
             <div className="grid gap-8 lg:grid-cols-2">
               {savedCreators.length > 0 && (
                 <div>
-                  <SectionHeading as="h2" size="sm">
+                  <SectionHeading as="h2" size="sm" tone="personalize">
                     {s.accountSavedCreatorsHeading}
                   </SectionHeading>
                   {/* A wrapping grid of square portraits, name beneath — mirrors
@@ -571,7 +576,7 @@ export default async function AccountPage() {
               )}
               {savedBooks.length > 0 && (
                 <div>
-                  <SectionHeading as="h2" size="sm">
+                  <SectionHeading as="h2" size="sm" tone="personalize">
                     {s.accountSavedComicsHeading}
                   </SectionHeading>
                   {/* A wrapping grid of covers — each links to the book, Remove in

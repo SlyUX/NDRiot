@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { Plus } from 'lucide-react'
 
 import {
@@ -28,8 +29,9 @@ export function PostUpdateDialog({
   mentions: MentionOption[]
   labels: ComposerLabels
 }) {
+  const [open, setOpen] = useState(false)
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="w-full justify-center font-black tracking-wide uppercase">
           <Plus aria-hidden="true" className="size-4" />
@@ -38,7 +40,14 @@ export function PostUpdateDialog({
       </DialogTrigger>
       <DialogContent className="max-w-xl">
         <DialogTitle className="sr-only">{labels.heading}</DialogTitle>
-        <UpdateComposer targets={targets} kinds={kinds} mentions={mentions} labels={labels} />
+        {/* Composer holds the "posted" confirmation for 2s, then onSuccess closes. */}
+        <UpdateComposer
+          targets={targets}
+          kinds={kinds}
+          mentions={mentions}
+          labels={labels}
+          onSuccess={() => setOpen(false)}
+        />
       </DialogContent>
     </Dialog>
   )

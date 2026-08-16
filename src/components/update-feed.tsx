@@ -14,6 +14,7 @@ import type { UpdateFeedItem } from "@/lib/types";
  */
 export function UpdateFeed({
   heading,
+  headingTone,
   emptyLabel,
   updates,
   owner,
@@ -21,6 +22,8 @@ export function UpdateFeed({
   action,
 }: {
   heading: string;
+  /** Teal on the personalized dashboard ("Your Feed"); default on a public profile. */
+  headingTone?: "default" | "primary" | "personalize";
   emptyLabel: string;
   updates: UpdateFeedItem[];
   /** Present only when the viewer owns these updates — enables edit + delete/undo. */
@@ -50,7 +53,7 @@ export function UpdateFeed({
 
   return (
     <div>
-      <SectionHeading as="h2" size="sm" action={action}>
+      <SectionHeading as="h2" size="sm" tone={headingTone} action={action}>
         {heading}
       </SectionHeading>
       {updates.length === 0 ? (

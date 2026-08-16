@@ -35,7 +35,7 @@ export function EventDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
-          variant="outline"
+          variant="inverse"
           className="w-full justify-center font-black tracking-wide uppercase"
         >
           <Plus aria-hidden="true" className="size-4" />

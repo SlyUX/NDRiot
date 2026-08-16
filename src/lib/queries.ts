@@ -52,12 +52,15 @@ export const CREATOR_APPEARANCES_QUERY =
   "venue":venue->{_id,name,"slug":slug.current,website,startDate,endDate,place}
 }`);
 // Appearances across a set of owned creators — for the dashboard events manager.
+// Same venue shape as CREATOR_APPEARANCES_QUERY so both feed one AppearanceCard;
+// creatorId/venueId identify the doc for removal.
 export const OWNED_APPEARANCES_QUERY =
   defineQuery(`*[_type=="conventionAppearance" && creator._ref in $creatorIds && defined(venue)]
   | order(venue->name asc){
-  status,tableNumber,note,forDate,
-  "creatorId":creator._ref,"creatorName":creator->name,
-  "venueId":venue._ref,"venueName":venue->name
+  _id,status,tableNumber,note,forDate,
+  "creatorId":creator._ref,
+  "venueId":venue._ref,
+  "venue":venue->{_id,name,"slug":slug.current,website,startDate,endDate,place}
 }`);
 
 export const BOOKS_QUERY = defineQuery(

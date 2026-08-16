@@ -4,49 +4,43 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { removeAppearance } from "@/app/actions/appearances";
+import { AppearanceCard } from "@/components/appearance-card";
 import { SectionHeading } from "@/components/section-heading";
-import { appearanceStatusDisplay } from "@/lib/taxonomy";
-
-export type ManagerAppearance = {
-  creatorId: string | null;
-  creatorName: string | null;
-  venueId: string | null;
-  venueName: string | null;
-  status: string | null;
-  tableNumber?: string | null;
-};
+import type { OwnedAppearance } from "@/lib/types";
 
 export interface EventsManagerLabels {
   heading: string;
   empty: string;
   tablePrefix: string;
+  tbaLabel: string;
   removeLabel: string;
 }
 
 /**
- * The creator's current convention appearances on the dashboard, each with a
- * Remove. Adding one lives in the "Add an Event" modal (EventDialog); this is
- * the read-and-remove list, so it stays visible on the dashboard. Owner-gated —
- * the remove action re-checks ownership.
+ * The creator's current convention appearances on the dashboard — the same
+ * AppearanceCard the public profile uses, each with a Remove. Adding one lives
+ * in the "Add an Event" modal (EventDialog); this is the read-and-remove list,
+ * so it stays visible on the dashboard. Owner-gated — the remove action
+ * re-checks ownership.
  */
 export function EventsManager({
   current,
   labels,
 }: {
-  current: ManagerAppearance[];
+  current: OwnedAppearance[];
   labels: EventsManagerLabels;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  function remove(appearance: ManagerAppearance) {
+  function remove(appearance: OwnedAppearance) {
     if (!appearance.creatorId || !appearance.venueId) return;
     setError(null);
     startTransition(async () => {
       const result = await removeAppearance({
-        creatorId: appearance.creatorId!,
-        conventionId: appearance.venueId!,
+        creatorId: appearance.creatorId,
+        conventionId: appearance.venueId,
       });
       if (result.ok) router.refresh();
       else setError(result.error ?? "Something went wrong.");
@@ -55,36 +49,33 @@ export function EventsManager({
 
   return (
     <div className="space-y-4">
-      <SectionHeading as="h2" size="sm">
+      <SectionHeading as="h2" size="sm" tone="personalize">
         {labels.heading}
       </SectionHeading>
 
       {current.length > 0 ? (
         <ul className="border-border divide-border divide-y border-t">
           {current.map((appearance) => (
-            <li
+            <AppearanceCard
               key={`${appearance.creatorId}-${appearance.venueId}`}
-              className="flex items-center justify-between gap-3 py-2 text-sm"
-            >
-              <span className="min-w-0 truncate">
-                <span className="font-bold">{appearance.venueName}</span>
-                <span className="text-muted-foreground">
-                  {" · "}
-                  {appearanceStatusDisplay(appearance.status)}
-                  {appearance.status === "tabling" && appearance.tableNumber
-                    ? ` · ${labels.tablePrefix} ${appearance.tableNumber}`
-                    : ""}
-                </span>
-              </span>
-              <button
-                type="button"
-                onClick={() => remove(appearance)}
-                disabled={pending}
-                className="text-primary focus-visible:ring-ring shrink-0 text-xs font-bold tracking-wide uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
-              >
-                {labels.removeLabel}
-              </button>
-            </li>
+              venue={appearance.venue}
+              status={appearance.status}
+              tableNumber={appearance.tableNumber}
+              note={appearance.note}
+              forDate={appearance.forDate}
+              tableLabel={labels.tablePrefix}
+              tbaLabel={labels.tbaLabel}
+              action={
+                <button
+                  type="button"
+                  onClick={() => remove(appearance)}
+                  disabled={pending}
+                  className="text-primary focus-visible:ring-ring shrink-0 text-xs font-bold tracking-wide uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
+                >
+                  {labels.removeLabel}
+                </button>
+              }
+            />
           ))}
         </ul>
       ) : (

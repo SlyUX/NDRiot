@@ -15,6 +15,10 @@ export interface EventAddFormLabels {
   tableFieldLabel: string;
   noteFieldLabel: string;
   saveLabel: string;
+  /** Shown while saving — e.g. "Posting…". */
+  postingLabel: string;
+  /** Confirmation after a save — e.g. "Your event has posted." */
+  postedLabel: string;
 }
 
 const field =
@@ -40,6 +44,7 @@ export function EventAddForm({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [posted, setPosted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [creatorId, setCreatorId] = useState(creators[0]?.id ?? "");
   const [conventionId, setConventionId] = useState("");
@@ -62,16 +67,30 @@ export function EventAddForm({
         note,
       });
       if (result.ok) {
-        setConventionId("");
-        setTableNumber("");
-        setNote("");
-        setStatus("attending");
-        onSaved?.();
         router.refresh();
+        // Hold the confirmation for a beat, then close the modal.
+        setPosted(true);
+        setTimeout(() => onSaved?.(), 2000);
       } else {
         setError(result.error ?? "Something went wrong.");
       }
     });
+  }
+
+  // Saving / saved swaps the form for a status line (the modal then closes).
+  if (pending || posted) {
+    return (
+      <div className="space-y-3">
+        <SectionHeading as="h2" size="sm">
+          {labels.addHeading}
+        </SectionHeading>
+        <div className="py-8" role="status" aria-live="polite">
+          <p className="text-funding text-lg font-black tracking-wide uppercase">
+            {posted ? labels.postedLabel : labels.postingLabel}
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
