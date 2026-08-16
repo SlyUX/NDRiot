@@ -20,6 +20,7 @@ export type ManagerAppearance = {
 
 export interface EventsManagerLabels {
   heading: string;
+  addHeading: string;
   empty: string;
   conventionLabel: string;
   tableFieldLabel: string;
@@ -99,105 +100,112 @@ export function EventsManager({
         {labels.heading}
       </SectionHeading>
 
-      <div className="space-y-3">
-        {creators.length > 1 && (
+      <div className="flex flex-col gap-6">
+        {/* Current events — first on phones (order-1), after the form on desktop. */}
+        <div className="order-1 md:order-2">
+          {current.length > 0 ? (
+            <ul className="border-border divide-border divide-y border-t">
+              {current.map((appearance) => (
+                <li
+                  key={`${appearance.creatorId}-${appearance.venueId}`}
+                  className="flex items-center justify-between gap-3 py-2 text-sm"
+                >
+                  <span className="min-w-0 truncate">
+                    <span className="font-bold">{appearance.venueName}</span>
+                    <span className="text-muted-foreground">
+                      {" · "}
+                      {appearanceStatusDisplay(appearance.status)}
+                      {appearance.status === "tabling" && appearance.tableNumber
+                        ? ` · ${labels.tablePrefix} ${appearance.tableNumber}`
+                        : ""}
+                    </span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => remove(appearance)}
+                    disabled={pending}
+                    className="text-destructive focus-visible:ring-ring shrink-0 text-xs font-bold tracking-wide uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
+                  >
+                    {labels.removeLabel}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-muted-foreground text-sm">{labels.empty}</p>
+          )}
+        </div>
+
+        {/* Add / update an event — after the list on phones (order-2), first on desktop. */}
+        <div className="order-2 space-y-3 md:order-1">
+          <SectionHeading as="h3" size="sm">
+            {labels.addHeading}
+          </SectionHeading>
+          {creators.length > 1 && (
+            <select
+              value={creatorId}
+              onChange={(e) => setCreatorId(e.target.value)}
+              className={cn(field, "appearance-none")}
+              aria-label="Profile"
+            >
+              {creators.map((creator) => (
+                <option key={creator.id} value={creator.id}>
+                  {creator.name}
+                </option>
+              ))}
+            </select>
+          )}
           <select
-            value={creatorId}
-            onChange={(e) => setCreatorId(e.target.value)}
+            value={conventionId}
+            onChange={(e) => setConventionId(e.target.value)}
             className={cn(field, "appearance-none")}
-            aria-label="Profile"
+            aria-label={labels.conventionLabel}
           >
-            {creators.map((creator) => (
-              <option key={creator.id} value={creator.id}>
-                {creator.name}
+            <option value="">{labels.conventionLabel}…</option>
+            {conventions.map((convention) => (
+              <option key={convention.id} value={convention.id}>
+                {convention.name}
               </option>
             ))}
           </select>
-        )}
-        <select
-          value={conventionId}
-          onChange={(e) => setConventionId(e.target.value)}
-          className={cn(field, "appearance-none")}
-          aria-label={labels.conventionLabel}
-        >
-          <option value="">{labels.conventionLabel}…</option>
-          {conventions.map((convention) => (
-            <option key={convention.id} value={convention.id}>
-              {convention.name}
-            </option>
-          ))}
-        </select>
-        <div className="flex flex-wrap gap-4">
-          {APPEARANCE_STATUSES.map((option) => (
-            <label
-              key={option.value}
-              className="flex items-center gap-2 text-sm"
-            >
-              <input
-                type="radio"
-                name="appearance-status"
-                value={option.value}
-                checked={status === option.value}
-                onChange={() => setStatus(option.value)}
-                className="size-4 accent-[var(--primary)]"
-              />
-              {option.title}
-            </label>
-          ))}
-        </div>
-        {status === "tabling" && (
-          <input
-            type="text"
-            value={tableNumber}
-            onChange={(e) => setTableNumber(e.target.value)}
-            placeholder={labels.tableFieldLabel}
-            aria-label={labels.tableFieldLabel}
-            className={cn(field, "sm:max-w-xs")}
-          />
-        )}
-        <Button
-          type="button"
-          onClick={save}
-          disabled={pending || !conventionId}
-        >
-          {labels.saveLabel}
-        </Button>
-        {error && <p className="text-destructive text-xs">{error}</p>}
-      </div>
-
-      {current.length > 0 && (
-        <ul className="border-border divide-border divide-y border-t">
-          {current.map((appearance) => (
-            <li
-              key={`${appearance.creatorId}-${appearance.venueId}`}
-              className="flex items-center justify-between gap-3 py-2 text-sm"
-            >
-              <span className="min-w-0 truncate">
-                <span className="font-bold">{appearance.venueName}</span>
-                <span className="text-muted-foreground">
-                  {" · "}
-                  {appearanceStatusDisplay(appearance.status)}
-                  {appearance.status === "tabling" && appearance.tableNumber
-                    ? ` · ${labels.tablePrefix} ${appearance.tableNumber}`
-                    : ""}
-                </span>
-              </span>
-              <button
-                type="button"
-                onClick={() => remove(appearance)}
-                disabled={pending}
-                className="text-destructive focus-visible:ring-ring shrink-0 text-xs font-bold tracking-wide uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
+          <div className="flex flex-wrap gap-4">
+            {APPEARANCE_STATUSES.map((option) => (
+              <label
+                key={option.value}
+                className="flex items-center gap-2 text-sm"
               >
-                {labels.removeLabel}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {current.length === 0 && (
-        <p className="text-muted-foreground text-sm">{labels.empty}</p>
-      )}
+                <input
+                  type="radio"
+                  name="appearance-status"
+                  value={option.value}
+                  checked={status === option.value}
+                  onChange={() => setStatus(option.value)}
+                  className="size-4 accent-[var(--primary)]"
+                />
+                {option.title}
+              </label>
+            ))}
+          </div>
+          {status === "tabling" && (
+            <input
+              type="text"
+              value={tableNumber}
+              onChange={(e) => setTableNumber(e.target.value)}
+              placeholder={labels.tableFieldLabel}
+              aria-label={labels.tableFieldLabel}
+              className={cn(field, "sm:max-w-xs")}
+            />
+          )}
+          <Button
+            type="button"
+            onClick={save}
+            disabled={pending || !conventionId}
+          >
+            {labels.saveLabel}
+          </Button>
+          {error && <p className="text-destructive text-xs">{error}</p>}
+        </div>
+      </div>
     </div>
   );
 }

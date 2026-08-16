@@ -475,6 +475,7 @@ export interface SiteSettings {
     accountMyUpdatesEmpty: string;
     /** Dashboard "your events" manager — convention appearances. */
     accountEventsHeading: string;
+    accountEventAddHeading: string;
     accountEventsEmpty: string;
     accountEventConventionLabel: string;
     accountEventTableLabel: string;
@@ -990,7 +991,7 @@ const DEFAULTS: SiteSettings = {
     accountComicsHeading: "Your Comics",
     accountMediaHeading: "Your Media",
     accountEditLabel: "Edit",
-    accountViewCreatorLabel: "Creator Profile",
+    accountViewCreatorLabel: "Public Profile",
     accountViewMediaLabel: "Media Page",
     accountSavedComicsHeading: "Your Saved Comics",
     accountSavedCreatorsHeading: "Favorite Creators",
@@ -1020,6 +1021,7 @@ const DEFAULTS: SiteSettings = {
     accountMyUpdatesHeading: "Your Updates",
     accountMyUpdatesEmpty: "You haven’t posted an update yet.",
     accountEventsHeading: "Your events",
+    accountEventAddHeading: "Add an event",
     accountEventsEmpty:
       "No events yet — add a convention you’re attending or tabling at.",
     accountEventConventionLabel: "Convention",

@@ -1,11 +1,11 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
-import { Eye, Pencil } from 'lucide-react'
+import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Eye, Pencil } from "lucide-react";
 
-import { cn } from '@/lib/utils'
+import { cn } from "@/lib/utils";
 
 /**
  * A creator's comics on /me — a horizontal rail of covers on the ND Riot pink,
@@ -18,31 +18,33 @@ import { cn } from '@/lib/utils'
  * doesn't push the rest of the dashboard down.
  */
 export type YourComicsBook = {
-  id: string
-  title: string
-  href: string | null
-  editHref: string
-  coverUrl: string | null
-}
+  id: string;
+  title: string;
+  href: string | null;
+  editHref: string;
+  coverUrl: string | null;
+};
 
 export function YourComics({
   books,
   heading,
   editLabel,
 }: {
-  books: YourComicsBook[]
-  heading: string
-  editLabel: string
+  books: YourComicsBook[];
+  heading: string;
+  editLabel: string;
 }) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
 
   return (
     <section className="bg-primary relative overflow-hidden">
       {/* Black wash so white text/icons clear AA on the pink (like the hero). */}
       <div className="absolute inset-0 bg-black/60" aria-hidden="true" />
-      <div className="relative p-4 sm:p-5">
+      <div className="relative px-4 py-2 sm:p-5">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-sm font-black tracking-widest text-white uppercase">{heading}</h2>
+          <h2 className="text-sm font-black tracking-widest text-white uppercase">
+            {heading}
+          </h2>
           {/* Accordion trigger — phones only; the "+" rotates 45° into "×". */}
           <button
             type="button"
@@ -58,8 +60,8 @@ export function YourComics({
               alt=""
               aria-hidden="true"
               className={cn(
-                'size-6 transition-transform duration-200 ease-out motion-reduce:transition-none',
-                open && 'rotate-45',
+                "size-6 transition-transform duration-200 ease-out motion-reduce:transition-none",
+                open && "rotate-45",
               )}
             />
           </button>
@@ -69,14 +71,23 @@ export function YourComics({
         <ul
           id="your-comics-rail"
           className={cn(
-            'punk-scroll mt-3 flex gap-3 overflow-x-auto',
-            !open && 'hidden lg:flex',
+            "punk-scroll mt-3 flex gap-3 overflow-x-auto",
+            !open && "hidden lg:flex",
           )}
         >
           {books.map((book) => (
-            <li key={book.id} className="relative aspect-[2/3] w-[70px] shrink-0 overflow-hidden bg-white/10">
+            <li
+              key={book.id}
+              className="relative aspect-[2/3] w-[70px] shrink-0 overflow-hidden bg-white/10"
+            >
               {book.coverUrl && (
-                <Image src={book.coverUrl} alt="" fill sizes="70px" className="object-cover" />
+                <Image
+                  src={book.coverUrl}
+                  alt=""
+                  fill
+                  sizes="70px"
+                  className="object-cover"
+                />
               )}
               {/* Actions on chips so they stay visible over any cover: view the
                   public page (lower-left), edit (lower-right). */}
@@ -101,5 +112,5 @@ export function YourComics({
         </ul>
       </div>
     </section>
-  )
+  );
 }

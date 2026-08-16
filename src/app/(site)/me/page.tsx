@@ -254,7 +254,11 @@ export default async function AccountPage() {
         {/* Profile — a creator gets the darker-pink zone holding their identity
             beside their comics (on ND Riot pink); a plain reader gets the charcoal
             band with just their details. */}
-        <Section padding="md" background={isCreator ? "creator" : "charcoal"}>
+        <Section
+          padding="md"
+          background={isCreator ? "creator" : "charcoal"}
+          className={isCreator ? "max-md:py-6" : undefined}
+        >
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h1 className="text-2xl font-black tracking-tighter uppercase sm:text-4xl">
@@ -314,7 +318,14 @@ export default async function AccountPage() {
                             </p>
                           )}
                           <div className="mt-2 flex flex-wrap gap-2">
-                            <Button asChild variant="inverse" size="sm">
+                            {/* Edit lives in the profile's owner band + the edit
+                                form; hidden on phones to declutter the block. */}
+                            <Button
+                              asChild
+                              variant="inverse"
+                              size="sm"
+                              className="max-sm:hidden"
+                            >
                               <Link
                                 href={`/join/creators?editing=${encodeURIComponent(creator._id)}`}
                               >
@@ -390,6 +401,7 @@ export default async function AccountPage() {
               current={ownedAppearances}
               labels={{
                 heading: s.accountEventsHeading,
+                addHeading: s.accountEventAddHeading,
                 empty: s.accountEventsEmpty,
                 conventionLabel: s.accountEventConventionLabel,
                 tableFieldLabel: s.accountEventTableLabel,

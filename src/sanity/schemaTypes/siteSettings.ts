@@ -1055,6 +1055,12 @@ export default defineType({
             'The convention-appearances manager on the dashboard — e.g. "Your events".',
         }),
         defineField({
+          name: "accountEventAddHeading",
+          title: "Reader home — add-event subheading",
+          type: "string",
+          description: 'Above the add/update form — e.g. "Add an event".',
+        }),
+        defineField({
           name: "accountEventsEmpty",
           title: "Reader home — events empty line",
           type: "text",
