@@ -96,7 +96,7 @@ export function UpdateComposer({
       <SectionHeading as="h2" size="sm">
         {labels.heading}
       </SectionHeading>
-      <p className="text-muted-foreground mb-5 max-w-prose text-sm">{labels.intro}</p>
+      <p className="text-foreground mb-5 max-w-prose text-sm">{labels.intro}</p>
 
       {/* Post mode keys by nonce to clear on success; edit mode uses a stable key
           (the dialog closes on success instead). */}

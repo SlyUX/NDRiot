@@ -38,7 +38,8 @@ const INITIAL: BookIntakeState = { status: 'idle' }
 const fieldClass =
   'focus-visible:ring-ring w-full border border-white/20 bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:outline-none aria-[invalid=true]:border-destructive'
 const labelClass = 'block text-xs tracking-widest uppercase'
-const hintClass = 'text-muted-foreground text-xs'
+// Helper text is meant to be read, so it takes the full foreground (not muted).
+const hintClass = 'text-foreground text-xs'
 
 export interface BookPickerItem {
   _id: string

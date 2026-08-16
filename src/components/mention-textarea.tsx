@@ -236,7 +236,7 @@ export function MentionTextarea({
             <p className="text-muted-foreground text-sm">{labels.mentionNoMatch}</p>
           )
         ) : (
-          <p className="text-muted-foreground text-xs">{labels.mentionHint}</p>
+          <p className="text-foreground text-xs">{labels.mentionHint}</p>
         ))}
 
       {/* The tags, carried into the form action. */}

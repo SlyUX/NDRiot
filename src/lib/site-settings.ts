@@ -1015,7 +1015,7 @@ const DEFAULTS: SiteSettings = {
     accountUndoLabel: "Undo",
     accountPostHeading: "Post an Update",
     accountPostIntro:
-      "A quick note to your followers — a new page, a con, a campaign. Everyone who saved this comic or your profile sees it. Keep it short; 200 characters.",
+      "A quick note to your followers — a new page, a con, a campaign. Everyone who saved this comic or your profile sees it. Use @ to tag a creator, convention, or outlet. Keep it short; 200 characters.",
     accountPostTargetLabel: "About",
     accountPostTargetPlaceholder: "Profile or Book update?",
     accountPostCreatorsGroup: "Your Profiles",
