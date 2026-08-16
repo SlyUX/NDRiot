@@ -15,11 +15,11 @@ export async function safeFetch<T>(
 }
 
 export const CREATORS_QUERY = defineQuery(
-  `*[_type=="creator"]|order(name asc){_id,name,"slug":slug.current,location,photo,genres,openToCollaboration,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}`,
+  `*[_type=="creator"]|order(name asc){_id,name,"slug":slug.current,location,place,photo,genres,openToCollaboration,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}`,
 );
 export const CREATOR_QUERY =
   defineQuery(`*[_type=="creator" && slug.current==$slug][0]{
-  _id,name,location,website,feedUrl,bio,"bioText":pt::text(bio),photo,socials,openToCollaboration,genres,formats,audience,
+  _id,name,location,place,website,feedUrl,bio,"bioText":pt::text(bio),photo,socials,openToCollaboration,genres,formats,audience,
   works[]{label,url},
   studio->{_id,name,"slug":slug.current,website,logo},
   organizations[]->{_id,name,"slug":slug.current,website,logo},
@@ -86,7 +86,7 @@ export const FILTERED_CREATORS_QUERY = defineQuery(`{
     && (!defined($collaborating) || openToCollaboration == true)
     && (!defined($q) || name match $q || studio->name match $q || pt::text(bio) match $q)
   ]|order(name asc)[0...$limit]{
-    _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,
+    _id,name,"slug":slug.current,location,place,photo,genres,openToCollaboration,
     "bioText":pt::text(bio),
     studio->{_id,name,"slug":slug.current,website,logo}
   },
@@ -191,7 +191,7 @@ export const SAVED_BOOKS_QUERY = defineQuery(
 );
 
 export const SAVED_CREATORS_QUERY = defineQuery(
-  `*[_type=="creator" && _id in $ids && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,location,photo,genres,openToCollaboration,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}`,
+  `*[_type=="creator" && _id in $ids && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,location,place,photo,genres,openToCollaboration,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}`,
 );
 
 /** The docs a signed-in owner can manage — creators and media they own. */
@@ -229,7 +229,7 @@ export const RAIL_UPDATES_QUERY =
   "targetSlug":target->slug.current,
   "authorName":coalesce(target->name,target->creator->name),
   "photo":coalesce(target->photo,target->creator->photo),
-  "mentions":mentions[]->{_id,_type,name,"slug":slug.current}
+  "mentions":mentions[]->{_id,_type,name,"slug":slug.current,website}
 }`);
 
 export const UPDATES_FEED_QUERY =
@@ -239,7 +239,7 @@ export const UPDATES_FEED_QUERY =
   "targetType":target->_type,
   "targetName":coalesce(target->title,target->name),
   "targetSlug":target->slug.current,
-  "mentions":mentions[]->{_id,_type,name,"slug":slug.current}
+  "mentions":mentions[]->{_id,_type,name,"slug":slug.current,website}
 }`);
 
 /**
@@ -254,7 +254,7 @@ export const CREATOR_UPDATES_QUERY =
   "targetType":target->_type,
   "targetName":coalesce(target->title,target->name),
   "targetSlug":target->slug.current,
-  "mentions":mentions[]->{_id,_type,name,"slug":slug.current}
+  "mentions":mentions[]->{_id,_type,name,"slug":slug.current,website}
 }`);
 
 /* ---------------------------------------------------- RSS feeds
@@ -317,12 +317,12 @@ export const RESOURCE_CATEGORIES_WITH_CONTENT_QUERY = defineQuery(
 // Directory cards — every convention, alphabetical (neutral order, never by
 // rating; §3). A venue creators table at, not a contributor.
 export const CONVENTIONS_QUERY = defineQuery(
-  `*[_type=="convention" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,location,whenHint,description,image}`,
+  `*[_type=="convention" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,location,place,whenHint,description,image}`,
 );
 // A single convention page.
 export const CONVENTION_QUERY =
   defineQuery(`*[_type=="convention" && slug.current==$slug][0]{
-  _id,name,"slug":slug.current,location,whenHint,website,description,image
+  _id,name,"slug":slug.current,location,place,whenHint,website,description,image
 }`);
 
 // ---- ND Riot Rag (magazine) ----
@@ -532,7 +532,7 @@ export const INTAKE_MEDIA_EDIT_QUERY =
 /** Creators who list a genre, for the category pages. */
 export const GENRE_CREATORS_QUERY = defineQuery(`{
   "items": *[_type=="creator" && $genre in genres]|order(name asc)[0...$limit]{
-    _id,name,"slug":slug.current,location,photo,genres,openToCollaboration,
+    _id,name,"slug":slug.current,location,place,photo,genres,openToCollaboration,
     "bioText":pt::text(bio),
     studio->{_id,name,"slug":slug.current,website,logo}
   },

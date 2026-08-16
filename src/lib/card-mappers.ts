@@ -1,4 +1,5 @@
-import type { ContentCardProps } from '@/components/content-card'
+import type { ContentCardProps } from "@/components/content-card";
+import { formatPlace } from "@/lib/place";
 import type {
   BookSummary,
   ColumnSummary,
@@ -13,8 +14,8 @@ import type {
   ResourceKind,
   ResourceSummary,
   SanityImage,
-} from '@/lib/types'
-import { truncate } from '@/lib/utils'
+} from "@/lib/types";
+import { truncate } from "@/lib/utils";
 
 /**
  * Sanity projection → ContentCard props.
@@ -29,21 +30,23 @@ import { truncate } from '@/lib/utils'
  * server/client, unlike bare toLocaleDateString(). Uppercased by CSS where the
  * surrounding label is (e.g. a campaign's "Ends" line) → "JUL 30, 2026".
  */
-const DATE_FORMAT = new Intl.DateTimeFormat('en-US', {
-  month: 'short',
-  day: 'numeric',
-  year: 'numeric',
+const DATE_FORMAT = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
   // Sanity `date` values are plain calendar dates ("2026-07-31"); Date parses
   // them as UTC midnight, so formatting in the runtime's zone (Vercel is UTC,
   // a laptop is not) would shift a deadline a day earlier west of UTC. Pin to
   // UTC so the day shown is always the day stored.
-  timeZone: 'UTC',
-})
+  timeZone: "UTC",
+});
 
 export function formatDate(iso?: string | null): string | undefined {
-  if (!iso) return undefined
-  const parsed = new Date(iso)
-  return Number.isNaN(parsed.getTime()) ? undefined : DATE_FORMAT.format(parsed)
+  if (!iso) return undefined;
+  const parsed = new Date(iso);
+  return Number.isNaN(parsed.getTime())
+    ? undefined
+    : DATE_FORMAT.format(parsed);
 }
 
 export function bookToCard(book: BookSummary): ContentCardProps {
@@ -53,7 +56,7 @@ export function bookToCard(book: BookSummary): ContentCardProps {
     image: book.cover,
     // Fallback only — book.cover.alt wins when set. Empty is right for cover
     // art sitting directly above its own title; announcing it twice is noise.
-    imageAlt: '',
+    imageAlt: "",
     eyebrow: book.creatorName,
     genres: book.genres,
     format: book.format,
@@ -61,8 +64,8 @@ export function bookToCard(book: BookSummary): ContentCardProps {
     fundingUrl: book.fundingUrl,
     // Shown on hover over the cover (desktop) — the opening of the description.
     hoverText: truncate(book.descriptionText, 200),
-    aspectRatio: 'cover',
-  }
+    aspectRatio: "cover",
+  };
 }
 
 /**
@@ -74,23 +77,30 @@ export function bookToCard(book: BookSummary): ContentCardProps {
  * card; one with neither a profile nor a link has nothing to point at and is
  * dropped by the caller.
  */
-export function favoriteToCard(favorite: FavoriteCreator): ContentCardProps | null {
+export function favoriteToCard(
+  favorite: FavoriteCreator,
+): ContentCardProps | null {
   if (favorite.onSite?.slug) {
-    const c = favorite.onSite
+    const c = favorite.onSite;
     return {
-      title: c.name ?? 'Creator',
+      title: c.name ?? "Creator",
       href: `/creators/${c.slug}`,
       image: c.photo,
-      imageAlt: `Portrait of ${c.name ?? 'creator'}`,
+      imageAlt: `Portrait of ${c.name ?? "creator"}`,
       eyebrow: c.studio?.name ?? c.location,
       summary: truncate(c.bioText, 160),
-      aspectRatio: 'square',
-    }
+      aspectRatio: "square",
+    };
   }
   if (favorite.name && favorite.url) {
-    return { title: favorite.name, href: favorite.url, imageAlt: '', aspectRatio: 'square' }
+    return {
+      title: favorite.name,
+      href: favorite.url,
+      imageAlt: "",
+      aspectRatio: "square",
+    };
   }
-  return null
+  return null;
 }
 
 export function creatorToCard(creator: CreatorSummary): ContentCardProps {
@@ -100,14 +110,16 @@ export function creatorToCard(creator: CreatorSummary): ContentCardProps {
     image: creator.photo,
     imageAlt: `Portrait of ${creator.name}`,
     // Studio name identifies a creator more usefully than a city does, and
-    // makes the card findable by studio. Location is the fallback.
-    eyebrow: creator.studio?.name ?? creator.location,
+    // makes the card findable by studio. Location is the fallback (structured
+    // place, or the legacy string until backfilled).
+    eyebrow:
+      creator.studio?.name ?? formatPlace(creator.place, creator.location),
     // A short bio preview for the horizontal card (the homepage creators row).
     // Only the horizontal layout renders summary, so this is inert on the
     // vertical listing cards. bioText is pt::text(bio) — see the queries.
     summary: truncate(creator.bioText, 160),
-    aspectRatio: 'square',
-  }
+    aspectRatio: "square",
+  };
 }
 
 /**
@@ -118,25 +130,27 @@ export function creatorToCard(creator: CreatorSummary): ContentCardProps {
  * which case there is nothing to link to and it returns null.
  */
 export interface CreatorRef {
-  name?: string | null
-  slug?: string | null
-  location?: string | null
-  photo?: SanityImage | null
-  bioText?: string | null
-  studio?: { name?: string | null } | null
+  name?: string | null;
+  slug?: string | null;
+  location?: string | null;
+  photo?: SanityImage | null;
+  bioText?: string | null;
+  studio?: { name?: string | null } | null;
 }
 
-export function creatorRefToCard(creator: CreatorRef | null | undefined): ContentCardProps | null {
-  if (!creator?.slug) return null
+export function creatorRefToCard(
+  creator: CreatorRef | null | undefined,
+): ContentCardProps | null {
+  if (!creator?.slug) return null;
   return {
-    title: creator.name ?? 'Creator',
+    title: creator.name ?? "Creator",
     href: `/creators/${creator.slug}`,
     image: creator.photo ?? null,
-    imageAlt: `Portrait of ${creator.name ?? 'creator'}`,
+    imageAlt: `Portrait of ${creator.name ?? "creator"}`,
     eyebrow: creator.studio?.name ?? creator.location ?? undefined,
     summary: truncate(creator.bioText, 160),
-    aspectRatio: 'square',
-  }
+    aspectRatio: "square",
+  };
 }
 
 export function columnToCard(column: ColumnSummary): ContentCardProps {
@@ -145,12 +159,12 @@ export function columnToCard(column: ColumnSummary): ContentCardProps {
     href: `/editorial/columns/${column.slug}`,
     // The 4:3 card thumbnail; the 16:9 header image is the fallback.
     image: column.thumbnail ?? column.cover,
-    imageAlt: '',
+    imageAlt: "",
     eyebrow: column.authorName,
     summary: column.excerpt,
     date: formatDate(column.publishedAt),
-    aspectRatio: 'landscape',
-  }
+    aspectRatio: "landscape",
+  };
 }
 
 export function interviewToCard(interview: InterviewSummary): ContentCardProps {
@@ -158,12 +172,12 @@ export function interviewToCard(interview: InterviewSummary): ContentCardProps {
     title: interview.title,
     href: `/editorial/interviews/${interview.slug}`,
     image: interview.thumbnail ?? interview.cover,
-    imageAlt: '',
+    imageAlt: "",
     eyebrow: interview.subjectName,
     summary: interview.excerpt,
     date: formatDate(interview.publishedAt),
-    aspectRatio: 'landscape',
-  }
+    aspectRatio: "landscape",
+  };
 }
 
 /**
@@ -172,17 +186,19 @@ export function interviewToCard(interview: InterviewSummary): ContentCardProps {
  * the combined HOME_EDITORIAL_QUERY shape.
  */
 export function editorialToCard(item: HomeEditorial): ContentCardProps {
-  const isColumn = item._type === 'column'
+  const isColumn = item._type === "column";
   return {
     title: item.title,
-    href: isColumn ? `/editorial/columns/${item.slug}` : `/editorial/interviews/${item.slug}`,
+    href: isColumn
+      ? `/editorial/columns/${item.slug}`
+      : `/editorial/interviews/${item.slug}`,
     image: item.thumbnail ?? item.cover,
-    imageAlt: '',
+    imageAlt: "",
     eyebrow: isColumn ? item.authorName : item.subjectName,
     summary: item.excerpt,
     date: formatDate(item.publishedAt),
-    aspectRatio: 'landscape',
-  }
+    aspectRatio: "landscape",
+  };
 }
 
 export function mediaToCard(media: MediaSummary): ContentCardProps {
@@ -192,26 +208,28 @@ export function mediaToCard(media: MediaSummary): ContentCardProps {
     image: media.logo,
     // Decorative — the name sits right beside it; a missing logo falls back to
     // a plain box (CardImage), which is fine here.
-    imageAlt: '',
-    eyebrow: media.kinds?.length ? media.kinds.join(' · ') : undefined,
+    imageAlt: "",
+    eyebrow: media.kinds?.length ? media.kinds.join(" · ") : undefined,
     summary: truncate(media.about, 160),
-    aspectRatio: 'square',
-  }
+    aspectRatio: "square",
+  };
 }
 
-export function conventionToCard(convention: ConventionSummary): ContentCardProps {
+export function conventionToCard(
+  convention: ConventionSummary,
+): ContentCardProps {
   return {
     title: convention.name,
     href: `/conventions/${convention.slug}`,
     image: convention.image,
     // Real alt if the editor gave it (a logo/banner); the name sits beside it,
     // so a blank falls back to a plain box.
-    imageAlt: convention.image?.alt ?? '',
-    eyebrow: convention.location ?? undefined,
+    imageAlt: convention.image?.alt ?? "",
+    eyebrow: formatPlace(convention.place, convention.location) ?? undefined,
     summary: truncate(convention.description, 160),
     date: convention.whenHint ?? undefined,
-    aspectRatio: 'square',
-  }
+    aspectRatio: "square",
+  };
 }
 
 export function downloadToCard(download: DownloadSummary): ContentCardProps {
@@ -219,34 +237,34 @@ export function downloadToCard(download: DownloadSummary): ContentCardProps {
     title: download.title,
     href: `/downloads/${download.slug}`,
     image: download.cover,
-    imageAlt: '',
+    imageAlt: "",
     eyebrow: download.creatorName,
     summary: download.description,
-    aspectRatio: 'cover',
-  }
+    aspectRatio: "cover",
+  };
 }
 
 /** Reader-facing label for a resource's kind — a system classification (like a
  *  genre/format badge), so it lives in code, not the CMS. Shared with the
  *  /resources listing cards. */
 export const RESOURCE_KIND_LABEL: Record<ResourceKind, string> = {
-  video: 'Video',
-  download: 'Download',
-  link: 'Link',
-  guide: 'Guide',
-}
+  video: "Video",
+  download: "Download",
+  link: "Link",
+  guide: "Guide",
+};
 
 export function ragIssueToCard(issue: RagIssueSummary): ContentCardProps {
   return {
     title: issue.title,
     href: `/magazine/${issue.slug}`,
     image: issue.cover,
-    imageAlt: '',
+    imageAlt: "",
     // "Issue N" is a structural label (code), like a page number.
     eyebrow: `Issue ${issue.issueNumber}`,
     date: formatDate(issue.publishedAt),
-    aspectRatio: 'cover',
-  }
+    aspectRatio: "cover",
+  };
 }
 
 export function resourceToCard(resource: ResourceSummary): ContentCardProps {
@@ -256,9 +274,9 @@ export function resourceToCard(resource: ResourceSummary): ContentCardProps {
     // Optional — a resource without a cover shows the plain box, like any
     // imageless card. Kind + category still identify it below.
     image: resource.image,
-    imageAlt: '',
+    imageAlt: "",
     eyebrow: `${RESOURCE_KIND_LABEL[resource.kind]} · ${resource.category}`,
     summary: resource.description,
-    aspectRatio: 'landscape',
-  }
+    aspectRatio: "landscape",
+  };
 }

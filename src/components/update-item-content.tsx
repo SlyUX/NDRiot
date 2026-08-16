@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 
 import { formatDate } from "@/lib/card-mappers";
+import { externalHref } from "@/lib/utils";
 import type { UpdateFeedItem } from "@/lib/types";
 
 /** Where an update's target links to (its comic or creator page). */
@@ -56,7 +58,7 @@ export function UpdateItemContent({
       {update.mentions && update.mentions.length > 0 && (
         <ul className="mt-2 flex flex-wrap gap-2">
           {update.mentions.map((mention) => (
-            <li key={mention._id}>
+            <li key={mention._id} className="inline-flex items-stretch">
               <Link
                 href={
                   mention._type === "convention"
@@ -67,6 +69,19 @@ export function UpdateItemContent({
               >
                 {mention.name}
               </Link>
+              {/* A convention's own site is the source of truth for specifics —
+                  so a mentioned con carries a link-out to it, right on the chip. */}
+              {mention._type === "convention" && mention.website && (
+                <a
+                  href={externalHref(mention.website)}
+                  target="_blank"
+                  rel="nofollow noopener noreferrer"
+                  aria-label={`${mention.name} website`}
+                  className="border-border hover:border-primary hover:text-primary -ml-px inline-flex items-center border px-1.5 transition-colors"
+                >
+                  <ArrowUpRight aria-hidden="true" className="size-3.5" />
+                </a>
+              )}
             </li>
           ))}
         </ul>

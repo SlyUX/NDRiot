@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { externalHref } from "@/lib/utils";
 import { Section } from "@/components/ui/section";
 import { bookToCard, favoriteToCard } from "@/lib/card-mappers";
+import { formatPlace } from "@/lib/place";
 import { pageMetadata } from "@/lib/page-metadata";
 import { auth } from "@/auth";
 import { isSaved } from "@/sanity/reader-client";
@@ -305,8 +306,10 @@ export default async function CreatorPage({
                       />
                     </div>
                   )}
-                  {creator.location && (
-                    <p className="text-muted-foreground">{creator.location}</p>
+                  {formatPlace(creator.place, creator.location) && (
+                    <p className="text-muted-foreground">
+                      {formatPlace(creator.place, creator.location)}
+                    </p>
                   )}
 
                   {/* Deliberately: "here's where to find me"

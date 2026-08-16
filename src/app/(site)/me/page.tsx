@@ -15,6 +15,7 @@ import { PostUpdateDialog } from "@/components/post-update-dialog";
 import { UpdateFeed } from "@/components/update-feed";
 import { YourComics, type YourComicsBook } from "@/components/your-comics";
 import { updateOwnerConfig } from "@/lib/composer-labels";
+import { formatPlace } from "@/lib/place";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/ui/section";
 import { auth } from "@/auth";
@@ -271,7 +272,9 @@ export default async function AccountPage() {
               <div className="lg:w-80 lg:shrink-0">
                 <div className="space-y-4">
                   {ownedCreators.map((creator) => {
-                    const sub = creator.studio?.name ?? creator.location;
+                    const sub =
+                      creator.studio?.name ??
+                      formatPlace(creator.place, creator.location);
                     return (
                       <div key={creator._id} className="flex gap-3 sm:gap-4">
                         <div className="relative aspect-square w-14 shrink-0 overflow-hidden bg-white/10 sm:w-20">
