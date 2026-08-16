@@ -205,12 +205,12 @@ function FeedRow({ item }: { item: RailFeedItem }) {
       : `/creators/${item.targetSlug}`
     : null;
   return (
-    // A followed update is boxed in a hot-pink border with the creator's avatar,
-    // so it stands out where it naturally falls in the recency order.
+    // A followed update is boxed in a personalization-teal border with the
+    // creator's avatar, so it stands out where it falls in the recency order.
     <li
       className={cn(
         "flex gap-2.5",
-        item.followed && "border-primary border p-2.5",
+        item.followed && "border-personalize border p-2.5",
       )}
     >
       {item.followed && (
@@ -272,8 +272,6 @@ function FeedRail({
   return (
     <div>
       <div className="mb-4 flex items-center gap-3">
-        {/* Personalization-teal tick: this rail is the reader's own feed (§3). */}
-        <span aria-hidden="true" className="bg-personalize h-4 w-1 shrink-0" />
         <h2 className="text-personalize text-xs leading-tight font-black tracking-[0.2em] uppercase">
           {heading}
         </h2>

@@ -33,7 +33,7 @@ export function PostUpdateDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full justify-center font-black tracking-wide uppercase">
+        <Button className="font-black tracking-wide uppercase">
           <Plus aria-hidden="true" className="size-4" />
           {labels.heading}
         </Button>

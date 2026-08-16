@@ -383,34 +383,6 @@ export default async function AccountPage() {
                     );
                   })}
                 </div>
-                {/* Post an Update + Add an Event — modals, their triggers stacked
-                    to fill the creator column. */}
-                {composerTargets.length > 0 && (
-                  <div className="mt-4 space-y-3">
-                    <PostUpdateDialog
-                      targets={composerTargets}
-                      kinds={UPDATE_KINDS}
-                      mentions={mentionOptions}
-                      labels={composerLabelsFrom(s)}
-                    />
-                    <EventDialog
-                      creators={ownedCreators.map((creator) => ({
-                        id: creator._id,
-                        name: creator.name ?? "Your profile",
-                      }))}
-                      conventions={eventConventions}
-                      labels={{
-                        addHeading: s.accountEventAddHeading,
-                        conventionLabel: s.accountEventConventionLabel,
-                        tableFieldLabel: s.accountEventTableLabel,
-                        noteFieldLabel: s.accountEventNoteLabel,
-                        saveLabel: s.accountEventSaveLabel,
-                        postingLabel: s.accountPostingLabel,
-                        postedLabel: s.accountEventPosted,
-                      }}
-                    />
-                  </div>
-                )}
               </div>
 
               {yourComicsBooks.length > 0 && (
@@ -438,6 +410,26 @@ export default async function AccountPage() {
                 tbaLabel: s.eventDateTba,
                 removeLabel: s.accountRemoveLabel,
               }}
+              action={
+                composerTargets.length > 0 ? (
+                  <EventDialog
+                    creators={ownedCreators.map((creator) => ({
+                      id: creator._id,
+                      name: creator.name ?? "Your profile",
+                    }))}
+                    conventions={eventConventions}
+                    labels={{
+                      addHeading: s.accountEventAddHeading,
+                      conventionLabel: s.accountEventConventionLabel,
+                      tableFieldLabel: s.accountEventTableLabel,
+                      noteFieldLabel: s.accountEventNoteLabel,
+                      saveLabel: s.accountEventSaveLabel,
+                      postingLabel: s.accountPostingLabel,
+                      postedLabel: s.accountEventPosted,
+                    }}
+                  />
+                ) : undefined
+              }
             />
           </Section>
         )}
@@ -500,19 +492,11 @@ export default async function AccountPage() {
           </Section>
         )}
 
-        {/* Your Feed (who you follow) + Your Updates (your own posts). */}
+        {/* Your Updates (your own posts) + Your Feed (who you follow). "Post an
+            Update" sits across from the Your Updates heading. */}
         {(followIds.length > 0 || isCreator) && (
           <Section padding="md">
             <div className="grid gap-8 lg:grid-cols-2">
-              {followIds.length > 0 && (
-                <UpdateFeed
-                  heading={s.accountFeedHeading}
-                  headingTone="personalize"
-                  emptyLabel={s.accountFeedEmpty}
-                  updates={updates}
-                  scrollCap
-                />
-              )}
               {isCreator && (
                 // Anchor target for the "manage your updates" link on a creator's
                 // own profile; scroll-mt clears the fixed nav on the jump.
@@ -523,9 +507,28 @@ export default async function AccountPage() {
                     emptyLabel={s.accountMyUpdatesEmpty}
                     updates={myUpdates}
                     owner={updateOwnerConfig(s, mentionOptions)}
+                    action={
+                      composerTargets.length > 0 ? (
+                        <PostUpdateDialog
+                          targets={composerTargets}
+                          kinds={UPDATE_KINDS}
+                          mentions={mentionOptions}
+                          labels={composerLabelsFrom(s)}
+                        />
+                      ) : undefined
+                    }
                     scrollCap
                   />
                 </div>
+              )}
+              {followIds.length > 0 && (
+                <UpdateFeed
+                  heading={s.accountFeedHeading}
+                  headingTone="personalize"
+                  emptyLabel={s.accountFeedEmpty}
+                  updates={updates}
+                  scrollCap
+                />
               )}
             </div>
           </Section>

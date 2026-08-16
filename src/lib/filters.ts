@@ -64,7 +64,7 @@ export function bookFacets(genres: readonly string[]): Facet[] {
     { param: 'audience', label: 'Audience', options: MATURITY_RATINGS },
     { param: 'status', label: 'Status', options: ['Ongoing', 'Complete', 'Upcoming'] },
     // "Sample before you buy" — books that carry a free preview PDF.
-    { param: 'preview', label: 'Has preview', options: [], toggle: true },
+    { param: 'preview', label: 'Has preview', options: [], toggle: true, tone: 'inverse' },
   ]
 }
 
@@ -89,7 +89,7 @@ export function homeBookFacets(genres: readonly string[]): Facet[] {
     { param: 'format', label: 'Format', options: FORMATS },
     { param: 'audience', label: 'Audience', options: MATURITY_RATINGS },
     { param: 'funding', label: 'Now funding', options: [], toggle: true, tone: 'funding' },
-    { param: 'preview', label: 'Has preview', options: [], toggle: true },
+    { param: 'preview', label: 'Has preview', options: [], toggle: true, tone: 'inverse' },
   ]
 }
 

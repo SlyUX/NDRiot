@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
@@ -26,9 +27,12 @@ export interface EventsManagerLabels {
 export function EventsManager({
   current,
   labels,
+  action,
 }: {
   current: OwnedAppearance[];
   labels: EventsManagerLabels;
+  /** Trailing control across from the heading — the "Add an Event" button. */
+  action?: ReactNode;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -49,7 +53,7 @@ export function EventsManager({
 
   return (
     <div className="space-y-4">
-      <SectionHeading as="h2" size="sm" tone="personalize">
+      <SectionHeading as="h2" size="sm" tone="personalize" action={action}>
         {labels.heading}
       </SectionHeading>
 

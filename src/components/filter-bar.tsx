@@ -40,10 +40,11 @@ export interface Facet {
   toggle?: boolean
   /**
    * Colour a toggle to its subject. `funding` uses the funding green so the
-   * "Currently funding" control matches the badge it filters for; the default
-   * is the site's pink accent.
+   * "Currently funding" control matches the badge it filters for; `inverse` is
+   * a solid white/black button (the "Has preview" control); the default is the
+   * site's pink accent.
    */
-  tone?: 'funding'
+  tone?: 'funding' | 'inverse'
 }
 
 export interface FilterBarProps {
@@ -312,6 +313,7 @@ export function FilterBar({
               // The funding toggle wears the funding green (black text on it,
               // §9) so it reads as the control for the badge it filters for.
               const funding = facet.tone === 'funding'
+              const inverse = facet.tone === 'inverse'
               return (
                 <button
                   key={facet.param}
@@ -323,10 +325,14 @@ export function FilterBar({
                     isOn
                       ? funding
                         ? 'bg-funding border-funding text-black'
-                        : 'bg-primary text-primary-foreground border-primary'
+                        : inverse
+                          ? 'border-white bg-white text-black'
+                          : 'bg-primary text-primary-foreground border-primary'
                       : funding
                         ? 'text-funding border-funding hover:bg-funding/10'
-                        : 'text-muted-foreground hover:border-primary/60 hover:text-foreground border-white/20',
+                        : inverse
+                          ? 'border-white/40 text-white hover:bg-white/10'
+                          : 'text-muted-foreground hover:border-primary/60 hover:text-foreground border-white/20',
                   )}
                 >
                   {facet.label}

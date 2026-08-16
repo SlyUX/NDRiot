@@ -36,7 +36,7 @@ export function EventDialog({
       <DialogTrigger asChild>
         <Button
           variant="inverse"
-          className="w-full justify-center font-black tracking-wide uppercase"
+          className="font-black tracking-wide uppercase"
         >
           <Plus aria-hidden="true" className="size-4" />
           {labels.addHeading}
