@@ -567,6 +567,13 @@ export default defineType({
             'Links out to the convention’s website — e.g. "Official site".',
         }),
         defineField({
+          name: "conventionAttendingLabel",
+          title: 'Convention page — "I\'m attending" button',
+          type: "string",
+          description:
+            'Opens the mark-attendance modal for this con (creators only) — e.g. "I\'m Attending".',
+        }),
+        defineField({
           name: "conventionTablersHeading",
           title: "Convention page — creators-with-tables heading",
           type: "string",
@@ -639,16 +646,12 @@ export default defineType({
           type: "string",
         }),
         defineField({
-          name: "conventionRateCelebrityLabel",
-          title: "Convention page — celebrity-focused label",
-          type: "string",
-          description: 'Descriptive flag — e.g. "Celebrity-focused".',
-        }),
-        defineField({
-          name: "conventionRateTableCostLabel",
-          title: "Convention page — table-cost label",
-          type: "string",
-          description: 'Descriptive flag — e.g. "Table cost".',
+          name: "conventionRateSkipNote",
+          title: "Convention page — skip-a-criterion note",
+          type: "text",
+          rows: 2,
+          description:
+            "Reassurance above the rating criteria that leaving one blank never lowers the average.",
         }),
         defineField({
           name: "conventionRateNoOpinion",
@@ -1091,6 +1094,13 @@ export default defineType({
           title: "Reader home — add-event subheading",
           type: "string",
           description: 'Above the add/update form — e.g. "Add an event".',
+        }),
+        defineField({
+          name: "accountEventEditHeading",
+          title: "Reader home — edit-event heading",
+          type: "string",
+          description:
+            'The modal title when editing an event card, and the card\'s Edit label — e.g. "Edit event".',
         }),
         defineField({
           name: "accountEventsEmpty",

@@ -8,9 +8,9 @@ import { ownsCreator } from "@/sanity/ownership-client";
 import { getWriteClient } from "@/sanity/write-client";
 
 /**
- * A creator's rating of a convention (later: comic shops). Owner-gated AND
- * appearance-gated — you can only rate a venue you've marked attending/tabling.
- * Its own document at a deterministic id (one per creator per venue).
+ * A creator's rating of a convention (later: comic shops). Owner-gated — any
+ * creator may rate (no appearance required). Its own document at a deterministic
+ * id (one per creator per venue).
  *
  * §3: informs, never orders discovery — enforced at display, not here. Write
  * path — prod/preview only (needs SANITY_WRITE_TOKEN).
@@ -45,19 +45,7 @@ export async function setVenueRating(input: {
   }
 
   const client = getWriteClient();
-  // Appearance-gated — integrity: rate only cons you've actually marked.
-  const attended = await client
-    .fetch<number>(
-      `count(*[_type=="conventionAppearance" && creator._ref==$c && venue._ref==$v])`,
-      { c: input.creatorId, v: input.conventionId },
-    )
-    .catch(() => 0);
-  if (!attended) {
-    return {
-      ok: false,
-      error: "Mark that you attended this convention before rating it.",
-    };
-  }
+  // Any creator may rate — no appearance required (owner-gated only).
 
   // Keep only known aspects, as 1–5 integers.
   const benefits: Record<string, number> = {};

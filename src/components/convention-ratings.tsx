@@ -2,44 +2,24 @@ import Link from "next/link";
 
 import { RatingsEmptyNudge } from "@/components/ratings-empty-nudge";
 import type { RatingsAggregate } from "@/lib/ratings";
-import { TABLE_COST_LEVELS } from "@/lib/taxonomy";
 
 export interface ConventionRatingsLabels {
   heading: string;
   /** Normal-weight note beside the heading, e.g. "(5 point scale)". */
   scaleNote: string;
-  celebrityLabel: string;
-  tableCostLabel: string;
   /** "{n}" is replaced with the rating count. */
   countLabel: string;
   /** Shown when there are no ratings. */
   empty: string;
 }
 
-const COST_TITLE = Object.fromEntries(
-  TABLE_COST_LEVELS.map((l) => [l.value, l.title]),
-);
-
-/** The most-reported table-cost band, as its title (ties join). */
-function dominantCost(cost: {
-  low: number;
-  mid: number;
-  high: number;
-}): string {
-  const max = Math.max(cost.low, cost.mid, cost.high);
-  return (["low", "mid", "high"] as const)
-    .filter((band) => cost[band] === max)
-    .map((band) => COST_TITLE[band])
-    .join(" / ");
-}
-
 /**
  * Aggregated creator ratings on a convention page — a tool for deciding which
  * cons are worth a table, never a leaderboard. §3: per-aspect averages only (no
  * composite score), and it never orders the directory. Benefit aspects show as
- * compact rectangles; descriptive flags are tallies; notes are attributed
- * blockquotes. Always visible — an un-rated con shows an empty state that nudges
- * a signed-out visitor to sign in and be the first.
+ * compact rectangles; notes are attributed blockquotes. Always visible — an
+ * un-rated con shows an empty state that nudges a signed-out visitor to sign in
+ * and be the first.
  */
 export function ConventionRatings({
   aggregate,
@@ -92,22 +72,6 @@ export function ConventionRatings({
                   <span className="font-bold">{aspect.avg.toFixed(1)}</span>
                 </span>
               ))}
-            </div>
-          )}
-
-          {(aggregate.celebrity || aggregate.tableCost) && (
-            <div className="text-muted-foreground flex flex-wrap gap-x-6 gap-y-1 text-sm">
-              {aggregate.celebrity && (
-                <span>
-                  {labels.celebrityLabel}: {aggregate.celebrity.yes}/
-                  {aggregate.celebrity.total}
-                </span>
-              )}
-              {aggregate.tableCost && (
-                <span>
-                  {labels.tableCostLabel}: {dominantCost(aggregate.tableCost)}
-                </span>
-              )}
             </div>
           )}
 

@@ -6,13 +6,11 @@ import { useRouter } from "next/navigation";
 import { removeVenueRating, setVenueRating } from "@/app/actions/ratings";
 import { SectionHeading } from "@/components/section-heading";
 import { Button } from "@/components/ui/button";
-import { CONVENTION_RATING_ASPECTS, TABLE_COST_LEVELS } from "@/lib/taxonomy";
+import { CONVENTION_RATING_ASPECTS } from "@/lib/taxonomy";
 import { cn } from "@/lib/utils";
 
 type Rating = {
   benefits?: Record<string, number | null> | null;
-  celebrityFocused?: boolean | null;
-  tableCost?: string | null;
   note?: string | null;
 } | null;
 
@@ -29,8 +27,8 @@ export interface RatingFormLabels {
   removeLabel: string;
   noteLabel: string;
   notePlaceholder: string;
-  celebrityLabel: string;
-  tableCostLabel: string;
+  /** Reassurance that leaving a criterion blank never lowers the average. */
+  skipNote: string;
   noOpinion: string;
 }
 
@@ -46,14 +44,12 @@ function benefitsFrom(rating: Rating): Record<string, string> {
   return out;
 }
 
-const celebString = (v?: boolean | null) =>
-  v === true ? "yes" : v === false ? "no" : "";
-
 /**
- * A creator's rating of a convention, on the con page. Shown only to a creator
- * who's marked an appearance here (the action re-checks). Two layers: 1–5
- * benefit aspects (higher = better) + descriptive flags, plus an attributed
- * note. Prefilled from an existing rating; editable and removable.
+ * A creator's rating of a convention, on the con page. Shown to any signed-in
+ * creator (the action re-checks ownership). 1–5 benefit aspects (higher =
+ * better), each optional — a blank aspect is simply left out of the average —
+ * plus an attributed note. Prefilled from an existing rating; editable and
+ * removable.
  */
 export function RatingForm({
   conventionId,
@@ -72,10 +68,6 @@ export function RatingForm({
   const [benefits, setBenefits] = useState<Record<string, string>>(() =>
     benefitsFrom(current?.rating ?? null),
   );
-  const [celebrity, setCelebrity] = useState(() =>
-    celebString(current?.rating?.celebrityFocused),
-  );
-  const [tableCost, setTableCost] = useState(current?.rating?.tableCost ?? "");
   const [note, setNote] = useState(current?.rating?.note ?? "");
   // Collapsed to an "update my ratings" link once a rating exists; open (the
   // full form) when there's nothing yet. A save refreshes → back to collapsed.
@@ -85,8 +77,6 @@ export function RatingForm({
     setCreatorId(id);
     const rating = creators.find((c) => c.id === id)?.rating ?? null;
     setBenefits(benefitsFrom(rating));
-    setCelebrity(celebString(rating?.celebrityFocused));
-    setTableCost(rating?.tableCost ?? "");
     setNote(rating?.note ?? "");
     setError(null);
   }
@@ -103,9 +93,8 @@ export function RatingForm({
         creatorId,
         conventionId,
         benefits: chosen,
-        celebrityFocused:
-          celebrity === "yes" ? true : celebrity === "no" ? false : null,
-        tableCost: tableCost || null,
+        celebrityFocused: null,
+        tableCost: null,
         note,
       });
       if (result.ok) {
@@ -122,8 +111,6 @@ export function RatingForm({
       if (result.ok) {
         // Clear the fields and collapse; the link becomes a "rate" CTA again.
         setBenefits(benefitsFrom(null));
-        setCelebrity("");
-        setTableCost("");
         setNote("");
         setOpen(false);
         router.refresh();
@@ -168,6 +155,8 @@ export function RatingForm({
         </select>
       )}
 
+      <p className="text-muted-foreground text-xs">{labels.skipNote}</p>
+
       <div className="divide-border divide-y">
         {CONVENTION_RATING_ASPECTS.map((aspect) => (
           <label
@@ -195,38 +184,6 @@ export function RatingForm({
             </select>
           </label>
         ))}
-      </div>
-
-      <div className="flex flex-wrap items-center gap-4 text-sm">
-        <label className="flex items-center gap-2">
-          {labels.celebrityLabel}
-          <select
-            value={celebrity}
-            onChange={(e) => setCelebrity(e.target.value)}
-            className={cn(field, "appearance-none")}
-            aria-label={labels.celebrityLabel}
-          >
-            <option value="">{labels.noOpinion}</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-          </select>
-        </label>
-        <label className="flex items-center gap-2">
-          {labels.tableCostLabel}
-          <select
-            value={tableCost}
-            onChange={(e) => setTableCost(e.target.value)}
-            className={cn(field, "appearance-none")}
-            aria-label={labels.tableCostLabel}
-          >
-            <option value="">{labels.noOpinion}</option>
-            {TABLE_COST_LEVELS.map((level) => (
-              <option key={level.value} value={level.value}>
-                {level.title}
-              </option>
-            ))}
-          </select>
-        </label>
       </div>
 
       <div className="space-y-1.5">

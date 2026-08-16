@@ -388,6 +388,7 @@ export interface SiteSettings {
     conventionsPageTitle: string;
     conventionsPageDescription: string;
     conventionVisitLabel: string;
+    conventionAttendingLabel: string;
     /** "Creators with tables" list on a convention page + the table-number prefix. */
     conventionTablersHeading: string;
     tableLabel: string;
@@ -403,8 +404,7 @@ export interface SiteSettings {
     conventionRateUpdateLabel: string;
     conventionRateNoteLabel: string;
     conventionRateNotePlaceholder: string;
-    conventionRateCelebrityLabel: string;
-    conventionRateTableCostLabel: string;
+    conventionRateSkipNote: string;
     conventionRateNoOpinion: string;
     conventionRatingsScaleNote: string;
     conventionRatingsEmpty: string;
@@ -487,6 +487,7 @@ export interface SiteSettings {
     /** Dashboard "your events" manager — convention appearances. */
     accountEventsHeading: string;
     accountEventAddHeading: string;
+    accountEventEditHeading: string;
     accountEventsEmpty: string;
     accountEventConventionLabel: string;
     accountEventTableLabel: string;
@@ -955,6 +956,7 @@ const DEFAULTS: SiteSettings = {
     conventionsPageDescription:
       "Comics conventions worth a creator’s table — where to show your work, meet readers, and find your scene. Independent-comics focused.",
     conventionVisitLabel: "Official site",
+    conventionAttendingLabel: "I'm Attending",
     conventionTablersHeading: "Creators with tables",
     tableLabel: "Table",
     creatorEventsHeading: "Upcoming events",
@@ -967,8 +969,8 @@ const DEFAULTS: SiteSettings = {
     conventionRateNoteLabel: "Your note",
     conventionRateNotePlaceholder:
       "What should other creators know before they table here?",
-    conventionRateCelebrityLabel: "Celebrity-focused",
-    conventionRateTableCostLabel: "Table cost",
+    conventionRateSkipNote:
+      "Rate only what you can speak to. Leaving one blank keeps it out of the average — it never counts against the score.",
     conventionRateNoOpinion: "—",
     conventionRatingsScaleNote: "(5 point scale)",
     conventionRatingsEmpty:
@@ -1040,6 +1042,7 @@ const DEFAULTS: SiteSettings = {
     accountMyUpdatesEmpty: "You haven’t posted an update yet.",
     accountEventsHeading: "Your events",
     accountEventAddHeading: "Add an event",
+    accountEventEditHeading: "Edit event",
     accountEventsEmpty:
       "No events yet — add a convention you’re attending or tabling at.",
     accountEventConventionLabel: "Convention",

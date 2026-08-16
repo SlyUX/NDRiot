@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { EventDialog } from "@/components/event-dialog";
 import { ConventionTablers } from "@/components/convention-tablers";
 import { ConventionRatings } from "@/components/convention-ratings";
 import {
@@ -90,8 +91,9 @@ export default async function ConventionPage({
   ]);
   const ratings = aggregateRatings(rawRatings);
 
-  // The rate form is shown only to a signed-in creator who's marked an
-  // appearance here (the action re-checks). Prefilled from their existing rating.
+  // The rate form is shown to any signed-in creator (the action re-checks
+  // ownership). Prefilled from their existing rating. The same creators can mark
+  // "I'm Attending" for this con.
   const email = session?.user?.email;
   let raters: RatingEligibleCreator[] = [];
   if (email) {
@@ -102,15 +104,14 @@ export default async function ConventionPage({
         { conId: convention._id, creatorIds: ownedIds },
         [],
       );
-      raters = context
-        .filter((c) => c.hasAppearance)
-        .map((c) => ({
-          id: c._id,
-          name: c.name ?? "Your profile",
-          rating: c.rating,
-        }));
+      raters = context.map((c) => ({
+        id: c._id,
+        name: c.name ?? "Your profile",
+        rating: c.rating,
+      }));
     }
   }
+  const eventCreators = raters.map((r) => ({ id: r.id, name: r.name }));
 
   // Location and timing, joined for the meta line under the title.
   const meta = [formatPlace(convention.place), convention.whenHint]
@@ -153,21 +154,50 @@ export default async function ConventionPage({
         )}
       </header>
 
-      {convention.website && (
-        <Button
-          asChild
-          size="lg"
-          className="font-black tracking-wide uppercase"
-        >
-          <a
-            href={externalHref(convention.website)}
-            target="_blank"
-            rel="nofollow noopener noreferrer"
-          >
-            {settings.sections.conventionVisitLabel}
-            <ArrowUpRight aria-hidden="true" className="size-4" />
-          </a>
-        </Button>
+      {(convention.website || eventCreators.length > 0) && (
+        <div className="flex flex-wrap gap-3">
+          {convention.website && (
+            <Button
+              asChild
+              size="lg"
+              className="font-black tracking-wide uppercase"
+            >
+              <a
+                href={externalHref(convention.website)}
+                target="_blank"
+                rel="nofollow noopener noreferrer"
+              >
+                {settings.sections.conventionVisitLabel}
+                <ArrowUpRight aria-hidden="true" className="size-4" />
+              </a>
+            </Button>
+          )}
+          {/* Any signed-in creator can mark attendance — the con is locked in. */}
+          {eventCreators.length > 0 && (
+            <EventDialog
+              creators={eventCreators}
+              lockedConvention={{ id: convention._id, name: convention.name }}
+              labels={{
+                addHeading: settings.sections.conventionAttendingLabel,
+                conventionLabel: settings.sections.accountEventConventionLabel,
+                tableFieldLabel: settings.sections.accountEventTableLabel,
+                noteFieldLabel: settings.sections.accountEventNoteLabel,
+                saveLabel: settings.sections.accountEventSaveLabel,
+                postingLabel: settings.sections.accountPostingLabel,
+                postedLabel: settings.sections.accountEventPosted,
+              }}
+              trigger={
+                <Button
+                  size="lg"
+                  variant="inverse"
+                  className="font-black tracking-wide uppercase"
+                >
+                  {settings.sections.conventionAttendingLabel}
+                </Button>
+              }
+            />
+          )}
+        </div>
       )}
 
       <ConventionTablers
@@ -187,8 +217,6 @@ export default async function ConventionPage({
         labels={{
           heading: settings.sections.conventionRatingsHeading,
           scaleNote: settings.sections.conventionRatingsScaleNote,
-          celebrityLabel: settings.sections.conventionRateCelebrityLabel,
-          tableCostLabel: settings.sections.conventionRateTableCostLabel,
           countLabel: settings.sections.conventionRatingsCountLabel,
           empty: settings.sections.conventionRatingsEmpty,
         }}
@@ -205,8 +233,7 @@ export default async function ConventionPage({
             removeLabel: settings.sections.accountRemoveLabel,
             noteLabel: settings.sections.conventionRateNoteLabel,
             notePlaceholder: settings.sections.conventionRateNotePlaceholder,
-            celebrityLabel: settings.sections.conventionRateCelebrityLabel,
-            tableCostLabel: settings.sections.conventionRateTableCostLabel,
+            skipNote: settings.sections.conventionRateSkipNote,
             noOpinion: settings.sections.conventionRateNoOpinion,
           }}
         />

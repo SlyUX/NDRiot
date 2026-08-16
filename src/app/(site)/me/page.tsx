@@ -286,6 +286,21 @@ export default async function AccountPage() {
     ownedAppearances = appearances;
   }
 
+  // Shared by the "Add an Event" button and each event card's Edit.
+  const eventFormCreators = ownedCreators.map((creator) => ({
+    id: creator._id,
+    name: creator.name ?? "Your profile",
+  }));
+  const eventFormLabels = {
+    addHeading: s.accountEventAddHeading,
+    conventionLabel: s.accountEventConventionLabel,
+    tableFieldLabel: s.accountEventTableLabel,
+    noteFieldLabel: s.accountEventNoteLabel,
+    saveLabel: s.accountEventSaveLabel,
+    postingLabel: s.accountPostingLabel,
+    postedLabel: s.accountEventPosted,
+  };
+
   return (
     <div>
       {/* The top user/creator zone keeps its own band (creator-pink / charcoal),
@@ -422,24 +437,19 @@ export default async function AccountPage() {
                 tablePrefix: s.tableLabel,
                 tbaLabel: s.eventDateTba,
                 removeLabel: s.accountRemoveLabel,
+                editLabel: s.accountEventEditHeading,
               }}
+              editForm={
+                composerTargets.length > 0
+                  ? { creators: eventFormCreators, labels: eventFormLabels }
+                  : undefined
+              }
               action={
                 composerTargets.length > 0 ? (
                   <EventDialog
-                    creators={ownedCreators.map((creator) => ({
-                      id: creator._id,
-                      name: creator.name ?? "Your profile",
-                    }))}
+                    creators={eventFormCreators}
                     conventions={eventConventions}
-                    labels={{
-                      addHeading: s.accountEventAddHeading,
-                      conventionLabel: s.accountEventConventionLabel,
-                      tableFieldLabel: s.accountEventTableLabel,
-                      noteFieldLabel: s.accountEventNoteLabel,
-                      saveLabel: s.accountEventSaveLabel,
-                      postingLabel: s.accountPostingLabel,
-                      postedLabel: s.accountEventPosted,
-                    }}
+                    labels={eventFormLabels}
                   />
                 ) : undefined
               }

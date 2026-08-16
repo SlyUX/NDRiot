@@ -5,7 +5,7 @@ import { ArrowUpRight } from "lucide-react";
 import { DateTile } from "@/components/date-tile";
 import { formatPlace } from "@/lib/place";
 import { appearanceStatusDisplay } from "@/lib/taxonomy";
-import { externalHref } from "@/lib/utils";
+import { cn, externalHref } from "@/lib/utils";
 
 /**
  * One convention appearance as a horizontal card — a pink date tile where a
@@ -31,6 +31,7 @@ export function AppearanceCard({
   tableLabel,
   tbaLabel,
   action,
+  layout = "list",
 }: {
   venue: AppearanceVenue;
   status: string | null;
@@ -39,15 +40,25 @@ export function AppearanceCard({
   forDate?: string | null;
   tableLabel: string;
   tbaLabel: string;
-  /** Trailing control on the name row — e.g. the dashboard's Remove. */
+  /** Trailing control on the name row — e.g. the dashboard's Edit + Remove. */
   action?: ReactNode;
+  /** `list` is a full-width stacked row (the profile); `card` is a fixed-width
+   *  bordered block for a scrolling row (the dashboard). */
+  layout?: "list" | "card";
 }) {
   const where = formatPlace(venue.place);
   // The tile shows the occurrence's start; forDate is the stamped fallback.
   const tileDate = venue.startDate ?? forDate ?? null;
 
   return (
-    <li className="flex gap-4 py-4">
+    <li
+      className={cn(
+        "flex gap-4",
+        layout === "card"
+          ? "border-border w-[19rem] shrink-0 border p-3"
+          : "py-4",
+      )}
+    >
       <DateTile date={tileDate} tbaLabel={tbaLabel} className="w-20 sm:w-24" />
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-x-3">

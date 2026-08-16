@@ -36,21 +36,35 @@ export function EventAddForm({
   conventions,
   labels,
   onSaved,
+  lockedConvention,
+  initial,
 }: {
   creators: { id: string; name: string }[];
   conventions: { id: string; name: string }[];
   labels: EventAddFormLabels;
   onSaved?: () => void;
+  /** Fix the convention (the con page's "I'm Attending", or editing an event):
+   *  the picker is replaced by its name. */
+  lockedConvention?: { id: string; name: string };
+  /** Prefill for editing an existing appearance. */
+  initial?: {
+    creatorId?: string;
+    status?: string;
+    tableNumber?: string | null;
+    note?: string | null;
+  };
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [posted, setPosted] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [creatorId, setCreatorId] = useState(creators[0]?.id ?? "");
-  const [conventionId, setConventionId] = useState("");
-  const [status, setStatus] = useState("attending");
-  const [tableNumber, setTableNumber] = useState("");
-  const [note, setNote] = useState("");
+  const [creatorId, setCreatorId] = useState(
+    initial?.creatorId ?? creators[0]?.id ?? "",
+  );
+  const [conventionId, setConventionId] = useState(lockedConvention?.id ?? "");
+  const [status, setStatus] = useState(initial?.status ?? "attending");
+  const [tableNumber, setTableNumber] = useState(initial?.tableNumber ?? "");
+  const [note, setNote] = useState(initial?.note ?? "");
 
   function save() {
     setError(null);
@@ -112,19 +126,25 @@ export function EventAddForm({
           ))}
         </select>
       )}
-      <select
-        value={conventionId}
-        onChange={(e) => setConventionId(e.target.value)}
-        className={cn(field, "appearance-none")}
-        aria-label={labels.conventionLabel}
-      >
-        <option value="">{labels.conventionLabel}…</option>
-        {conventions.map((convention) => (
-          <option key={convention.id} value={convention.id}>
-            {convention.name}
-          </option>
-        ))}
-      </select>
+      {lockedConvention ? (
+        <p className="border border-white/20 px-3 py-2 text-sm font-bold">
+          {lockedConvention.name}
+        </p>
+      ) : (
+        <select
+          value={conventionId}
+          onChange={(e) => setConventionId(e.target.value)}
+          className={cn(field, "appearance-none")}
+          aria-label={labels.conventionLabel}
+        >
+          <option value="">{labels.conventionLabel}…</option>
+          {conventions.map((convention) => (
+            <option key={convention.id} value={convention.id}>
+              {convention.name}
+            </option>
+          ))}
+        </select>
+      )}
       <div className="flex flex-wrap gap-4">
         {APPEARANCE_STATUSES.map((option) => (
           <label key={option.value} className="flex items-center gap-2 text-sm">

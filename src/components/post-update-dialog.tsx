@@ -33,7 +33,7 @@ export function PostUpdateDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="font-black tracking-wide uppercase">
+        <Button variant="inverse" className="font-black tracking-wide uppercase">
           <Plus aria-hidden="true" className="size-4" />
           {labels.heading}
         </Button>
