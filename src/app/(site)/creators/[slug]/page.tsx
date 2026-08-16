@@ -30,6 +30,7 @@ import { ownsCreator } from "@/sanity/ownership-client";
 import { fetchFeed } from "@/lib/feed-parse";
 import {
   safeFetch,
+  freshFetch,
   CREATOR_QUERY,
   CREATOR_UPDATES_QUERY,
   CREATOR_APPEARANCES_QUERY,
@@ -153,7 +154,7 @@ export default async function CreatorPage({
   );
 
   // Their convention appearances (own docs) — for the Events row, upcoming only.
-  const appearances = await safeFetch<CreatorAppearance[]>(
+  const appearances = await freshFetch<CreatorAppearance[]>(
     CREATOR_APPEARANCES_QUERY,
     { creatorId: creator._id },
     [],

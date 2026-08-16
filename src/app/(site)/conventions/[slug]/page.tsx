@@ -15,6 +15,7 @@ import { auth } from "@/auth";
 import { pageMetadata } from "@/lib/page-metadata";
 import {
   safeFetch,
+  freshFetch,
   CONVENTION_QUERY,
   CONVENTION_TABLERS_QUERY,
   CONVENTION_RATINGS_QUERY,
@@ -76,12 +77,12 @@ export default async function ConventionPage({
   // Creators tabling at the upcoming occurrence (neutral order, §3) + all
   // creator ratings, aggregated for display.
   const [tablers, rawRatings] = await Promise.all([
-    safeFetch<ConventionTabler[]>(
+    freshFetch<ConventionTabler[]>(
       CONVENTION_TABLERS_QUERY,
       { conId: convention._id },
       [],
     ),
-    safeFetch<ConventionRatingRow[]>(
+    freshFetch<ConventionRatingRow[]>(
       CONVENTION_RATINGS_QUERY,
       { conId: convention._id },
       [],
@@ -96,7 +97,7 @@ export default async function ConventionPage({
   if (email) {
     const ownedIds = await creatorsOwnedBy(email);
     if (ownedIds.length) {
-      const context = await safeFetch<ConRatingContext[]>(
+      const context = await freshFetch<ConRatingContext[]>(
         CON_RATING_CONTEXT_QUERY,
         { conId: convention._id, creatorIds: ownedIds },
         [],
@@ -177,11 +178,19 @@ export default async function ConventionPage({
 
       <ConventionRatings
         aggregate={ratings}
+        signedIn={Boolean(email)}
+        signInCopy={{
+          title: settings.sections.accountSignInTitle,
+          body: settings.sections.accountSignInBody,
+          cta: settings.sections.accountSignInCta,
+        }}
         labels={{
           heading: settings.sections.conventionRatingsHeading,
+          scaleNote: settings.sections.conventionRatingsScaleNote,
           celebrityLabel: settings.sections.conventionRateCelebrityLabel,
           tableCostLabel: settings.sections.conventionRateTableCostLabel,
           countLabel: settings.sections.conventionRatingsCountLabel,
+          empty: settings.sections.conventionRatingsEmpty,
         }}
       />
 

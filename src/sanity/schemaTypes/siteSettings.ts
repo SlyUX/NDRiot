@@ -639,6 +639,21 @@ export default defineType({
             'The blank option in a rating dropdown — e.g. "—" or "No opinion".',
         }),
         defineField({
+          name: "conventionRatingsScaleNote",
+          title: "Convention page — ratings scale note",
+          type: "string",
+          description:
+            'Normal-weight note beside the ratings heading — e.g. "(5 point scale)".',
+        }),
+        defineField({
+          name: "conventionRatingsEmpty",
+          title: "Convention page — no-ratings-yet line",
+          type: "text",
+          rows: 2,
+          description:
+            "Shown when a convention has no ratings; signed-out visitors clicking it get the sign-in prompt.",
+        }),
+        defineField({
           name: "ragPageTitle",
           title: "Rag (magazine) — page title (H1)",
           type: "string",

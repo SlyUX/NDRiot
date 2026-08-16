@@ -401,6 +401,8 @@ export interface SiteSettings {
     conventionRateCelebrityLabel: string;
     conventionRateTableCostLabel: string;
     conventionRateNoOpinion: string;
+    conventionRatingsScaleNote: string;
+    conventionRatingsEmpty: string;
     ragPageTitle: string;
     ragPageDescription: string;
     ragArchiveHeading: string;
@@ -950,6 +952,9 @@ const DEFAULTS: SiteSettings = {
     conventionRateCelebrityLabel: "Celebrity-focused",
     conventionRateTableCostLabel: "Table cost",
     conventionRateNoOpinion: "—",
+    conventionRatingsScaleNote: "(5 point scale)",
+    conventionRatingsEmpty:
+      "No creator ratings yet — be the first to weigh in on this convention.",
     ragPageTitle: "ND Riot Rag",
     ragPageDescription:
       "The ND Riot Rag — our magazine. Read each issue online or download the PDF free; other editions are linked where you can get them.",

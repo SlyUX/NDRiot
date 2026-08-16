@@ -1,6 +1,6 @@
 import { defineQuery } from "next-sanity";
 
-import { client } from "@/sanity/client";
+import { client, liveClient } from "@/sanity/client";
 export async function safeFetch<T>(
   query: string,
   params: Record<string, unknown>,
@@ -8,6 +8,24 @@ export async function safeFetch<T>(
 ): Promise<T> {
   try {
     const result = await client.fetch<T>(query, params);
+    return result ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+/**
+ * Like safeFetch, but reads live (non-CDN) — for creator-authored, mutable
+ * content (ratings, appearances) so a writer sees their change immediately
+ * instead of after the CDN cache catches up. Use only where that matters.
+ */
+export async function freshFetch<T>(
+  query: string,
+  params: Record<string, unknown>,
+  fallback: T,
+): Promise<T> {
+  try {
+    const result = await liveClient.fetch<T>(query, params);
     return result ?? fallback;
   } catch {
     return fallback;

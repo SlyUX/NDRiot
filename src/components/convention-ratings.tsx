@@ -1,15 +1,19 @@
 import Link from "next/link";
 
-import { SectionHeading } from "@/components/section-heading";
+import { RatingsEmptyNudge } from "@/components/ratings-empty-nudge";
 import type { RatingsAggregate } from "@/lib/ratings";
 import { TABLE_COST_LEVELS } from "@/lib/taxonomy";
 
 export interface ConventionRatingsLabels {
   heading: string;
+  /** Normal-weight note beside the heading, e.g. "(5 point scale)". */
+  scaleNote: string;
   celebrityLabel: string;
   tableCostLabel: string;
   /** "{n}" is replaced with the rating count. */
   countLabel: string;
+  /** Shown when there are no ratings. */
+  empty: string;
 }
 
 const COST_TITLE = Object.fromEntries(
@@ -30,85 +34,110 @@ function dominantCost(cost: {
 }
 
 /**
- * Aggregated creator ratings on a convention page — per-aspect averages only
- * (§3: never a composite score, never orders discovery), descriptive-flag
- * tallies, and attributed notes. Renders nothing until there's at least one
- * rating (the rate form invites the first).
+ * Aggregated creator ratings on a convention page — a tool for deciding which
+ * cons are worth a table, never a leaderboard. §3: per-aspect averages only (no
+ * composite score), and it never orders the directory. Benefit aspects show as
+ * compact rectangles; descriptive flags are tallies; notes are attributed
+ * blockquotes. Always visible — an un-rated con shows an empty state that nudges
+ * a signed-out visitor to sign in and be the first.
  */
 export function ConventionRatings({
   aggregate,
   labels,
+  signedIn,
+  signInCopy,
 }: {
   aggregate: RatingsAggregate;
   labels: ConventionRatingsLabels;
+  signedIn: boolean;
+  signInCopy: { title: string; body: string; cta: string };
 }) {
-  if (aggregate.count === 0) return null;
+  const empty = aggregate.count === 0;
 
   return (
     <section className="space-y-4">
-      <SectionHeading as="h2" size="sm">
-        {labels.heading}
-      </SectionHeading>
-      <p className="text-muted-foreground text-xs tracking-widest uppercase">
-        {labels.countLabel.replace("{n}", String(aggregate.count))}
-      </p>
+      <div className="flex flex-wrap items-baseline gap-x-2">
+        <h2 className="text-sm font-black tracking-widest uppercase">
+          {labels.heading}
+        </h2>
+        <span className="text-muted-foreground text-xs font-normal">
+          {labels.scaleNote}
+        </span>
+      </div>
 
-      {aggregate.aspects.length > 0 && (
-        <ul className="divide-border divide-y">
-          {aggregate.aspects.map((aspect) => (
-            <li
-              key={aspect.code}
-              className="flex items-center justify-between gap-3 py-2 text-sm"
-            >
-              <span>{aspect.label}</span>
-              <span className="text-muted-foreground">
-                <span className="text-foreground font-bold">
-                  {aspect.avg.toFixed(1)}
-                </span>{" "}
-                / 5{" · "}
-                {aspect.count}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
+      {empty ? (
+        signedIn ? (
+          <p className="text-muted-foreground max-w-prose text-sm">
+            {labels.empty}
+          </p>
+        ) : (
+          <RatingsEmptyNudge text={labels.empty} signInCopy={signInCopy} />
+        )
+      ) : (
+        <>
+          <p className="text-muted-foreground text-xs tracking-widest uppercase">
+            {labels.countLabel.replace("{n}", String(aggregate.count))}
+          </p>
 
-      {(aggregate.celebrity || aggregate.tableCost) && (
-        <div className="text-muted-foreground flex flex-wrap gap-x-6 gap-y-1 text-sm">
-          {aggregate.celebrity && (
-            <span>
-              {labels.celebrityLabel}: {aggregate.celebrity.yes}/
-              {aggregate.celebrity.total}
-            </span>
-          )}
-          {aggregate.tableCost && (
-            <span>
-              {labels.tableCostLabel}: {dominantCost(aggregate.tableCost)}
-            </span>
-          )}
-        </div>
-      )}
-
-      {aggregate.notes.length > 0 && (
-        <ul className="space-y-3">
-          {aggregate.notes.map((note, i) => (
-            <li key={i} className="text-sm">
-              <p className="text-foreground/85">{note.text}</p>
-              {note.slug ? (
-                <Link
-                  href={`/creators/${note.slug}`}
-                  className="text-primary text-xs hover:underline"
+          {aggregate.aspects.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {aggregate.aspects.map((aspect) => (
+                <span
+                  key={aspect.code}
+                  title={`${aspect.count}`}
+                  className="border-border inline-flex items-center gap-2 border px-2.5 py-1 text-sm"
                 >
-                  — {note.name}
-                </Link>
-              ) : (
-                <span className="text-muted-foreground text-xs">
-                  — {note.name}
+                  <span>{aspect.label}</span>
+                  <span className="text-muted-foreground">|</span>
+                  <span className="font-bold">{aspect.avg.toFixed(1)}</span>
+                </span>
+              ))}
+            </div>
+          )}
+
+          {(aggregate.celebrity || aggregate.tableCost) && (
+            <div className="text-muted-foreground flex flex-wrap gap-x-6 gap-y-1 text-sm">
+              {aggregate.celebrity && (
+                <span>
+                  {labels.celebrityLabel}: {aggregate.celebrity.yes}/
+                  {aggregate.celebrity.total}
                 </span>
               )}
-            </li>
-          ))}
-        </ul>
+              {aggregate.tableCost && (
+                <span>
+                  {labels.tableCostLabel}: {dominantCost(aggregate.tableCost)}
+                </span>
+              )}
+            </div>
+          )}
+
+          {aggregate.notes.length > 0 && (
+            <div className="space-y-3">
+              {aggregate.notes.map((note, i) => (
+                <blockquote
+                  key={i}
+                  className="border-primary/40 border-l-2 pl-4"
+                >
+                  <p className="text-foreground/90 text-sm italic">
+                    {note.text}
+                  </p>
+                  {note.slug ? (
+                    <Link
+                      href={`/creators/${note.slug}`}
+                      className="text-primary mt-1 inline-block text-xs not-italic hover:underline"
+                    >
+                      — {note.name}
+                    </Link>
+                  ) : (
+                    <span className="text-muted-foreground mt-1 inline-block text-xs">
+                      — {note.name}
+                    </span>
+                  )}
+                </blockquote>
+              ))}
+            </div>
+          )}
+        </>
       )}
     </section>
   );

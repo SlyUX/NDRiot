@@ -23,6 +23,7 @@ import { auth } from "@/auth";
 import { UPDATE_KINDS } from "@/lib/taxonomy";
 import {
   safeFetch,
+  freshFetch,
   CONVENTIONS_QUERY,
   CREATORS_QUERY,
   OWNED_APPEARANCES_QUERY,
@@ -218,7 +219,7 @@ export default async function AccountPage() {
     const [allCreators, allConventions, appearances] = await Promise.all([
       safeFetch<CreatorSummary[]>(CREATORS_QUERY, {}, []),
       safeFetch<ConventionSummary[]>(CONVENTIONS_QUERY, {}, []),
-      safeFetch<OwnedAppearance[]>(
+      freshFetch<OwnedAppearance[]>(
         OWNED_APPEARANCES_QUERY,
         { creatorIds: ownedCreatorIds },
         [],
