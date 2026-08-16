@@ -470,7 +470,6 @@ export interface SiteSettings {
     accountPostKindLabel: string;
     accountPostKindPlaceholder: string;
     accountPostPlaceholder: string;
-    accountPostMentionsLabel: string;
     accountPostMentionHint: string;
     accountPostMentionNoMatch: string;
     accountPostMentionCreators: string;
@@ -1023,7 +1022,6 @@ const DEFAULTS: SiteSettings = {
     accountPostKindLabel: "Type of Update",
     accountPostKindPlaceholder: "Select One",
     accountPostPlaceholder: "What’s new?",
-    accountPostMentionsLabel: "Tagged",
     accountPostMentionHint: "Keep typing to find a creator, convention, or outlet…",
     accountPostMentionNoMatch: "No matches.",
     accountPostMentionCreators: "Creators",

@@ -6,7 +6,7 @@ import { ArrowRight, Shuffle } from "lucide-react";
 import { TaxonomyRow } from "@/components/content-card";
 import PortableTextBody from "@/components/PortableTextBody";
 import { Button } from "@/components/ui/button";
-import { mentionHref } from "@/lib/mentions";
+import { MentionedText } from "@/components/mentioned-text";
 import type { HeroSettings } from "@/lib/site-settings";
 import type { HeroBook, HomeNewItem, RailFeedItem } from "@/lib/types";
 import { cn, truncate } from "@/lib/utils";
@@ -244,23 +244,14 @@ function FeedRow({ item }: { item: RailFeedItem }) {
             {item.targetName}
           </span>
         )}
+        {/* @-mentions linked inline within the body (MentionedText). */}
         <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-white/85">
-          {item.body}
+          <MentionedText
+            body={item.body}
+            mentions={item.mentions}
+            linkClassName="text-primary font-bold hover:underline"
+          />
         </p>
-        {item.mentions && item.mentions.length > 0 && (
-          <ul className="mt-1.5 flex flex-wrap gap-1">
-            {item.mentions.map((mention) => (
-              <li key={mention._id}>
-                <Link
-                  href={mentionHref(mention)}
-                  className="border-border hover:border-primary hover:text-primary inline-block border px-1.5 py-0.5 text-[10px] text-white/85 transition-colors"
-                >
-                  {mention.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
     </li>
   );

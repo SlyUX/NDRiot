@@ -998,13 +998,6 @@ export default defineType({
           description: 'Placeholder in the update box — e.g. "What’s new?".',
         }),
         defineField({
-          name: "accountPostMentionsLabel",
-          title: "Reader home — tagged-mentions label",
-          type: "string",
-          description:
-            'Label over the tagged creators/conventions/outlets chips — e.g. "Tagged".',
-        }),
-        defineField({
           name: "accountPostMentionHint",
           title: "Reader home — @ mention hint",
           type: "string",

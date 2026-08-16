@@ -45,7 +45,6 @@ export type ComposerLabels = {
   kindLabel: string
   kindPlaceholder: string
   placeholder: string
-  mentionsLabel: string
   /** Shown under the textarea once an @ is typed but before 3 letters land. */
   mentionHint: string
   mentionNoMatch: string

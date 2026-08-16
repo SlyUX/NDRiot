@@ -1,10 +1,8 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
 
+import { MentionedText } from "@/components/mentioned-text";
 import { formatDate } from "@/lib/card-mappers";
-import { mentionHref } from "@/lib/mentions";
-import { externalHref } from "@/lib/utils";
 import type { UpdateFeedItem } from "@/lib/types";
 
 /** Where an update's target links to (its comic or creator page). */
@@ -55,34 +53,14 @@ export function UpdateItemContent({
           {action}
         </span>
       </div>
-      <p className="mt-2 text-sm">{update.body}</p>
-      {update.mentions && update.mentions.length > 0 && (
-        <ul className="mt-2 flex flex-wrap gap-2">
-          {update.mentions.map((mention) => (
-            <li key={mention._id} className="inline-flex items-stretch">
-              <Link
-                href={mentionHref(mention)}
-                className="border-border hover:border-primary hover:text-primary inline-block border px-2 py-0.5 text-xs transition-colors"
-              >
-                {mention.name}
-              </Link>
-              {/* A convention's own site is the source of truth for specifics —
-                  so a mentioned con carries a link-out to it, right on the chip. */}
-              {mention._type === "convention" && mention.website && (
-                <a
-                  href={externalHref(mention.website)}
-                  target="_blank"
-                  rel="nofollow noopener noreferrer"
-                  aria-label={`${mention.name} website`}
-                  className="border-border hover:border-primary hover:text-primary -ml-px inline-flex items-center border px-1.5 transition-colors"
-                >
-                  <ArrowUpRight aria-hidden="true" className="size-3.5" />
-                </a>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
+      {/* @-mentions are linked inline within the body (MentionedText). */}
+      <p className="mt-2 text-sm">
+        <MentionedText
+          body={update.body}
+          mentions={update.mentions}
+          linkClassName="text-primary font-bold hover:underline"
+        />
+      </p>
     </>
   );
 }

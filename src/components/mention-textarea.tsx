@@ -28,7 +28,6 @@ const groupHeadingClass =
   "text-muted-foreground mb-1.5 text-[10px] font-bold tracking-widest uppercase";
 
 export type MentionTextareaLabels = {
-  mentionsLabel: string;
   mentionHint: string;
   mentionNoMatch: string;
   mentionCreatorsGroup: string;
@@ -119,25 +118,28 @@ export function MentionTextarea({
   const pick = (option: MentionOption) => {
     if (!token) return;
     const { start, query } = token;
-    // Drop the "@query" fragment; the mention lives on as a chip, not body text.
-    setBody((prev) => prev.slice(0, start) + prev.slice(start + 1 + query.length));
+    // Replace the "@query" fragment with the full "@Name " inline — it reads in
+    // the sentence and the feed linkifies it; the ref rides a hidden input.
+    const insert = `@${option.label} `;
+    setBody(
+      (prev) =>
+        prev.slice(0, start) + insert + prev.slice(start + 1 + query.length),
+    );
     setSelected((prev) =>
       prev.length < MENTION_CAP && !selectedIds.has(option.id)
         ? [...prev, option]
         : prev,
     );
     setToken(null);
+    const caret = start + insert.length;
     requestAnimationFrame(() => {
       const el = ref.current;
       if (el) {
         el.focus();
-        el.setSelectionRange(start, start);
+        el.setSelectionRange(caret, caret);
       }
     });
   };
-
-  const remove = (id: string) =>
-    setSelected((prev) => prev.filter((o) => o.id !== id));
 
   const onKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (!token || flat.length === 0) return;
@@ -239,32 +241,18 @@ export function MentionTextarea({
           <p className="text-foreground text-xs">{labels.mentionHint}</p>
         ))}
 
-      {/* The tags, carried into the form action. */}
-      {selected.map((option) => (
-        <input key={option.id} type="hidden" name="mentions" value={option.id} />
-      ))}
-      {selected.length > 0 && (
-        <div className="space-y-1.5">
-          <span className="text-muted-foreground block text-xs tracking-widest uppercase">
-            {labels.mentionsLabel}
-          </span>
-          <ul className="flex flex-wrap gap-2">
-            {selected.map((option) => (
-              <li key={option.id}>
-                <button
-                  type="button"
-                  onClick={() => remove(option.id)}
-                  className="border-primary text-primary hover:bg-primary hover:text-primary-foreground focus-visible:ring-ring inline-flex items-center gap-1 border px-2 py-0.5 text-xs transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                >
-                  {option.label}
-                  <span aria-hidden="true">×</span>
-                  <span className="sr-only">— remove</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {/* Tag refs for the action — only those whose "@Name" is still in the text,
+          so deleting the inline mention drops the reference too. */}
+      {selected
+        .filter((option) => body.includes(`@${option.label}`))
+        .map((option) => (
+          <input
+            key={option.id}
+            type="hidden"
+            name="mentions"
+            value={option.id}
+          />
+        ))}
     </div>
   );
 }
