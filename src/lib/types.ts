@@ -19,6 +19,7 @@ import type {
   CONVENTIONS_QUERY_RESULT,
   CONVENTION_QUERY_RESULT,
   UPDATES_FEED_QUERY_RESULT,
+  APPEARANCE_FEED_QUERY_RESULT,
   RAIL_UPDATES_QUERY_RESULT,
   HERO_BOOKS_QUERY_RESULT,
   HOME_EDITORIAL_QUERY_RESULT,
@@ -64,6 +65,8 @@ export type ConventionRatingRow = CONVENTION_RATINGS_QUERY_RESULT[number];
 export type ConRatingContext = CON_RATING_CONTEXT_QUERY_RESULT[number];
 
 export type UpdateFeedItem = UPDATES_FEED_QUERY_RESULT[number];
+/** A followed creator's convention appearance, mapped into a feed item (feed-mappers). */
+export type AppearanceFeedRow = APPEARANCE_FEED_QUERY_RESULT[number];
 /** A hero-rail update. `followed` is added at assembly time, not from the query. */
 export type RailUpdate = RAIL_UPDATES_QUERY_RESULT[number];
 export type RailFeedItem = RailUpdate & { followed: boolean };

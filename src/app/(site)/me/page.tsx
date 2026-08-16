@@ -33,7 +33,9 @@ import {
   SAVED_BOOKS_QUERY,
   SAVED_CREATORS_QUERY,
   UPDATES_FEED_QUERY,
+  APPEARANCE_FEED_QUERY,
 } from "@/lib/queries";
+import { appearanceToFeedItem, mergeFeed } from "@/lib/feed-mappers";
 import { getSiteSettings } from "@/lib/site-settings";
 import { ownedDocIds } from "@/sanity/ownership-client";
 import { savedItems } from "@/sanity/reader-client";
@@ -45,6 +47,7 @@ import type {
   MediaSummary,
   OwnedAppearance,
   UpdateFeedItem,
+  AppearanceFeedRow,
 } from "@/lib/types";
 
 /**
@@ -130,7 +133,8 @@ export default async function AccountPage() {
     ownedCreators,
     ownedBooks,
     ownedMedia,
-    updates,
+    feedPosts,
+    feedAppearances,
   ] = await Promise.all([
     bookIds.length
       ? safeFetch<BookSummary[]>(SAVED_BOOKS_QUERY, { ids: bookIds }, [])
@@ -166,7 +170,22 @@ export default async function AccountPage() {
           [],
         )
       : Promise.resolve<UpdateFeedItem[]>([]),
+    followIds.length
+      ? safeFetch<AppearanceFeedRow[]>(
+          APPEARANCE_FEED_QUERY,
+          { ids: followIds, limit: 30 },
+          [],
+        )
+      : Promise.resolve<AppearanceFeedRow[]>([]),
   ]);
+
+  // Your Feed = followed creators' updates + their convention appearances,
+  // merged newest-first (§3: recency only).
+  const updates = mergeFeed(
+    feedPosts,
+    feedAppearances.map((a) => appearanceToFeedItem(a, s.conventionFeedBody)),
+    30,
+  );
 
   const isCreator = ownedCreators.length > 0;
   const hasSaves = savedBooks.length > 0 || savedCreators.length > 0;

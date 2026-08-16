@@ -673,6 +673,13 @@ export default defineType({
             'Short muted line on convention cards (home row + directory) when it has no ratings — e.g. "Not yet rated".',
         }),
         defineField({
+          name: "conventionFeedBody",
+          title: "Feed — convention appearance line",
+          type: "string",
+          description:
+            'Shown in a follower\'s feed when a creator marks a convention appearance. Use "{venue}" for the convention name — e.g. "Appearing at {venue}".',
+        }),
+        defineField({
           name: "ragPageTitle",
           title: "Rag (magazine) — page title (H1)",
           type: "string",

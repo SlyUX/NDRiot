@@ -408,6 +408,9 @@ export interface SiteSettings {
     conventionRatingsEmpty: string;
     /** Short "no ratings yet" line on convention cards (home + directory). */
     conventionRatingCardEmpty: string;
+    /** Feed-item body when a followed creator marks a convention appearance;
+     *  "{venue}" is replaced with the convention name. */
+    conventionFeedBody: string;
     ragPageTitle: string;
     ragPageDescription: string;
     ragArchiveHeading: string;
@@ -964,6 +967,7 @@ const DEFAULTS: SiteSettings = {
     conventionRatingsEmpty:
       "No creator ratings yet — be the first to weigh in on this convention.",
     conventionRatingCardEmpty: "Not yet rated",
+    conventionFeedBody: "Appearing at {venue}",
     ragPageTitle: "ND Riot Rag",
     ragPageDescription:
       "The ND Riot Rag — our magazine. Read each issue online or download the PDF free; other editions are linked where you can get them.",

@@ -45,7 +45,9 @@ import {
   FILTERED_BOOKS_QUERY,
   FILTERED_CREATORS_QUERY,
   RAIL_UPDATES_QUERY,
+  APPEARANCE_FEED_QUERY,
 } from "@/lib/queries";
+import { appearanceToRailItem, mergeFeed } from "@/lib/feed-mappers";
 import { getSiteSettings } from "@/lib/site-settings";
 import { auth } from "@/auth";
 import { isSaved, savedItems } from "@/sanity/reader-client";
@@ -57,6 +59,7 @@ import type {
   HeroBook,
   HomeNewItem,
   ConventionSummary,
+  AppearanceFeedRow,
   Paginated,
   RailFeedItem,
   RailUpdate,
@@ -201,10 +204,25 @@ export default async function Home({
     isCreator = owned.length > 0;
     const savedIds = saves.map((save) => save.itemId);
     if (savedIds.length) {
-      followedUpdates = await safeFetch<RailUpdate[]>(
-        RAIL_UPDATES_QUERY,
-        { ids: savedIds, limit: RAIL_LIMIT },
-        [],
+      // Updates + convention appearances by followed creators, merged newest-first.
+      const [posts, appearances] = await Promise.all([
+        safeFetch<RailUpdate[]>(
+          RAIL_UPDATES_QUERY,
+          { ids: savedIds, limit: RAIL_LIMIT },
+          [],
+        ),
+        safeFetch<AppearanceFeedRow[]>(
+          APPEARANCE_FEED_QUERY,
+          { ids: savedIds, limit: RAIL_LIMIT },
+          [],
+        ),
+      ]);
+      followedUpdates = mergeFeed(
+        posts,
+        appearances.map((a) =>
+          appearanceToRailItem(a, settings.sections.conventionFeedBody),
+        ),
+        RAIL_LIMIT,
       );
     }
   }

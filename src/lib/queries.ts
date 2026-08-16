@@ -265,6 +265,26 @@ export const RAIL_UPDATES_QUERY =
   "mentions":mentions[]->{_id,_type,name,"slug":slug.current,website}
 }`);
 
+/**
+ * Convention appearances by followed creators, as feed items — a creator marking
+ * that they'll be at a con surfaces to their followers alongside their updates.
+ * These aren't `update` docs, so the caller maps each into an "At a convention"
+ * feed item (feed-mappers) and merges by date. Upcoming only: an appearance
+ * whose occurrence date has passed auto-drops (undated ones stay). Recency of
+ * the marking (`_createdAt`), never ranked (§3). `$ids` are followed creator ids
+ * (book ids in the set simply never match a `creator._ref`).
+ */
+export const APPEARANCE_FEED_QUERY =
+  defineQuery(`*[_type=="conventionAppearance" && creator._ref in $ids && defined(creator->slug.current) && defined(venue->slug.current) && (!defined(forDate) || dateTime(forDate) > dateTime(now()))]|order(_createdAt desc)[0...$limit]{
+  _id,status,
+  "publishedAt":_createdAt,
+  "creatorId":creator._ref,
+  "creatorName":creator->name,
+  "creatorSlug":creator->slug.current,
+  "creatorPhoto":creator->photo,
+  "venue":venue->{_id,_type,name,"slug":slug.current,website}
+}`);
+
 export const UPDATES_FEED_QUERY =
   defineQuery(`*[_type=="update" && target._ref in $ids && defined(publishedAt)]|order(publishedAt desc)[0...$limit]{
   _id,body,kind,publishedAt,
