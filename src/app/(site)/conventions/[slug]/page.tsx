@@ -25,6 +25,7 @@ import {
 import { getSiteSettings } from "@/lib/site-settings";
 import { externalHref } from "@/lib/utils";
 import { formatPlace } from "@/lib/place";
+import { formatOccurrence } from "@/lib/conventions";
 import { aggregateRatings } from "@/lib/ratings";
 import { creatorsOwnedBy } from "@/sanity/ownership-client";
 import type {
@@ -132,8 +133,12 @@ export default async function ConventionPage({
     eventCreators.length > 0 &&
     eventCreators.every((c) => attendingByCreator[c.id]);
 
-  // Location and timing, joined for the meta line under the title.
-  const meta = [formatPlace(convention.place), convention.whenHint]
+  // Location and timing, joined for the meta line under the title. Prefer the
+  // real occurrence dates; fall back to the legacy free-text hint.
+  const when =
+    formatOccurrence(convention.startDate, convention.endDate) ??
+    convention.whenHint;
+  const meta = [formatPlace(convention.place), when]
     .filter(Boolean)
     .join(" · ");
 

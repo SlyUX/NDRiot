@@ -239,12 +239,13 @@ export default async function Home({
     followed: true,
   }));
   const feedHeading = settings.sections.feedMineHeading;
-  // Signed-in hero: greet the reader; give them a Dashboard link, plus their
-  // public profile when they own one. Replaces the evangelism tagline/CTAs.
+  // Signed-in hero: greet the reader by first name; give them a Dashboard link,
+  // plus their public profile when they own one. Replaces the evangelism CTAs.
+  const firstName = (session?.user?.name ?? "").trim().split(/\s+/)[0];
   const account = email
     ? {
         greeting: settings.hero.loggedInGreeting
-          .replace("{name}", session?.user?.name ?? "")
+          .replace("{name}", firstName)
           .replace(/,\s*$/, "")
           .trim(),
         ctas: [

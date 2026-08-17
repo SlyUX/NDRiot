@@ -383,7 +383,7 @@ export const CONVENTIONS_QUERY = defineQuery(
 // A single convention page.
 export const CONVENTION_QUERY =
   defineQuery(`*[_type=="convention" && slug.current==$slug][0]{
-  _id,name,"slug":slug.current,place,whenHint,website,description,image
+  _id,name,"slug":slug.current,place,whenHint,startDate,endDate,website,description,image
 }`);
 // Creators tabling at a convention — from the appearance docs, creator resolved.
 // Neutral (alphabetical) order, never by anything rank-like (§3). The caller
