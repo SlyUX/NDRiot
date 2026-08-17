@@ -226,9 +226,10 @@ export const SAVED_BOOKS_QUERY = defineQuery(
   `*[_type=="book" && _id in $ids && defined(slug.current)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}`,
 );
 
-/** One creator's public slug, by id — for the signed-in hero's profile link. */
-export const CREATOR_SLUG_QUERY = defineQuery(
-  `*[_type=="creator" && _id==$id][0].slug.current`,
+/** A creator's display name + public slug, by id — for the signed-in hero
+ *  (greet by their ND Riot profile name, link to their public page). */
+export const CREATOR_HERO_QUERY = defineQuery(
+  `*[_type=="creator" && _id==$id][0]{name,"slug":slug.current}`,
 );
 
 export const SAVED_CREATORS_QUERY = defineQuery(

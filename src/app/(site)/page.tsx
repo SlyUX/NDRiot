@@ -46,7 +46,7 @@ import {
   FILTERED_CREATORS_QUERY,
   RAIL_UPDATES_QUERY,
   APPEARANCE_FEED_QUERY,
-  CREATOR_SLUG_QUERY,
+  CREATOR_HERO_QUERY,
 } from "@/lib/queries";
 import { appearanceToRailItem, mergeFeed } from "@/lib/feed-mappers";
 import { getSiteSettings } from "@/lib/site-settings";
@@ -195,8 +195,9 @@ export default async function Home({
   // Hoisted so the hero's save slot can check whether the featured comic is the
   // viewer's own — a creator can't save what they publish.
   let ownedCreatorIds: string[] = [];
-  // The signed-in creator's public slug, for the hero's "Your Public Profile".
-  let profileSlug: string | null = null;
+  // The signed-in creator's profile name + slug, for the hero greeting + the
+  // "Your Public Profile" link.
+  let profile: { name: string; slug: string } | null = null;
   if (email) {
     const [saves, owned] = await Promise.all([
       savedItems(email),
@@ -204,8 +205,8 @@ export default async function Home({
     ]);
     ownedCreatorIds = owned;
     if (ownedCreatorIds.length) {
-      profileSlug = await safeFetch<string | null>(
-        CREATOR_SLUG_QUERY,
+      profile = await safeFetch<{ name: string; slug: string } | null>(
+        CREATOR_HERO_QUERY,
         { id: ownedCreatorIds[0] },
         null,
       );
@@ -239,9 +240,12 @@ export default async function Home({
     followed: true,
   }));
   const feedHeading = settings.sections.feedMineHeading;
-  // Signed-in hero: greet the reader by first name; give them a Dashboard link,
-  // plus their public profile when they own one. Replaces the evangelism CTAs.
-  const firstName = (session?.user?.name ?? "").trim().split(/\s+/)[0];
+  // Signed-in hero: greet by the reader's ND Riot profile first name (the name
+  // they entered), falling back to their Google account name for a plain
+  // reader; give them a Dashboard link, plus their public profile if a creator.
+  const firstName = (profile?.name ?? session?.user?.name ?? "")
+    .trim()
+    .split(/\s+/)[0];
   const account = email
     ? {
         greeting: settings.hero.loggedInGreeting
@@ -250,11 +254,11 @@ export default async function Home({
           .trim(),
         ctas: [
           { label: settings.hero.loggedInDashboardLabel, href: "/me" },
-          ...(profileSlug
+          ...(profile?.slug
             ? [
                 {
                   label: settings.hero.loggedInProfileLabel,
-                  href: `/creators/${profileSlug}`,
+                  href: `/creators/${profile.slug}`,
                 },
               ]
             : []),
