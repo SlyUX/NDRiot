@@ -514,6 +514,7 @@ export interface SiteSettings {
     footerJoinComicsLabel: string;
     footerJoinMediaLabel: string;
     footerAboutLabel: string;
+    footerPrivacyLabel: string;
     navLoginLabel: string;
     navJoinLabel: string;
     creatorBooksHeading: string;
@@ -1076,6 +1077,7 @@ const DEFAULTS: SiteSettings = {
     footerJoinComicsLabel: "Comics",
     footerJoinMediaLabel: "Media",
     footerAboutLabel: "About",
+    footerPrivacyLabel: "Privacy",
     navLoginLabel: "Login",
     navJoinLabel: "Join",
     creatorBooksHeading: "{name}’s Comics",

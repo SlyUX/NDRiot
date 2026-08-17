@@ -39,6 +39,7 @@ const STATIC_ROUTES: SitemapEntry[] = [
   { url: absoluteUrl('/join'), changeFrequency: 'monthly', priority: 0.9 },
   { url: absoluteUrl('/resources'), changeFrequency: 'weekly', priority: 0.7 },
   { url: absoluteUrl('/about'), changeFrequency: 'monthly', priority: 0.6 },
+  { url: absoluteUrl('/privacy'), changeFrequency: 'yearly', priority: 0.3 },
   { url: absoluteUrl('/magazine'), changeFrequency: 'monthly', priority: 0.4 },
 ]
 

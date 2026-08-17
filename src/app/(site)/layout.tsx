@@ -158,6 +158,9 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
                 <li>
                   <Link href="/contact" className={FOOTER_LINK}>{settings.contact.linkLabel}</Link>
                 </li>
+                <li>
+                  <Link href="/privacy" className={FOOTER_LINK}>{s.footerPrivacyLabel}</Link>
+                </li>
               </ul>
             </div>
           </nav>

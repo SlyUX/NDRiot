@@ -1248,6 +1248,11 @@ export default defineType({
           type: "string",
         }),
         defineField({
+          name: "footerPrivacyLabel",
+          title: "Footer — Privacy link",
+          type: "string",
+        }),
+        defineField({
           name: "navLoginLabel",
           title: "Header — logged-out Login link",
           type: "string",
