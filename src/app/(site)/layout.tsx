@@ -9,7 +9,10 @@ import {
   safeFetch,
   GENRES_WITH_BOOKS_QUERY,
   RESOURCE_CATEGORIES_WITH_CONTENT_QUERY,
+  CREATOR_HERO_QUERY,
 } from '@/lib/queries'
+import { creatorsOwnedBy } from '@/sanity/ownership-client'
+import { urlFor } from '@/sanity/image'
 import { getSiteSettings } from '@/lib/site-settings'
 import { RESOURCE_CATEGORIES } from '@/lib/taxonomy'
 
@@ -42,7 +45,23 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   // Only categories that have content, in taxonomy order — so nav links never
   // point at an empty category.
   const navCategories = RESOURCE_CATEGORIES.filter((category) => resourceCategories.includes(category))
-  const avatar = session?.user?.image
+
+  // The nav avatar: prefer the creator's own ND Riot profile photo (the one they
+  // uploaded), so the masthead reflects their identity here rather than Google's.
+  // Plain readers (no profile) keep their Google account image.
+  let avatar = session?.user?.image ?? null
+  const email = session?.user?.email
+  if (email) {
+    const owned = await creatorsOwnedBy(email)
+    if (owned.length) {
+      const profile = await safeFetch<{
+        photo: Parameters<typeof urlFor>[0] | null
+      } | null>(CREATOR_HERO_QUERY, { id: owned[0] }, null)
+      if (profile?.photo) {
+        avatar = urlFor(profile.photo).width(96).height(96).fit('crop').url()
+      }
+    }
+  }
   const s = settings.sections
 
   return (

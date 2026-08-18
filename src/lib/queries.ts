@@ -229,7 +229,7 @@ export const SAVED_BOOKS_QUERY = defineQuery(
 /** A creator's display name + public slug, by id — for the signed-in hero
  *  (greet by their ND Riot profile name, link to their public page). */
 export const CREATOR_HERO_QUERY = defineQuery(
-  `*[_type=="creator" && _id==$id][0]{name,"slug":slug.current}`,
+  `*[_type=="creator" && _id==$id][0]{name,"slug":slug.current,photo}`,
 );
 
 export const SAVED_CREATORS_QUERY = defineQuery(
