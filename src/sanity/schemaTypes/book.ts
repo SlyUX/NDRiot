@@ -131,6 +131,37 @@ export default defineType({
         'Every route to the work — free reads, shops, Patreon, a live campaign. Put the option that serves the creator best first; free reads and live campaigns are shown most prominently regardless.',
     }),
     defineField({
+      name: 'videos',
+      title: 'Videos',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          name: 'bookVideo',
+          fields: [
+            defineField({
+              name: 'title',
+              title: 'Label',
+              type: 'string',
+              description: 'e.g. "Book trailer", "Interview", "Motion cover".',
+              validation: (rule) => rule.required().max(60),
+            }),
+            defineField({
+              name: 'url',
+              title: 'YouTube URL',
+              type: 'url',
+              description: 'A YouTube or youtu.be link. Other hosts won’t embed.',
+              validation: (rule) =>
+                rule.required().uri({ scheme: ['http', 'https'] }),
+            }),
+          ],
+          preview: { select: { title: 'title', subtitle: 'url' } },
+        },
+      ],
+      description:
+        'Optional. Book trailers, interviews, readings — paste a YouTube link. Shown in a collapsible "Videos" section on the book page.',
+    }),
+    defineField({
       name: 'previewUrl',
       title: 'Preview PDF',
       type: 'url',

@@ -1429,6 +1429,13 @@ export default defineType({
             'Above the creator card on a book page, e.g. "Creators:".',
         }),
         defineField({
+          name: "bookVideosHeading",
+          title: "Book page — videos section heading",
+          type: "string",
+          description:
+            'The collapsible videos section on a book page, e.g. "Videos".',
+        }),
+        defineField({
           name: "editorialAuthorHeading",
           title: "Editorial page — author block heading",
           type: "string",
@@ -2295,6 +2302,33 @@ export default defineType({
         defineField({
           name: "linkEndDateLabel",
           title: "Link — campaign end-date label",
+          type: "string",
+        }),
+        defineField({
+          name: "videosLabel",
+          title: "Videos — section legend",
+          type: "string",
+          description: 'e.g. "Videos".',
+        }),
+        defineField({
+          name: "videosHint",
+          title: "Videos — hint",
+          type: "text",
+          rows: 2,
+        }),
+        defineField({
+          name: "videoTitlePlaceholder",
+          title: "Videos — label input placeholder",
+          type: "string",
+        }),
+        defineField({
+          name: "videoUrlPlaceholder",
+          title: "Videos — URL input placeholder",
+          type: "string",
+        }),
+        defineField({
+          name: "videoAddLabel",
+          title: "Videos — add-row label",
           type: "string",
         }),
         defineField({

@@ -49,6 +49,7 @@ type EditBook = {
   coverAlt: string | null
   previewUrl: string | null
   links: { kind: string | null; label: string | null; url: string | null; endDate: string | null }[] | null
+  videos: { title: string | null; url: string | null }[] | null
 }
 
 function toInitial(b: EditBook): BookIntakeInitial {
@@ -72,6 +73,10 @@ function toInitial(b: EditBook): BookIntakeInitial {
       label: l.label ?? '',
       url: l.url ?? '',
       endDate: l.endDate ?? '',
+    })),
+    videos: (b.videos ?? []).map((v) => ({
+      left: v.title ?? '',
+      right: v.url ?? '',
     })),
   }
 }

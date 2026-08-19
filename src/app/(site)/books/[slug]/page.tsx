@@ -5,6 +5,8 @@ import { ExternalLink } from "lucide-react";
 
 import { AlternatingSections } from "@/components/alternating-sections";
 import BookLinks from "@/components/book-links";
+import { BookVideos } from "@/components/book-videos";
+import { youtubeId } from "@/components/video-embed";
 import {
   ContentCard,
   FundingBadge,
@@ -110,6 +112,11 @@ export default async function BookPage({
   const buyHeading = settings.sections.buyHeading.replace(
     "{title}",
     book.title,
+  );
+  // Only YouTube-recognizable videos — a non-YouTube URL never embeds, so it
+  // shouldn't leave an empty "Videos" section behind.
+  const bookVideos = (book.videos ?? []).filter(
+    (video) => video.url && youtubeId(video.url),
   );
 
   return (
@@ -256,6 +263,17 @@ export default async function BookPage({
               />
             </div>
             <PortableTextBody value={book.description} />
+
+            {/* Videos — trailers, interviews, readings. Thumbnails open the
+              player in a lightbox. */}
+            {bookVideos.length > 0 && (
+              <div>
+                <SectionHeading as="h3" size="sm">
+                  {settings.sections.bookVideosHeading}
+                </SectionHeading>
+                <BookVideos videos={bookVideos} />
+              </div>
+            )}
 
             {/* The creator, nested in the detail column beside the cover rather
               than in a band of its own. */}

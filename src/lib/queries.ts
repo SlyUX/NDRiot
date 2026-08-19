@@ -138,6 +138,7 @@ export const FILTERED_CREATORS_QUERY = defineQuery(`{
 export const BOOK_QUERY =
   defineQuery(`*[_type=="book" && slug.current==$slug][0]{
   _id,title,status,genres,format,maturity,issueCount,description,"descriptionText":pt::text(description),cover,previewUrl,
+  videos[]{title,url},
   links[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},
   "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,
   "creatorId": creator._ref,
@@ -571,7 +572,8 @@ export const INTAKE_BOOK_EDIT_QUERY =
   "descriptionText":pt::text(description),
   cover,"coverAlt":cover.alt,
   previewUrl,
-  links[]{kind,label,url,endDate}
+  links[]{kind,label,url,endDate},
+  videos[]{title,url}
 }`);
 
 /* ----------------------------------------------------------------- media */

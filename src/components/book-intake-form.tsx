@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { useActionState, useEffect, useRef, useState } from 'react'
 
 import { submitBook, type BookIntakeState } from '@/app/actions/book-intake'
+import { PairedRowsField } from '@/components/paired-rows-field'
 import { Button } from '@/components/ui/button'
 import { ALLOWED_IMAGE_TYPES, MAX_PICK_BYTES, downscaleImage } from '@/lib/intake/downscale'
 import { slugify } from '@/lib/intake/mapping'
@@ -68,6 +69,7 @@ export interface BookIntakeInitial {
   coverAlt: string
   previewUrl: string
   links: { kind: string; label: string; url: string; endDate: string }[]
+  videos: { left: string; right: string }[]
 }
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
@@ -683,6 +685,21 @@ export function BookIntakeForm({
         <fieldset className="space-y-5">
           <SectionHeading>{copy.sectionFind}</SectionHeading>
           <BookLinksField copy={copy} common={common} initial={initial?.links} />
+          {/* Videos — book trailers, interviews, readings (YouTube). Label + URL
+              per row; shown as lightbox thumbnails on the book page. */}
+          <PairedRowsField
+            legend={copy.videosLabel}
+            hint={copy.videosHint}
+            optionalLabel={common.optionalLabel}
+            leftName="videoTitle"
+            leftPlaceholder={copy.videoTitlePlaceholder}
+            rightName="videoUrl"
+            rightPlaceholder={copy.videoUrlPlaceholder}
+            rightDefault="https://"
+            addLabel={copy.videoAddLabel}
+            removeLabel={common.workRemoveLabel}
+            initial={initial?.videos}
+          />
         </fieldset>
 
         {/* — Permission — */}

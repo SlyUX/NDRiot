@@ -18,6 +18,7 @@
  */
 
 import { SOCIAL_PROFILE_PREFIX, linkKindForHost, type SocialPlatform } from '@/lib/taxonomy'
+import { youtubeId } from '@/components/video-embed'
 
 /** A Portable Text block, minimally shaped for a plain-text bio. */
 export type PortableTextBlock = {
@@ -169,6 +170,36 @@ export type BookLink = {
   label: string
   url: string
   endDate?: string
+}
+
+export type BookVideo = {
+  _type: 'bookVideo'
+  _key: string
+  title: string
+  url: string
+}
+
+/**
+ * Zip the parallel title/URL arrays from the intake form's Videos rows into
+ * `bookVideo` items. Keeps only YouTube-recognizable URLs (nothing else embeds)
+ * that also carry a label; drops the rest silently.
+ */
+export function buildVideos(titles: string[], urls: string[]): BookVideo[] {
+  const out: BookVideo[] = []
+  const rows = Math.max(titles.length, urls.length)
+  for (let r = 0; r < rows; r += 1) {
+    const url = normalizeUrl(urls[r])
+    if (!url || !youtubeId(url)) continue
+    const title = (titles[r] ?? '').trim()
+    if (!title) continue
+    out.push({
+      _type: 'bookVideo',
+      _key: `video${out.length}`,
+      title: title.slice(0, 60),
+      url,
+    })
+  }
+  return out
 }
 
 /**

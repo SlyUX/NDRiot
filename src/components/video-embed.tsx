@@ -15,14 +15,23 @@ export function youtubeId(url: string): string | null {
   return match ? match[1] : null
 }
 
-export function VideoEmbed({ url, title }: { url: string; title: string }) {
+export function VideoEmbed({
+  url,
+  title,
+  autoplay = false,
+}: {
+  url: string
+  title: string
+  /** Start playing on mount — for a lightbox opened by an explicit click. */
+  autoplay?: boolean
+}) {
   const id = youtubeId(url)
   if (!id) return null
 
   return (
     <div className="relative aspect-video w-full overflow-hidden bg-black">
       <iframe
-        src={`https://www.youtube-nocookie.com/embed/${id}`}
+        src={`https://www.youtube-nocookie.com/embed/${id}?rel=0${autoplay ? '&autoplay=1' : ''}`}
         title={title}
         loading="lazy"
         allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"

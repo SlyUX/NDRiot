@@ -233,6 +233,11 @@ export type BookIntakeSettings = {
   linkKindPlaceholder: string;
   linkLabelPlaceholder: string;
   linkEndDateLabel: string;
+  videosLabel: string;
+  videosHint: string;
+  videoTitlePlaceholder: string;
+  videoUrlPlaceholder: string;
+  videoAddLabel: string;
   permissionStatement: string;
   anythingElseLabel: string;
   submitLabel: string;
@@ -534,6 +539,7 @@ export interface SiteSettings {
     creatorFavoritesHeading: string;
     otherBooksHeading: string;
     bookCreatorsHeading: string;
+    bookVideosHeading: string;
     editorialAuthorHeading: string;
     openToCollaborationLabel: string;
     mediaPageHeading: string;
@@ -859,6 +865,12 @@ const DEFAULTS: SiteSettings = {
     linkKindPlaceholder: "Kind",
     linkLabelPlaceholder: "Label (optional)",
     linkEndDateLabel: "Campaign end date",
+    videosLabel: "Videos",
+    videosHint:
+      "Book trailers, interviews, readings — paste a YouTube link. They show as thumbnails on your comic's page; a click plays them in a lightbox.",
+    videoTitlePlaceholder: "Label (e.g. Book trailer)",
+    videoUrlPlaceholder: "YouTube URL",
+    videoAddLabel: "Add another video",
     permissionStatement:
       "I own or have permission to share this cover and description, and ND Riot can use them to list this comic.",
     anythingElseLabel: "Anything else?",
@@ -1096,6 +1108,7 @@ const DEFAULTS: SiteSettings = {
     creatorFavoritesHeading: "{name}’s Cosigns",
     otherBooksHeading: "Other comics by {name}",
     bookCreatorsHeading: "Comic Creators:",
+    bookVideosHeading: "Videos",
     editorialAuthorHeading: "Author:",
     openToCollaborationLabel: "Open to collaboration",
     mediaPageHeading: "Media covering indie comics",

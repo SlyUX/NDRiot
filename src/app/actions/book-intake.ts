@@ -11,6 +11,7 @@ import {
 import { honeypotTripped, rateLimited, submittedTooFast } from '@/lib/intake/anti-spam'
 import {
   buildLinks,
+  buildVideos,
   isYes,
   matchTaxonomy,
   normalizeUrl,
@@ -188,6 +189,11 @@ export async function submitBook(
     LINK_KINDS,
   )
 
+  const videos = buildVideos(
+    formData.getAll('videoTitle').map(String),
+    formData.getAll('videoUrl').map(String),
+  )
+
   const previewUrl = normalizeUrl(values.previewUrl)
 
   const slug = isUpdate
@@ -220,6 +226,7 @@ export async function submitBook(
   if (values.shortDescription) fields.shortDescription = values.shortDescription.slice(0, LIMITS.short)
   if (values.description) fields.description = toPortableText(values.description)
   if (links.length) fields.links = links
+  if (videos.length) fields.videos = videos
   if (previewUrl) fields.previewUrl = previewUrl
   if (coverAssetId) {
     fields.cover = {
