@@ -11,6 +11,7 @@ import { JsonLd } from "@/components/json-ld";
 import { OrganizationLink } from "@/components/organization-link";
 import PortableTextBody from "@/components/PortableTextBody";
 import { CollabRequestButton } from "@/components/collab-request-button";
+import { InitialsAvatar } from "@/components/initials-avatar";
 import { SaveButton } from "@/components/save-button";
 import SocialLinks from "@/components/SocialLinks";
 import { SocialIcon } from "@/components/social-icon";
@@ -271,8 +272,8 @@ export default async function CreatorPage({
                   // Left-aligned on every size (no mobile centering), sized to the
                   // portrait so the contacts and chips stack neatly beneath it.
                   <div className="flex shrink-0 flex-col items-start gap-3 sm:w-40">
-                    {creator.photo && (
-                      <div className="relative h-40 w-40 overflow-hidden">
+                    <div className="relative h-40 w-40 overflow-hidden">
+                      {creator.photo ? (
                         <Image
                           src={urlFor(creator.photo)
                             .width(320)
@@ -285,8 +286,13 @@ export default async function CreatorPage({
                           sizes="160px"
                           className="object-cover"
                         />
-                      </div>
-                    )}
+                      ) : (
+                        <InitialsAvatar
+                          name={creator.name ?? ""}
+                          className="text-6xl"
+                        />
+                      )}
+                    </div>
                     {/* Socials + the website, as icons. */}
                     {(creator.socials?.length || creator.website) && (
                       <div className="-ml-2.5 flex flex-wrap items-center gap-1">

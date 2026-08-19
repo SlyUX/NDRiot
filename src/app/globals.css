@@ -10,6 +10,9 @@
   --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
+  /* Permanent Marker — a hand-lettered display face. Used for the no-avatar
+     initials tag; wired as a token so H2/display use is a one-line toggle. */
+  --font-marker: var(--font-permanent-marker);
 
   /*
     Fluid display type. Only the heading sizes (2xl and up) scale with the

@@ -113,6 +113,7 @@ export function creatorToCard(creator: CreatorSummary): ContentCardProps {
     itemType: "creator",
     itemId: creator._id,
     image: creator.photo,
+    fallbackInitials: creator.name,
     imageAlt: `Portrait of ${creator.name}`,
     // Studio name identifies a creator more usefully than a city does, and
     // makes the card findable by studio. Structured place is the fallback.
@@ -153,6 +154,7 @@ export function creatorRefToCard(
     title: creator.name ?? "Creator",
     href: `/creators/${creator.slug}`,
     image: creator.photo ?? null,
+    fallbackInitials: creator.name ?? "Creator",
     imageAlt: `Portrait of ${creator.name ?? "creator"}`,
     eyebrow: creator.studio?.name ?? formatPlace(creator.place) ?? undefined,
     summary: truncate(creator.bioText, 160),

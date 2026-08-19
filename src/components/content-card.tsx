@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { GenreBadge } from '@/components/genre-badge'
+import { InitialsAvatar } from '@/components/initials-avatar'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { urlFor } from '@/sanity/image'
@@ -51,6 +52,12 @@ export interface ContentCardProps {
   itemType?: SavedItemType
   itemId?: string
   image?: SanityImage | null
+  /**
+   * Name to draw as an initials tag when `image` is absent — set by the creator
+   * mappers, so a maker with no avatar gets a hand-lettered fallback instead of a
+   * blank box. Books leave this unset (a coverless book keeps the muted box).
+   */
+  fallbackInitials?: string | null
   /**
    * Fallback alt text. The image's own `alt` from Sanity always wins; this is
    * only used when an editor left it blank. Empty string marks the image
@@ -210,6 +217,7 @@ function CardImage({
   alt,
   width,
   fit = 'cover',
+  fallbackInitials,
   className,
 }: {
   image?: SanityImage | null
@@ -218,10 +226,14 @@ function CardImage({
   /** `contain` shows the whole image (horizontal cards, square box) instead of
    *  cropping it to fill. */
   fit?: 'cover' | 'contain'
+  /** Drawn as an initials tag when there is no image (creators). */
+  fallbackInitials?: string | null
   className?: string
 }) {
   if (!image) {
-    return (
+    return fallbackInitials ? (
+      <InitialsAvatar name={fallbackInitials} className="h-full w-full text-3xl" />
+    ) : (
       <div
         className={cn('bg-muted flex items-center justify-center', className)}
         aria-hidden="true"
@@ -246,6 +258,7 @@ export function ContentCard({
   href,
   image,
   imageAlt,
+  fallbackInitials,
   eyebrow,
   genres,
   format,
@@ -342,7 +355,13 @@ export function ContentCard({
             rather than cropping it — a portrait cover or a landscape logo sits
             letterboxed in the square rather than filling it. */}
         <div className="bg-muted relative aspect-square w-24 shrink-0 overflow-hidden sm:w-32">
-          <CardImage image={image} alt={imageAlt} width={256} fit="contain" />
+          <CardImage
+            image={image}
+            alt={imageAlt}
+            width={256}
+            fit="contain"
+            fallbackInitials={fallbackInitials}
+          />
           {maturity && <MaturityOverlay maturity={maturity} />}
         </div>
         <div className="min-w-0 flex-1 space-y-1">
@@ -390,6 +409,7 @@ export function ContentCard({
               image={image}
               alt={imageAlt}
               width={400}
+              fallbackInitials={fallbackInitials}
               className="transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none"
             />
           </div>

@@ -1,13 +1,20 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { Analytics } from '@vercel/analytics/next'
-import { Geist } from 'next/font/google'
+import { Geist, Permanent_Marker } from 'next/font/google'
 
 import { cn } from '@/lib/utils'
 import { getSiteSettings } from '@/lib/site-settings'
 import { SITE_URL } from '@/lib/site-url'
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' })
+// Hand-lettered display face — the no-avatar initials tag (and a candidate for
+// display headings). One weight only, and it's a small surface, so cheap.
+const permanentMarker = Permanent_Marker({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-permanent-marker',
+})
 
 /**
  * Tints the mobile browser chrome and the installed-app splash in the site's
@@ -52,7 +59,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={cn('font-sans', geist.variable)}>
+    <html lang="en" className={cn('font-sans', geist.variable, permanentMarker.variable)}>
       <body className="min-h-screen antialiased">
         {children}
         {/* Cookieless, aggregate traffic analytics — no per-user tracking. */}

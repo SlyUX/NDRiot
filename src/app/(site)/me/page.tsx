@@ -11,6 +11,7 @@ import {
 } from "@/components/collab-requests";
 import { EventDialog } from "@/components/event-dialog";
 import { EventsManager } from "@/components/events-manager";
+import { InitialsAvatar } from "@/components/initials-avatar";
 import { NewsletterOptIn } from "@/components/newsletter-opt-in";
 import { SavedItemRow } from "@/components/saved-item-row";
 import { SectionHeading } from "@/components/section-heading";
@@ -406,13 +407,18 @@ export default async function AccountPage() {
                       <div key={creator._id} className="flex gap-3 sm:gap-4">
                         {/* Avatar sized to the Your Comics covers beside it (105px). */}
                         <div className="relative aspect-square w-[105px] shrink-0 overflow-hidden bg-black/10">
-                          {creator.photo && (
+                          {creator.photo ? (
                             <Image
                               src={urlFor(creator.photo).width(320).url()}
                               alt=""
                               fill
                               sizes="105px"
                               className="object-cover"
+                            />
+                          ) : (
+                            <InitialsAvatar
+                              name={creator.name ?? ""}
+                              className="text-3xl"
                             />
                           )}
                         </div>
@@ -643,13 +649,18 @@ export default async function AccountPage() {
                         undoLabel={s.accountUndoLabel}
                         thumb={
                           <div className="bg-muted relative aspect-square w-full overflow-hidden">
-                            {creator.photo && (
+                            {creator.photo ? (
                               <Image
                                 src={urlFor(creator.photo).width(200).url()}
                                 alt=""
                                 fill
                                 sizes="6rem"
                                 className="object-cover"
+                              />
+                            ) : (
+                              <InitialsAvatar
+                                name={creator.name ?? ""}
+                                className="text-xl"
                               />
                             )}
                           </div>
