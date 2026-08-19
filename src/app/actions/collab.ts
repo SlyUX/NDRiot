@@ -177,8 +177,12 @@ export async function respondCollab(input: {
     response: label,
     respondedAt: new Date().toISOString(),
   });
-  if (!result)
+  if (result.result === "missing")
     return { ok: false, error: "That request isn't available anymore." };
+  if (result.result === "terminal")
+    return { ok: false, error: "You've already responded to this request." };
+  // Re-picking the same option (e.g. maybe → maybe) is a no-op — don't re-notify.
+  if (result.result === "unchanged") return { ok: true };
 
   const client = getWriteClient();
   const n = settings.notifications;

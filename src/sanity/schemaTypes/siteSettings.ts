@@ -344,6 +344,7 @@ export default defineType({
         defineField({ name: "incomingIntro", title: "/me — incoming requests intro", type: "text", rows: 3 }),
         defineField({ name: "incomingVerb", title: "/me — incoming item phrase", type: "string", description: 'Reads "{name} <phrase> {genre}" — e.g. "wants to collaborate on".' }),
         defineField({ name: "respondPrompt", title: "/me — respond prompt", type: "string" }),
+        defineField({ name: "incomingMaybeNote", title: "/me — note on a deferred (“maybe”) request", type: "string", description: "Shown above the presets on a request they answered “maybe later” — it stays actionable so they can still choose “Yes” to connect." }),
         defineField({ name: "incomingEmpty", title: "/me — no incoming requests", type: "string" }),
         defineField({ name: "sentHeading", title: "/me — sent requests heading", type: "string" }),
         defineField({ name: "sentPendingLabel", title: "/me — sent, awaiting reply", type: "string" }),

@@ -831,6 +831,7 @@ export type SiteSettings = {
     incomingIntro?: string;
     incomingVerb?: string;
     respondPrompt?: string;
+    incomingMaybeNote?: string;
     incomingEmpty?: string;
     sentHeading?: string;
     sentPendingLabel?: string;

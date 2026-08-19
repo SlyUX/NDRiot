@@ -105,10 +105,18 @@ export async function createCollabRequest(input: {
   }
 }
 
+export type RespondResult =
+  | { result: 'missing' }
+  | { result: 'terminal' }
+  | { result: 'unchanged'; fromEmail: string; genre: string | null }
+  | { result: 'updated'; fromEmail: string; genre: string | null }
+
 /**
- * Apply a canned response to a pending request. Returns the requester's email
- * (to notify them) and the stored genre, or null if the request is missing.
- * The caller has already verified the responder owns `toId`.
+ * Apply a canned response. `pending` and `maybe` can still change — a "maybe
+ * later" is a genuine deferred state the recipient can later upgrade to "yes"
+ * (or close out), which is what makes it more than a dead end. `accepted` and
+ * `declined` are terminal. `unchanged` (re-picking the same option) is a no-op
+ * so the requester isn't re-notified. The caller has verified ownership of `toId`.
  */
 export async function respondToCollabRequest(input: {
   fromId: string
@@ -116,22 +124,27 @@ export async function respondToCollabRequest(input: {
   status: CollabStatus
   response: string
   respondedAt: string
-}): Promise<{ fromEmail: string; genre: string | null } | null> {
+}): Promise<RespondResult> {
   const id = collabId(input.fromId, input.toId)
   try {
-    const existing = await client().fetch<{ fromEmail: string; genre: string | null } | null>(
-      `*[_id==$id][0]{fromEmail, genre}`,
-      { id },
-    )
-    if (!existing) return null
+    const existing = await client().fetch<{
+      status: CollabStatus
+      fromEmail: string
+      genre: string | null
+    } | null>(`*[_id==$id][0]{status, fromEmail, genre}`, { id })
+    if (!existing) return { result: 'missing' }
+    if (existing.status === 'accepted' || existing.status === 'declined')
+      return { result: 'terminal' }
+    if (existing.status === input.status)
+      return { result: 'unchanged', fromEmail: existing.fromEmail, genre: existing.genre }
     await client()
       .patch(id)
       .set({ status: input.status, response: input.response, respondedAt: input.respondedAt })
       .commit()
-    return existing
+    return { result: 'updated', fromEmail: existing.fromEmail, genre: existing.genre }
   } catch (cause) {
     console.error('[collab] respondToCollabRequest failed', cause)
-    return null
+    return { result: 'missing' }
   }
 }
 

@@ -324,6 +324,7 @@ export type CollabSettings = {
   incomingIntro: string;
   incomingVerb: string;
   respondPrompt: string;
+  incomingMaybeNote: string;
   incomingEmpty: string;
   sentHeading: string;
   sentPendingLabel: string;
@@ -714,9 +715,12 @@ const DEFAULTS: SiteSettings = {
       "",
       "  “{response}”",
       "",
-      "If they chose “Yes, let’s connect,” we’ve introduced you both by email — check your inbox for a message you can simply reply to.",
+      "What that means:",
+      "• “Yes, let’s connect” — we’ve introduced you both by email; check your inbox for a message you can simply reply to.",
+      "• “Maybe later” — the door is open. They may reach out to connect down the road, and there’s nothing more you need to do — no need to ask again.",
+      "• “Not right now” — that’s where things stand today, and that’s completely okay.",
       "",
-      "If not, that’s completely okay. Everyone here is under no obligation, and a “maybe later” or “not right now” is never a personal judgment — just where things stand today. Thanks for reaching out and helping build the community.",
+      "Everyone here is under no obligation, and a “maybe” or a “not right now” is never a personal judgment. Thanks for reaching out and helping build the community.",
       "",
       "— ND Riot",
     ].join("\n"),
@@ -1056,6 +1060,8 @@ const DEFAULTS: SiteSettings = {
       "Creators who’d like to work with you. Respond with a preset — you’re under no obligation, and there’s no wrong answer. Only a “Yes, let’s connect” shares an email introduction.",
     incomingVerb: "wants to collaborate on",
     respondPrompt: "Respond:",
+    incomingMaybeNote:
+      "You said “Maybe later” — you can connect anytime, or close it out:",
     incomingEmpty: "No collaboration requests right now.",
     sentHeading: "Requests you’ve sent",
     sentPendingLabel: "Awaiting a reply",

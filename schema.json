@@ -4999,6 +4999,13 @@
               },
               "optional": true
             },
+            "incomingMaybeNote": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "incomingEmpty": {
               "type": "objectAttribute",
               "value": {

@@ -150,10 +150,11 @@ function IncomingRow({
         </span>
       </p>
 
-      {item.status === 'pending' ? (
+      {item.status === 'pending' || item.status === 'maybe' ? (
         <div className="mt-2.5 flex flex-wrap items-center gap-2">
           <span className="text-muted-foreground text-[10px] tracking-widest uppercase">
-            {copy.respondPrompt}
+            {/* A "maybe" is a deferred state they can still act on — say so. */}
+            {item.status === 'maybe' ? copy.incomingMaybeNote : copy.respondPrompt}
           </span>
           {COLLAB_RESPONSES.map((o) => (
             <button
