@@ -6177,6 +6177,13 @@
               },
               "optional": true
             },
+            "footerFeedsHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "footerJoinCreatorsLabel": {
               "type": "objectAttribute",
               "value": {

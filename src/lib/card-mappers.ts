@@ -54,6 +54,8 @@ export function bookToCard(book: BookSummary): ContentCardProps {
   return {
     title: book.title,
     href: `/books/${book.slug}`,
+    itemType: "book",
+    itemId: book._id,
     image: book.cover,
     // Fallback only — book.cover.alt wins when set. Empty is right for cover
     // art sitting directly above its own title; announcing it twice is noise.
@@ -108,6 +110,8 @@ export function creatorToCard(creator: CreatorSummary): ContentCardProps {
   return {
     title: creator.name,
     href: `/creators/${creator.slug}`,
+    itemType: "creator",
+    itemId: creator._id,
     image: creator.photo,
     imageAlt: `Portrait of ${creator.name}`,
     // Studio name identifies a creator more usefully than a city does, and

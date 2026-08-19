@@ -558,6 +558,7 @@ export interface SiteSettings {
     /** Footer nav groups + the logged-out header account links. */
     footerGetListedHeading: string;
     footerRiotHeading: string;
+    footerFeedsHeading: string;
     footerJoinCreatorsLabel: string;
     footerJoinComicsLabel: string;
     footerJoinMediaLabel: string;
@@ -1214,6 +1215,7 @@ const DEFAULTS: SiteSettings = {
     accountNewsletterCta: "Sign me up",
     footerGetListedHeading: "Get Listed",
     footerRiotHeading: "The Riot",
+    footerFeedsHeading: "RSS",
     footerJoinCreatorsLabel: "Comic Creators",
     footerJoinComicsLabel: "Comics",
     footerJoinMediaLabel: "Media",

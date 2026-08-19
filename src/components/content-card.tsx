@@ -7,6 +7,7 @@ import { urlFor } from '@/sanity/image'
 import { cn, externalHref } from '@/lib/utils'
 import { RESTRICTED_RATING } from '@/lib/taxonomy'
 import type { BookFormat, Genre, MaturityRating, SanityImage } from '@/lib/types'
+import type { SavedItemType } from '@/sanity/reader-client'
 
 /**
  * The one card. Books, creators, columns, interviews and downloads all render
@@ -42,6 +43,13 @@ const ASPECT = {
 export interface ContentCardProps {
   title: string
   href: string
+  /**
+   * Identity for a card-level Save affordance. The mappers set these for books
+   * and creators; the grid uses them to render a bookmark chip when it is given
+   * a save config. Absent → no Save on the card (columns/editorial/etc.).
+   */
+  itemType?: SavedItemType
+  itemId?: string
   image?: SanityImage | null
   /**
    * Fallback alt text. The image's own `alt` from Sanity always wins; this is

@@ -21,6 +21,8 @@ import {
 } from '@/lib/filters'
 import { pageMetadata } from '@/lib/page-metadata'
 import { safeFetch, CREATORS_QUERY, FILTERED_CREATORS_QUERY, GENRES_WITH_BOOKS_QUERY } from '@/lib/queries'
+import { auth } from '@/auth'
+import { savedItems } from '@/sanity/reader-client'
 import { getSiteSettings } from '@/lib/site-settings'
 import type { CreatorSummary, Paginated } from '@/lib/types'
 
@@ -49,7 +51,7 @@ export default async function CreatorsPage({
   // filtering keeps query order so a narrowed set doesn't reshuffle as you page.
   const seed = filtering ? null : (discoverSeed(params, 'sort', 'seed') ?? randomSeed())
 
-  const [result, genresWithBooks, settings] = await Promise.all([
+  const [result, genresWithBooks, settings, session] = await Promise.all([
     safeFetch<Paginated<CreatorSummary>>(
       FILTERED_CREATORS_QUERY,
       { ...filters, limit: seed === null ? limit : SHUFFLE_CAP },
@@ -57,7 +59,28 @@ export default async function CreatorsPage({
     ),
     safeFetch<string[]>(GENRES_WITH_BOOKS_QUERY, {}, []),
     getSiteSettings(),
+    auth(),
   ])
+
+  // Card-level Save/Follow (§3: explicit only). Seed each chip from the reader's
+  // followed creators; signed out, a tap opens the sign-in modal.
+  const email = session?.user?.email ?? null
+  const savedIds = email
+    ? (await savedItems(email))
+        .filter((x) => x.itemType === 'creator')
+        .map((x) => x.itemId)
+    : []
+  const saveConfig = {
+    signedIn: Boolean(email),
+    savedIds,
+    saveLabel: settings.sections.followLabel,
+    savedLabel: settings.sections.followingLabel,
+    signInCopy: {
+      title: settings.sections.accountSignInTitle,
+      body: settings.sections.accountSignInBody,
+      cta: settings.sections.accountSignInCta,
+    },
+  }
   const creators = seed === null ? result.items : seededShuffle(result.items, seed).slice(0, limit)
 
   const fallback =
@@ -84,6 +107,7 @@ export default async function CreatorsPage({
 
       <ContentCardGrid
         cards={creators.map(creatorToCard)}
+        save={saveConfig}
         layout="horizontal"
         columns={4}
         summaryLines={4}
@@ -109,6 +133,7 @@ export default async function CreatorsPage({
           heading={settings.sections.everythingElseHeading}
           headingSize="sm"
           cards={fallback.slice(0, 8).map(creatorToCard)}
+          save={saveConfig}
           layout="horizontal"
           columns={4}
           summaryLines={4}

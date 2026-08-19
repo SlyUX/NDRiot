@@ -3,6 +3,7 @@ import { ChevronRight } from 'lucide-react'
 
 import { ContentCard, type ContentCardProps } from '@/components/content-card'
 import { HorizontalScroller } from '@/components/horizontal-scroller'
+import { SaveButton } from '@/components/save-button'
 import { SectionHeading } from '@/components/section-heading'
 import { Section, type SectionProps } from '@/components/ui/section'
 import { Button } from '@/components/ui/button'
@@ -36,8 +37,23 @@ const COLUMN_CLASSES: Record<GridColumns, string> = {
   5: 'sm:grid-cols-4 lg:grid-cols-5',
 }
 
+/**
+ * Card-level Save. Given this, the grid renders a bookmark chip on the cover of
+ * every card that carries an itemType + itemId (books, creators). Omit it and
+ * cards render exactly as before — Save is opt-in per listing.
+ */
+export interface CardSaveConfig {
+  signedIn: boolean
+  savedIds: string[]
+  saveLabel: string
+  savedLabel: string
+  signInCopy: { title: string; body: string; cta: string }
+}
+
 export interface ContentCardGridProps {
   cards: ContentCardProps[]
+  /** Enable a Save chip on each savable card's cover. */
+  save?: CardSaveConfig
   /** Section title. Omit for an unheaded grid. */
   heading?: string
   /**
@@ -96,6 +112,7 @@ export interface ContentCardGridProps {
 
 export function ContentCardGrid({
   cards,
+  save,
   heading,
   headingAs,
   headingSize,
@@ -187,6 +204,32 @@ export function ContentCardGrid({
                 aspectRatio={card.aspectRatio ?? aspectRatio}
                 stretch
               />
+              {/* Save chip — a sibling of the card's Link (anchors can't nest a
+                  button), pinned to the cover corner. Top-left dodges the
+                  maturity badge (top-right); it drops below a funding bar. */}
+              {save && card.itemType && card.itemId && (
+                <div
+                  className={cn(
+                    'absolute z-20',
+                    layout === 'horizontal'
+                      ? 'top-1 left-1'
+                      : card.fundingUrl
+                        ? 'top-8 left-2'
+                        : 'top-2 left-2',
+                  )}
+                >
+                  <SaveButton
+                    variant="icon"
+                    itemType={card.itemType}
+                    itemId={card.itemId}
+                    initialSaved={save.savedIds.includes(card.itemId)}
+                    signedIn={save.signedIn}
+                    saveLabel={save.saveLabel}
+                    savedLabel={save.savedLabel}
+                    signInCopy={save.signInCopy}
+                  />
+                </div>
+              )}
             </div>
           ))
 

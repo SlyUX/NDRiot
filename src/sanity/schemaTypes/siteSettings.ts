@@ -1323,6 +1323,13 @@ export default defineType({
           type: "string",
         }),
         defineField({
+          name: "footerFeedsHeading",
+          title: 'Footer — RSS feeds heading',
+          type: "string",
+          description:
+            "Heading over the footer RSS links (Comics + Media feeds) — e.g. \"RSS\".",
+        }),
+        defineField({
           name: "footerJoinCreatorsLabel",
           title: "Footer — join as creator link",
           type: "string",

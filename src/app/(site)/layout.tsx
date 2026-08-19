@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Rss } from 'lucide-react'
 
 import { Logo } from '@/components/logo'
 import { MainNav } from '@/components/main-nav'
@@ -179,6 +180,23 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
                 </li>
                 <li>
                   <Link href="/privacy" className={FOOTER_LINK}>{s.footerPrivacyLabel}</Link>
+                </li>
+              </ul>
+            </div>
+            {/* RSS — the feeds we already publish, for anyone who reads by feed.
+                Plain <a>: these are .xml route handlers, not app routes. Editorial
+                stays out (its section is hidden). */}
+            <div>
+              <p className="text-foreground mb-2 flex items-center justify-center gap-1.5 font-bold">
+                <Rss aria-hidden="true" className="size-3.5" />
+                {s.footerFeedsHeading}
+              </p>
+              <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1">
+                <li>
+                  <a href="/feeds/comics.xml" className={FOOTER_LINK}>{s.footerJoinComicsLabel}</a>
+                </li>
+                <li>
+                  <a href="/feeds/media.xml" className={FOOTER_LINK}>{s.footerJoinMediaLabel}</a>
                 </li>
               </ul>
             </div>

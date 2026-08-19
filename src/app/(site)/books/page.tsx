@@ -21,6 +21,8 @@ import {
 } from '@/lib/filters'
 import { pageMetadata } from '@/lib/page-metadata'
 import { safeFetch, BOOKS_QUERY, FILTERED_BOOKS_QUERY, GENRES_WITH_BOOKS_QUERY } from '@/lib/queries'
+import { auth } from '@/auth'
+import { savedItems } from '@/sanity/reader-client'
 import { getSiteSettings } from '@/lib/site-settings'
 import type { BookSummary, Paginated } from '@/lib/types'
 
@@ -54,7 +56,7 @@ export default async function BooksPage({
   // page. Fetch the whole set when shuffling, then slice to the page.
   const seed = filtering ? null : (discoverSeed(params, 'sort', 'seed') ?? randomSeed())
 
-  const [result, genresWithBooks, settings] = await Promise.all([
+  const [result, genresWithBooks, settings, session] = await Promise.all([
     safeFetch<Paginated<BookSummary>>(
       FILTERED_BOOKS_QUERY,
       { ...filters, limit: seed === null ? limit : SHUFFLE_CAP },
@@ -62,8 +64,29 @@ export default async function BooksPage({
     ),
     safeFetch<string[]>(GENRES_WITH_BOOKS_QUERY, {}, []),
     getSiteSettings(),
+    auth(),
   ])
   const books = seed === null ? result.items : seededShuffle(result.items, seed).slice(0, limit)
+
+  // Card-level Save (§3: explicit only). The signed-in reader's saved book ids
+  // seed each chip; signed out, tapping a chip opens the sign-in modal.
+  const email = session?.user?.email ?? null
+  const savedIds = email
+    ? (await savedItems(email))
+        .filter((x) => x.itemType === 'book')
+        .map((x) => x.itemId)
+    : []
+  const saveConfig = {
+    signedIn: Boolean(email),
+    savedIds,
+    saveLabel: settings.sections.followLabel,
+    savedLabel: settings.sections.followingLabel,
+    signInCopy: {
+      title: settings.sections.accountSignInTitle,
+      body: settings.sections.accountSignInBody,
+      cta: settings.sections.accountSignInCta,
+    },
+  }
 
   // Only fetched when filtering emptied the page. An empty result is a
   // discovery moment, not an error (AGENTS.md §3) — so offer the rest of the
@@ -93,6 +116,7 @@ export default async function BooksPage({
 
       <ContentCardGrid
         cards={books.map(bookToCard)}
+        save={saveConfig}
         columns={5}
         padding="md"
         className="pt-6"
@@ -116,6 +140,7 @@ export default async function BooksPage({
           heading={settings.sections.everythingElseHeading}
           headingSize="sm"
           cards={fallback.slice(0, 8).map(bookToCard)}
+          save={saveConfig}
           columns={5}
           padding="md"
           emptyMessage={settings.empty.books}

@@ -999,6 +999,7 @@ export type SiteSettings = {
     accountNewsletterCta?: string;
     footerGetListedHeading?: string;
     footerRiotHeading?: string;
+    footerFeedsHeading?: string;
     footerJoinCreatorsLabel?: string;
     footerJoinComicsLabel?: string;
     footerJoinMediaLabel?: string;
