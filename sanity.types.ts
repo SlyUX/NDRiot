@@ -2287,11 +2287,64 @@ export type SAVED_BOOKS_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: CREATOR_HERO_QUERY
-// Query: *[_type=="creator" && _id==$id][0]{name,"slug":slug.current,photo}
+// Query: *[_type=="creator" && _id==$id][0]{name,"slug":slug.current,photo,"region":place.region}
 export type CREATOR_HERO_QUERY_RESULT = {
   name: string;
   slug: string;
   photo: ImageWithAlt | null;
+  region:
+    | "AK"
+    | "AL"
+    | "AR"
+    | "AZ"
+    | "CA"
+    | "CO"
+    | "CT"
+    | "DC"
+    | "DE"
+    | "FL"
+    | "GA"
+    | "HI"
+    | "IA"
+    | "ID"
+    | "IL"
+    | "IN"
+    | "KS"
+    | "KY"
+    | "LA"
+    | "MA"
+    | "MD"
+    | "ME"
+    | "MI"
+    | "MN"
+    | "MO"
+    | "MS"
+    | "MT"
+    | "NC"
+    | "ND"
+    | "NE"
+    | "NH"
+    | "NJ"
+    | "NM"
+    | "NV"
+    | "NY"
+    | "OH"
+    | "OK"
+    | "OR"
+    | "PA"
+    | "RI"
+    | "SC"
+    | "SD"
+    | "TN"
+    | "TX"
+    | "UT"
+    | "VA"
+    | "VT"
+    | "WA"
+    | "WI"
+    | "WV"
+    | "WY"
+    | null;
 } | null;
 
 // Source: src/lib/queries.ts
@@ -3664,7 +3717,7 @@ declare module "@sanity/client" {
     '*[_type in ["column","interview"] && defined(slug.current)]|order(publishedAt desc)[0...8]{\n  _id,_type,title,"slug":slug.current,excerpt,cover,thumbnail,publishedAt,\n  "authorName":author->name,\n  "subjectName":subject->name\n}': HOME_EDITORIAL_QUERY_RESULT;
     '*[_type in ["book","creator"] && defined(slug.current)]|order(_createdAt desc)[0...4]{\n  _id,_type,"slug":slug.current,genres,\n  title,"creatorName":creator->name,"descriptionText":pt::text(description),\n  name,"bioText":pt::text(bio)\n}': HOME_NEW_QUERY_RESULT;
     '*[_type=="book" && _id in $ids && defined(slug.current)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}': SAVED_BOOKS_QUERY_RESULT;
-    '*[_type=="creator" && _id==$id][0]{name,"slug":slug.current,photo}': CREATOR_HERO_QUERY_RESULT;
+    '*[_type=="creator" && _id==$id][0]{name,"slug":slug.current,photo,"region":place.region}': CREATOR_HERO_QUERY_RESULT;
     '*[_type=="creator" && _id in $ids && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,place,photo,genres,openToCollaboration,"joinedAt":_createdAt,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}': SAVED_CREATORS_QUERY_RESULT;
     '*[_id in $ids && defined(slug.current)]{_id,_type,name,"slug":slug.current}|order(name asc)': OWNED_DOCS_QUERY_RESULT;
     '*[_type=="book" && creator._ref in $ids && defined(slug.current)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}': OWNED_BOOKS_QUERY_RESULT;

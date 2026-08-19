@@ -616,10 +616,10 @@ export default defineType({
         }),
         defineField({
           name: "conventionNearMeLabel",
-          title: 'Conventions listing — "Near me" shortcut',
+          title: 'Conventions — "Near me" toggle',
           type: "string",
           description:
-            'One-tap shortcut shown to a signed-in creator who has set a location, pre-filling the State filter with their own state. Use the {state} token — e.g. "Shows in {state}".',
+            'Label for the off-by-default toggle shown to a signed-in creator who has set a location (on the conventions directory and the home conventions row). Toggling it filters to their own state — e.g. "Near me".',
         }),
         defineField({
           name: "conventionTablersHeading",

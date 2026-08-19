@@ -127,30 +127,51 @@ export function conventionRegionOptions(present: readonly string[]): string[] {
 }
 
 /**
- * Conventions filter by US state. The facet carries state NAMES (what a reader
- * reads); the stored value is the state CODE (place.region), so conventionFilters
- * maps the name back to its code. State-only for now — city is free text on both
- * sides, so a reliable city filter waits for a canonical city list.
+ * Conventions filter by US state, two ways into the same `place.region` filter:
+ *
+ * - a **State** dropdown (options carry state NAMES, what a reader reads; the
+ *   stored value is the CODE, so conventionFilters maps name→code), and
+ * - a **Near me** toggle (off by default) that a signed-in creator with a set
+ *   region gets — one tap to their own state, no dropdown-hunt. Personalized, so
+ *   it wears the teal tone (§9). Included only when `nearMe` is passed, i.e. the
+ *   viewer actually has a region to match.
+ *
+ * State-only for now — city is free text on both sides, so a reliable city
+ * filter waits for a canonical city list.
  */
-export function conventionFacets(regionNames: readonly string[]): Facet[] {
-  return [{ param: 'region', label: 'State', options: regionNames }]
+export function conventionFacets(opts: {
+  regions?: readonly string[]
+  nearMe?: { label: string; param?: string }
+}): Facet[] {
+  const facets: Facet[] = []
+  if (opts.regions?.length) facets.push({ param: 'region', label: 'State', options: opts.regions })
+  if (opts.nearMe)
+    facets.push({
+      param: opts.nearMe.param ?? 'nearme',
+      label: opts.nearMe.label,
+      options: [],
+      toggle: true,
+      tone: 'personalize',
+    })
+  return facets
 }
 
-export function conventionFilters(params: SearchParams) {
+/**
+ * The GROQ filter for the /conventions listing. An explicit State pick wins;
+ * failing that, the Near-me toggle resolves to the signed-in creator's region.
+ * `creatorRegion` is null for anyone without a set region, so a stray ?nearme=1
+ * from a shared link simply does nothing.
+ */
+export function conventionFilters(params: SearchParams, creatorRegion?: string | null) {
   const name = one(params.region)
   // Map the display name in the URL to its stored code; an unknown name (a
   // hand-typed ?region=Atlantis) drops to null — show everything, not nothing.
-  const region = name ? (US_STATES.find((s) => s.name === name)?.code ?? null) : null
+  const dropdown = name ? (US_STATES.find((s) => s.name === name)?.code ?? null) : null
+  const near = one(params.nearme) && creatorRegion ? creatorRegion : null
   return {
-    region,
+    region: dropdown ?? near,
     q: searchTerm(params.q),
   }
-}
-
-/** The display name for a stored state code, or null — for the "Near me" chip. */
-export function stateName(code: string | null | undefined): string | null {
-  if (!code) return null
-  return US_STATES.find((s) => s.code === code)?.name ?? null
 }
 
 /**

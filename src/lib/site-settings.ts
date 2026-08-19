@@ -988,7 +988,7 @@ const DEFAULTS: SiteSettings = {
     conventionManageAttendingLabel: "Manage Attendance",
     conventionCancelAttendingLabel: "Cancel attendance",
     searchConventionsLabel: "Search conventions",
-    conventionNearMeLabel: "Shows in {state}",
+    conventionNearMeLabel: "Near me",
     conventionTablersHeading: "Creators with tables",
     tableLabel: "Table",
     creatorEventsHeading: "Upcoming events",

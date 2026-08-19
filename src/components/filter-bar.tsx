@@ -41,10 +41,11 @@ export interface Facet {
   /**
    * Colour a toggle to its subject. `funding` uses the funding green so the
    * "Currently funding" control matches the badge it filters for; `inverse` is
-   * a solid white/black button (the "Has preview" control); the default is the
-   * site's pink accent.
+   * a solid white/black button (the "Has preview" control); `personalize` is
+   * the teal that marks a control as tuned to the signed-in person (§9 — the
+   * "Near me" convention filter); the default is the site's pink accent.
    */
-  tone?: 'funding' | 'inverse'
+  tone?: 'funding' | 'inverse' | 'personalize'
 }
 
 export interface FilterBarProps {
@@ -314,6 +315,7 @@ export function FilterBar({
               // §9) so it reads as the control for the badge it filters for.
               const funding = facet.tone === 'funding'
               const inverse = facet.tone === 'inverse'
+              const personalize = facet.tone === 'personalize'
               return (
                 <button
                   key={facet.param}
@@ -327,12 +329,16 @@ export function FilterBar({
                         ? 'bg-funding border-funding text-black'
                         : inverse
                           ? 'border-white bg-white text-black'
-                          : 'bg-primary text-primary-foreground border-primary'
+                          : personalize
+                            ? 'bg-personalize border-personalize text-personalize-foreground'
+                            : 'bg-primary text-primary-foreground border-primary'
                       : funding
                         ? 'text-funding border-funding hover:bg-funding/10'
                         : inverse
                           ? 'border-white/40 text-white hover:bg-white/10'
-                          : 'text-muted-foreground hover:border-primary/60 hover:text-foreground border-white/20',
+                          : personalize
+                            ? 'text-personalize border-personalize hover:bg-personalize/10'
+                            : 'text-muted-foreground hover:border-primary/60 hover:text-foreground border-white/20',
                   )}
                 >
                   {facet.label}

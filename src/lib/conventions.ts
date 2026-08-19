@@ -52,6 +52,32 @@ export function orderConventionsUpcomingFirst<T extends { startDate?: string | n
 }
 
 /**
+ * Filter an already-fetched convention list in JS — for the home row, whose
+ * conventions are fetched whole (unlike the /conventions listing, which filters
+ * in GROQ). `region` is a US-state code (exact match on place.region); `q` is a
+ * plain substring over name + city. Empty options pass everything through.
+ */
+export function filterConventions<
+  T extends {
+    name?: string | null
+    place?: { region?: string | null; city?: string | null } | null
+  },
+>(conventions: T[], opts: { region?: string | null; q?: string | null }): T[] {
+  const region = opts.region ?? null
+  const q = (opts.q ?? '').trim().toLowerCase()
+  return conventions.filter((con) => {
+    if (region && con.place?.region !== region) return false
+    if (
+      q &&
+      !(con.name ?? '').toLowerCase().includes(q) &&
+      !(con.place?.city ?? '').toLowerCase().includes(q)
+    )
+      return false
+    return true
+  })
+}
+
+/**
  * Display a con occurrence's dates: a single day, a range, or nothing.
  * "Jul 23, 2026" · "Jul 23 – 26, 2026"-ish (kept simple: full both ends).
  */

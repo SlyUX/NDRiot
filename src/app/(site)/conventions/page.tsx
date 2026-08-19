@@ -1,7 +1,5 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { Suspense } from 'react'
-import { MapPin } from 'lucide-react'
 
 import { auth } from '@/auth'
 import { ContentCardGrid } from '@/components/content-card-grid'
@@ -14,7 +12,6 @@ import {
   conventionFilters,
   conventionRegionOptions,
   hasActiveFilters,
-  stateName,
   type SearchParams,
 } from '@/lib/filters'
 import { pageMetadata } from '@/lib/page-metadata'
@@ -34,10 +31,9 @@ import { creatorsOwnedBy } from '@/sanity/ownership-client'
  *
  * Ordered upcoming-first (§3-safe: a convention is a venue/event, not a ranked
  * contributor). Discovery is user-directed (§3): an explicit **State** filter,
- * always visible and clearable. A signed-in creator who set a location gets a
- * one-tap "Near me" shortcut that pre-fills that same filter — teal, because it
- * is tuned to them (§9); the default view stays unfiltered, so nobody arrives
- * pre-narrowed. Creator ratings surface per convention on the detail page.
+ * always visible and clearable. A signed-in creator who set a location also gets
+ * an off-by-default **Near me** toggle (teal — tuned to them, §9) that filters to
+ * their own state in one tap. Creator ratings surface per convention on detail.
  */
 export const dynamic = 'force-dynamic'
 
@@ -57,40 +53,37 @@ export default async function ConventionsPage({
   searchParams: Promise<SearchParams>
 }) {
   const params = await searchParams
-  const filters = conventionFilters(params)
-  const filtering = hasActiveFilters(filters)
 
-  const [regionCodes, filtered, settings, session] = await Promise.all([
+  const [regionCodes, settings, session] = await Promise.all([
     safeFetch<string[]>(CONVENTION_REGIONS_QUERY, {}, []),
-    safeFetch<ConventionSummary[]>(FILTERED_CONVENTIONS_QUERY, filters, []),
     getSiteSettings(),
     auth(),
   ])
-  const conventions = orderConventionsUpcomingFirst(filtered)
   const { sections, empty } = settings
 
-  // "Near me" — a signed-in creator with a stored region, unless the list is
-  // already filtered to it. Their own explicit data, offered as a one-tap
-  // shortcut rather than applied silently (§3).
+  // The signed-in creator's own region, if any — enables the off-by-default
+  // "Near me" toggle, and is what that toggle resolves to when on.
   const email = session?.user?.email ?? null
-  let nearMe: { label: string; href: string } | null = null
+  let creatorRegion: string | null = null
   if (email) {
     const owned = await creatorsOwnedBy(email)
     if (owned.length) {
-      const code = await safeFetch<string | null>(
+      creatorRegion = await safeFetch<string | null>(
         OWNED_CREATOR_REGION_QUERY,
         { id: owned[0] },
         null,
       )
-      const name = stateName(code)
-      if (name && filters.region !== code) {
-        nearMe = {
-          label: sections.conventionNearMeLabel.replace('{state}', name),
-          href: `/conventions?region=${encodeURIComponent(name)}`,
-        }
-      }
     }
   }
+
+  const filters = conventionFilters(params, creatorRegion)
+  const filtering = hasActiveFilters(filters)
+  const filtered = await safeFetch<ConventionSummary[]>(
+    FILTERED_CONVENTIONS_QUERY,
+    filters,
+    [],
+  )
+  const conventions = orderConventionsUpcomingFirst(filtered)
 
   // Filtered into an empty result: offer everything upcoming instead of a dead
   // end (§3 — an empty result is a discovery moment).
@@ -100,6 +93,11 @@ export default async function ConventionsPage({
           await safeFetch<ConventionSummary[]>(CONVENTIONS_QUERY, {}, []),
         )
       : []
+
+  const facets = conventionFacets({
+    regions: conventionRegionOptions(regionCodes),
+    nearMe: creatorRegion ? { label: sections.conventionNearMeLabel } : undefined,
+  })
 
   return (
     <div>
@@ -115,19 +113,9 @@ export default async function ConventionsPage({
           </p>
         )}
 
-        {nearMe && (
-          <Link
-            href={nearMe.href}
-            className="bg-personalize text-personalize-foreground focus-visible:ring-ring mt-6 inline-flex items-center gap-1.5 px-3 py-2 text-[11px] font-bold tracking-widest uppercase focus-visible:ring-2 focus-visible:outline-none"
-          >
-            <MapPin aria-hidden="true" className="size-3.5" />
-            {nearMe.label}
-          </Link>
-        )}
-
         <Suspense fallback={null}>
           <FilterBar
-            facets={conventionFacets(conventionRegionOptions(regionCodes))}
+            facets={facets}
             resultCount={conventions.length}
             searchLabel={sections.searchConventionsLabel}
             control="select"
