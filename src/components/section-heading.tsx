@@ -16,7 +16,12 @@ import { cn } from '@/lib/utils'
 const headingVariants = cva('font-black tracking-tighter', {
   variants: {
     size: {
-      sm: 'text-sm tracking-widest',
+      // The section-heading tier. Was text-sm (14px) — an eyebrow size that
+      // read as smaller than the item titles it sat above (font-bold, 16px),
+      // inverting the hierarchy. Bumped ~30% to text-lg (18px) so a section
+      // heading leads its items, while staying well clear of H1 (30–48px) and
+      // the md/lg display sizes (24–36px).
+      sm: 'text-lg tracking-widest',
       md: 'text-2xl md:text-3xl',
       lg: 'text-3xl md:text-4xl',
     },

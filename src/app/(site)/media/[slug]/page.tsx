@@ -87,7 +87,7 @@ export default async function MediaDetailPage({ params }: { params: Promise<{ sl
           {media.about && <p className="mt-4 max-w-prose text-sm">{media.about}</p>}
           {media.genresCovered && media.genresCovered.length > 0 && (
             <div className="mt-6">
-              <h2 className="text-muted-foreground text-sm font-black tracking-widest uppercase">
+              <h2 className="text-muted-foreground text-lg font-black tracking-widest uppercase">
                 {sections.mediaGenresHeading}
               </h2>
               <div className="mt-2 flex flex-wrap gap-1.5">
@@ -102,14 +102,14 @@ export default async function MediaDetailPage({ params }: { params: Promise<{ sl
 
       {media.pitchInfo && (
         <div className="mt-10">
-          <h2 className="text-sm font-black tracking-widest uppercase">{sections.mediaPitchHeading}</h2>
+          <h2 className="text-lg font-black tracking-widest uppercase">{sections.mediaPitchHeading}</h2>
           <p className="mt-2 max-w-prose text-sm whitespace-pre-line">{media.pitchInfo}</p>
         </div>
       )}
 
       {media.links && media.links.length > 0 && (
         <div className="mt-10">
-          <h2 className="text-sm font-black tracking-widest uppercase">{sections.mediaLinksHeading}</h2>
+          <h2 className="text-lg font-black tracking-widest uppercase">{sections.mediaLinksHeading}</h2>
           <div className="mt-3 flex flex-wrap gap-2">
             {media.links.map((link) => (
               <Badge key={link.url} variant="outline" asChild>

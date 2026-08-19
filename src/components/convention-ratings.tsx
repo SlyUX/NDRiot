@@ -37,7 +37,7 @@ export function ConventionRatings({
   return (
     <section className="space-y-4">
       <div className="flex flex-wrap items-baseline gap-x-2">
-        <h2 className="text-sm font-black tracking-widest uppercase">
+        <h2 className="text-lg font-black tracking-widest uppercase">
           {labels.heading}
         </h2>
         <span className="text-muted-foreground text-xs font-normal">
