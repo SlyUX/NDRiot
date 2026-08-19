@@ -873,6 +873,8 @@ export type SiteSettings = {
     conventionAttendingLabel?: string;
     conventionManageAttendingLabel?: string;
     conventionCancelAttendingLabel?: string;
+    searchConventionsLabel?: string;
+    conventionNearMeLabel?: string;
     conventionTablersHeading?: string;
     tableLabel?: string;
     creatorEventsHeading?: string;
@@ -1010,6 +1012,7 @@ export type SiteSettings = {
     genreCreators?: string;
     filteredBooks?: string;
     filteredCreators?: string;
+    filteredConventions?: string;
     saved?: string;
     columns?: string;
     interviews?: string;
@@ -2872,6 +2875,146 @@ export type CONVENTIONS_QUERY_RESULT = Array<{
 }>;
 
 // Source: src/lib/queries.ts
+// Variable: FILTERED_CONVENTIONS_QUERY
+// Query: *[_type=="convention" && defined(slug.current)    && (!defined($region) || place.region == $region)    && (!defined($q) || name match $q || place.city match $q)  ]|order(name asc){_id,name,"slug":slug.current,place,whenHint,startDate,endDate,description,image,"ratings":*[_type=="venueRating" && target._ref==^._id]{benefits}}
+export type FILTERED_CONVENTIONS_QUERY_RESULT = Array<{
+  _id: string;
+  name: string;
+  slug: string;
+  place: Place | null;
+  whenHint: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  description: string | null;
+  image: ImageWithAlt | null;
+  ratings: Array<{
+    benefits: {
+      focusOnComics?: number;
+      tableValue?: number;
+      footTraffic?: number;
+      community?: number;
+      panels?: number;
+      afterHours?: number;
+    } | null;
+  }>;
+}>;
+
+// Source: src/lib/queries.ts
+// Variable: CONVENTION_REGIONS_QUERY
+// Query: array::unique(*[_type=="convention" && defined(slug.current) && defined(place.region)].place.region)
+export type CONVENTION_REGIONS_QUERY_RESULT = Array<
+  | "AK"
+  | "AL"
+  | "AR"
+  | "AZ"
+  | "CA"
+  | "CO"
+  | "CT"
+  | "DC"
+  | "DE"
+  | "FL"
+  | "GA"
+  | "HI"
+  | "IA"
+  | "ID"
+  | "IL"
+  | "IN"
+  | "KS"
+  | "KY"
+  | "LA"
+  | "MA"
+  | "MD"
+  | "ME"
+  | "MI"
+  | "MN"
+  | "MO"
+  | "MS"
+  | "MT"
+  | "NC"
+  | "ND"
+  | "NE"
+  | "NH"
+  | "NJ"
+  | "NM"
+  | "NV"
+  | "NY"
+  | "OH"
+  | "OK"
+  | "OR"
+  | "PA"
+  | "RI"
+  | "SC"
+  | "SD"
+  | "TN"
+  | "TX"
+  | "UT"
+  | "VA"
+  | "VT"
+  | "WA"
+  | "WI"
+  | "WV"
+  | "WY"
+  | null
+>;
+
+// Source: src/lib/queries.ts
+// Variable: OWNED_CREATOR_REGION_QUERY
+// Query: *[_type=="creator" && _id==$id][0].place.region
+export type OWNED_CREATOR_REGION_QUERY_RESULT =
+  | "AK"
+  | "AL"
+  | "AR"
+  | "AZ"
+  | "CA"
+  | "CO"
+  | "CT"
+  | "DC"
+  | "DE"
+  | "FL"
+  | "GA"
+  | "HI"
+  | "IA"
+  | "ID"
+  | "IL"
+  | "IN"
+  | "KS"
+  | "KY"
+  | "LA"
+  | "MA"
+  | "MD"
+  | "ME"
+  | "MI"
+  | "MN"
+  | "MO"
+  | "MS"
+  | "MT"
+  | "NC"
+  | "ND"
+  | "NE"
+  | "NH"
+  | "NJ"
+  | "NM"
+  | "NV"
+  | "NY"
+  | "OH"
+  | "OK"
+  | "OR"
+  | "PA"
+  | "RI"
+  | "SC"
+  | "SD"
+  | "TN"
+  | "TX"
+  | "UT"
+  | "VA"
+  | "VT"
+  | "WA"
+  | "WI"
+  | "WV"
+  | "WY"
+  | null;
+
+// Source: src/lib/queries.ts
 // Variable: CONVENTION_QUERY
 // Query: *[_type=="convention" && slug.current==$slug][0]{  _id,name,"slug":slug.current,place,whenHint,startDate,endDate,website,description,image}
 export type CONVENTION_QUERY_RESULT = {
@@ -3540,6 +3683,9 @@ declare module "@sanity/client" {
     '*[_type=="resource" && slug.current==$slug][0]{\n  _id,title,kind,category,description,body,videoUrl,url,image,publishedAt,source,\n  "fileUrl":file.asset->url,\n  "creatorName":creator->name,"creatorSlug":creator->slug.current\n}': RESOURCE_QUERY_RESULT;
     'array::unique(*[_type=="resource" && defined(slug.current) && defined(category)].category)': RESOURCE_CATEGORIES_WITH_CONTENT_QUERY_RESULT;
     '*[_type=="convention" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,place,whenHint,startDate,endDate,description,image,"ratings":*[_type=="venueRating" && target._ref==^._id]{benefits}}': CONVENTIONS_QUERY_RESULT;
+    '*[_type=="convention" && defined(slug.current)\n    && (!defined($region) || place.region == $region)\n    && (!defined($q) || name match $q || place.city match $q)\n  ]|order(name asc){_id,name,"slug":slug.current,place,whenHint,startDate,endDate,description,image,"ratings":*[_type=="venueRating" && target._ref==^._id]{benefits}}': FILTERED_CONVENTIONS_QUERY_RESULT;
+    'array::unique(*[_type=="convention" && defined(slug.current) && defined(place.region)].place.region)': CONVENTION_REGIONS_QUERY_RESULT;
+    '*[_type=="creator" && _id==$id][0].place.region': OWNED_CREATOR_REGION_QUERY_RESULT;
     '*[_type=="convention" && slug.current==$slug][0]{\n  _id,name,"slug":slug.current,place,whenHint,startDate,endDate,website,description,image\n}': CONVENTION_QUERY_RESULT;
     '*[_type=="conventionAppearance" && venue._ref==$conId && status=="tabling" && defined(creator->slug.current)]\n  | order(creator->name asc){\n  "_id": creator->_id,"name": creator->name,"slug": creator->slug.current,"photo": creator->photo,\n  tableNumber,forDate\n}': CONVENTION_TABLERS_QUERY_RESULT;
     '*[_type=="venueRating" && target._ref==$conId]{\n  benefits,celebrityFocused,tableCost,note,\n  "creatorName":creator->name,"creatorSlug":creator->slug.current\n}': CONVENTION_RATINGS_QUERY_RESULT;

@@ -401,6 +401,10 @@ export interface SiteSettings {
     conventionAttendingLabel: string;
     conventionManageAttendingLabel: string;
     conventionCancelAttendingLabel: string;
+    /** Conventions listing — the State search box + the signed-in creator's
+     *  one-tap "Near me" shortcut ({state} = their state name). */
+    searchConventionsLabel: string;
+    conventionNearMeLabel: string;
     /** "Creators with tables" list on a convention page + the table-number prefix. */
     conventionTablersHeading: string;
     tableLabel: string;
@@ -559,6 +563,7 @@ export interface SiteSettings {
     genreCreators: string;
     filteredBooks: string;
     filteredCreators: string;
+    filteredConventions: string;
     columns: string;
     interviews: string;
     resources: string;
@@ -982,6 +987,8 @@ const DEFAULTS: SiteSettings = {
     conventionAttendingLabel: "I'm Attending",
     conventionManageAttendingLabel: "Manage Attendance",
     conventionCancelAttendingLabel: "Cancel attendance",
+    searchConventionsLabel: "Search conventions",
+    conventionNearMeLabel: "Shows in {state}",
     conventionTablersHeading: "Creators with tables",
     tableLabel: "Table",
     creatorEventsHeading: "Upcoming events",
@@ -1131,6 +1138,8 @@ const DEFAULTS: SiteSettings = {
     filteredBooks: "Nothing matches all of those at once. Try loosening one.",
     filteredCreators:
       "No comic creators match all of those at once. Try loosening one.",
+    filteredConventions:
+      "No conventions match — here's everything coming up instead.",
     columns: "No columns yet.",
     interviews: "No interviews yet.",
     resources: "No resources yet — check back soon.",

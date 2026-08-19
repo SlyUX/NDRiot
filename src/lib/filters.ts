@@ -1,5 +1,5 @@
 import type { Facet } from '@/components/filter-bar'
-import { FORMATS, GENRES, MATURITY_RATINGS } from '@/lib/taxonomy'
+import { FORMATS, GENRES, MATURITY_RATINGS, US_STATES } from '@/lib/taxonomy'
 
 /**
  * Turning URL search params into GROQ parameters.
@@ -113,6 +113,44 @@ export function creatorFacets(genres: readonly string[]): Facet[] {
     { param: 'audience', label: 'Audience', options: MATURITY_RATINGS },
     { param: 'collaborating', label: 'Open to collaboration', options: [], toggle: true },
   ]
+}
+
+/**
+ * Region facet options: the US states that actually have a convention, as
+ * display names in the taxonomy's canonical order. Like genreOptions, a state
+ * nobody tables in is never offered — picking it would only land on an empty
+ * page. `present` is the set of state CODES from CONVENTION_REGIONS_QUERY.
+ */
+export function conventionRegionOptions(present: readonly string[]): string[] {
+  const set = new Set(present)
+  return US_STATES.filter((s) => set.has(s.code)).map((s) => s.name)
+}
+
+/**
+ * Conventions filter by US state. The facet carries state NAMES (what a reader
+ * reads); the stored value is the state CODE (place.region), so conventionFilters
+ * maps the name back to its code. State-only for now — city is free text on both
+ * sides, so a reliable city filter waits for a canonical city list.
+ */
+export function conventionFacets(regionNames: readonly string[]): Facet[] {
+  return [{ param: 'region', label: 'State', options: regionNames }]
+}
+
+export function conventionFilters(params: SearchParams) {
+  const name = one(params.region)
+  // Map the display name in the URL to its stored code; an unknown name (a
+  // hand-typed ?region=Atlantis) drops to null — show everything, not nothing.
+  const region = name ? (US_STATES.find((s) => s.name === name)?.code ?? null) : null
+  return {
+    region,
+    q: searchTerm(params.q),
+  }
+}
+
+/** The display name for a stored state code, or null — for the "Near me" chip. */
+export function stateName(code: string | null | undefined): string | null {
+  if (!code) return null
+  return US_STATES.find((s) => s.code === code)?.name ?? null
 }
 
 /**

@@ -608,6 +608,20 @@ export default defineType({
             'Removes an appearance from inside the modal (delists the creator) — e.g. "Cancel attendance".',
         }),
         defineField({
+          name: "searchConventionsLabel",
+          title: "Conventions listing — search box label",
+          type: "string",
+          description:
+            'Placeholder + accessible name for the search box on the conventions directory — e.g. "Search conventions".',
+        }),
+        defineField({
+          name: "conventionNearMeLabel",
+          title: 'Conventions listing — "Near me" shortcut',
+          type: "string",
+          description:
+            'One-tap shortcut shown to a signed-in creator who has set a location, pre-filling the State filter with their own state. Use the {state} token — e.g. "Shows in {state}".',
+        }),
+        defineField({
           name: "conventionTablersHeading",
           title: "Convention page — creators-with-tables heading",
           type: "string",
@@ -1482,6 +1496,13 @@ export default defineType({
           name: "filteredCreators",
           title: "No creators match the filters",
           type: "string",
+        }),
+        defineField({
+          name: "filteredConventions",
+          title: "No conventions match the state filter",
+          type: "string",
+          description:
+            "Shown when a state filter yields no conventions — the page then offers everything upcoming instead (a discovery moment, not a dead end; §3).",
         }),
         defineField({
           name: "saved",

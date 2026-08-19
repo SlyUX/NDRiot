@@ -382,6 +382,26 @@ export const RESOURCE_CATEGORIES_WITH_CONTENT_QUERY = defineQuery(
 export const CONVENTIONS_QUERY = defineQuery(
   `*[_type=="convention" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,place,whenHint,startDate,endDate,description,image,"ratings":*[_type=="venueRating" && target._ref==^._id]{benefits}}`,
 );
+// The same directory, narrowed by an explicit State filter (place.region, a
+// US-state code) and/or a name/city search. Absent params mean "no filter", not
+// "match nothing". Fetched alphabetically; the page reorders upcoming-first (§3-
+// safe date order) in JS, since GROQ can't band by upcoming/dateless/past.
+export const FILTERED_CONVENTIONS_QUERY = defineQuery(
+  `*[_type=="convention" && defined(slug.current)
+    && (!defined($region) || place.region == $region)
+    && (!defined($q) || name match $q || place.city match $q)
+  ]|order(name asc){_id,name,"slug":slug.current,place,whenHint,startDate,endDate,description,image,"ratings":*[_type=="venueRating" && target._ref==^._id]{benefits}}`,
+);
+// The distinct US-state codes that actually have a convention — the region
+// facet's option set (a state nobody tables in is never offered).
+export const CONVENTION_REGIONS_QUERY = defineQuery(
+  `array::unique(*[_type=="convention" && defined(slug.current) && defined(place.region)].place.region)`,
+);
+// One owned creator's stored region code — seeds the "Near me" shortcut on the
+// conventions page. Null when they haven't set a location.
+export const OWNED_CREATOR_REGION_QUERY = defineQuery(
+  `*[_type=="creator" && _id==$id][0].place.region`,
+);
 // A single convention page.
 export const CONVENTION_QUERY =
   defineQuery(`*[_type=="convention" && slug.current==$slug][0]{

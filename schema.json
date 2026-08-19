@@ -5300,6 +5300,20 @@
               },
               "optional": true
             },
+            "searchConventionsLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "conventionNearMeLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "conventionTablersHeading": {
               "type": "objectAttribute",
               "value": {
@@ -6248,6 +6262,13 @@
               "optional": true
             },
             "filteredCreators": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "filteredConventions": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"
