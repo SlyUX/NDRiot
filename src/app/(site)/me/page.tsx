@@ -4,6 +4,11 @@ import Link from "next/link";
 
 import { AlternatingSections } from "@/components/alternating-sections";
 import { SignInButton, SignOutButton } from "@/components/auth-controls";
+import {
+  CollabRequests,
+  type IncomingCollab,
+  type SentCollab,
+} from "@/components/collab-requests";
 import { EventDialog } from "@/components/event-dialog";
 import { EventsManager } from "@/components/events-manager";
 import { NewsletterOptIn } from "@/components/newsletter-opt-in";
@@ -37,10 +42,12 @@ import {
   SAVED_CREATORS_QUERY,
   UPDATES_FEED_QUERY,
   APPEARANCE_FEED_QUERY,
+  COLLAB_CREATORS_QUERY,
 } from "@/lib/queries";
 import { appearanceToFeedItem, mergeFeed } from "@/lib/feed-mappers";
 import { getSiteSettings } from "@/lib/site-settings";
 import { ownedDocIds } from "@/sanity/ownership-client";
+import { incomingRequests, sentRequests } from "@/sanity/collab-client";
 import { savedItems } from "@/sanity/reader-client";
 import { urlFor } from "@/sanity/image";
 import type {
@@ -192,6 +199,45 @@ export default async function AccountPage() {
 
   const isCreator = ownedCreators.length > 0;
   const hasSaves = savedBooks.length > 0 || savedCreators.length > 0;
+
+  // Collaboration requests — incoming (respond) + sent (status). Creator-only;
+  // the private request docs resolve to public identities via COLLAB_CREATORS_QUERY.
+  let incomingCollab: IncomingCollab[] = [];
+  let sentCollab: SentCollab[] = [];
+  if (isCreator) {
+    const myCreatorId = ownedCreatorIds[0];
+    const [incoming, sent] = await Promise.all([
+      incomingRequests(myCreatorId),
+      sentRequests(myCreatorId),
+    ]);
+    const otherIds = [
+      ...new Set([
+        ...incoming.map((r) => r.fromId),
+        ...sent.map((r) => r.toId),
+      ]),
+    ];
+    const others = otherIds.length
+      ? await safeFetch<
+          { _id: string; name: string | null; slug: string | null }[]
+        >(COLLAB_CREATORS_QUERY, { ids: otherIds }, [])
+      : [];
+    const byId = new Map(others.map((c) => [c._id, c]));
+    incomingCollab = incoming.map((r) => ({
+      fromId: r.fromId,
+      name: byId.get(r.fromId)?.name ?? "A creator",
+      slug: byId.get(r.fromId)?.slug ?? null,
+      genre: r.genre,
+      status: r.status,
+      response: r.response,
+    }));
+    sentCollab = sent.map((r) => ({
+      name: byId.get(r.toId)?.name ?? "A creator",
+      slug: byId.get(r.toId)?.slug ?? null,
+      genre: r.genre,
+      status: r.status,
+      response: r.response,
+    }));
+  }
 
   // Your Updates — the creator's own posts (updates targeting a creator or comic
   // they own), for the dashboard. Owner-editable, same as on the profile.
@@ -454,6 +500,18 @@ export default async function AccountPage() {
                   />
                 ) : undefined
               }
+            />
+          </Section>
+        )}
+
+        {/* Collaboration requests — creators only. Incoming (respond with a
+            canned preset) + sent (status). */}
+        {isCreator && (
+          <Section padding="md">
+            <CollabRequests
+              incoming={incomingCollab}
+              sent={sentCollab}
+              copy={settings.collab}
             />
           </Section>
         )}

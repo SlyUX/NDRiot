@@ -410,6 +410,21 @@ export const APPEARANCE_STATUSES = [
 
 export type AppearanceStatus = (typeof APPEARANCE_STATUSES)[number]["value"];
 
+/**
+ * The canned replies to a collaboration request — a fixed set, NO free text
+ * (that no-free-text property is the whole safety model: nothing to moderate).
+ * `accepts` marks the one reply that opens a channel (triggers the intro email).
+ * The reader-facing label for each lives in CMS (collab settings), keyed by
+ * `value`; only the structural value + accept flag live here.
+ */
+export const COLLAB_RESPONSES = [
+  { value: "accepted", accepts: true },
+  { value: "maybe", accepts: false },
+  { value: "declined", accepts: false },
+] as const;
+
+export type CollabResponseValue = (typeof COLLAB_RESPONSES)[number]["value"];
+
 /** Third-person badge for an appearance status ("Tabling"), vs the form's first-person option. */
 export function appearanceStatusDisplay(status?: string | null): string {
   return APPEARANCE_STATUSES.find((s) => s.value === status)?.display ?? "";

@@ -34,6 +34,7 @@ export default defineType({
     { name: "about", title: "About & AI letter" },
     { name: "newsletter", title: "Newsletter" },
     { name: "notifications", title: "Notification emails" },
+    { name: "collab", title: "Collaboration handshake" },
     { name: "nav", title: "Navigation" },
   ],
   fields: [
@@ -266,6 +267,88 @@ export default defineType({
           type: "text",
           rows: 8,
         }),
+        defineField({
+          name: "collabRequestSubject",
+          title: "Collab request → recipient — subject",
+          type: "string",
+          description: "Tokens: {from} (the requester’s name).",
+        }),
+        defineField({
+          name: "collabRequestBody",
+          title: "Collab request → recipient — body",
+          type: "text",
+          rows: 14,
+          description:
+            "Explains the privacy paradigm + that it’s their one, no-obligation request. Tokens: {to}, {from}, {genre}, {profile} (requester’s public profile URL), {dashboard} (the /me link to respond).",
+        }),
+        defineField({
+          name: "collabResponseSubject",
+          title: "Collab response → requester — subject",
+          type: "string",
+          description: "Tokens: {to} (the responder’s name).",
+        }),
+        defineField({
+          name: "collabResponseBody",
+          title: "Collab response → requester — body",
+          type: "text",
+          rows: 12,
+          description:
+            "Tells the requester the canned answer, reassuring either way. Tokens: {from}, {to}, {genre}, {response} (the chosen preset).",
+        }),
+        defineField({
+          name: "collabIntroSubject",
+          title: "Collab intro (on “yes”) — subject",
+          type: "string",
+          description: "Tokens: {other} (the other creator’s name).",
+        }),
+        defineField({
+          name: "collabIntroBody",
+          title: "Collab intro (on “yes”) — body",
+          type: "text",
+          rows: 10,
+          description:
+            "Sent to each creator on a mutual yes; reply-to is the other person, so addresses surface only on reply. Tokens: {you}, {other}, {genre}.",
+        }),
+      ],
+    }),
+
+    defineField({
+      name: "collab",
+      title: "Collaboration handshake",
+      type: "object",
+      group: "collab",
+      options: { collapsible: true, collapsed: true },
+      description:
+        "Reader-facing copy for the creator-to-creator collaboration request flow (the emails live under Notification emails). {name} = the other creator; {genre} = the chosen genre.",
+      fields: [
+        defineField({ name: "requestButtonLabel", title: "Profile button", type: "string" }),
+        defineField({ name: "requestPendingLabel", title: "Button — after sending (awaiting reply)", type: "string" }),
+        defineField({ name: "requestRespondedPrefix", title: "Button — prefix before their reply", type: "string", description: 'e.g. "They responded:" then the preset.' }),
+        defineField({ name: "dialogTitle", title: "Request dialog — title", type: "string", description: "Tokens: {name}." }),
+        defineField({
+          name: "dialogBody",
+          title: "Request dialog — body",
+          type: "text",
+          rows: 8,
+          description:
+            "Where the “one request, ever” gravity + the community / no-obligation framing lives. Tokens: {name}.",
+        }),
+        defineField({ name: "genreLabel", title: "Genre field — label", type: "string" }),
+        defineField({ name: "genrePlaceholder", title: "Genre field — placeholder", type: "string" }),
+        defineField({ name: "submitLabel", title: "Dialog — send button", type: "string" }),
+        defineField({ name: "cancelLabel", title: "Dialog — cancel button", type: "string" }),
+        defineField({ name: "responseAcceptedLabel", title: "Preset — accept (opens the intro)", type: "string" }),
+        defineField({ name: "responseMaybeLabel", title: "Preset — maybe later", type: "string" }),
+        defineField({ name: "responseDeclinedLabel", title: "Preset — not right now", type: "string" }),
+        defineField({ name: "incomingHeading", title: "/me — incoming requests heading", type: "string" }),
+        defineField({ name: "incomingIntro", title: "/me — incoming requests intro", type: "text", rows: 3 }),
+        defineField({ name: "incomingVerb", title: "/me — incoming item phrase", type: "string", description: 'Reads "{name} <phrase> {genre}" — e.g. "wants to collaborate on".' }),
+        defineField({ name: "respondPrompt", title: "/me — respond prompt", type: "string" }),
+        defineField({ name: "incomingEmpty", title: "/me — no incoming requests", type: "string" }),
+        defineField({ name: "sentHeading", title: "/me — sent requests heading", type: "string" }),
+        defineField({ name: "sentPendingLabel", title: "/me — sent, awaiting reply", type: "string" }),
+        defineField({ name: "sentRespondedPrefix", title: "/me — sent, prefix before their reply", type: "string" }),
+        defineField({ name: "sentEmpty", title: "/me — no sent requests", type: "string" }),
       ],
     }),
 

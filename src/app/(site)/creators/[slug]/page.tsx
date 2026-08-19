@@ -10,6 +10,7 @@ import { FeedPreview } from "@/components/feed-preview";
 import { JsonLd } from "@/components/json-ld";
 import { OrganizationLink } from "@/components/organization-link";
 import PortableTextBody from "@/components/PortableTextBody";
+import { CollabRequestButton } from "@/components/collab-request-button";
 import { SaveButton } from "@/components/save-button";
 import SocialLinks from "@/components/SocialLinks";
 import { SocialIcon } from "@/components/social-icon";
@@ -24,9 +25,11 @@ import { bookToCard, favoriteToCard } from "@/lib/card-mappers";
 import { formatPlace } from "@/lib/place";
 import { isUpcomingDate } from "@/lib/conventions";
 import { pageMetadata } from "@/lib/page-metadata";
+import { GENRES } from "@/lib/taxonomy";
 import { auth } from "@/auth";
 import { isSaved } from "@/sanity/reader-client";
-import { ownsCreator } from "@/sanity/ownership-client";
+import { ownsCreator, creatorsOwnedBy } from "@/sanity/ownership-client";
+import { sentRequest, type CollabStatus } from "@/sanity/collab-client";
 import { fetchFeed } from "@/lib/feed-parse";
 import {
   safeFetch,
@@ -116,6 +119,24 @@ export default async function CreatorPage({
         ownsCreator(email, creator._id),
       ])
     : [false, false];
+
+  // Collab request: only a signed-in creator, viewing another open-to-collab
+  // profile, may ask. Resolve their own creator id + any existing request (one
+  // per creator, ever → the button becomes a status line once sent).
+  let collab: {
+    status: CollabStatus | null;
+    response: string | null;
+  } | null = null;
+  if (email && !isOwner && creator.openToCollaboration) {
+    const viewerCreatorId = (await creatorsOwnedBy(email))[0];
+    if (viewerCreatorId) {
+      const existing = await sentRequest(viewerCreatorId, creator._id);
+      collab = {
+        status: existing?.status ?? null,
+        response: existing?.response ?? null,
+      };
+    }
+  }
 
   // Favorites are shown as horizontal creator cards. All on-site in practice;
   // any without a profile or link are dropped.
@@ -376,6 +397,16 @@ export default async function CreatorPage({
                           body: settings.sections.accountSignInBody,
                           cta: settings.sections.accountSignInCta,
                         }}
+                      />
+                    )}
+                    {collab && (
+                      <CollabRequestButton
+                        toId={creator._id}
+                        toName={creator.name ?? ""}
+                        genres={GENRES}
+                        copy={settings.collab}
+                        status={collab.status}
+                        response={collab.response}
                       />
                     )}
                     <ShareBar

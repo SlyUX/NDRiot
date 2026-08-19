@@ -402,6 +402,11 @@ export const CONVENTION_REGIONS_QUERY = defineQuery(
 export const OWNED_CREATOR_REGION_QUERY = defineQuery(
   `*[_type=="creator" && _id==$id][0].place.region`,
 );
+// Minimal name + slug for a set of creators — resolves collab-request ids (which
+// live in the private dataset) to public identities for the /me dashboard.
+export const COLLAB_CREATORS_QUERY = defineQuery(
+  `*[_type=="creator" && _id in $ids]{_id,name,"slug":slug.current}`,
+);
 // A single convention page.
 export const CONVENTION_QUERY =
   defineQuery(`*[_type=="convention" && slug.current==$slug][0]{

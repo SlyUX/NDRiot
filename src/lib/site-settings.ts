@@ -301,6 +301,36 @@ export interface ContactSettings {
   errorMessage: string;
 }
 
+/** Reader-facing copy for the creator-to-creator collaboration handshake.
+ *  A `type` (not `interface`) so it satisfies mergeGroup's Record constraint. */
+export type CollabSettings = {
+  /** Profile button + its states. */
+  requestButtonLabel: string;
+  requestPendingLabel: string;
+  requestRespondedPrefix: string;
+  /** The confirmation dialog — where the "one request, no obligation" gravity lives. */
+  dialogTitle: string;
+  dialogBody: string;
+  genreLabel: string;
+  genrePlaceholder: string;
+  submitLabel: string;
+  cancelLabel: string;
+  /** The three canned replies (labels for taxonomy COLLAB_RESPONSES). */
+  responseAcceptedLabel: string;
+  responseMaybeLabel: string;
+  responseDeclinedLabel: string;
+  /** The /me sections. */
+  incomingHeading: string;
+  incomingIntro: string;
+  incomingVerb: string;
+  respondPrompt: string;
+  incomingEmpty: string;
+  sentHeading: string;
+  sentPendingLabel: string;
+  sentRespondedPrefix: string;
+  sentEmpty: string;
+}
+
 export interface FaqItem {
   question: string;
   answer: string;
@@ -341,6 +371,13 @@ export type NotificationsSettings = {
   bookSubmitBody: string;
   bookDigestSubject: string;
   bookDigestBody: string;
+  /** Collaboration handshake — request → B, response → A, intro on a mutual yes. */
+  collabRequestSubject: string;
+  collabRequestBody: string;
+  collabResponseSubject: string;
+  collabResponseBody: string;
+  collabIntroSubject: string;
+  collabIntroBody: string;
 };
 
 export interface SiteSettings {
@@ -362,6 +399,7 @@ export interface SiteSettings {
   bookIntake: BookIntakeSettings;
   mediaIntake: MediaIntakeSettings;
   contact: ContactSettings;
+  collab: CollabSettings;
   home: {
     genresHeading: string;
     booksHeading: string;
@@ -643,6 +681,54 @@ const DEFAULTS: SiteSettings = {
       "{titles}",
       "",
       "Thanks for adding to the directory.",
+      "",
+      "— ND Riot",
+    ].join("\n"),
+    collabRequestSubject: "{from} wants to collaborate with you on ND Riot",
+    collabRequestBody: [
+      "Hi {to},",
+      "",
+      "{from}, a creator on ND Riot, has sent you a collaboration request.",
+      "",
+      "• Who: {from} — {profile}",
+      "• Genre they have in mind: {genre}",
+      "",
+      "How this works — your privacy is protected:",
+      "• ND Riot did not share your email to send you this. {from} only ever sees your public profile.",
+      "• This is a gated, canned-response process: you reply by choosing a quick preset — no back-and-forth, no pressure.",
+      "• From your dashboard you can reply with “Yes, let’s connect,” “Maybe later,” or “Not right now.”",
+      "• Only if you choose “Yes, let’s connect” does ND Riot introduce you both by email so you can talk directly. Until then, neither of you sees the other’s address.",
+      "• You are under no obligation to respond, and each creator can send you only one request — so there is never any repeated asking.",
+      "",
+      "Please know: a decline, or no answer at all, is completely okay. This is about building community — nobody should read silence or a “not right now” as a personal judgment.",
+      "",
+      "Respond from your dashboard: {dashboard}",
+      "",
+      "— ND Riot",
+    ].join("\n"),
+    collabResponseSubject: "{to} responded to your collaboration request",
+    collabResponseBody: [
+      "Hi {from},",
+      "",
+      "{to} responded to your request to collaborate on {genre}:",
+      "",
+      "  “{response}”",
+      "",
+      "If they chose “Yes, let’s connect,” we’ve introduced you both by email — check your inbox for a message you can simply reply to.",
+      "",
+      "If not, that’s completely okay. Everyone here is under no obligation, and a “maybe later” or “not right now” is never a personal judgment — just where things stand today. Thanks for reaching out and helping build the community.",
+      "",
+      "— ND Riot",
+    ].join("\n"),
+    collabIntroSubject: "You’re connected on ND Riot — {other}",
+    collabIntroBody: [
+      "Hi {you},",
+      "",
+      "Good news — you and {other} both want to collaborate on {genre}.",
+      "",
+      "Just reply to this email to start the conversation. Your reply goes straight to {other}; your address stays private until you send it.",
+      "",
+      "Have fun making something together.",
       "",
       "— ND Riot",
     ].join("\n"),
@@ -946,6 +1032,36 @@ const DEFAULTS: SiteSettings = {
     successMessage: "Thanks — your message is on its way. We’ll be in touch.",
     errorMessage: "That didn’t send. Try again in a moment.",
   },
+  collab: {
+    requestButtonLabel: "Request to collaborate",
+    requestPendingLabel: "Request sent — awaiting a reply",
+    requestRespondedPrefix: "They responded:",
+    dialogTitle: "Request to collaborate with {name}",
+    dialogBody: [
+      "You can send one collaboration request to {name} — just one, ever — so make it count.",
+      "",
+      "Choose the genre you have in mind. {name} gets an email with your public profile and can reply with a quick preset. If they choose “Yes, let’s connect,” we introduce you both by email — until then, neither of you sees the other’s address.",
+      "",
+      "Please remember: {name} is under no obligation to respond, and a “not right now” or no answer at all is completely okay. This is about building community — never take silence or a decline as a personal criticism.",
+    ].join("\n"),
+    genreLabel: "Genre you have in mind",
+    genrePlaceholder: "Choose a genre",
+    submitLabel: "Send request",
+    cancelLabel: "Cancel",
+    responseAcceptedLabel: "Yes — let’s connect",
+    responseMaybeLabel: "Maybe later",
+    responseDeclinedLabel: "Not right now",
+    incomingHeading: "Collaboration requests",
+    incomingIntro:
+      "Creators who’d like to work with you. Respond with a preset — you’re under no obligation, and there’s no wrong answer. Only a “Yes, let’s connect” shares an email introduction.",
+    incomingVerb: "wants to collaborate on",
+    respondPrompt: "Respond:",
+    incomingEmpty: "No collaboration requests right now.",
+    sentHeading: "Requests you’ve sent",
+    sentPendingLabel: "Awaiting a reply",
+    sentRespondedPrefix: "They responded:",
+    sentEmpty: "You haven’t sent any collaboration requests yet.",
+  },
   home: {
     genresHeading: "Browse by genre",
     booksHeading: "Comics",
@@ -1186,7 +1302,7 @@ export const SITE_SETTINGS_QUERY = `*[_id=="siteSettings"][0]{
   siteTitle,siteDescription,footer,discordUrl,socialLinks[]{platform,url},
   newsletter{heading,description,placeholder,buttonLabel,consent,successMessage,errorMessage},
   about{heading,body,faqHeading,faq[]{question,answer},seoTitle,seoDescription},aiLetter,
-  home,sections,empty,creatorIntake,bookIntake,mediaIntake,notifications,
+  home,sections,empty,creatorIntake,bookIntake,mediaIntake,notifications,collab,
   hero{background,headline,body,tagline,featureCtaLabel,featuredHeading,newHeading,ctas[]{label,href}},
   join{heading,editHeading,body,ctaLabel,formUrl,funnelHeading,funnelIntro,creatorsLabel,creatorsDesc,contactLabel,contactDesc,mediaLabel,mediaDesc,readersLabel,readersDesc,readersBadge,terms,termsWhy},
   contact{heading,linkLabel,body,nameLabel,emailLabel,subjectLabel,messageLabel,submitLabel,successMessage,errorMessage},
@@ -1296,6 +1412,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     creatorIntake: mergeGroup(DEFAULTS.creatorIntake, data.creatorIntake),
     bookIntake: mergeGroup(DEFAULTS.bookIntake, data.bookIntake),
     mediaIntake: mergeGroup(DEFAULTS.mediaIntake, data.mediaIntake),
+    collab: mergeGroup(DEFAULTS.collab, data.collab),
     contact: {
       // Field-by-field like `join` above: a blank string falls back to the
       // default, and the rich-text body passes through untouched.

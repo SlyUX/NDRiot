@@ -807,6 +807,35 @@ export type SiteSettings = {
     bookSubmitBody?: string;
     bookDigestSubject?: string;
     bookDigestBody?: string;
+    collabRequestSubject?: string;
+    collabRequestBody?: string;
+    collabResponseSubject?: string;
+    collabResponseBody?: string;
+    collabIntroSubject?: string;
+    collabIntroBody?: string;
+  };
+  collab?: {
+    requestButtonLabel?: string;
+    requestPendingLabel?: string;
+    requestRespondedPrefix?: string;
+    dialogTitle?: string;
+    dialogBody?: string;
+    genreLabel?: string;
+    genrePlaceholder?: string;
+    submitLabel?: string;
+    cancelLabel?: string;
+    responseAcceptedLabel?: string;
+    responseMaybeLabel?: string;
+    responseDeclinedLabel?: string;
+    incomingHeading?: string;
+    incomingIntro?: string;
+    incomingVerb?: string;
+    respondPrompt?: string;
+    incomingEmpty?: string;
+    sentHeading?: string;
+    sentPendingLabel?: string;
+    sentRespondedPrefix?: string;
+    sentEmpty?: string;
   };
   hero?: {
     background?: ImageWithAlt;
@@ -3068,6 +3097,15 @@ export type OWNED_CREATOR_REGION_QUERY_RESULT =
   | null;
 
 // Source: src/lib/queries.ts
+// Variable: COLLAB_CREATORS_QUERY
+// Query: *[_type=="creator" && _id in $ids]{_id,name,"slug":slug.current}
+export type COLLAB_CREATORS_QUERY_RESULT = Array<{
+  _id: string;
+  name: string;
+  slug: string;
+}>;
+
+// Source: src/lib/queries.ts
 // Variable: CONVENTION_QUERY
 // Query: *[_type=="convention" && slug.current==$slug][0]{  _id,name,"slug":slug.current,place,whenHint,startDate,endDate,website,description,image}
 export type CONVENTION_QUERY_RESULT = {
@@ -3739,6 +3777,7 @@ declare module "@sanity/client" {
     '*[_type=="convention" && defined(slug.current)\n    && (!defined($region) || place.region == $region)\n    && (!defined($q) || name match $q || place.city match $q)\n  ]|order(name asc){_id,name,"slug":slug.current,place,whenHint,startDate,endDate,description,image,"ratings":*[_type=="venueRating" && target._ref==^._id]{benefits}}': FILTERED_CONVENTIONS_QUERY_RESULT;
     'array::unique(*[_type=="convention" && defined(slug.current) && defined(place.region)].place.region)': CONVENTION_REGIONS_QUERY_RESULT;
     '*[_type=="creator" && _id==$id][0].place.region': OWNED_CREATOR_REGION_QUERY_RESULT;
+    '*[_type=="creator" && _id in $ids]{_id,name,"slug":slug.current}': COLLAB_CREATORS_QUERY_RESULT;
     '*[_type=="convention" && slug.current==$slug][0]{\n  _id,name,"slug":slug.current,place,whenHint,startDate,endDate,website,description,image\n}': CONVENTION_QUERY_RESULT;
     '*[_type=="conventionAppearance" && venue._ref==$conId && status=="tabling" && defined(creator->slug.current)]\n  | order(creator->name asc){\n  "_id": creator->_id,"name": creator->name,"slug": creator->slug.current,"photo": creator->photo,\n  tableNumber,forDate\n}': CONVENTION_TABLERS_QUERY_RESULT;
     '*[_type=="venueRating" && target._ref==$conId]{\n  benefits,celebrityFocused,tableCost,note,\n  "creatorName":creator->name,"creatorSlug":creator->slug.current\n}': CONVENTION_RATINGS_QUERY_RESULT;
