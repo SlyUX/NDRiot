@@ -1255,6 +1255,13 @@
         },
         "optional": true
       },
+      "note": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
       "forDate": {
         "type": "objectAttribute",
         "value": {
@@ -1419,6 +1426,36 @@
     }
   },
   {
+    "type": "type",
+    "name": "media.reference",
+    "value": {
+      "type": "object",
+      "attributes": {
+        "_ref": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string"
+          }
+        },
+        "_type": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string",
+            "value": "reference"
+          }
+        },
+        "_weak": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "boolean"
+          },
+          "optional": true
+        }
+      },
+      "dereferencesTo": "media"
+    }
+  },
+  {
     "name": "update",
     "type": "document",
     "attributes": {
@@ -1523,7 +1560,15 @@
               },
               {
                 "type": "inline",
+                "name": "book.reference"
+              },
+              {
+                "type": "inline",
                 "name": "convention.reference"
+              },
+              {
+                "type": "inline",
+                "name": "media.reference"
               }
             ]
           }
@@ -3705,6 +3750,50 @@
         },
         "optional": true
       },
+      "videos": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "array",
+          "of": {
+            "type": "object",
+            "attributes": {
+              "title": {
+                "type": "objectAttribute",
+                "value": {
+                  "type": "string"
+                },
+                "optional": false
+              },
+              "url": {
+                "type": "objectAttribute",
+                "value": {
+                  "type": "string"
+                },
+                "optional": false
+              },
+              "_type": {
+                "type": "objectAttribute",
+                "value": {
+                  "type": "string",
+                  "value": "bookVideo"
+                }
+              }
+            },
+            "rest": {
+              "type": "object",
+              "attributes": {
+                "_key": {
+                  "type": "objectAttribute",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "optional": true
+      },
       "previewUrl": {
         "type": "objectAttribute",
         "value": {
@@ -4954,6 +5043,27 @@
                 }
               },
               "optional": true
+            },
+            "loggedInGreeting": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "loggedInDashboardLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "loggedInProfileLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
             }
           }
         },
@@ -4993,6 +5103,13 @@
               "optional": true
             },
             "resourcesHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "conventionsHeading": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"
@@ -5162,6 +5279,27 @@
               },
               "optional": true
             },
+            "conventionAttendingLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "conventionManageAttendingLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "conventionCancelAttendingLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "conventionTablersHeading": {
               "type": "objectAttribute",
               "value": {
@@ -5177,6 +5315,13 @@
               "optional": true
             },
             "creatorEventsHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "eventDateTba": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"
@@ -5211,6 +5356,13 @@
               },
               "optional": true
             },
+            "conventionRateUpdateLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "conventionRateNoteLabel": {
               "type": "objectAttribute",
               "value": {
@@ -5225,14 +5377,7 @@
               },
               "optional": true
             },
-            "conventionRateCelebrityLabel": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
-            "conventionRateTableCostLabel": {
+            "conventionRateSkipNote": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"
@@ -5240,6 +5385,34 @@
               "optional": true
             },
             "conventionRateNoOpinion": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "conventionRatingsScaleNote": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "conventionRatingsEmpty": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "conventionRatingCardEmpty": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "conventionFeedBody": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"
@@ -5400,20 +5573,6 @@
               },
               "optional": true
             },
-            "saveLabel": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
-            "savedLabel": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
             "followLabel": {
               "type": "objectAttribute",
               "value": {
@@ -5471,6 +5630,13 @@
               "optional": true
             },
             "accountViewCreatorLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "accountRiotingSince": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"
@@ -5582,14 +5748,7 @@
               },
               "optional": true
             },
-            "accountPostMentionsLabel": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
-            "accountPostMentionSearch": {
+            "accountPostMentionHint": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"
@@ -5610,6 +5769,13 @@
               },
               "optional": true
             },
+            "accountPostMentionBooks": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "accountPostMentionConventions": {
               "type": "objectAttribute",
               "value": {
@@ -5617,7 +5783,21 @@
               },
               "optional": true
             },
+            "accountPostMentionMedia": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "accountPostSubmitLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "accountPostingLabel": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"
@@ -5666,6 +5846,20 @@
               },
               "optional": true
             },
+            "accountEventAddHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "accountEventEditHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "accountEventsEmpty": {
               "type": "objectAttribute",
               "value": {
@@ -5687,7 +5881,21 @@
               },
               "optional": true
             },
+            "accountEventNoteLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "accountEventSaveLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "accountEventPosted": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"
@@ -5772,6 +5980,13 @@
               "optional": true
             },
             "footerAboutLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "footerPrivacyLabel": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"
@@ -5961,6 +6176,13 @@
               "optional": true
             },
             "bookCreatorsHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "bookVideosHeading": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"
@@ -7150,6 +7372,41 @@
               "optional": true
             },
             "linkEndDateLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "videosLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "videosHint": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "videoTitlePlaceholder": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "videoUrlPlaceholder": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "videoAddLabel": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

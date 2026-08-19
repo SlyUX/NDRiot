@@ -49,3 +49,6 @@ next-env.d.ts
 # the cost of missing one is a permanent commit of personal data.
 /data/*.csv
 /data/**/*.csv
+
+# Claude Code local settings (machine-specific; incl. sync-conflict copies)
+.claude/
