@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import { useActionState, useEffect, useRef, useState } from 'react'
+import { ChevronDown } from 'lucide-react'
 
 import { submitBook, type BookIntakeState } from '@/app/actions/book-intake'
 import { PairedRowsField } from '@/components/paired-rows-field'
@@ -685,22 +686,40 @@ export function BookIntakeForm({
         <fieldset className="space-y-5">
           <SectionHeading>{copy.sectionFind}</SectionHeading>
           <BookLinksField copy={copy} common={common} initial={initial?.links} />
-          {/* Videos — book trailers, interviews, readings (YouTube). Label + URL
-              per row; shown as lightbox thumbnails on the book page. */}
-          <PairedRowsField
-            legend={copy.videosLabel}
-            hint={copy.videosHint}
-            optionalLabel={common.optionalLabel}
-            leftName="videoTitle"
-            leftPlaceholder={copy.videoTitlePlaceholder}
-            rightName="videoUrl"
-            rightPlaceholder={copy.videoUrlPlaceholder}
-            rightDefault="https://"
-            addLabel={copy.videoAddLabel}
-            removeLabel={common.workRemoveLabel}
-            initial={initial?.videos}
-          />
         </fieldset>
+
+        {/* Videos — optional (YouTube trailers/interviews/readings). Collapsed by
+            default so it never clutters the required fields; label + URL per row,
+            shown as lightbox thumbnails on the comic's page. Opens automatically
+            when editing a comic that already has some. */}
+        <details
+          className="group border-border border"
+          open={(initial?.videos?.length ?? 0) > 0}
+        >
+          <summary className="text-primary flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-black tracking-widest uppercase">
+            {copy.videosLabel}
+            <ChevronDown
+              aria-hidden="true"
+              className="size-4 transition-transform group-open:rotate-180 motion-reduce:transition-none"
+            />
+          </summary>
+          <div className="border-border border-t p-4">
+            <PairedRowsField
+              legend={copy.videosLabel}
+              hideLegend
+              hint={copy.videosHint}
+              optionalLabel={common.optionalLabel}
+              leftName="videoTitle"
+              leftPlaceholder={copy.videoTitlePlaceholder}
+              rightName="videoUrl"
+              rightPlaceholder={copy.videoUrlPlaceholder}
+              rightDefault="https://"
+              addLabel={copy.videoAddLabel}
+              removeLabel={common.workRemoveLabel}
+              initial={initial?.videos}
+            />
+          </div>
+        </details>
 
         {/* — Permission — */}
         <fieldset className="space-y-5">

@@ -31,6 +31,7 @@ export function PairedRowsField({
   addLabel,
   removeLabel,
   initial,
+  hideLegend = false,
 }: {
   legend: string
   hint?: string
@@ -44,6 +45,9 @@ export function PairedRowsField({
   addLabel: string
   removeLabel: string
   initial?: { left: string; right: string }[]
+  /** Keep the legend for screen readers but hide it — when a wrapping
+   *  disclosure (e.g. a collapsible summary) already shows the label. */
+  hideLegend?: boolean
 }) {
   const [rows, setRows] = useState<{ left: string; right: string; key: number }[]>(() =>
     (initial && initial.length ? initial : [{ left: '', right: rightDefault }]).map((r, i) => ({
@@ -64,7 +68,7 @@ export function PairedRowsField({
 
   return (
     <fieldset className="space-y-3">
-      <legend className={labelClass}>
+      <legend className={hideLegend ? 'sr-only' : labelClass}>
         {legend}
         <span className="text-muted-foreground ml-2 text-[0.65rem] tracking-wider normal-case">
           ({optionalLabel})
