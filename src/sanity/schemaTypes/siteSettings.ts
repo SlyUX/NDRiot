@@ -1520,6 +1520,34 @@ export default defineType({
             'A creator’s public list of creators they endorse ("cosigns"). Use {name} for their first name — e.g. "{name}’s Cosigns" renders as "Stephen’s Cosigns".',
         }),
         defineField({
+          name: "cosignLabel",
+          title: "Cosign button — default",
+          type: "string",
+          description:
+            'Shown to a signed-in creator on ANOTHER creator\'s profile — e.g. "Cosign".',
+        }),
+        defineField({
+          name: "cosignedLabel",
+          title: "Cosign button — active (already cosigned)",
+          type: "string",
+          description: 'The pressed state — e.g. "Cosigned".',
+        }),
+        defineField({
+          name: "cosignInfoLabel",
+          title: "Cosign info icon — accessible name",
+          type: "string",
+          description:
+            'Accessible label for the (i) info icon beside the Cosign button — e.g. "What is a Cosign?".',
+        }),
+        defineField({
+          name: "cosignTooltip",
+          title: "Cosign info tooltip",
+          type: "text",
+          rows: 3,
+          description:
+            "The explanation shown in the (i) tooltip: what cosigning does, that it's public + creators-only, and that it's never ranked (§3).",
+        }),
+        defineField({
           name: "otherBooksHeading",
           title: "Book page — more from the creator heading",
           type: "string",

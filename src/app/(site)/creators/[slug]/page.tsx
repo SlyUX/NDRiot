@@ -11,6 +11,7 @@ import { JsonLd } from "@/components/json-ld";
 import { OrganizationLink } from "@/components/organization-link";
 import PortableTextBody from "@/components/PortableTextBody";
 import { CollabRequestButton } from "@/components/collab-request-button";
+import { CosignButton } from "@/components/cosign-button";
 import { InitialsAvatar } from "@/components/initials-avatar";
 import { SaveButton } from "@/components/save-button";
 import SocialLinks from "@/components/SocialLinks";
@@ -38,6 +39,7 @@ import {
   CREATOR_QUERY,
   CREATOR_UPDATES_QUERY,
   CREATOR_APPEARANCES_QUERY,
+  COSIGNED_IDS_QUERY,
 } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
 import { absoluteUrl } from "@/lib/site-url";
@@ -121,20 +123,31 @@ export default async function CreatorPage({
       ])
     : [false, false];
 
-  // Collab request: only a signed-in creator, viewing another open-to-collab
-  // profile, may ask. Resolve their own creator id + any existing request (one
-  // per creator, ever → the button becomes a status line once sent).
+  // A signed-in creator viewing ANOTHER profile can Cosign it (any creator) and,
+  // if it's open to collaboration, send a collab request. Resolve their own
+  // creator id once, then both states off it.
+  const viewerCreatorId =
+    email && !isOwner ? ((await creatorsOwnedBy(email))[0] ?? null) : null;
+
+  // Cosign: has the viewer already cosigned this profile? (null = don't show it.)
+  let cosigned: boolean | null = null;
+  // Collab: any existing request (one per creator, ever → a status line once sent).
   let collab: {
     status: CollabStatus | null;
     response: string | null;
   } | null = null;
-  if (email && !isOwner && creator.openToCollaboration) {
-    const viewerCreatorId = (await creatorsOwnedBy(email))[0];
-    if (viewerCreatorId) {
-      const existing = await sentRequest(viewerCreatorId, creator._id);
+  if (viewerCreatorId) {
+    const [cosignedRefs, collabReq] = await Promise.all([
+      safeFetch<string[]>(COSIGNED_IDS_QUERY, { id: viewerCreatorId }, []),
+      creator.openToCollaboration
+        ? sentRequest(viewerCreatorId, creator._id)
+        : Promise.resolve(null),
+    ]);
+    cosigned = cosignedRefs.includes(creator._id);
+    if (creator.openToCollaboration) {
       collab = {
-        status: existing?.status ?? null,
-        response: existing?.response ?? null,
+        status: collabReq?.status ?? null,
+        response: collabReq?.response ?? null,
       };
     }
   }
@@ -403,6 +416,16 @@ export default async function CreatorPage({
                           body: settings.sections.accountSignInBody,
                           cta: settings.sections.accountSignInCta,
                         }}
+                      />
+                    )}
+                    {cosigned !== null && (
+                      <CosignButton
+                        targetId={creator._id}
+                        initialCosigned={cosigned}
+                        cosignLabel={settings.sections.cosignLabel}
+                        cosignedLabel={settings.sections.cosignedLabel}
+                        infoLabel={settings.sections.cosignInfoLabel}
+                        tooltip={settings.sections.cosignTooltip}
                       />
                     )}
                     {collab && (

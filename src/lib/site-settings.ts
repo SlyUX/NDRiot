@@ -581,6 +581,11 @@ export interface SiteSettings {
     creatorWorksHeading: string;
     creatorOrganizationsHeading: string;
     creatorFavoritesHeading: string;
+    /** The Cosign button (creator-to-creator public endorsement) + its info tooltip. */
+    cosignLabel: string;
+    cosignedLabel: string;
+    cosignInfoLabel: string;
+    cosignTooltip: string;
     otherBooksHeading: string;
     bookCreatorsHeading: string;
     bookVideosHeading: string;
@@ -1237,6 +1242,11 @@ const DEFAULTS: SiteSettings = {
     creatorWorksHeading: "Where to find {name}’s work",
     creatorOrganizationsHeading: "Member of",
     creatorFavoritesHeading: "{name}’s Cosigns",
+    cosignLabel: "Cosign",
+    cosignedLabel: "Cosigned",
+    cosignInfoLabel: "What is a Cosign?",
+    cosignTooltip:
+      "A public shout-out to a fellow creator. Cosigning adds them to your Cosigns — shown on your profile — to vouch for work you rate. It’s public and creators-only, separate from a private Save, and never counted or ranked.",
     otherBooksHeading: "Other comics by {name}",
     bookCreatorsHeading: "Comic Creators:",
     bookVideosHeading: "Videos",

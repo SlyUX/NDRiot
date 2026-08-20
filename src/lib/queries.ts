@@ -407,6 +407,11 @@ export const OWNED_CREATOR_REGION_QUERY = defineQuery(
 export const COLLAB_CREATORS_QUERY = defineQuery(
   `*[_type=="creator" && _id in $ids]{_id,name,"slug":slug.current}`,
 );
+// The on-site creator ids one creator has cosigned — seeds the Cosign button's
+// pressed state on another creator's profile.
+export const COSIGNED_IDS_QUERY = defineQuery(
+  `*[_type=="creator" && _id==$id][0].favoriteCreators[defined(onSite)].onSite._ref`,
+);
 // A single convention page.
 export const CONVENTION_QUERY =
   defineQuery(`*[_type=="convention" && slug.current==$slug][0]{

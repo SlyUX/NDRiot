@@ -1030,6 +1030,10 @@ export type SiteSettings = {
     shareLabel?: string;
     linkCopiedLabel?: string;
     creatorFavoritesHeading?: string;
+    cosignLabel?: string;
+    cosignedLabel?: string;
+    cosignInfoLabel?: string;
+    cosignTooltip?: string;
     otherBooksHeading?: string;
     bookCreatorsHeading?: string;
     bookVideosHeading?: string;
@@ -3108,6 +3112,11 @@ export type COLLAB_CREATORS_QUERY_RESULT = Array<{
 }>;
 
 // Source: src/lib/queries.ts
+// Variable: COSIGNED_IDS_QUERY
+// Query: *[_type=="creator" && _id==$id][0].favoriteCreators[defined(onSite)].onSite._ref
+export type COSIGNED_IDS_QUERY_RESULT = Array<string | null> | null;
+
+// Source: src/lib/queries.ts
 // Variable: CONVENTION_QUERY
 // Query: *[_type=="convention" && slug.current==$slug][0]{  _id,name,"slug":slug.current,place,whenHint,startDate,endDate,website,description,image}
 export type CONVENTION_QUERY_RESULT = {
@@ -3780,6 +3789,7 @@ declare module "@sanity/client" {
     'array::unique(*[_type=="convention" && defined(slug.current) && defined(place.region)].place.region)': CONVENTION_REGIONS_QUERY_RESULT;
     '*[_type=="creator" && _id==$id][0].place.region': OWNED_CREATOR_REGION_QUERY_RESULT;
     '*[_type=="creator" && _id in $ids]{_id,name,"slug":slug.current}': COLLAB_CREATORS_QUERY_RESULT;
+    '*[_type=="creator" && _id==$id][0].favoriteCreators[defined(onSite)].onSite._ref': COSIGNED_IDS_QUERY_RESULT;
     '*[_type=="convention" && slug.current==$slug][0]{\n  _id,name,"slug":slug.current,place,whenHint,startDate,endDate,website,description,image\n}': CONVENTION_QUERY_RESULT;
     '*[_type=="conventionAppearance" && venue._ref==$conId && status=="tabling" && defined(creator->slug.current)]\n  | order(creator->name asc){\n  "_id": creator->_id,"name": creator->name,"slug": creator->slug.current,"photo": creator->photo,\n  tableNumber,forDate\n}': CONVENTION_TABLERS_QUERY_RESULT;
     '*[_type=="venueRating" && target._ref==$conId]{\n  benefits,celebrityFocused,tableCost,note,\n  "creatorName":creator->name,"creatorSlug":creator->slug.current\n}': CONVENTION_RATINGS_QUERY_RESULT;
