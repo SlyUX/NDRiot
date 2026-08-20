@@ -379,6 +379,20 @@ export type RagIssue = {
   publishedAt?: string;
 };
 
+export type Ally = {
+  _id: string;
+  _type: "ally";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  name: string;
+  slug: Slug;
+  url: string;
+  logo?: ImageWithAlt;
+  offering?: string;
+  about?: string;
+};
+
 export type Resource = {
   _id: string;
   _type: "resource";
@@ -895,6 +909,9 @@ export type SiteSettings = {
     resourcesMoreLabel?: string;
     conventionsRowSubtitle?: string;
     mediaRowSubtitle?: string;
+    alliesPageTitle?: string;
+    alliesPageDescription?: string;
+    allyVisitLabel?: string;
     conventionsPageTitle?: string;
     conventionsPageDescription?: string;
     conventionVisitLabel?: string;
@@ -1051,6 +1068,7 @@ export type SiteSettings = {
     interviews?: string;
     resources?: string;
     conventions?: string;
+    allies?: string;
     ragIssues?: string;
     media?: string;
   };
@@ -1447,6 +1465,7 @@ export type AllSanitySchemaTypes =
   | Update
   | SanityFileAssetReference
   | RagIssue
+  | Ally
   | Resource
   | FreeDownload
   | Interview
@@ -2422,6 +2441,12 @@ export type SAVED_CREATORS_QUERY_RESULT = Array<{
 export type OWNED_DOCS_QUERY_RESULT = Array<
   | {
       _id: string;
+      _type: "ally";
+      name: string;
+      slug: string;
+    }
+  | {
+      _id: string;
       _type: "book";
       name: null;
       slug: string;
@@ -3113,6 +3138,31 @@ export type COLLAB_CREATORS_QUERY_RESULT = Array<{
 export type COSIGNED_IDS_QUERY_RESULT = Array<string | null> | null;
 
 // Source: src/lib/queries.ts
+// Variable: ALLIES_QUERY
+// Query: *[_type=="ally" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,offering,logo,about}
+export type ALLIES_QUERY_RESULT = Array<{
+  _id: string;
+  name: string;
+  slug: string;
+  offering: string | null;
+  logo: ImageWithAlt | null;
+  about: string | null;
+}>;
+
+// Source: src/lib/queries.ts
+// Variable: ALLY_QUERY
+// Query: *[_type=="ally" && slug.current==$slug][0]{_id,name,"slug":slug.current,url,offering,logo,about}
+export type ALLY_QUERY_RESULT = {
+  _id: string;
+  name: string;
+  slug: string;
+  url: string;
+  offering: string | null;
+  logo: ImageWithAlt | null;
+  about: string | null;
+} | null;
+
+// Source: src/lib/queries.ts
 // Variable: CONVENTION_QUERY
 // Query: *[_type=="convention" && slug.current==$slug][0]{  _id,name,"slug":slug.current,place,whenHint,startDate,endDate,website,description,image}
 export type CONVENTION_QUERY_RESULT = {
@@ -3352,7 +3402,7 @@ export type HERO_BOOKS_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: SITEMAP_QUERY
-// Query: {  "books": *[_type=="book" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "creators": *[_type=="creator" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "columns": *[_type=="column" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "interviews": *[_type=="interview" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "resources": *[_type=="resource" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "ragIssues": *[_type=="ragIssue" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "genres": array::unique(*[_type=="book" && defined(genres)].genres[]),  "formats": array::unique(*[_type=="book" && defined(format)].format)}
+// Query: {  "books": *[_type=="book" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "creators": *[_type=="creator" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "columns": *[_type=="column" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "interviews": *[_type=="interview" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "resources": *[_type=="resource" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "allies": *[_type=="ally" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "ragIssues": *[_type=="ragIssue" && defined(slug.current)]{"slug":slug.current,_updatedAt},  "genres": array::unique(*[_type=="book" && defined(genres)].genres[]),  "formats": array::unique(*[_type=="book" && defined(format)].format)}
 export type SITEMAP_QUERY_RESULT = {
   books: Array<{
     slug: string;
@@ -3375,6 +3425,10 @@ export type SITEMAP_QUERY_RESULT = {
     _updatedAt: string;
   }>;
   resources: Array<{
+    slug: string;
+    _updatedAt: string;
+  }>;
+  allies: Array<{
     slug: string;
     _updatedAt: string;
   }>;
@@ -3786,6 +3840,8 @@ declare module "@sanity/client" {
     '*[_type=="creator" && _id==$id][0].place.region': OWNED_CREATOR_REGION_QUERY_RESULT;
     '*[_type=="creator" && _id in $ids]{_id,name,"slug":slug.current}': COLLAB_CREATORS_QUERY_RESULT;
     '*[_type=="creator" && _id==$id][0].favoriteCreators[defined(onSite)].onSite._ref': COSIGNED_IDS_QUERY_RESULT;
+    '*[_type=="ally" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,offering,logo,about}': ALLIES_QUERY_RESULT;
+    '*[_type=="ally" && slug.current==$slug][0]{_id,name,"slug":slug.current,url,offering,logo,about}': ALLY_QUERY_RESULT;
     '*[_type=="convention" && slug.current==$slug][0]{\n  _id,name,"slug":slug.current,place,whenHint,startDate,endDate,website,description,image\n}': CONVENTION_QUERY_RESULT;
     '*[_type=="conventionAppearance" && venue._ref==$conId && status=="tabling" && defined(creator->slug.current)]\n  | order(creator->name asc){\n  "_id": creator->_id,"name": creator->name,"slug": creator->slug.current,"photo": creator->photo,\n  tableNumber,forDate\n}': CONVENTION_TABLERS_QUERY_RESULT;
     '*[_type=="venueRating" && target._ref==$conId]{\n  benefits,celebrityFocused,tableCost,note,\n  "creatorName":creator->name,"creatorSlug":creator->slug.current\n}': CONVENTION_RATINGS_QUERY_RESULT;
@@ -3795,7 +3851,7 @@ declare module "@sanity/client" {
     '*[_type=="ragIssue" && slug.current==$slug][0]{\n  _id,title,issueNumber,publishedAt,description,cover,"pdfUrl":pdfFile.asset->url,\n  buyLinks[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},\n  toc,\n  contributors[]{_key,section,role,customName,"creatorName":creator->name,"creatorSlug":creator->slug.current}\n}': RAG_ISSUE_QUERY_RESULT;
     '*[_type=="book" && defined(slug.current)]._id': BOOK_IDS_QUERY_RESULT;
     '*[_type=="book" && _id in $ids]{\n  _id,title,"slug":slug.current,status,genres,format,maturity,cover,shortDescription,\n  "descriptionText": pt::text(description),\n  "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,\n  "creatorName":creator->name,"creatorId":creator._ref\n}': HERO_BOOKS_QUERY_RESULT;
-    '{\n  "books": *[_type=="book" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "creators": *[_type=="creator" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "columns": *[_type=="column" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "interviews": *[_type=="interview" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "resources": *[_type=="resource" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "ragIssues": *[_type=="ragIssue" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "genres": array::unique(*[_type=="book" && defined(genres)].genres[]),\n  "formats": array::unique(*[_type=="book" && defined(format)].format)\n}': SITEMAP_QUERY_RESULT;
+    '{\n  "books": *[_type=="book" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "creators": *[_type=="creator" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "columns": *[_type=="column" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "interviews": *[_type=="interview" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "resources": *[_type=="resource" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "allies": *[_type=="ally" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "ragIssues": *[_type=="ragIssue" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "genres": array::unique(*[_type=="book" && defined(genres)].genres[]),\n  "formats": array::unique(*[_type=="book" && defined(format)].format)\n}': SITEMAP_QUERY_RESULT;
     '*[_type=="organization" && defined(name)]|order(name asc){_id,name}': INTAKE_ORGANIZATIONS_QUERY_RESULT;
     '*[_type=="creator" && defined(studio)].studio._ref': INTAKE_STUDIO_ORG_IDS_QUERY_RESULT;
     '*[_type=="creator"]._id': INTAKE_CREATOR_IDS_QUERY_RESULT;

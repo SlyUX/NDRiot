@@ -5,6 +5,7 @@ import column from "./column";
 import interview from "./interview";
 import freeDownload from "./freeDownload";
 import resource from "./resource";
+import ally from "./ally";
 import ragIssue from "./ragIssue";
 import update from "./update";
 import convention from "./convention";
@@ -30,6 +31,7 @@ export const schemaTypes = [
   interview,
   freeDownload,
   resource,
+  ally,
   ragIssue,
   update,
   convention,

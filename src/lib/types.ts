@@ -27,6 +27,8 @@ import type {
   INTERVIEWS_QUERY_RESULT,
   INTERVIEW_QUERY_RESULT,
   MEDIA_QUERY_RESULT,
+  ALLIES_QUERY_RESULT,
+  ALLY_QUERY_RESULT,
   MEDIA_DETAIL_QUERY_RESULT,
   HUB_PAGE_QUERY_RESULT,
   ImageWithAlt,
@@ -72,6 +74,8 @@ export type RailUpdate = RAIL_UPDATES_QUERY_RESULT[number];
 export type RailFeedItem = RailUpdate & { followed: boolean };
 export type MediaSummary = MEDIA_QUERY_RESULT[number];
 export type MediaDetail = NonNullable<MEDIA_DETAIL_QUERY_RESULT>;
+export type AllySummary = ALLIES_QUERY_RESULT[number];
+export type AllyDetail = NonNullable<ALLY_QUERY_RESULT>;
 export type HeroBook = HERO_BOOKS_QUERY_RESULT[number];
 export type HomeEditorial = HOME_EDITORIAL_QUERY_RESULT[number];
 export type HomeNewItem = HOME_NEW_QUERY_RESULT[number];

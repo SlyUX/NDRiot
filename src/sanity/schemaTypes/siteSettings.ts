@@ -649,6 +649,24 @@ export default defineType({
             "One line under the Media Outlets row heading on /resources.",
         }),
         defineField({
+          name: "alliesPageTitle",
+          title: "Allies — page title (H1)",
+          type: "string",
+        }),
+        defineField({
+          name: "alliesPageDescription",
+          title: "Allies — page description",
+          type: "text",
+          rows: 2,
+        }),
+        defineField({
+          name: "allyVisitLabel",
+          title: "Ally page — visit button",
+          type: "string",
+          description:
+            'External link to the ally\'s site — use {name} for the ally\'s name, e.g. "Visit {name}".',
+        }),
+        defineField({
           name: "conventionsPageTitle",
           title: "Conventions — page title (H1)",
           type: "string",
@@ -1644,6 +1662,11 @@ export default defineType({
         defineField({
           name: "conventions",
           title: "No conventions",
+          type: "string",
+        }),
+        defineField({
+          name: "allies",
+          title: "No allies",
           type: "string",
         }),
         defineField({

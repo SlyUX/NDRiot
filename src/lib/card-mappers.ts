@@ -11,6 +11,7 @@ import type {
   HomeEditorial,
   InterviewSummary,
   MediaSummary,
+  AllySummary,
   RagIssueSummary,
   ResourceKind,
   ResourceSummary,
@@ -137,6 +138,18 @@ export interface CreatorRef {
   photo?: SanityImage | null;
   bioText?: string | null;
   studio?: { name?: string | null } | null;
+}
+
+export function allyToCard(ally: AllySummary): ContentCardProps {
+  return {
+    title: ally.name,
+    href: `/allies/${ally.slug}`,
+    image: ally.logo,
+    imageAlt: `${ally.name} logo`,
+    eyebrow: ally.offering ?? undefined,
+    summary: truncate(ally.about, 160),
+    aspectRatio: "square",
+  };
 }
 
 export function creatorRefToCard(

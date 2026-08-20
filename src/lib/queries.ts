@@ -412,6 +412,15 @@ export const COLLAB_CREATORS_QUERY = defineQuery(
 export const COSIGNED_IDS_QUERY = defineQuery(
   `*[_type=="creator" && _id==$id][0].favoriteCreators[defined(onSite)].onSite._ref`,
 );
+
+// ---- Allies ----
+// Vetted partner services, alphabetical (neutral order, §3). Curated in Studio.
+export const ALLIES_QUERY = defineQuery(
+  `*[_type=="ally" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,offering,logo,about}`,
+);
+export const ALLY_QUERY = defineQuery(
+  `*[_type=="ally" && slug.current==$slug][0]{_id,name,"slug":slug.current,url,offering,logo,about}`,
+);
 // A single convention page.
 export const CONVENTION_QUERY =
   defineQuery(`*[_type=="convention" && slug.current==$slug][0]{
@@ -499,6 +508,7 @@ export const SITEMAP_QUERY = defineQuery(`{
   "interviews": *[_type=="interview" && defined(slug.current)]{"slug":slug.current,_updatedAt},
   "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},
   "resources": *[_type=="resource" && defined(slug.current)]{"slug":slug.current,_updatedAt},
+  "allies": *[_type=="ally" && defined(slug.current)]{"slug":slug.current,_updatedAt},
   "ragIssues": *[_type=="ragIssue" && defined(slug.current)]{"slug":slug.current,_updatedAt},
   "genres": array::unique(*[_type=="book" && defined(genres)].genres[]),
   "formats": array::unique(*[_type=="book" && defined(format)].format)

@@ -24,6 +24,7 @@ const EMPTY: SITEMAP_QUERY_RESULT = {
   interviews: [],
   downloads: [],
   resources: [],
+  allies: [],
   ragIssues: [],
   genres: [],
   formats: [],
@@ -38,6 +39,7 @@ const STATIC_ROUTES: SitemapEntry[] = [
   // because it is the one we most want found.
   { url: absoluteUrl('/join'), changeFrequency: 'monthly', priority: 0.9 },
   { url: absoluteUrl('/resources'), changeFrequency: 'weekly', priority: 0.7 },
+  { url: absoluteUrl('/allies'), changeFrequency: 'weekly', priority: 0.6 },
   { url: absoluteUrl('/about'), changeFrequency: 'monthly', priority: 0.6 },
   { url: absoluteUrl('/privacy'), changeFrequency: 'yearly', priority: 0.3 },
   { url: absoluteUrl('/magazine'), changeFrequency: 'monthly', priority: 0.4 },
@@ -53,6 +55,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // Editorials (columns/interviews) and free downloads are hidden for now —
       // their detail pages still resolve, but we don't advertise them.
       ['/resources', data.resources, 0.6] as const,
+      ['/allies', data.allies, 0.6] as const,
       ['/magazine', data.ragIssues, 0.5] as const,
     ] satisfies ReadonlyArray<readonly [string, { slug: string | null; _updatedAt: string }[], number]>
   ).flatMap(([base, items, priority]) =>

@@ -433,6 +433,10 @@ export interface SiteSettings {
     /** One-line intros under the Conventions + Media rows on the /resources hub. */
     conventionsRowSubtitle: string;
     mediaRowSubtitle: string;
+    /** Allies directory (/allies) + detail. */
+    alliesPageTitle: string;
+    alliesPageDescription: string;
+    allyVisitLabel: string;
     /** Conventions directory (/conventions) + detail. */
     conventionsPageTitle: string;
     conventionsPageDescription: string;
@@ -613,6 +617,7 @@ export interface SiteSettings {
     interviews: string;
     resources: string;
     conventions: string;
+    allies: string;
     ragIssues: string;
     media: string;
     saved: string;
@@ -1108,6 +1113,10 @@ const DEFAULTS: SiteSettings = {
       "What conventions are worth your time as an independent creator?",
     mediaRowSubtitle:
       "Who’s talking about independent creators and comics — and how to reach out to them.",
+    alliesPageTitle: "Allies",
+    alliesPageDescription:
+      "Vetted partners and services we vouch for — hand-picked help for independent comic creators, from distribution to printing and beyond.",
+    allyVisitLabel: "Visit {name}",
     conventionsPageTitle: "Conventions",
     conventionsPageDescription:
       "Comics conventions worth a creator’s table — where to show your work, meet readers, and find your scene. Independent-comics focused.",
@@ -1278,6 +1287,7 @@ const DEFAULTS: SiteSettings = {
     interviews: "No interviews yet.",
     resources: "No resources yet — check back soon.",
     conventions: "No conventions listed yet — check back soon.",
+    allies: "No allies listed yet — check back soon.",
     ragIssues: "The first issue is on its way — check back soon.",
     media: "No media listed yet.",
     saved:
@@ -1291,20 +1301,18 @@ const DEFAULTS: SiteSettings = {
     { _type: "navLink", label: "Comics", href: "/books" },
     { _type: "navLink", label: "Comic Creators", href: "/creators" },
     // The supporting family lives in one dropdown so it stops eating top-level
-    // slots as it grows (Comic Shops land here next). Named "For Creators" so
-    // "Resources" only ever labels the category group inside — the resource
-    // categories (live, non-empty) sit as peers of the Conventions/Media
-    // directories, all reachable from the nav.
+    // slots as it grows. A flat list (no sub-headings): Resources is a single
+    // link to its own hub-of-rows landing; the rest are peer destinations.
     {
       _type: "navPanel",
       label: "For Creators",
       groups: [
-        { heading: "Resources", useResourceCategories: true },
         {
-          heading: "Directories",
           links: [
             { label: "Conventions", href: "/conventions" },
             { label: "Media Outlets", href: "/media" },
+            { label: "Resources", href: "/resources" },
+            { label: "Allies", href: "/allies" },
           ],
         },
       ],
