@@ -180,11 +180,11 @@ export default defineType({
     }),
     defineField({
       name: "favoriteCreators",
-      title: "Favorite independent creators",
+      title: "Cosigns",
       type: "array",
       of: [{ type: "favoriteCreator" }],
       description:
-        "Who they want to shout out. This is how the directory grows — link to an ND Riot profile where one already exists.",
+        'Creators this creator publicly cosigns (shouts out) — shown as "{name}\'s Cosigns" on their profile. Link to an ND Riot profile where one exists; otherwise add a name + URL for an off-site creator (this is how the directory grows). On-site cosigns can also be added by the creator themselves via the Cosign button on another profile.',
     }),
   ],
   preview: {

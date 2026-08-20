@@ -1,7 +1,7 @@
 import { defineType, defineField } from 'sanity'
 // Mixed: link to an on-site creator, OR name + url for an off-site creator.
 export default defineType({
-  name: 'favoriteCreator', title: 'Favorite creator', type: 'object',
+  name: 'favoriteCreator', title: 'Cosign', type: 'object',
   fields: [
     defineField({ name: 'onSite', title: 'On-site creator', type: 'reference', to: [{ type: 'creator' }],
       description: 'Pick if they have an ND Riot profile.' }),
@@ -10,6 +10,6 @@ export default defineType({
   ],
   preview: {
     select: { ref: 'onSite.name', name: 'name' },
-    prepare: ({ ref, name }) => ({ title: ref || name || 'Favorite creator' }),
+    prepare: ({ ref, name }) => ({ title: ref || name || 'Cosign' }),
   },
 })
