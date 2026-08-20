@@ -232,7 +232,7 @@ function CardImage({
 }) {
   if (!image) {
     return fallbackInitials ? (
-      <InitialsAvatar name={fallbackInitials} className="h-full w-full text-2xl" />
+      <InitialsAvatar name={fallbackInitials} className="h-full w-full text-4xl" />
     ) : (
       <div
         className={cn('bg-muted flex items-center justify-center', className)}
