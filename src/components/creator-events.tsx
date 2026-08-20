@@ -37,10 +37,13 @@ export function CreatorEvents({
       <SectionHeading as="h2" size="sm">
         {heading}
       </SectionHeading>
-      <ul className="border-border divide-border divide-y border-t">
+      {/* A horizontal scrolling row of cards (mirrors the /me events row) rather
+          than a stacked column — the pink punk-scroll bar on overflow. */}
+      <ul className="punk-scroll mt-4 flex gap-4 overflow-x-auto pb-2">
         {upcoming.map((appearance, i) => (
           <AppearanceCard
             key={`${appearance.venue!._id}-${i}`}
+            layout="card"
             venue={appearance.venue!}
             status={appearance.status}
             tableNumber={appearance.tableNumber}
