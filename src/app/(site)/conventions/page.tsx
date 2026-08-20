@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 
-import { auth } from '@/auth'
 import { ContentCardGrid } from '@/components/content-card-grid'
 import { FilterBar } from '@/components/filter-bar'
 import { Section } from '@/components/ui/section'
@@ -20,20 +19,17 @@ import {
   CONVENTIONS_QUERY,
   CONVENTION_REGIONS_QUERY,
   FILTERED_CONVENTIONS_QUERY,
-  OWNED_CREATOR_REGION_QUERY,
 } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
 import type { ConventionSummary } from '@/lib/types'
-import { creatorsOwnedBy } from '@/sanity/ownership-client'
 
 /**
  * Conventions — a directory of comics cons worth a creator's table.
  *
  * Ordered upcoming-first (§3-safe: a convention is a venue/event, not a ranked
  * contributor). Discovery is user-directed (§3): an explicit **State** filter,
- * always visible and clearable. A signed-in creator who set a location also gets
- * an off-by-default **Near me** toggle (teal — tuned to them, §9) that filters to
- * their own state in one tap. Creator ratings surface per convention on detail.
+ * always visible and clearable. (Profile-based "near me" is deferred until we
+ * add real geolocation.) Creator ratings surface per convention on detail.
  */
 export const dynamic = 'force-dynamic'
 
@@ -54,29 +50,15 @@ export default async function ConventionsPage({
 }) {
   const params = await searchParams
 
-  const [regionCodes, settings, session] = await Promise.all([
+  const [regionCodes, settings] = await Promise.all([
     safeFetch<string[]>(CONVENTION_REGIONS_QUERY, {}, []),
     getSiteSettings(),
-    auth(),
   ])
   const { sections, empty } = settings
 
-  // The signed-in creator's own region, if any — enables the off-by-default
-  // "Near me" toggle, and is what that toggle resolves to when on.
-  const email = session?.user?.email ?? null
-  let creatorRegion: string | null = null
-  if (email) {
-    const owned = await creatorsOwnedBy(email)
-    if (owned.length) {
-      creatorRegion = await safeFetch<string | null>(
-        OWNED_CREATOR_REGION_QUERY,
-        { id: owned[0] },
-        null,
-      )
-    }
-  }
-
-  const filters = conventionFilters(params, creatorRegion)
+  // Discovery is user-directed (§3): an explicit State dropdown. (Profile-based
+  // "near me" was removed for now — geolocation returns when we're further along.)
+  const filters = conventionFilters(params)
   const filtering = hasActiveFilters(filters)
   const filtered = await safeFetch<ConventionSummary[]>(
     FILTERED_CONVENTIONS_QUERY,
@@ -94,10 +76,7 @@ export default async function ConventionsPage({
         )
       : []
 
-  const facets = conventionFacets({
-    regions: conventionRegionOptions(regionCodes),
-    nearMe: creatorRegion ? { label: sections.conventionNearMeLabel } : undefined,
-  })
+  const facets = conventionFacets(conventionRegionOptions(regionCodes))
 
   return (
     <div>

@@ -23,7 +23,6 @@ import {
 import {
   HOME_ROW_LIMIT,
   bookFilters,
-  conventionFacets,
   creatorHomeFilters,
   discoverSeed,
   genreOptions,
@@ -35,10 +34,7 @@ import {
   seededShuffle,
   type SearchParams,
 } from "@/lib/filters";
-import {
-  filterConventions,
-  orderConventionsUpcomingFirst,
-} from "@/lib/conventions";
+import { orderConventionsUpcomingFirst } from "@/lib/conventions";
 import {
   safeFetch,
   BOOK_IDS_QUERY,
@@ -201,9 +197,8 @@ export default async function Home({
   // viewer's own — a creator can't save what they publish.
   let ownedCreatorIds: string[] = [];
   // The signed-in creator's profile name + slug (hero greeting + "Your Public
-  // Profile" link) and region (the home "Near me" convention toggle).
-  let profile: { name: string; slug: string; region: string | null } | null =
-    null;
+  // Profile" link).
+  let profile: { name: string; slug: string } | null = null;
   if (email) {
     const [saves, owned] = await Promise.all([
       savedItems(email),
@@ -211,11 +206,11 @@ export default async function Home({
     ]);
     ownedCreatorIds = owned;
     if (ownedCreatorIds.length) {
-      profile = await safeFetch<{
-        name: string;
-        slug: string;
-        region: string | null;
-      } | null>(CREATOR_HERO_QUERY, { id: ownedCreatorIds[0] }, null);
+      profile = await safeFetch<{ name: string; slug: string } | null>(
+        CREATOR_HERO_QUERY,
+        { id: ownedCreatorIds[0] },
+        null,
+      );
     }
     const savedIds = saves.map((save) => save.itemId);
     if (savedIds.length) {
@@ -330,41 +325,10 @@ export default async function Home({
     </Suspense>
   );
 
-  // Home conventions row: a signed-in creator with a region gets an off-by-
-  // default "Near me" toggle (its own conq/connear params, so it never touches
-  // the comics/creators rows). The row is fetched whole, so it filters + orders
-  // upcoming-first in JS. The toggle is shown only when there's a region to
-  // match — everyone else sees the row exactly as before.
-  const creatorRegion = profile?.region ?? null;
-  const conNear =
-    Boolean(Array.isArray(params.connear) ? params.connear[0] : params.connear) &&
-    Boolean(creatorRegion);
-  const conQ = String(
-    (Array.isArray(params.conq) ? params.conq[0] : params.conq) ?? "",
-  );
-  const conventionsFiltered = orderConventionsUpcomingFirst(
-    filterConventions(conventions, {
-      region: conNear ? creatorRegion : null,
-      q: conQ,
-    }),
-  );
-  const conventionsShown = conventionsFiltered.slice(0, 8);
-  const conventionsBar = creatorRegion ? (
-    <Suspense fallback={null}>
-      <FilterBar
-        facets={conventionFacets({
-          nearMe: {
-            label: settings.sections.conventionNearMeLabel,
-            param: "connear",
-          },
-        })}
-        control="select"
-        resultCount={conventionsFiltered.length}
-        searchLabel={settings.sections.searchConventionsLabel}
-        searchParam="conq"
-      />
-    </Suspense>
-  ) : null;
+  // Home conventions row — a scrolling taste, ordered upcoming-first. (The
+  // profile-based "near me" toggle was removed; the full directory + State
+  // filter live on /conventions.)
+  const conventionsShown = orderConventionsUpcomingFirst(conventions).slice(0, 8);
 
   // Default browse is randomly ordered — a fresh, fair rotation each visit, so no
   // title keeps the top spot by its name (AGENTS.md §3: alphabetical was an MVP
@@ -527,7 +491,6 @@ export default async function Home({
         {conventions.length > 0 && (
           <ContentCardGrid
             heading={settings.home.conventionsHeading}
-            toolbar={conventionsBar}
             cards={conventionsShown.map((c) =>
               conventionToCard(c, settings.sections.conventionRatingCardEmpty),
             )}
@@ -539,10 +502,7 @@ export default async function Home({
             padding="md"
             viewAllHref="/conventions"
             viewAllLabel={settings.home.viewAllLabel}
-            // Only reachable when the "Near me" toggle (or its search) narrows the
-            // row to nothing; the toolbar stays above it to toggle back off (§3).
-            emptyMessage={settings.empty.filteredConventions}
-            emptyEmphasis={conNear || conQ.length > 0}
+            emptyMessage=""
           />
         )}
       </AlternatingSections>
