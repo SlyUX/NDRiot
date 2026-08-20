@@ -184,7 +184,7 @@ export default defineType({
       type: "array",
       of: [{ type: "favoriteCreator" }],
       description:
-        'Creators this creator publicly cosigns (shouts out) — shown as "{name}\'s Cosigns" on their profile. Link to an ND Riot profile where one exists; otherwise add a name + URL for an off-site creator (this is how the directory grows). On-site cosigns can also be added by the creator themselves via the Cosign button on another profile.',
+        'ND Riot creators this creator publicly cosigns (shouts out) — shown as "{name}\'s Cosigns" on their profile. Creators can also add these themselves via the Cosign button on another creator\'s profile.',
     }),
   ],
   preview: {

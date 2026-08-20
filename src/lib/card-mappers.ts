@@ -89,17 +89,10 @@ export function favoriteToCard(
       title: c.name ?? "Creator",
       href: `/creators/${c.slug}`,
       image: c.photo,
+      fallbackInitials: c.name ?? "Creator",
       imageAlt: `Portrait of ${c.name ?? "creator"}`,
       eyebrow: c.studio?.name ?? formatPlace(c.place),
       summary: truncate(c.bioText, 160),
-      aspectRatio: "square",
-    };
-  }
-  if (favorite.name && favorite.url) {
-    return {
-      title: favorite.name,
-      href: favorite.url,
-      imageAlt: "",
       aspectRatio: "square",
     };
   }

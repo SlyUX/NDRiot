@@ -41,7 +41,7 @@ export const CREATOR_QUERY =
   works[]{label,url},
   studio->{_id,name,"slug":slug.current,website,logo},
   organizations[]->{_id,name,"slug":slug.current,website,logo},
-  favoriteCreators[]{name,url,onSite->{name,"slug":slug.current,place,photo,"bioText":pt::text(bio),studio->{name}}},
+  favoriteCreators[defined(onSite)]{onSite->{name,"slug":slug.current,place,photo,"bioText":pt::text(bio),studio->{name}}},
   "books": *[_type=="book" && references(^._id)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}
 }`);
 // A creator's convention appearances (separate docs), venue resolved — for the
