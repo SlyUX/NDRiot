@@ -850,8 +850,12 @@ export function CreatorIntakeForm({
               defaultValue={
                 initialText("website", initial?.website) || "https://www."
               }
+              aria-describedby="website-hint"
               className={fieldClass}
             />
+            <p id="website-hint" className={hintClass}>
+              {copy.websiteHint}
+            </p>
           </div>
 
           <div className="space-y-1.5">

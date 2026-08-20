@@ -2041,6 +2041,14 @@ export default defineType({
           type: "string",
         }),
         defineField({
+          name: "websiteHint",
+          title: "Website hint",
+          type: "text",
+          rows: 2,
+          description:
+            "Clarifies this is their single main home link (vs. socials = follow, works = read/buy) — the trio testers found overlapping.",
+        }),
+        defineField({
           name: "feedUrlLabel",
           title: "Feed URL label",
           type: "string",

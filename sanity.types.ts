@@ -1145,6 +1145,7 @@ export type SiteSettings = {
     collabYesLabel?: string;
     collabNoLabel?: string;
     websiteLabel?: string;
+    websiteHint?: string;
     feedUrlLabel?: string;
     feedUrlHint?: string;
     socialsLabel?: string;

@@ -7186,6 +7186,13 @@
               },
               "optional": true
             },
+            "websiteHint": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "feedUrlLabel": {
               "type": "objectAttribute",
               "value": {

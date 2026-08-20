@@ -147,6 +147,7 @@ export type CreatorIntakeSettings = {
   collabYesLabel: string;
   collabNoLabel: string;
   websiteLabel: string;
+  websiteHint: string;
   feedUrlLabel: string;
   feedUrlHint: string;
   socialsLabel: string;
@@ -869,17 +870,19 @@ const DEFAULTS: SiteSettings = {
     collabYesLabel: "Yes — I’m looking for collaborators",
     collabNoLabel: "Not right now",
     websiteLabel: "Your website",
+    websiteHint:
+      "Your main home base — one portfolio site or personal store. Just your single primary link.",
     feedUrlLabel: "Your RSS / Atom feed",
     feedUrlHint:
       "Optional. A blog or webcomic feed — we’ll show your latest posts on your profile, each linking back to you. We check the link is a real feed.",
     socialsLabel: "Social links",
     socialsHint:
-      "Pick a platform and enter just your account name — we build the link. Add a row for each.",
+      "Where readers follow you day to day — Instagram, Bluesky, TikTok, and the like. Pick a platform and enter just your handle; we build the link. Add a row for each.",
     socialPlatformPlaceholder: "Choose a platform",
     socialHandlePlaceholder: "yourname",
     worksLabel: "Where can readers find your work?",
     worksHint:
-      "Add platform profile pages like Amazon Author pages, Webtoon Series pages, or similar. NOT individual comic pages — those go on your comic pages, which you’ll be able to create once your Comic Creator page is published.",
+      "Where readers go to read or buy your comics right now — platform profile pages like your Webtoon Series, Amazon Author, or Gumroad page (not individual comics; those attach to each comic once your page is published). A link could fit more than one of these sections — that’s fine, just pick its best home; reading and store pages belong here.",
     workPlatformPlaceholder: "Platform name",
     workUrlPlaceholder: "https://…",
     workAddLabel: "Add another",
