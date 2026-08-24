@@ -203,12 +203,76 @@ export function buildVideos(titles: string[], urls: string[]): BookVideo[] {
 }
 
 /**
+ * Common host → friendly display name, so a pasted `a.co` link reads "Amazon",
+ * not "a.co". Unknown hosts fall back to the cleaned host itself.
+ */
+const STORE_NAMES: Record<string, string> = {
+  "a.co": "Amazon",
+  "amzn.to": "Amazon",
+  "amazon.com": "Amazon",
+  "gumroad.com": "Gumroad",
+  "itch.io": "itch.io",
+  "kickstarter.com": "Kickstarter",
+  "indiegogo.com": "Indiegogo",
+  "backerkit.com": "BackerKit",
+  "webtoons.com": "Webtoon",
+  "tapas.io": "Tapas",
+  "patreon.com": "Patreon",
+  "ko-fi.com": "Ko-fi",
+  "bandcamp.com": "Bandcamp",
+  "bigcartel.com": "Big Cartel",
+  "globalcomix.com": "GlobalComix",
+  "drivethrucomics.com": "DriveThruComics",
+  "substack.com": "Substack",
+  "etsy.com": "Etsy",
+};
+
+/** A reader-friendly display name derived from a link's URL. */
+function labelFromUrl(url: string): string {
+  let host = "";
+  try {
+    host = new URL(url).hostname.replace(/^www\./, "").toLowerCase();
+  } catch {
+    return "";
+  }
+  if (STORE_NAMES[host]) return STORE_NAMES[host];
+  // Amazon regional domains (amazon.co.uk, amazon.de, …).
+  if (/(^|\.)amazon\./.test(host)) return "Amazon";
+  return host;
+}
+
+/**
+ * True when a typed label is really a URL fragment (`https`, `a.co`, a path…),
+ * so we should ignore it and derive a clean name from the URL instead. A real
+ * label ("Signed copies", "Free PDF") never matches — it has spaces or no
+ * domain-like shape — so intentional names are always kept.
+ */
+function looksLikeUrl(label: string): boolean {
+  const l = label.trim().toLowerCase();
+  if (!l) return true;
+  if (/^https?:?\/?\/?/.test(l)) return true; // http, https, https://, http:/
+  if (l.includes("://") || l.includes("/")) return true;
+  // A bare domain like a.co / gumroad.com: no spaces, dotted, letter TLD.
+  if (!l.includes(" ") && /^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/.test(l))
+    return true;
+  return false;
+}
+
+/** The display label for a link row: keep a real typed name; otherwise (blank
+ *  or a URL fragment) derive a friendly name from the URL. */
+export function displayLabel(typed: string, url: string): string {
+  const t = (typed ?? "").trim();
+  return looksLikeUrl(t) ? labelFromUrl(url) : t;
+}
+
+/**
  * Build a book's links from parallel kind / label / URL / end-date columns —
  * the rows the form collects. A row needs a valid URL; the kind falls back to a
  * host guess then to "Buy" (the importer's rule) if the submitted one isn't in
- * `allowedKinds`; a blank label becomes the host; an end date is kept only on a
- * `Back` campaign and only if it's a real ISO date (what an <input type=date>
- * yields).
+ * `allowedKinds`; the label is what readers see — a real typed name is kept, a
+ * blank or a pasted URL fragment becomes a friendly name from the link (a.co →
+ * "Amazon"); an end date is kept only on a `Back` campaign and only if it's a
+ * real ISO date (what an <input type=date> yields).
  */
 export function buildLinks(
   kinds: string[],
@@ -224,17 +288,11 @@ export function buildLinks(
     if (!url) continue
     const submitted = (kinds[r] ?? '').trim()
     const kind = allowedKinds.includes(submitted) ? submitted : (linkKindForHost(url) ?? 'Buy')
-    let host = ''
-    try {
-      host = new URL(url).hostname.replace(/^www\./, '')
-    } catch {
-      /* url already validated by normalizeUrl */
-    }
     const link: BookLink = {
       _type: 'bookLink',
       _key: `link${out.length}`,
       kind,
-      label: (labels[r] ?? '').trim() || host,
+      label: displayLabel(labels[r] ?? '', url),
       url,
     }
     if (kind === 'Back') {
@@ -256,13 +314,7 @@ export function buildMediaLinks(labels: string[], urls: string[]): MediaLink[] {
   for (let r = 0; r < rows; r += 1) {
     const url = normalizeUrl(urls[r])
     if (!url) continue
-    let host = ''
-    try {
-      host = new URL(url).hostname.replace(/^www\./, '')
-    } catch {
-      /* validated */
-    }
-    out.push({ _type: 'mediaLink', _key: `link${out.length}`, label: (labels[r] ?? '').trim() || host, url })
+    out.push({ _type: 'mediaLink', _key: `link${out.length}`, label: displayLabel(labels[r] ?? '', url), url })
   }
   return out
 }
@@ -281,8 +333,7 @@ export function buildWorks(labels: string[], urls: string[]): WorkLink[] {
   for (let r = 0; r < rows; r += 1) {
     const url = normalizeUrl(urls[r])
     if (!url) continue
-    const label = (labels[r] ?? '').trim()
-    out.push({ _type: 'workLink', _key: `w${out.length}`, label: label || url, url })
+    out.push({ _type: 'workLink', _key: `w${out.length}`, label: displayLabel(labels[r] ?? '', url), url })
   }
   return out
 }

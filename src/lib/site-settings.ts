@@ -970,9 +970,9 @@ const DEFAULTS: SiteSettings = {
       "Optional. A direct, public link to a SHORT preview PDF — the first few pages — that opens with no sign-in.",
     linksLabel: "Where to find it",
     linksHint:
-      "Every route to the work — free reads, shops, Patreon, a live campaign. The kind is guessed from the link; adjust it if needed. Free reads and live campaigns are shown most prominently.",
+      "Every route to the work — free reads, shops, Patreon, a live campaign. The kind is guessed from the link; adjust it if needed. The label is how the link shows to readers (“Amazon”, “Free PDF”) — leave it blank and we’ll fill in the store name for you. Free reads and live campaigns are shown most prominently.",
     linkKindPlaceholder: "Kind",
-    linkLabelPlaceholder: "Label (optional)",
+    linkLabelPlaceholder: "Display as — e.g. Amazon",
     linkEndDateLabel: "Campaign end date",
     videosLabel: "Videos",
     videosHint:
