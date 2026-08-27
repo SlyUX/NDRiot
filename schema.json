@@ -3378,6 +3378,178 @@
     }
   },
   {
+    "name": "strip",
+    "type": "document",
+    "attributes": {
+      "_id": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
+      },
+      "_type": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string",
+          "value": "strip"
+        }
+      },
+      "_createdAt": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
+      },
+      "_updatedAt": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
+      },
+      "_rev": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        }
+      },
+      "title": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": false
+      },
+      "slug": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "inline",
+          "name": "slug"
+        },
+        "optional": false
+      },
+      "creator": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "inline",
+          "name": "creator.reference"
+        },
+        "optional": false
+      },
+      "image": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "inline",
+          "name": "imageWithAlt"
+        },
+        "optional": false
+      },
+      "genres": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "array",
+          "of": {
+            "type": "union",
+            "of": [
+              {
+                "type": "string",
+                "value": "Action & Adventure"
+              },
+              {
+                "type": "string",
+                "value": "Sci-Fi"
+              },
+              {
+                "type": "string",
+                "value": "Fantasy"
+              },
+              {
+                "type": "string",
+                "value": "Horror"
+              },
+              {
+                "type": "string",
+                "value": "Crime & Noir"
+              },
+              {
+                "type": "string",
+                "value": "Romance"
+              },
+              {
+                "type": "string",
+                "value": "Drama"
+              },
+              {
+                "type": "string",
+                "value": "Slice of Life"
+              },
+              {
+                "type": "string",
+                "value": "Historical"
+              },
+              {
+                "type": "string",
+                "value": "Superhero"
+              },
+              {
+                "type": "string",
+                "value": "Humor & Satire"
+              },
+              {
+                "type": "string",
+                "value": "Memoir & Autobio"
+              },
+              {
+                "type": "string",
+                "value": "Queer"
+              },
+              {
+                "type": "string",
+                "value": "Weird & Experimental"
+              },
+              {
+                "type": "string",
+                "value": "Punk & Protest"
+              }
+            ]
+          }
+        },
+        "optional": true
+      },
+      "maturity": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "union",
+          "of": [
+            {
+              "type": "string",
+              "value": "All Ages"
+            },
+            {
+              "type": "string",
+              "value": "Teen"
+            },
+            {
+              "type": "string",
+              "value": "Teen+"
+            },
+            {
+              "type": "string",
+              "value": "Mature"
+            }
+          ]
+        },
+        "optional": true
+      },
+      "publishedAt": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      }
+    }
+  },
+  {
     "name": "book",
     "type": "document",
     "attributes": {
@@ -6490,6 +6662,13 @@
               "optional": true
             },
             "creatorFavoritesHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "creatorStripsHeading": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

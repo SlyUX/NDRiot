@@ -1554,6 +1554,13 @@ export default defineType({
             'A creator’s public list of creators they endorse ("cosigns"). Use {name} for their first name — e.g. "{name}’s Cosigns" renders as "Stephen’s Cosigns".',
         }),
         defineField({
+          name: "creatorStripsHeading",
+          title: "Creator page — strips heading",
+          type: "string",
+          description:
+            'Above a creator’s single-page comics (strips) hosted on ND Riot. Use {name} — e.g. "{name}’s Strips".',
+        }),
+        defineField({
           name: "cosignLabel",
           title: "Cosign button — default",
           type: "string",

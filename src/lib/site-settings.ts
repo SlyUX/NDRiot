@@ -589,6 +589,8 @@ export interface SiteSettings {
     creatorWorksHeading: string;
     creatorOrganizationsHeading: string;
     creatorFavoritesHeading: string;
+    /** A creator's single-page comics (strips) hosted on ND Riot. */
+    creatorStripsHeading: string;
     /** The Cosign button (creator-to-creator public endorsement) + its info tooltip. */
     cosignLabel: string;
     cosignedLabel: string;
@@ -1260,6 +1262,7 @@ const DEFAULTS: SiteSettings = {
     creatorWorksHeading: "Where to find {name}’s work",
     creatorOrganizationsHeading: "Member of",
     creatorFavoritesHeading: "{name}’s Cosigns",
+    creatorStripsHeading: "{name}’s Strips",
     cosignLabel: "Cosign",
     cosignedLabel: "Cosigned",
     cosignInfoLabel: "What is a Cosign?",

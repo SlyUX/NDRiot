@@ -422,6 +422,22 @@ export const ALLY_QUERY = defineQuery(
   `*[_type=="ally" && slug.current==$slug][0]{_id,name,"slug":slug.current,url,offering,logo,about}`,
 );
 
+// ---- Strips ----
+// Single-page comics hosted on-site. Newest first (§3: recency, never ranked).
+const STRIP_CARD = `_id,title,"slug":slug.current,image,genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current`;
+export const STRIPS_QUERY = defineQuery(
+  `*[_type=="strip" && defined(slug.current)]|order(publishedAt desc){${STRIP_CARD}}`,
+);
+// A single creator's strips — the profile gallery.
+export const CREATOR_STRIPS_QUERY = defineQuery(
+  `*[_type=="strip" && creator._ref==$id && defined(slug.current)]|order(publishedAt desc){${STRIP_CARD}}`,
+);
+// One strip, to read — with the page image's real dimensions so it renders at
+// its natural aspect, whatever shape the creator drew.
+export const STRIP_QUERY = defineQuery(
+  `*[_type=="strip" && slug.current==$slug][0]{_id,title,"slug":slug.current,image,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,creator->{name,"slug":slug.current,photo}}`,
+);
+
 // ---- AI access (/llms.txt + /llms.json) ----
 // Published counts of the main entities, so an agent knows the scale at a glance.
 export const AI_STATS_QUERY = defineQuery(`{
@@ -520,6 +536,7 @@ export const SITEMAP_QUERY = defineQuery(`{
   "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},
   "resources": *[_type=="resource" && defined(slug.current)]{"slug":slug.current,_updatedAt},
   "allies": *[_type=="ally" && defined(slug.current)]{"slug":slug.current,_updatedAt},
+  "strips": *[_type=="strip" && defined(slug.current)]{"slug":slug.current,_updatedAt},
   "ragIssues": *[_type=="ragIssue" && defined(slug.current)]{"slug":slug.current,_updatedAt},
   "genres": array::unique(*[_type=="book" && defined(genres)].genres[]),
   "formats": array::unique(*[_type=="book" && defined(format)].format)

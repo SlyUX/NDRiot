@@ -1,5 +1,6 @@
 import creator from "./creator";
 import book from "./book";
+import strip from "./strip";
 import media from "./media";
 import column from "./column";
 import interview from "./interview";
@@ -26,6 +27,7 @@ export const schemaTypes = [
   siteSettings,
   creator,
   book,
+  strip,
   media,
   column,
   interview,

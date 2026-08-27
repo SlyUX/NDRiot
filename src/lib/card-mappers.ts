@@ -12,6 +12,7 @@ import type {
   InterviewSummary,
   MediaSummary,
   AllySummary,
+  StripSummary,
   RagIssueSummary,
   ResourceKind,
   ResourceSummary,
@@ -138,6 +139,21 @@ export interface CreatorRef {
   photo?: SanityImage | null;
   bioText?: string | null;
   studio?: { name?: string | null } | null;
+}
+
+export function stripToCard(strip: StripSummary): ContentCardProps {
+  return {
+    title: strip.title,
+    href: `/strips/${strip.slug}`,
+    image: strip.image,
+    // The title sits beside the card, so the thumbnail is decorative here; a
+    // creator's own alt (describing the page) wins on the detail view.
+    imageAlt: "",
+    eyebrow: strip.creatorName ?? undefined,
+    genres: strip.genres,
+    maturity: strip.maturity,
+    aspectRatio: "cover",
+  };
 }
 
 export function allyToCard(ally: AllySummary): ContentCardProps {

@@ -25,6 +25,7 @@ const EMPTY: SITEMAP_QUERY_RESULT = {
   downloads: [],
   resources: [],
   allies: [],
+  strips: [],
   ragIssues: [],
   genres: [],
   formats: [],
@@ -56,6 +57,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       // their detail pages still resolve, but we don't advertise them.
       ['/resources', data.resources, 0.6] as const,
       ['/allies', data.allies, 0.6] as const,
+      ['/strips', data.strips, 0.7] as const,
       ['/magazine', data.ragIssues, 0.5] as const,
     ] satisfies ReadonlyArray<readonly [string, { slug: string | null; _updatedAt: string }[], number]>
   ).flatMap(([base, items, priority]) =>
