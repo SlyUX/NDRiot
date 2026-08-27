@@ -21,16 +21,22 @@ export async function GET() {
 
 ${settings.aiLetter}
 
+${settings.aiUsage}
+
 ## Key sections
 
 - [Comics](${SITE_URL}/books): the directory of independent comics.
 - [Comic Creators](${SITE_URL}/creators): the creators behind the work.
-- [Editorial](${SITE_URL}/editorial): columns and interviews on indie comics.
-- [Media](${SITE_URL}/media): independent outlets covering indie comics.
+- [Conventions](${SITE_URL}/conventions): comics conventions worth a creator's table.
+- [Media Outlets](${SITE_URL}/media): independent outlets covering indie comics.
+- [Resources](${SITE_URL}/resources): tools and help for independent creators.
+- [Allies](${SITE_URL}/allies): vetted partner services we vouch for.
+- [ND Riot Rag](${SITE_URL}/magazine): our magazine, free to read.
 - [About ND Riot](${SITE_URL}/about): what this is, and what "real independent comics" means.
 - [Join the Riot](${SITE_URL}/join): how creators get listed.
 
 Full index: ${SITE_URL}/sitemap.xml
+Structured version of this file: ${SITE_URL}/llms.json
 `
 
   return new Response(body, {

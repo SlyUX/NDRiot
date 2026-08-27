@@ -421,6 +421,17 @@ export const ALLIES_QUERY = defineQuery(
 export const ALLY_QUERY = defineQuery(
   `*[_type=="ally" && slug.current==$slug][0]{_id,name,"slug":slug.current,url,offering,logo,about}`,
 );
+
+// ---- AI access (/llms.txt + /llms.json) ----
+// Published counts of the main entities, so an agent knows the scale at a glance.
+export const AI_STATS_QUERY = defineQuery(`{
+  "creators": count(*[_type=="creator" && defined(slug.current)]),
+  "comics": count(*[_type=="book" && defined(slug.current)]),
+  "media": count(*[_type=="media" && defined(slug.current)]),
+  "conventions": count(*[_type=="convention" && defined(slug.current)]),
+  "allies": count(*[_type=="ally" && defined(slug.current)]),
+  "resources": count(*[_type=="resource" && defined(slug.current)])
+}`);
 // A single convention page.
 export const CONVENTION_QUERY =
   defineQuery(`*[_type=="convention" && slug.current==$slug][0]{

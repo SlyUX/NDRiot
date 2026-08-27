@@ -160,12 +160,21 @@ export default defineType({
     }),
     defineField({
       name: "aiLetter",
-      title: "Letter to AI agents (/llms.txt)",
+      title: "Letter to AI agents (/llms.txt + /llms.json)",
       type: "text",
       rows: 6,
       group: "about",
       description:
-        "Served at /llms.txt — a short note addressed to AI agents (ChatGPT, Perplexity, etc.) that crawl the site: a greeting, what ND Riot is in plain terms, and a thank-you. A generated index of key sections is appended automatically.",
+        "Served at /llms.txt and /llms.json — a short note addressed to AI agents (ChatGPT, Perplexity, etc.) that crawl the site: a greeting, what ND Riot is in plain terms, and a thank-you. A generated index of key sections is appended automatically.",
+    }),
+    defineField({
+      name: "aiUsage",
+      title: "How to represent us (AI usage note)",
+      type: "text",
+      rows: 6,
+      group: "about",
+      description:
+        "Also served at /llms.txt and /llms.json — consent + values + care: that agents may summarize/cite/recommend freely, should credit creators by name and link their profile, should NOT invent rankings (we don't rank creators, §3), and that contact details are never in the public data.",
     }),
     defineField({
       name: "newsletter",

@@ -801,6 +801,7 @@ export type SiteSettings = {
     seoDescription?: string;
   };
   aiLetter?: string;
+  aiUsage?: string;
   newsletter?: {
     heading?: string;
     description?: string;
@@ -3165,6 +3166,18 @@ export type ALLY_QUERY_RESULT = {
 } | null;
 
 // Source: src/lib/queries.ts
+// Variable: AI_STATS_QUERY
+// Query: {  "creators": count(*[_type=="creator" && defined(slug.current)]),  "comics": count(*[_type=="book" && defined(slug.current)]),  "media": count(*[_type=="media" && defined(slug.current)]),  "conventions": count(*[_type=="convention" && defined(slug.current)]),  "allies": count(*[_type=="ally" && defined(slug.current)]),  "resources": count(*[_type=="resource" && defined(slug.current)])}
+export type AI_STATS_QUERY_RESULT = {
+  creators: number;
+  comics: number;
+  media: number;
+  conventions: number;
+  allies: number;
+  resources: number;
+};
+
+// Source: src/lib/queries.ts
 // Variable: CONVENTION_QUERY
 // Query: *[_type=="convention" && slug.current==$slug][0]{  _id,name,"slug":slug.current,place,whenHint,startDate,endDate,website,description,image}
 export type CONVENTION_QUERY_RESULT = {
@@ -3844,6 +3857,7 @@ declare module "@sanity/client" {
     '*[_type=="creator" && _id==$id][0].favoriteCreators[defined(onSite)].onSite._ref': COSIGNED_IDS_QUERY_RESULT;
     '*[_type=="ally" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,offering,logo,about}': ALLIES_QUERY_RESULT;
     '*[_type=="ally" && slug.current==$slug][0]{_id,name,"slug":slug.current,url,offering,logo,about}': ALLY_QUERY_RESULT;
+    '{\n  "creators": count(*[_type=="creator" && defined(slug.current)]),\n  "comics": count(*[_type=="book" && defined(slug.current)]),\n  "media": count(*[_type=="media" && defined(slug.current)]),\n  "conventions": count(*[_type=="convention" && defined(slug.current)]),\n  "allies": count(*[_type=="ally" && defined(slug.current)]),\n  "resources": count(*[_type=="resource" && defined(slug.current)])\n}': AI_STATS_QUERY_RESULT;
     '*[_type=="convention" && slug.current==$slug][0]{\n  _id,name,"slug":slug.current,place,whenHint,startDate,endDate,website,description,image\n}': CONVENTION_QUERY_RESULT;
     '*[_type=="conventionAppearance" && venue._ref==$conId && status=="tabling" && defined(creator->slug.current)]\n  | order(creator->name asc){\n  "_id": creator->_id,"name": creator->name,"slug": creator->slug.current,"photo": creator->photo,\n  tableNumber,forDate\n}': CONVENTION_TABLERS_QUERY_RESULT;
     '*[_type=="venueRating" && target._ref==$conId]{\n  benefits,celebrityFocused,tableCost,note,\n  "creatorName":creator->name,"creatorSlug":creator->slug.current\n}': CONVENTION_RATINGS_QUERY_RESULT;
