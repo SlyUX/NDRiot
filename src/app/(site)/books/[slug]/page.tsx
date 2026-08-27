@@ -186,6 +186,13 @@ export default async function BookPage({
                 </a>
               </Button>
             )}
+            {/* Sets the expectation that the preview leaves the site (the file
+                lives on the creator's host), so the hand-off feels deliberate. */}
+            {book.previewUrl && settings.sections.previewNote && (
+              <p className="text-muted-foreground mt-1.5 text-center text-[11px]">
+                {settings.sections.previewNote}
+              </p>
+            )}
 
             {/* Buy/read links, beneath the preview — set apart in their own
               charcoal panel under the "Get it here" label. */}

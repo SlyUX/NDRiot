@@ -496,6 +496,7 @@ export interface SiteSettings {
     searchCreatorsLabel: string;
     downloadCta: string;
     previewCta: string;
+    previewNote: string;
     /** Heading over a book's buy/read links. `{title}` is replaced with the title. */
     buyHeading: string;
     /** Heading over a profile's syndicated feed. `{name}` → the outlet/creator name. */
@@ -1170,6 +1171,7 @@ const DEFAULTS: SiteSettings = {
     searchCreatorsLabel: "Search comic creators and studios",
     downloadCta: "Download",
     previewCta: "Read a preview (PDF)",
+    previewNote: "Opens in a new tab on the host’s site",
     buyHeading: "Get it here",
     feedHeading: "Latest from {name}",
     followLabel: "Follow",

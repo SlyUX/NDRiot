@@ -970,6 +970,13 @@ export default defineType({
             'On a book page with a preview PDF, e.g. "Read a preview (PDF)".',
         }),
         defineField({
+          name: "previewNote",
+          title: "Book preview — caption",
+          type: "string",
+          description:
+            'Small note under the preview button, so the hand-off to the host feels deliberate — e.g. "Opens in a new tab on the host\'s site". Blank to hide it.',
+        }),
+        defineField({
           name: "buyHeading",
           title: "Book buy-links heading",
           type: "string",

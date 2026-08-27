@@ -5866,6 +5866,13 @@
               },
               "optional": true
             },
+            "previewNote": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "buyHeading": {
               "type": "objectAttribute",
               "value": {

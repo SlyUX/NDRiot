@@ -957,6 +957,7 @@ export type SiteSettings = {
     genreCreatorsHeading?: string;
     downloadCta?: string;
     previewCta?: string;
+    previewNote?: string;
     buyHeading?: string;
     feedHeading?: string;
     followLabel?: string;
