@@ -422,6 +422,38 @@ export const ALLY_QUERY = defineQuery(
   `*[_type=="ally" && slug.current==$slug][0]{_id,name,"slug":slug.current,url,offering,logo,about}`,
 );
 
+// ---- Strips ----
+// Single-page comics hosted on-site. Newest first (§3: recency, never ranked).
+const STRIP_CARD = `_id,title,"slug":slug.current,image,genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current`;
+export const STRIPS_QUERY = defineQuery(
+  `*[_type=="strip" && defined(slug.current)]|order(publishedAt desc){${STRIP_CARD}}`,
+);
+// A single creator's strips — the profile gallery.
+export const CREATOR_STRIPS_QUERY = defineQuery(
+  `*[_type=="strip" && creator._ref==$id && defined(slug.current)]|order(publishedAt desc){${STRIP_CARD}}`,
+);
+// One strip, to read — with the page image's real dimensions so it renders at
+// its natural aspect, whatever shape the creator drew.
+export const STRIP_QUERY = defineQuery(
+  `*[_type=="strip" && slug.current==$slug][0]{_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,creator->{name,"slug":slug.current,photo},"series":series->{title,"slug":slug.current}}`,
+);
+// A strip series and its strips, in reading order (oldest first).
+export const SERIES_QUERY = defineQuery(
+  `*[_type=="stripSeries" && slug.current==$slug][0]{
+    _id,title,description,"slug":slug.current,
+    creator->{name,"slug":slug.current},
+    "strips": *[_type=="strip" && references(^._id) && defined(slug.current)]|order(publishedAt asc){${STRIP_CARD}}
+  }`,
+);
+// A creator's existing (published) series — the composer's Series dropdown.
+export const INTAKE_OWNED_SERIES_QUERY = defineQuery(
+  `*[_type=="stripSeries" && creator._ref in $ids && defined(slug.current)]|order(title asc){_id,title,"creatorId":creator._ref}`,
+);
+// Every series id — published and draft — so intake dedupes + never reuses a slug.
+export const INTAKE_SERIES_IDS_QUERY = defineQuery(
+  `*[_type=="stripSeries"]{_id,"slug":slug.current,"creatorId":creator._ref}`,
+);
+
 // ---- AI access (/llms.txt + /llms.json) ----
 // Published counts of the main entities, so an agent knows the scale at a glance.
 export const AI_STATS_QUERY = defineQuery(`{
@@ -520,6 +552,8 @@ export const SITEMAP_QUERY = defineQuery(`{
   "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},
   "resources": *[_type=="resource" && defined(slug.current)]{"slug":slug.current,_updatedAt},
   "allies": *[_type=="ally" && defined(slug.current)]{"slug":slug.current,_updatedAt},
+  "strips": *[_type=="strip" && defined(slug.current)]{"slug":slug.current,_updatedAt},
+  "series": *[_type=="stripSeries" && defined(slug.current)]{"slug":slug.current,_updatedAt},
   "ragIssues": *[_type=="ragIssue" && defined(slug.current)]{"slug":slug.current,_updatedAt},
   "genres": array::unique(*[_type=="book" && defined(genres)].genres[]),
   "formats": array::unique(*[_type=="book" && defined(format)].format)
@@ -599,6 +633,9 @@ export const INTAKE_CREATOR_EDIT_QUERY =
  * (token) so it includes `drafts.*`.
  */
 export const INTAKE_BOOK_IDS_QUERY = defineQuery(`*[_type=="book"]._id`);
+
+/** Every strip id — published and draft — so intake never reuses a slug. */
+export const INTAKE_STRIP_IDS_QUERY = defineQuery(`*[_type=="strip"]._id`);
 
 /**
  * The signed-in user's books — those under a creator they own — for the book

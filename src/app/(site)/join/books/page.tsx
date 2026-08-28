@@ -174,6 +174,7 @@ export default async function BooksIntakePage({
           key={initial?.updateId ?? 'new'}
           copy={copy}
           common={common}
+          reviewNotice={settings.reviewNotice}
           creators={creators}
           books={books}
           initial={initial}

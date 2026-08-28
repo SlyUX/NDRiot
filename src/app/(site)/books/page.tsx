@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { Suspense } from 'react'
 
 import { ContentCardGrid } from '@/components/content-card-grid'
 import { FilterBar } from '@/components/filter-bar'
 import { LoadMore } from '@/components/load-more'
 import { Section } from '@/components/ui/section'
-import { bookToCard } from '@/lib/card-mappers'
+import { bookToCard, stripToCard } from '@/lib/card-mappers'
+import { cn } from '@/lib/utils'
 import {
   PAGE_SIZE,
   SHUFFLE_CAP,
@@ -20,11 +22,11 @@ import {
   type SearchParams,
 } from '@/lib/filters'
 import { pageMetadata } from '@/lib/page-metadata'
-import { safeFetch, BOOKS_QUERY, FILTERED_BOOKS_QUERY, GENRES_WITH_BOOKS_QUERY } from '@/lib/queries'
+import { safeFetch, BOOKS_QUERY, FILTERED_BOOKS_QUERY, GENRES_WITH_BOOKS_QUERY, STRIPS_QUERY } from '@/lib/queries'
 import { auth } from '@/auth'
 import { savedItems } from '@/sanity/reader-client'
-import { getSiteSettings } from '@/lib/site-settings'
-import type { BookSummary, Paginated } from '@/lib/types'
+import { getSiteSettings, type SiteSettings } from '@/lib/site-settings'
+import type { BookSummary, Paginated, StripSummary } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,12 +43,72 @@ export async function generateMetadata(): Promise<Metadata> {
   })
 }
 
+/** Comics ↔ Strips tab switcher — books link out, strips read here. */
+function TabBar({
+  active,
+  settings,
+}: {
+  active: 'comics' | 'strips'
+  settings: SiteSettings
+}) {
+  const tab = (label: string, href: string, isActive: boolean) => (
+    <Link
+      href={href}
+      aria-current={isActive ? 'page' : undefined}
+      className={cn(
+        'focus-visible:ring-ring border-b-2 px-3 py-2 text-xs font-bold tracking-widest uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none',
+        isActive
+          ? 'border-primary text-foreground'
+          : 'text-muted-foreground hover:text-foreground border-transparent',
+      )}
+    >
+      {label}
+    </Link>
+  )
+  return (
+    <div className="border-border mt-6 flex gap-1 border-b">
+      {tab(settings.sections.booksHeading, '/books', active === 'comics')}
+      {tab(settings.sections.stripsHeading, '/books?tab=strips', active === 'strips')}
+    </div>
+  )
+}
+
 export default async function BooksPage({
   searchParams,
 }: {
   searchParams: Promise<SearchParams>
 }) {
   const params = await searchParams
+
+  // The Strips tab — single-page comics hosted here (read now), a different
+  // reading model from the link-out books, so it's a sibling tab, not mixed in.
+  const onStrips =
+    (Array.isArray(params.tab) ? params.tab[0] : params.tab) === 'strips'
+  if (onStrips) {
+    const [strips, settings] = await Promise.all([
+      safeFetch<StripSummary[]>(STRIPS_QUERY, {}, []),
+      getSiteSettings(),
+    ])
+    return (
+      <div>
+        <Section as="header" padding="md" className="pb-6">
+          <h1 className="text-3xl font-black tracking-tighter uppercase md:text-4xl">
+            {settings.sections.stripsHeading}
+          </h1>
+          <TabBar active="strips" settings={settings} />
+        </Section>
+        <ContentCardGrid
+          cards={strips.map(stripToCard)}
+          aspectRatio="cover"
+          columns={5}
+          padding="md"
+          className="pt-6"
+          emptyMessage={settings.empty.strips}
+        />
+      </div>
+    )
+  }
+
   const filters = bookFilters(params)
   const filtering = hasActiveFilters(filters)
   const limit = pageLimit(params)
@@ -105,6 +167,7 @@ export default async function BooksPage({
         <h1 className="text-3xl font-black tracking-tighter uppercase md:text-4xl">
           {settings.sections.booksHeading}
         </h1>
+        <TabBar active="comics" settings={settings} />
         <Suspense fallback={null}>
           <FilterBar facets={bookFacets(genreOptions(genresWithBooks))} resultCount={result.total}
             searchLabel={settings.sections.searchBooksLabel}

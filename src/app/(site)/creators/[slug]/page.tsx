@@ -23,7 +23,7 @@ import { GenreBadge } from "@/components/genre-badge";
 import { Badge } from "@/components/ui/badge";
 import { externalHref } from "@/lib/utils";
 import { Section } from "@/components/ui/section";
-import { bookToCard, favoriteToCard } from "@/lib/card-mappers";
+import { bookToCard, favoriteToCard, stripToCard } from "@/lib/card-mappers";
 import { formatPlace } from "@/lib/place";
 import { isUpcomingDate } from "@/lib/conventions";
 import { pageMetadata } from "@/lib/page-metadata";
@@ -39,6 +39,7 @@ import {
   CREATOR_QUERY,
   CREATOR_UPDATES_QUERY,
   CREATOR_APPEARANCES_QUERY,
+  CREATOR_STRIPS_QUERY,
   COSIGNED_IDS_QUERY,
 } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
@@ -51,6 +52,7 @@ import {
 import type {
   CreatorAppearance,
   CreatorDetail,
+  StripSummary,
   UpdateFeedItem,
 } from "@/lib/types";
 import { urlFor } from "@/sanity/image";
@@ -169,6 +171,10 @@ export default async function CreatorPage({
     "{name}",
     firstName,
   );
+  const stripsHeading = settings.sections.creatorStripsHeading.replace(
+    "{name}",
+    firstName,
+  );
   const feedHeading = settings.sections.feedHeading.replace(
     "{name}",
     firstName,
@@ -194,6 +200,15 @@ export default async function CreatorPage({
     { creatorId: creator._id },
     [],
   );
+
+  // Their strips (single-page comics hosted here), newest first.
+  const stripCards = (
+    await safeFetch<StripSummary[]>(
+      CREATOR_STRIPS_QUERY,
+      { id: creator._id },
+      [],
+    )
+  ).map(stripToCard);
 
   // Their own feed (blog, webcomic updates), if they gave one and it's live.
   // Cached for half an hour; a dead or moved feed returns null and shows nothing.
@@ -518,6 +533,18 @@ export default async function CreatorPage({
               ))}
             </ul>
           </Section>
+        )}
+
+        {stripCards.length > 0 && (
+          <ContentCardGrid
+            heading={stripsHeading}
+            headingSize="sm"
+            cards={stripCards}
+            columns={4}
+            aspectRatio="cover"
+            padding="md"
+            emptyMessage=""
+          />
         )}
 
         {favoriteCards.length > 0 && (

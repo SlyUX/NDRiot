@@ -30,6 +30,8 @@ export default defineType({
     { name: "creatorIntake", title: "Comic Creator intake form" },
     { name: "bookIntake", title: "Comic intake form" },
     { name: "mediaIntake", title: "Media intake form" },
+    { name: "stripIntake", title: "Strip intake form" },
+    { name: "reviewNotice", title: "Review notice (all forms)" },
     { name: "contact", title: "Contact page" },
     { name: "about", title: "About & AI letter" },
     { name: "newsletter", title: "Newsletter" },
@@ -266,6 +268,17 @@ export default defineType({
           rows: 8,
         }),
         defineField({
+          name: "stripSubmitSubject",
+          title: "Strip submitted — subject",
+          type: "string",
+        }),
+        defineField({
+          name: "stripSubmitBody",
+          title: "Strip submitted — body",
+          type: "text",
+          rows: 8,
+        }),
+        defineField({
           name: "bookDigestSubject",
           title: "Comics approved (daily digest) — subject",
           type: "string",
@@ -317,6 +330,79 @@ export default defineType({
           rows: 10,
           description:
             "Sent to each creator on a mutual yes; reply-to is the other person, so addresses surface only on reply. Tokens: {you}, {other}, {genre}.",
+        }),
+      ],
+    }),
+
+    defineField({
+      name: "stripIntake",
+      title: "Strip intake form",
+      type: "object",
+      group: "stripIntake",
+      options: { collapsible: true, collapsed: true },
+      description:
+        "Copy for the on-site “post a strip” form (a single-page comic hosted here). Generic strings (sign-in button, image errors, optional marker) are reused from the Comic Creator intake form.",
+      fields: [
+        defineField({ name: "heading", title: "Page heading", type: "string" }),
+        defineField({ name: "intro", title: "Intro", type: "text", rows: 3 }),
+        defineField({ name: "signInPrompt", title: "Sign-in prompt (signed out)", type: "string" }),
+        defineField({ name: "signInBody", title: "Sign-in body (signed out)", type: "text", rows: 3 }),
+        defineField({ name: "creatorHint", title: "No-creator hint", type: "text", rows: 2, description: "Shown when a signed-in user owns no creator yet — a strip needs one first." }),
+        defineField({ name: "sectionWhat", title: "Section — what it is", type: "string" }),
+        defineField({ name: "sectionImage", title: "Section — the page", type: "string" }),
+        defineField({ name: "titleLabel", title: "Title — label", type: "string" }),
+        defineField({ name: "creatorLabel", title: "Comic Creator — label", type: "string" }),
+        defineField({ name: "optionalDetailsLabel", title: "Optional details — disclosure label", type: "string" }),
+        defineField({ name: "imageLabel", title: "Image — label", type: "string" }),
+        defineField({ name: "imageHint", title: "Image — hint", type: "text", rows: 2 }),
+        defineField({ name: "imageAltLabel", title: "Image alt — label", type: "string" }),
+        defineField({ name: "imageAltHint", title: "Image alt — hint", type: "text", rows: 2 }),
+        defineField({ name: "captionLabel", title: "Caption — label", type: "string" }),
+        defineField({ name: "captionHint", title: "Caption — hint", type: "text", rows: 2 }),
+        defineField({ name: "genreLabel", title: "Genre — label", type: "string" }),
+        defineField({ name: "genreHint", title: "Genre — hint", type: "string" }),
+        defineField({ name: "genrePlaceholder", title: "Genre — placeholder", type: "string" }),
+        defineField({ name: "maturityLabel", title: "Appropriate-for — label", type: "string" }),
+        defineField({ name: "maturityPlaceholder", title: "Appropriate-for — placeholder", type: "string" }),
+        defineField({ name: "seriesLabel", title: "Series — label", type: "string" }),
+        defineField({ name: "seriesHint", title: "Series — hint", type: "text", rows: 2 }),
+        defineField({ name: "seriesNoneLabel", title: "Series — none option", type: "string" }),
+        defineField({ name: "newSeriesLabel", title: "New series — label", type: "string" }),
+        defineField({ name: "newSeriesPlaceholder", title: "New series — placeholder", type: "string" }),
+        defineField({ name: "permissionStatement", title: "Permission — statement", type: "text", rows: 2 }),
+        defineField({ name: "submitLabel", title: "Submit button", type: "string" }),
+        defineField({ name: "successMessage", title: "Success message", type: "text", rows: 2 }),
+        defineField({ name: "errorMessage", title: "Error message", type: "string" }),
+      ],
+    }),
+
+    defineField({
+      name: "reviewNotice",
+      title: "Review notice (all forms)",
+      type: "object",
+      group: "reviewNotice",
+      options: { collapsible: true, collapsed: true },
+      description:
+        "The submit → review → publish explainer shown on EVERY intake form (creator, comic, media, strip). Reworded here, it updates everywhere at once — why the delay exists, that a small volunteer team is behind it, and thanks for their patience.",
+      fields: [
+        defineField({
+          name: "short",
+          title: "Short line (on the form)",
+          type: "text",
+          rows: 2,
+          description: "One line shown near the submit button — sets the expectation before they submit.",
+        }),
+        defineField({
+          name: "title",
+          title: "Confirmation — heading",
+          type: "string",
+        }),
+        defineField({
+          name: "body",
+          title: "Confirmation — full statement",
+          type: "text",
+          rows: 5,
+          description: "The three beats: why the wait protects them, the volunteer team, and gratitude for their patience.",
         }),
       ],
     }),
@@ -578,6 +664,20 @@ export default defineType({
           name: "booksHeading",
           title: "Books page title",
           type: "string",
+        }),
+        defineField({
+          name: "stripsHeading",
+          title: "Strips label (Comics tab + Home row)",
+          type: "string",
+          description:
+            'Single-page comics hosted on ND Riot — labels the "Strips" tab on the Comics page and the Strips row on the home page.',
+        }),
+        defineField({
+          name: "seriesPartOfLabel",
+          title: "Strip → series prefix",
+          type: "string",
+          description:
+            'Prefix on a strip\'s link to the series it belongs to — e.g. "Part of" → "Part of Retails".',
         }),
         defineField({
           name: "creatorsHeading",
@@ -1554,6 +1654,13 @@ export default defineType({
             'A creator’s public list of creators they endorse ("cosigns"). Use {name} for their first name — e.g. "{name}’s Cosigns" renders as "Stephen’s Cosigns".',
         }),
         defineField({
+          name: "creatorStripsHeading",
+          title: "Creator page — strips heading",
+          type: "string",
+          description:
+            'Above a creator’s single-page comics (strips) hosted on ND Riot. Use {name} — e.g. "{name}’s Strips".',
+        }),
+        defineField({
           name: "cosignLabel",
           title: "Cosign button — default",
           type: "string",
@@ -1683,6 +1790,11 @@ export default defineType({
         defineField({
           name: "allies",
           title: "No allies",
+          type: "string",
+        }),
+        defineField({
+          name: "strips",
+          title: "No strips",
           type: "string",
         }),
         defineField({

@@ -6,6 +6,7 @@ import { ChevronDown } from 'lucide-react'
 
 import { submitBook, type BookIntakeState } from '@/app/actions/book-intake'
 import { PairedRowsField } from '@/components/paired-rows-field'
+import { ReviewNotice } from '@/components/review-notice'
 import { Button } from '@/components/ui/button'
 import { ALLOWED_IMAGE_TYPES, MAX_PICK_BYTES, downscaleImage } from '@/lib/intake/downscale'
 import { slugify } from '@/lib/intake/mapping'
@@ -21,7 +22,11 @@ import {
 } from '@/lib/taxonomy'
 import { urlFor } from '@/sanity/image'
 import { cn } from '@/lib/utils'
-import type { BookIntakeSettings, CreatorIntakeSettings } from '@/lib/site-settings'
+import type {
+  BookIntakeSettings,
+  CreatorIntakeSettings,
+  ReviewNoticeSettings,
+} from '@/lib/site-settings'
 import type { SanityImage } from '@/lib/types'
 
 /**
@@ -264,12 +269,14 @@ function BookLinksField({
 export function BookIntakeForm({
   copy,
   common,
+  reviewNotice,
   creators,
   books,
   initial,
 }: {
   copy: BookIntakeSettings
   common: CreatorIntakeSettings
+  reviewNotice: ReviewNoticeSettings
   creators: OwnedCreator[]
   books: BookPickerItem[]
   initial?: BookIntakeInitial
@@ -326,9 +333,12 @@ export function BookIntakeForm({
 
   if (state.status === 'success') {
     return (
-      <p role="status" className="border-primary text-foreground border-l-2 py-2 pl-4 text-sm">
-        {copy.successMessage}
-      </p>
+      <div className="space-y-4">
+        <p role="status" className="border-primary text-foreground border-l-2 py-2 pl-4 text-sm">
+          {copy.successMessage}
+        </p>
+        <ReviewNotice copy={reviewNotice} variant="full" />
+      </div>
     )
   }
 
@@ -415,30 +425,43 @@ export function BookIntakeForm({
             </div>
           )}
 
-          <div className="space-y-1.5">
-            <label htmlFor="creator" className={labelClass}>
-              {copy.creatorLabel}
-            </label>
-            <select
-              id="creator"
-              name="creator"
-              required
-              defaultValue={initial?.creatorId ?? (creators.length === 1 ? creators[0]._id : '')}
-              aria-invalid={Boolean(errors.creator)}
-              className={cn(fieldClass, 'appearance-none')}
-            >
-              <option value="">—</option>
-              {creators.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-            <p className={hintClass}>{copy.creatorHint}</p>
-            {errors.creator && (
-              <p className="text-destructive text-xs">{errors.creator}</p>
-            )}
-          </div>
+          {/* A book is gated by the creator you own. With one profile per
+              account (the guardrail), that creator is known — so it's posted,
+              not asked. Only a rare multi-creator account (admin-assigned) sees
+              the picker. The action re-checks ownership either way. */}
+          {creators.length === 1 ? (
+            <div className="space-y-1.5">
+              <input type="hidden" name="creator" value={creators[0]._id} />
+              <p className="text-muted-foreground text-xs">
+                {copy.creatorLabel}:{' '}
+                <span className="text-foreground font-semibold">{creators[0].name}</span>
+              </p>
+              {errors.creator && <p className="text-destructive text-xs">{errors.creator}</p>}
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              <label htmlFor="creator" className={labelClass}>
+                {copy.creatorLabel}
+              </label>
+              <select
+                id="creator"
+                name="creator"
+                required
+                defaultValue={initial?.creatorId ?? ''}
+                aria-invalid={Boolean(errors.creator)}
+                className={cn(fieldClass, 'appearance-none')}
+              >
+                <option value="">—</option>
+                {creators.map((c) => (
+                  <option key={c._id} value={c._id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+              <p className={hintClass}>{copy.creatorHint}</p>
+              {errors.creator && <p className="text-destructive text-xs">{errors.creator}</p>}
+            </div>
+          )}
         </fieldset>
 
         {/* — Classification — */}
@@ -760,6 +783,8 @@ export function BookIntakeForm({
             {state.message ?? copy.errorMessage}
           </p>
         )}
+
+        <ReviewNotice copy={reviewNotice} variant="compact" />
 
         <Button type="submit" size="lg" disabled={pending} className="font-black tracking-wide uppercase">
           {copy.submitLabel}

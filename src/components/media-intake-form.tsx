@@ -11,7 +11,12 @@ import { slugify } from '@/lib/intake/mapping'
 import { GENRES, MEDIA_KINDS } from '@/lib/taxonomy'
 import { urlFor } from '@/sanity/image'
 import { cn } from '@/lib/utils'
-import type { CreatorIntakeSettings, MediaIntakeSettings } from '@/lib/site-settings'
+import { ReviewNotice } from '@/components/review-notice'
+import type {
+  CreatorIntakeSettings,
+  MediaIntakeSettings,
+  ReviewNoticeSettings,
+} from '@/lib/site-settings'
 import type { SanityImage } from '@/lib/types'
 
 /**
@@ -101,11 +106,13 @@ function MediaPicker({ media, copy }: { media: MediaPickerItem[]; copy: MediaInt
 export function MediaIntakeForm({
   copy,
   common,
+  reviewNotice,
   media,
   initial,
 }: {
   copy: MediaIntakeSettings
   common: CreatorIntakeSettings
+  reviewNotice: ReviewNoticeSettings
   media: MediaPickerItem[]
   initial?: MediaIntakeInitial
 }) {
@@ -151,9 +158,12 @@ export function MediaIntakeForm({
 
   if (state.status === 'success') {
     return (
-      <p role="status" className="border-primary text-foreground border-l-2 py-2 pl-4 text-sm">
-        {copy.successMessage}
-      </p>
+      <div className="space-y-4">
+        <p role="status" className="border-primary text-foreground border-l-2 py-2 pl-4 text-sm">
+          {copy.successMessage}
+        </p>
+        <ReviewNotice copy={reviewNotice} variant="full" />
+      </div>
     )
   }
 
@@ -457,6 +467,8 @@ export function MediaIntakeForm({
             {state.message ?? copy.errorMessage}
           </p>
         )}
+
+        <ReviewNotice copy={reviewNotice} variant="compact" />
 
         <Button type="submit" size="lg" disabled={pending} className="font-black tracking-wide uppercase">
           {copy.submitLabel}
