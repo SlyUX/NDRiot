@@ -204,3 +204,22 @@
   grid-template-rows: 1fr;
   animation: strip-reveal 300ms ease-out;
 }
+
+/* …and the reverse — the reader collapses back up on close (X), the mirror of
+   strip-reveal. onAnimationEnd unmounts it; the reduced-motion reset makes it
+   instant. */
+@keyframes strip-collapse {
+  from {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+  to {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
+}
+.strip-collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  animation: strip-collapse 260ms ease-in;
+}

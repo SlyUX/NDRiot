@@ -52,6 +52,9 @@ export function StripGallery({
   const [selectedSlug, setSelectedSlug] = useState<string | null>(
     searchParams.get("strip"),
   );
+  // While the close (X) animation plays, the reader stays mounted; the
+  // strip-collapse keyframe's onAnimationEnd finalizes the unmount.
+  const [closing, setClosing] = useState(false);
   const readerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -76,13 +79,28 @@ export function StripGallery({
     });
   }, [selectedSlug]);
 
-  const select = (slug: string | null) => {
-    setSelectedSlug(slug);
+  const pushStrip = (slug: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
     if (slug) params.set("strip", slug);
     else params.delete("strip");
     const qs = params.toString();
     window.history.pushState(null, "", qs ? `?${qs}` : window.location.pathname);
+  };
+
+  // Open or navigate (grid click, prev/next) — instant, and cancels any close.
+  const select = (slug: string) => {
+    setClosing(false);
+    setSelectedSlug(slug);
+    pushStrip(slug);
+  };
+
+  // Close (X): play the collapse, then unmount on animation end.
+  const requestClose = () => setClosing(true);
+  const finalizeClose = (e: React.AnimationEvent) => {
+    if (e.animationName !== "strip-collapse") return;
+    setClosing(false);
+    setSelectedSlug(null);
+    pushStrip(null);
   };
 
   const neighbors = useMemo<{ prev: StripNeighbor | null; next: StripNeighbor | null }>(() => {
@@ -118,7 +136,11 @@ export function StripGallery({
           strip-reveal keyframe replays — the "slide down" that pushes the
           thumbnails below it down. */}
       {selected && (
-        <div key={selected.slug} className="strip-reveal">
+        <div
+          key={selected.slug}
+          className={closing ? "strip-collapse" : "strip-reveal"}
+          onAnimationEnd={finalizeClose}
+        >
           <div className="overflow-hidden">
             <Section padding={padding} maxWidth="4xl" className="pb-2">
               <div ref={readerRef} className="scroll-mt-24">
@@ -141,7 +163,7 @@ export function StripGallery({
                   prev={neighbors.prev}
                   next={neighbors.next}
                   onNavigate={select}
-                  onClose={() => select(null)}
+                  onClose={requestClose}
                 />
               </div>
             </Section>
