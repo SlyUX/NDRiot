@@ -2,9 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { ContentCardGrid } from "@/components/content-card-grid";
+import { StripGallery } from "@/components/strip-gallery";
 import { Section } from "@/components/ui/section";
-import { stripToCard } from "@/lib/card-mappers";
 import { pageMetadata } from "@/lib/page-metadata";
 import { safeFetch, SERIES_QUERY } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
@@ -47,8 +46,6 @@ export default async function SeriesPage({
   ]);
   if (!series) notFound();
 
-  const cards = series.strips.map(stripToCard);
-
   return (
     <div>
       <Section as="header" padding="md" className="pb-6">
@@ -71,12 +68,12 @@ export default async function SeriesPage({
         )}
       </Section>
 
-      <ContentCardGrid
-        cards={cards}
-        aspectRatio="cover"
+      <StripGallery
+        strips={series.strips}
+        partOfLabel={settings.sections.seriesPartOfLabel}
         columns={5}
         padding="md"
-        className="pt-6"
+        gridClassName="pt-6"
         emptyMessage={settings.empty.strips}
       />
     </div>

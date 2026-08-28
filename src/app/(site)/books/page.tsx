@@ -5,8 +5,9 @@ import { Suspense } from 'react'
 import { ContentCardGrid } from '@/components/content-card-grid'
 import { FilterBar } from '@/components/filter-bar'
 import { LoadMore } from '@/components/load-more'
+import { StripGallery } from '@/components/strip-gallery'
 import { Section } from '@/components/ui/section'
-import { bookToCard, stripToCard } from '@/lib/card-mappers'
+import { bookToCard } from '@/lib/card-mappers'
 import { cn } from '@/lib/utils'
 import {
   PAGE_SIZE,
@@ -97,12 +98,12 @@ export default async function BooksPage({
           </h1>
           <TabBar active="strips" settings={settings} />
         </Section>
-        <ContentCardGrid
-          cards={strips.map(stripToCard)}
-          aspectRatio="cover"
+        <StripGallery
+          strips={strips}
+          partOfLabel={settings.sections.seriesPartOfLabel}
           columns={5}
           padding="md"
-          className="pt-6"
+          gridClassName="pt-6"
           emptyMessage={settings.empty.strips}
         />
       </div>

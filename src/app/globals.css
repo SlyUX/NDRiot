@@ -186,3 +186,21 @@
     scroll-behavior: auto !important;
   }
 }
+/* Strips gallery — the inline reader slides down on open, pushing the
+   thumbnails below it down. grid-template-rows 0fr→1fr animates to auto height
+   (no fixed max); the reduced-motion reset above collapses it to instant. */
+@keyframes strip-reveal {
+  from {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
+  to {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+}
+.strip-reveal {
+  display: grid;
+  grid-template-rows: 1fr;
+  animation: strip-reveal 300ms ease-out;
+}
