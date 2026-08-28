@@ -162,7 +162,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
                   <Link href="/join/creators" className={FOOTER_LINK}>{s.footerJoinCreatorsLabel}</Link>
                 </li>
                 <li>
-                  <Link href="/join/books" className={FOOTER_LINK}>{s.footerJoinComicsLabel}</Link>
+                  <Link href="/join/comics" className={FOOTER_LINK}>{s.footerJoinComicsLabel}</Link>
                 </li>
                 <li>
                   <Link href="/join/media" className={FOOTER_LINK}>{s.footerJoinMediaLabel}</Link>

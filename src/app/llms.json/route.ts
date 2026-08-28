@@ -49,7 +49,7 @@ export async function GET() {
     // come across faithfully.
     representing_us: settings.aiUsage,
     sections: [
-      { name: "Comics", url: `${SITE_URL}/books`, description: "The directory of independent comics." },
+      { name: "Comics", url: `${SITE_URL}/comics`, description: "The directory of independent comics." },
       { name: "Comic Creators", url: `${SITE_URL}/creators`, description: "The creators behind the work." },
       { name: "Conventions", url: `${SITE_URL}/conventions`, description: "Comics conventions worth a creator's table." },
       { name: "Media Outlets", url: `${SITE_URL}/media`, description: "Independent outlets covering indie comics." },

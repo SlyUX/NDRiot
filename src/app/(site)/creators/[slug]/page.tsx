@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 
 import { AlternatingSections } from "@/components/alternating-sections";
 import { ContentCardGrid } from "@/components/content-card-grid";
+import { StripGallery } from "@/components/strip-gallery";
 import { CreatorEvents } from "@/components/creator-events";
 import { FeedPreview } from "@/components/feed-preview";
 import { JsonLd } from "@/components/json-ld";
@@ -23,7 +24,7 @@ import { GenreBadge } from "@/components/genre-badge";
 import { Badge } from "@/components/ui/badge";
 import { externalHref } from "@/lib/utils";
 import { Section } from "@/components/ui/section";
-import { bookToCard, favoriteToCard, stripToCard } from "@/lib/card-mappers";
+import { bookToCard, favoriteToCard } from "@/lib/card-mappers";
 import { formatPlace } from "@/lib/place";
 import { isUpcomingDate } from "@/lib/conventions";
 import { pageMetadata } from "@/lib/page-metadata";
@@ -202,13 +203,11 @@ export default async function CreatorPage({
   );
 
   // Their strips (single-page comics hosted here), newest first.
-  const stripCards = (
-    await safeFetch<StripSummary[]>(
-      CREATOR_STRIPS_QUERY,
-      { id: creator._id },
-      [],
-    )
-  ).map(stripToCard);
+  const strips = await safeFetch<StripSummary[]>(
+    CREATOR_STRIPS_QUERY,
+    { id: creator._id },
+    [],
+  );
 
   // Their own feed (blog, webcomic updates), if they gave one and it's live.
   // Cached for half an hour; a dead or moved feed returns null and shows nothing.
@@ -535,13 +534,13 @@ export default async function CreatorPage({
           </Section>
         )}
 
-        {stripCards.length > 0 && (
-          <ContentCardGrid
+        {strips.length > 0 && (
+          <StripGallery
+            strips={strips}
+            partOfLabel={settings.sections.seriesPartOfLabel}
             heading={stripsHeading}
             headingSize="sm"
-            cards={stripCards}
             columns={4}
-            aspectRatio="cover"
             padding="md"
             emptyMessage=""
           />

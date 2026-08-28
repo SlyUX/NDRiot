@@ -8,6 +8,12 @@ const nextConfig: NextConfig = {
     return [
       { source: '/editorial', destination: '/resources', permanent: true },
       { source: '/downloads', destination: '/resources', permanent: true },
+      // "Books" → "Comics": the route was renamed for accuracy (the Sanity type
+      // stays `book`). Permanent so search engines move the ranking to /comics;
+      // query strings (?tab=strips, ?editing=) carry over automatically.
+      { source: '/books', destination: '/comics', permanent: true },
+      { source: '/books/:slug', destination: '/comics/:slug', permanent: true },
+      { source: '/join/books', destination: '/join/comics', permanent: true },
     ]
   },
   experimental: {

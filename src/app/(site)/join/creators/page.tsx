@@ -247,7 +247,7 @@ export default async function JoinPage({
       {/* Books live on their own page, scoped to the creators you own. */}
       <p className="mt-4 text-xs">
         <Link
-          href="/join/books"
+          href="/join/comics"
           className="text-primary tracking-widest uppercase underline underline-offset-4"
         >
           {settings.bookIntake.heading} →

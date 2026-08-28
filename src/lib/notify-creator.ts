@@ -28,7 +28,7 @@ export async function sendCreatorLiveEmail(args: {
       link: args.slug
         ? absoluteUrl(`/creators/${args.slug}`)
         : absoluteUrl("/creators"),
-      booksLink: absoluteUrl("/join/books"),
+      booksLink: absoluteUrl("/join/comics"),
     }),
   });
 }

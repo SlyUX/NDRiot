@@ -70,7 +70,7 @@ export function websiteSchema(settings: SiteSettings) {
       '@type': 'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: `${SITE_URL}/books?q={search_term_string}`,
+        urlTemplate: `${SITE_URL}/comics?q={search_term_string}`,
       },
       'query-input': 'required name=search_term_string',
     },

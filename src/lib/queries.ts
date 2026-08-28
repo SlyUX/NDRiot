@@ -424,7 +424,10 @@ export const ALLY_QUERY = defineQuery(
 
 // ---- Strips ----
 // Single-page comics hosted on-site. Newest first (§3: recency, never ranked).
-const STRIP_CARD = `_id,title,"slug":slug.current,image,genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current`;
+// Enough to render a strip inline in the gallery (image at natural aspect,
+// caption, series) without a second fetch — the whole point of the same-page
+// expand. `seriesId` groups a series' installments for prev/next.
+const STRIP_CARD = `_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current`;
 export const STRIPS_QUERY = defineQuery(
   `*[_type=="strip" && defined(slug.current)]|order(publishedAt desc){${STRIP_CARD}}`,
 );
@@ -435,7 +438,9 @@ export const CREATOR_STRIPS_QUERY = defineQuery(
 // One strip, to read — with the page image's real dimensions so it renders at
 // its natural aspect, whatever shape the creator drew.
 export const STRIP_QUERY = defineQuery(
-  `*[_type=="strip" && slug.current==$slug][0]{_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,creator->{name,"slug":slug.current,photo},"series":series->{title,"slug":slug.current}}`,
+  `*[_type=="strip" && slug.current==$slug][0]{_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,creator->{name,"slug":slug.current,photo},"series":series->{title,"slug":slug.current},
+    "prevInSeries": *[_type=="strip" && defined(^.series._ref) && series._ref==^.series._ref && publishedAt < ^.publishedAt && defined(slug.current)]|order(publishedAt desc)[0]{title,"slug":slug.current},
+    "nextInSeries": *[_type=="strip" && defined(^.series._ref) && series._ref==^.series._ref && publishedAt > ^.publishedAt && defined(slug.current)]|order(publishedAt asc)[0]{title,"slug":slug.current}}`,
 );
 // A strip series and its strips, in reading order (oldest first).
 export const SERIES_QUERY = defineQuery(

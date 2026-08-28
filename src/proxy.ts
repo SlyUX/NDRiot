@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server'
 
 /**
  * Redirects mixed/upper-case paths to their lowercase form, so /Books lands on
- * /books rather than a 404. The top-level routes are static and case-sensitive,
+ * /comics rather than a 404. The top-level routes are static and case-sensitive,
  * and a capitalised URL — typed, or shared with an initial cap — would
  * otherwise dead-end. A 308 makes it the permanent canonical for search engines.
  *

@@ -5,8 +5,9 @@ import { Suspense } from 'react'
 import { ContentCardGrid } from '@/components/content-card-grid'
 import { FilterBar } from '@/components/filter-bar'
 import { LoadMore } from '@/components/load-more'
+import { StripGallery } from '@/components/strip-gallery'
 import { Section } from '@/components/ui/section'
-import { bookToCard, stripToCard } from '@/lib/card-mappers'
+import { bookToCard } from '@/lib/card-mappers'
 import { cn } from '@/lib/utils'
 import {
   PAGE_SIZE,
@@ -32,12 +33,12 @@ export const dynamic = 'force-dynamic'
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings()
-  // Canonical is the bare /books — so the filter permutations (?genre=…&sort=…)
+  // Canonical is the bare /comics — so the filter permutations (?genre=…&sort=…)
   // all fold into one ranking target rather than splitting it.
   return pageMetadata({
     title: settings.sections.booksHeading,
     description: settings.sections.booksDescription,
-    path: '/books',
+    path: '/comics',
     siteTitle: settings.siteTitle,
     feeds: [{ url: '/feeds/comics.xml', title: settings.sections.booksHeading }],
   })
@@ -67,8 +68,8 @@ function TabBar({
   )
   return (
     <div className="border-border mt-6 flex gap-1 border-b">
-      {tab(settings.sections.booksHeading, '/books', active === 'comics')}
-      {tab(settings.sections.stripsHeading, '/books?tab=strips', active === 'strips')}
+      {tab(settings.sections.booksHeading, '/comics', active === 'comics')}
+      {tab(settings.sections.stripsHeading, '/comics?tab=strips', active === 'strips')}
     </div>
   )
 }
@@ -97,12 +98,12 @@ export default async function BooksPage({
           </h1>
           <TabBar active="strips" settings={settings} />
         </Section>
-        <ContentCardGrid
-          cards={strips.map(stripToCard)}
-          aspectRatio="cover"
+        <StripGallery
+          strips={strips}
+          partOfLabel={settings.sections.seriesPartOfLabel}
           columns={5}
           padding="md"
-          className="pt-6"
+          gridClassName="pt-6"
           emptyMessage={settings.empty.strips}
         />
       </div>

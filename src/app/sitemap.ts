@@ -36,7 +36,7 @@ const EMPTY: SITEMAP_QUERY_RESULT = {
 const STATIC_ROUTES: SitemapEntry[] = [
   { url: absoluteUrl('/'), changeFrequency: 'daily', priority: 1 },
   { url: absoluteUrl('/creators'), changeFrequency: 'daily', priority: 0.9 },
-  { url: absoluteUrl('/books'), changeFrequency: 'daily', priority: 0.9 },
+  { url: absoluteUrl('/comics'), changeFrequency: 'daily', priority: 0.9 },
   // The recruitment funnel's entrance — rated above the other static pages
   // because it is the one we most want found.
   { url: absoluteUrl('/join'), changeFrequency: 'monthly', priority: 0.9 },
@@ -52,7 +52,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const documents = (
     [
-      ['/books', data.books, 0.8] as const,
+      ['/comics', data.books, 0.8] as const,
       ['/creators', data.creators, 0.8] as const,
       // Editorials (columns/interviews) and free downloads are hidden for now —
       // their detail pages still resolve, but we don't advertise them.

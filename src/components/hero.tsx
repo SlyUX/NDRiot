@@ -73,7 +73,7 @@ function FeatureBook({
 }) {
   const preview =
     truncate(book.descriptionText, 280) ?? truncate(book.shortDescription, 280);
-  const href = `/books/${book.slug}`;
+  const href = `/comics/${book.slug}`;
 
   // Not one big <Link> anymore: Save is a <button> and lives in the text column,
   // which can't sit inside an anchor. So the cover, title, and CTA each link to
@@ -165,7 +165,7 @@ function FeatureBook({
  */
 function NewRow({ item }: { item: HomeNewItem }) {
   const isBook = item._type === "book";
-  const href = isBook ? `/books/${item.slug}` : `/creators/${item.slug}`;
+  const href = isBook ? `/comics/${item.slug}` : `/creators/${item.slug}`;
   const title = isBook ? item.title : item.name;
   const line = isBook
     ? item.creatorName
@@ -207,7 +207,7 @@ function NewRow({ item }: { item: HomeNewItem }) {
 function FeedRow({ item }: { item: RailFeedItem }) {
   const href = item.targetSlug
     ? item.targetType === "book"
-      ? `/books/${item.targetSlug}`
+      ? `/comics/${item.targetSlug}`
       : `/creators/${item.targetSlug}`
     : null;
   return (

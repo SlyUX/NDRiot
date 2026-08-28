@@ -22,13 +22,13 @@ export async function GET() {
     title: `${brand} — ${settings.sections.booksHeading}`,
     description: settings.sections.booksDescription,
     feedUrl: absoluteUrl('/feeds/comics.xml'),
-    siteUrl: absoluteUrl('/books'),
+    siteUrl: absoluteUrl('/comics'),
     items: items.flatMap((item) => {
       if (!item.slug) return []
       return [
         {
           title: item.title ?? 'Untitled',
-          url: absoluteUrl(`/books/${item.slug}`),
+          url: absoluteUrl(`/comics/${item.slug}`),
           date: item._createdAt,
           description: truncate(item.descriptionText, 400),
           author: item.creatorName,

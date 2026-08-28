@@ -111,12 +111,12 @@ export default async function GenrePage({
               .filter((b) => b.slug)
               .map((b) => ({
                 name: b.title,
-                url: absoluteUrl(`/books/${b.slug}`),
+                url: absoluteUrl(`/comics/${b.slug}`),
               })),
           }),
           breadcrumbSchema([
             { name: "Home", path: "/" },
-            { name: "Comics", path: "/books" },
+            { name: "Comics", path: "/comics" },
             {
               name: decoded,
               path: `/categories/${encodeURIComponent(decoded)}`,

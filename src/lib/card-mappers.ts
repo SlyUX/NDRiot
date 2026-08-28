@@ -55,7 +55,7 @@ export function formatDate(iso?: string | null): string | undefined {
 export function bookToCard(book: BookSummary): ContentCardProps {
   return {
     title: book.title,
-    href: `/books/${book.slug}`,
+    href: `/comics/${book.slug}`,
     itemType: "book",
     itemId: book._id,
     image: book.cover,

@@ -26,7 +26,7 @@ export default defineType({
       description: 'The book or series title, as the creator styles it.',
       validation: (rule) => rule.required(),
     }),
-    slugField('title', '/books/your-slug'),
+    slugField('title', '/comics/your-slug'),
     defineField({
       name: 'creator',
       title: 'Creator',

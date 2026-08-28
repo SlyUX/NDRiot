@@ -872,7 +872,7 @@ const DEFAULTS: SiteSettings = {
     newHeading: "New Comics & Comic Creators",
     ctas: [
       { label: "All Comic Creators", href: "/creators" },
-      { label: "All Comics", href: "/books" },
+      { label: "All Comics", href: "/comics" },
     ],
     loggedInGreeting: "Welcome back, {name}",
     loggedInDashboardLabel: "Your Dashboard",
@@ -1017,7 +1017,7 @@ const DEFAULTS: SiteSettings = {
     titleLabel: "Title",
     slugLabel: "Preferred ND Riot address",
     slugHint:
-      "The end of the comic’s link — ndriot.com/books/your-title. We suggest one from the title; edit if you like. Lowercase letters, numbers and hyphens only.",
+      "The end of the comic’s link — ndriot.com/comics/your-title. We suggest one from the title; edit if you like. Lowercase letters, numbers and hyphens only.",
     creatorLabel: "Comic Creator",
     creatorHint:
       "One of your comic creators. Not listed? Add the comic creator profile first — a comic needs a comic creator.",
@@ -1431,7 +1431,7 @@ const DEFAULTS: SiteSettings = {
   // kind); the Rag (magazine) is its own destination. Join the Riot + Contact
   // live in the footer.
   nav: [
-    { _type: "navLink", label: "Comics", href: "/books" },
+    { _type: "navLink", label: "Comics", href: "/comics" },
     { _type: "navLink", label: "Comic Creators", href: "/creators" },
     // The supporting family lives in one dropdown so it stops eating top-level
     // slots as it grows. A flat list (no sub-headings): Resources is a single

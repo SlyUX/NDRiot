@@ -81,7 +81,7 @@ export default async function ConventionsPage({
   return (
     <div>
       {/* pb-6 + the grid's pt-6 halve the gap so the filters and their results
-          read as one group — matching the creators/books listings. */}
+          read as one group — matching the creators/comics listings. */}
       <Section as="header" padding="md" className="pb-6">
         <h1 className="text-3xl font-black tracking-tighter uppercase md:text-4xl">
           {sections.conventionsPageTitle}

@@ -111,7 +111,7 @@ export default async function BooksIntakePage({
         <div className="mt-12 space-y-4">
           <h2 className="text-2xl font-black tracking-tighter uppercase">{copy.signInPrompt}</h2>
           <p className="text-muted-foreground max-w-prose text-sm">{copy.signInBody}</p>
-          <SignInButton label={common.signInButton} redirectTo="/join/books" />
+          <SignInButton label={common.signInButton} redirectTo="/join/comics" />
         </div>
       </Section>
     )
@@ -165,7 +165,7 @@ export default async function BooksIntakePage({
         <span className="text-muted-foreground tracking-widest uppercase">
           {common.signedInLabel} <span className="text-foreground">{email}</span>
         </span>
-        <SignOutButton label={common.signOutLabel} redirectTo="/join/books" />
+        <SignOutButton label={common.signOutLabel} redirectTo="/join/comics" />
       </div>
 
       <div className="mt-8 space-y-6">

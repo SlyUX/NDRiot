@@ -271,8 +271,8 @@ export default async function AccountPage() {
   const yourComicsBooks: YourComicsBook[] = ownedBooks.map((book) => ({
     id: book._id,
     title: book.title ?? "Untitled",
-    href: book.slug ? `/books/${book.slug}` : null,
-    editHref: `/join/books?editing=${encodeURIComponent(book._id)}`,
+    href: book.slug ? `/comics/${book.slug}` : null,
+    editHref: `/join/comics?editing=${encodeURIComponent(book._id)}`,
     coverUrl: book.cover ? urlFor(book.cover).width(300).url() : null,
   }));
 
@@ -716,7 +716,7 @@ export default async function AccountPage() {
                         itemId={book._id}
                         itemType="book"
                         title={book.title ?? "Untitled"}
-                        href={book.slug ? `/books/${book.slug}` : null}
+                        href={book.slug ? `/comics/${book.slug}` : null}
                         removeLabel={s.accountRemoveLabel}
                         removedLabel={s.accountRemovedLabel}
                         undoLabel={s.accountUndoLabel}
@@ -749,7 +749,7 @@ export default async function AccountPage() {
               {settings.empty.saved}
             </p>
             <Link
-              href="/books"
+              href="/comics"
               className="text-primary hover:text-primary focus-visible:ring-ring mt-4 inline-block text-sm font-black tracking-widest uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none"
             >
               {settings.home.viewAllLabel} →
