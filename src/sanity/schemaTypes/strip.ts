@@ -44,6 +44,14 @@ export default defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
+      name: "caption",
+      title: "Caption",
+      type: "text",
+      rows: 2,
+      description: "Optional — a short line shown beneath the strip (≤ 150 characters).",
+      validation: (rule) => rule.max(150),
+    }),
+    defineField({
       name: "genres",
       title: "Genres",
       type: "array",

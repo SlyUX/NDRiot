@@ -595,6 +595,7 @@ export type Strip = {
   slug: Slug;
   creator: CreatorReference;
   image: ImageWithAlt;
+  caption?: string;
   genres?: Array<
     | "Action & Adventure"
     | "Sci-Fi"
@@ -929,6 +930,7 @@ export type SiteSettings = {
     columnsHeading?: string;
     interviewsHeading?: string;
     booksHeading?: string;
+    stripsHeading?: string;
     creatorsHeading?: string;
     booksDescription?: string;
     creatorsDescription?: string;
@@ -1103,6 +1105,7 @@ export type SiteSettings = {
     resources?: string;
     conventions?: string;
     allies?: string;
+    strips?: string;
     ragIssues?: string;
     media?: string;
   };
@@ -3268,12 +3271,13 @@ export type CREATOR_STRIPS_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: STRIP_QUERY
-// Query: *[_type=="strip" && slug.current==$slug][0]{_id,title,"slug":slug.current,image,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,creator->{name,"slug":slug.current,photo}}
+// Query: *[_type=="strip" && slug.current==$slug][0]{_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,creator->{name,"slug":slug.current,photo}}
 export type STRIP_QUERY_RESULT = {
   _id: string;
   title: string;
   slug: string;
   image: ImageWithAlt;
+  caption: string | null;
   dimensions: {
     width: number;
     height: number;
@@ -4002,7 +4006,7 @@ declare module "@sanity/client" {
     '*[_type=="ally" && slug.current==$slug][0]{_id,name,"slug":slug.current,url,offering,logo,about}': ALLY_QUERY_RESULT;
     '*[_type=="strip" && defined(slug.current)]|order(publishedAt desc){_id,title,"slug":slug.current,image,genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current}': STRIPS_QUERY_RESULT;
     '*[_type=="strip" && creator._ref==$id && defined(slug.current)]|order(publishedAt desc){_id,title,"slug":slug.current,image,genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current}': CREATOR_STRIPS_QUERY_RESULT;
-    '*[_type=="strip" && slug.current==$slug][0]{_id,title,"slug":slug.current,image,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,creator->{name,"slug":slug.current,photo}}': STRIP_QUERY_RESULT;
+    '*[_type=="strip" && slug.current==$slug][0]{_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,creator->{name,"slug":slug.current,photo}}': STRIP_QUERY_RESULT;
     '{\n  "creators": count(*[_type=="creator" && defined(slug.current)]),\n  "comics": count(*[_type=="book" && defined(slug.current)]),\n  "media": count(*[_type=="media" && defined(slug.current)]),\n  "conventions": count(*[_type=="convention" && defined(slug.current)]),\n  "allies": count(*[_type=="ally" && defined(slug.current)]),\n  "resources": count(*[_type=="resource" && defined(slug.current)])\n}': AI_STATS_QUERY_RESULT;
     '*[_type=="convention" && slug.current==$slug][0]{\n  _id,name,"slug":slug.current,place,whenHint,startDate,endDate,website,description,image\n}': CONVENTION_QUERY_RESULT;
     '*[_type=="conventionAppearance" && venue._ref==$conId && status=="tabling" && defined(creator->slug.current)]\n  | order(creator->name asc){\n  "_id": creator->_id,"name": creator->name,"slug": creator->slug.current,"photo": creator->photo,\n  tableNumber,forDate\n}': CONVENTION_TABLERS_QUERY_RESULT;

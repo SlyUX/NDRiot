@@ -3443,6 +3443,13 @@
         },
         "optional": false
       },
+      "caption": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
       "genres": {
         "type": "objectAttribute",
         "value": {
@@ -5625,6 +5632,13 @@
               },
               "optional": true
             },
+            "stripsHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "creatorsHeading": {
               "type": "objectAttribute",
               "value": {
@@ -6832,6 +6846,13 @@
               "optional": true
             },
             "allies": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "strips": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

@@ -435,7 +435,7 @@ export const CREATOR_STRIPS_QUERY = defineQuery(
 // One strip, to read — with the page image's real dimensions so it renders at
 // its natural aspect, whatever shape the creator drew.
 export const STRIP_QUERY = defineQuery(
-  `*[_type=="strip" && slug.current==$slug][0]{_id,title,"slug":slug.current,image,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,creator->{name,"slug":slug.current,photo}}`,
+  `*[_type=="strip" && slug.current==$slug][0]{_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,creator->{name,"slug":slug.current,photo}}`,
 );
 
 // ---- AI access (/llms.txt + /llms.json) ----

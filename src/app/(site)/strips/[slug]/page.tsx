@@ -89,6 +89,12 @@ export default async function StripPage({
         />
       </div>
 
+      {strip.caption && (
+        <p className="mt-4 max-w-prose text-sm whitespace-pre-line">
+          {strip.caption}
+        </p>
+      )}
+
       {strip.genres && strip.genres.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-1.5">
           {strip.genres.map((g) => (

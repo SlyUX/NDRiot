@@ -422,6 +422,8 @@ export interface SiteSettings {
     interviewsHeading: string;
     booksHeading: string;
     creatorsHeading: string;
+    /** Strips — the Comics-page tab label + the Home row heading (single-page comics). */
+    stripsHeading: string;
     /** Meta descriptions for the listing pages — SEO copy, §2. */
     booksDescription: string;
     creatorsDescription: string;
@@ -624,6 +626,7 @@ export interface SiteSettings {
     resources: string;
     conventions: string;
     allies: string;
+    strips: string;
     ragIssues: string;
     media: string;
     saved: string;
@@ -1106,6 +1109,7 @@ const DEFAULTS: SiteSettings = {
     interviewsHeading: "Interviews",
     booksHeading: "Comics",
     creatorsHeading: "Comic Creators",
+    stripsHeading: "Strips",
     booksDescription:
       "Browse independent comics on ND Riot — graphic novels, single issues, and webcomics from real indie creators, across every genre. Filter by genre, format, and audience.",
     creatorsDescription:
@@ -1300,6 +1304,7 @@ const DEFAULTS: SiteSettings = {
     resources: "No resources yet — check back soon.",
     conventions: "No conventions listed yet — check back soon.",
     allies: "No allies listed yet — check back soon.",
+    strips: "No strips yet — check back soon.",
     ragIssues: "The first issue is on its way — check back soon.",
     media: "No media listed yet.",
     saved:

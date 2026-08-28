@@ -580,6 +580,13 @@ export default defineType({
           type: "string",
         }),
         defineField({
+          name: "stripsHeading",
+          title: "Strips label (Comics tab + Home row)",
+          type: "string",
+          description:
+            'Single-page comics hosted on ND Riot — labels the "Strips" tab on the Comics page and the Strips row on the home page.',
+        }),
+        defineField({
           name: "creatorsHeading",
           title: "Creators page title",
           type: "string",
@@ -1690,6 +1697,11 @@ export default defineType({
         defineField({
           name: "allies",
           title: "No allies",
+          type: "string",
+        }),
+        defineField({
+          name: "strips",
+          title: "No strips",
           type: "string",
         }),
         defineField({

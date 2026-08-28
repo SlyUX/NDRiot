@@ -19,6 +19,7 @@ import {
   creatorToCard,
   conventionToCard,
   resourceToCard,
+  stripToCard,
 } from "@/lib/card-mappers";
 import {
   HOME_ROW_LIMIT,
@@ -43,6 +44,7 @@ import {
   HOME_NEW_QUERY,
   HOME_RESOURCES_QUERY,
   CONVENTIONS_QUERY,
+  STRIPS_QUERY,
   FILTERED_BOOKS_QUERY,
   FILTERED_CREATORS_QUERY,
   RAIL_UPDATES_QUERY,
@@ -61,6 +63,7 @@ import type {
   HeroBook,
   HomeNewItem,
   ConventionSummary,
+  StripSummary,
   AppearanceFeedRow,
   Paginated,
   RailFeedItem,
@@ -157,6 +160,7 @@ export default async function Home({
     newItems,
     conventions,
     homeResources,
+    strips,
     settings,
     session,
   ] = await Promise.all([
@@ -178,6 +182,7 @@ export default async function Home({
     safeFetch<HomeNewItem[]>(HOME_NEW_QUERY, {}, []),
     safeFetch<ConventionSummary[]>(CONVENTIONS_QUERY, {}, []),
     safeFetch<ResourceSummary[]>(HOME_RESOURCES_QUERY, {}, []),
+    safeFetch<StripSummary[]>(STRIPS_QUERY, {}, []),
     getSiteSettings(),
     auth(),
   ]);
@@ -479,6 +484,23 @@ export default async function Home({
             scroll
             padding="md"
             viewAllHref="/resources"
+            viewAllLabel={settings.home.viewAllLabel}
+            emptyMessage=""
+          />
+        )}
+
+        {/* Strips: single-page comics you can read right here. A scrolling
+            taste, newest first (§3: recency, never ranked); shows once there
+            are enough of them, and the full set is the Comics page's Strips tab. */}
+        {strips.length >= 3 && (
+          <ContentCardGrid
+            heading={settings.sections.stripsHeading}
+            cards={strips.slice(0, 8).map(stripToCard)}
+            aspectRatio="cover"
+            columns={5}
+            scroll
+            padding="md"
+            viewAllHref="/books?tab=strips"
             viewAllLabel={settings.home.viewAllLabel}
             emptyMessage=""
           />
