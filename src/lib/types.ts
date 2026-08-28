@@ -31,6 +31,7 @@ import type {
   ALLY_QUERY_RESULT,
   STRIPS_QUERY_RESULT,
   STRIP_QUERY_RESULT,
+  SERIES_QUERY_RESULT,
   MEDIA_DETAIL_QUERY_RESULT,
   HUB_PAGE_QUERY_RESULT,
   ImageWithAlt,
@@ -80,6 +81,7 @@ export type AllySummary = ALLIES_QUERY_RESULT[number];
 export type AllyDetail = NonNullable<ALLY_QUERY_RESULT>;
 export type StripSummary = STRIPS_QUERY_RESULT[number];
 export type StripDetail = NonNullable<STRIP_QUERY_RESULT>;
+export type SeriesDetail = NonNullable<SERIES_QUERY_RESULT>;
 export type HeroBook = HERO_BOOKS_QUERY_RESULT[number];
 export type HomeEditorial = HOME_EDITORIAL_QUERY_RESULT[number];
 export type HomeNewItem = HOME_NEW_QUERY_RESULT[number];

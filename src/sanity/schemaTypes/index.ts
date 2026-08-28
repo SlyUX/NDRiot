@@ -1,6 +1,7 @@
 import creator from "./creator";
 import book from "./book";
 import strip from "./strip";
+import stripSeries from "./stripSeries";
 import media from "./media";
 import column from "./column";
 import interview from "./interview";
@@ -28,6 +29,7 @@ export const schemaTypes = [
   creator,
   book,
   strip,
+  stripSeries,
   media,
   column,
   interview,

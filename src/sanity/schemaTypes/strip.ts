@@ -36,6 +36,14 @@ export default defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
+      name: "series",
+      title: "Series",
+      type: "reference",
+      to: [{ type: "stripSeries" }],
+      description:
+        "Optional — group this with related strips (a recurring feature or shared world). Should belong to the same creator.",
+    }),
+    defineField({
       name: "image",
       title: "The strip (single page)",
       type: "imageWithAlt",

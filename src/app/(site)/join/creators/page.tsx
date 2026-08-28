@@ -267,6 +267,7 @@ export default async function JoinPage({
         <CreatorIntakeForm
           key={initial?.updateId ?? "new"}
           copy={intake}
+          reviewNotice={settings.reviewNotice}
           organizations={organizations}
           collectives={collectives}
           creators={ownedCreators}

@@ -288,6 +288,60 @@ export type MediaIntakeSettings = {
   errorMessage: string;
 };
 
+/**
+ * The submit → review → publish explainer, shown across EVERY intake flow
+ * (creator, comic, media, strip) — so a creator always knows why there's a
+ * delay, that a small volunteer team is behind it, and that their patience is
+ * appreciated. One source of truth (§2): worded once, shown everywhere. Two
+ * placements per flow: `short` sits on the form (expectation before submit),
+ * `title` + `body` on the confirmation (the full three-beat statement).
+ */
+export type ReviewNoticeSettings = {
+  short: string;
+  title: string;
+  body: string;
+};
+
+/**
+ * Strip intake copy. A strip is a single-page comic HOSTED on ND Riot, so this
+ * form is image-first (the page IS the work) — no link-out fields. Generic
+ * strings (sign-in button, signed-in/out, optional marker, image errors) are
+ * reused from `creatorIntake` rather than duplicated; the form receives both.
+ */
+export type StripIntakeSettings = {
+  heading: string;
+  intro: string;
+  signInPrompt: string;
+  signInBody: string;
+  /** Shown when a signed-in user owns no creator — a strip needs one first. */
+  creatorHint: string;
+  sectionWhat: string;
+  sectionImage: string;
+  titleLabel: string;
+  creatorLabel: string;
+  optionalDetailsLabel: string;
+  imageLabel: string;
+  imageHint: string;
+  imageAltLabel: string;
+  imageAltHint: string;
+  captionLabel: string;
+  captionHint: string;
+  genreLabel: string;
+  genreHint: string;
+  genrePlaceholder: string;
+  maturityLabel: string;
+  maturityPlaceholder: string;
+  seriesLabel: string;
+  seriesHint: string;
+  seriesNoneLabel: string;
+  newSeriesLabel: string;
+  newSeriesPlaceholder: string;
+  permissionStatement: string;
+  submitLabel: string;
+  successMessage: string;
+  errorMessage: string;
+};
+
 export interface ContactSettings {
   heading: string;
   /** Footer link label — Contact lives in the footer, not the header nav. */
@@ -371,6 +425,8 @@ export type NotificationsSettings = {
   creatorPublishedBody: string;
   bookSubmitSubject: string;
   bookSubmitBody: string;
+  stripSubmitSubject: string;
+  stripSubmitBody: string;
   bookDigestSubject: string;
   bookDigestBody: string;
   /** Collaboration handshake — request → B, response → A, intro on a mutual yes. */
@@ -402,6 +458,9 @@ export interface SiteSettings {
   creatorIntake: CreatorIntakeSettings;
   bookIntake: BookIntakeSettings;
   mediaIntake: MediaIntakeSettings;
+  stripIntake: StripIntakeSettings;
+  /** Shared submit → review → publish explainer, used by every intake flow. */
+  reviewNotice: ReviewNoticeSettings;
   contact: ContactSettings;
   collab: CollabSettings;
   home: {
@@ -424,6 +483,8 @@ export interface SiteSettings {
     creatorsHeading: string;
     /** Strips — the Comics-page tab label + the Home row heading (single-page comics). */
     stripsHeading: string;
+    /** Prefix on a strip's link to its series ("Part of {series}"). */
+    seriesPartOfLabel: string;
     /** Meta descriptions for the listing pages — SEO copy, §2. */
     booksDescription: string;
     creatorsDescription: string;
@@ -693,6 +754,14 @@ const DEFAULTS: SiteSettings = {
       "",
       "— ND Riot",
     ].join("\n"),
+    stripSubmitSubject: "We received your strip",
+    stripSubmitBody: [
+      "Thanks — we’ve received your strip “{title}.”",
+      "",
+      "A person reviews every submission before it goes live, so it’s pending approval. We’ll confirm once it’s published.",
+      "",
+      "— ND Riot",
+    ].join("\n"),
     bookDigestSubject: "Your comics are live on ND Riot",
     bookDigestBody: [
       "Hi {name},",
@@ -920,7 +989,7 @@ const DEFAULTS: SiteSettings = {
     anythingElseLabel: "Anything else?",
     submitLabel: "Submit for review",
     successMessage:
-      "Thanks — your details are in. A person reviews every submission before it goes live, usually within a few days. We’ll email you when your creator page is approved — then you can add your comics.",
+      "Thanks — your details are in. We’ll email you when your creator page is approved — then you can add your comics.",
     errorMessage: "That didn’t save. Please try again in a moment.",
     optionalLabel: "optional",
   },
@@ -994,9 +1063,55 @@ const DEFAULTS: SiteSettings = {
       "I own or have permission to share this cover and description, and ND Riot can use them to list this comic.",
     anythingElseLabel: "Anything else?",
     submitLabel: "Submit for review",
-    successMessage:
-      "Got it — your comic is in. A person reviews every submission before it goes live, usually within a few days, and we’ll email you when it’s up.",
+    successMessage: "Got it — your comic is in. We’ll email you when it’s up.",
     errorMessage: "That didn’t save. Please try again in a moment.",
+  },
+  stripIntake: {
+    heading: "Post a strip",
+    intro:
+      "A strip is a single-page comic that lives right here on ND Riot — the page itself, shown on the site. A title, one of your comic creators, the page, and permission are all it needs.",
+    signInPrompt: "Sign in to post a strip",
+    signInBody:
+      "ND Riot uses Google sign-in so a strip stays with its comic creator — it only confirms it’s you. You can only post strips under a comic creator you own, so add your comic creator profile first if you haven’t.",
+    creatorHint:
+      "A strip needs a comic creator. Add your comic creator profile first, then come back to post one.",
+    sectionWhat: "What it is",
+    sectionImage: "The page",
+    titleLabel: "Title",
+    creatorLabel: "Comic Creator",
+    optionalDetailsLabel: "Add details (optional)",
+    imageLabel: "The strip (single page)",
+    imageHint:
+      "The full page, shown at whatever shape it is. The highest resolution you have, up to about 2000px on the longest edge.",
+    imageAltLabel: "Describe the page",
+    imageAltHint:
+      "For readers who can’t see it — a short description of what happens on the page.",
+    captionLabel: "Caption",
+    captionHint:
+      "Optional — a short line shown beneath the strip (up to 150 characters).",
+    genreLabel: "Genre",
+    genreHint: "What it’s about.",
+    genrePlaceholder: "Choose a genre",
+    maturityLabel: "Appropriate for:",
+    maturityPlaceholder: "Choose an audience",
+    seriesLabel: "Series",
+    seriesHint:
+      "Optional — group this with related strips. Pick one of your series, or start a new one.",
+    seriesNoneLabel: "None",
+    newSeriesLabel: "Or start a new series",
+    newSeriesPlaceholder: "New series name",
+    permissionStatement:
+      "This is my work, or I have permission to post it, and ND Riot can host and show it here.",
+    submitLabel: "Submit for review",
+    successMessage: "Got it — your strip is in. We’ll email you when it’s live.",
+    errorMessage: "That didn’t save. Please try again in a moment.",
+  },
+  reviewNotice: {
+    short:
+      "A person reviews every submission before it’s published — we’re a small volunteer team, so thank you for your patience.",
+    title: "Why there’s a wait",
+    body:
+      "A real person reviews every submission before it goes live. That pause protects you and everyone else here — it keeps ND Riot safe, properly credited, and free of anything that shouldn’t sit next to your name. We’re a very small volunteer team, so reviews happen as fast as real people can get to them. Thank you for your patience while we look yours over.",
   },
   mediaIntake: {
     heading: "List your outlet",
@@ -1046,7 +1161,7 @@ const DEFAULTS: SiteSettings = {
     anythingElseLabel: "Anything else?",
     submitLabel: "Submit for review",
     successMessage:
-      "Thanks — your listing is in. A person reviews every submission before it goes live, so it’ll appear shortly.",
+      "Thanks — your listing is in. It’ll appear once it’s reviewed.",
     errorMessage: "That didn’t save. Please try again in a moment.",
   },
   contact: {
@@ -1110,6 +1225,7 @@ const DEFAULTS: SiteSettings = {
     booksHeading: "Comics",
     creatorsHeading: "Comic Creators",
     stripsHeading: "Strips",
+    seriesPartOfLabel: "Part of",
     booksDescription:
       "Browse independent comics on ND Riot — graphic novels, single issues, and webcomics from real indie creators, across every genre. Filter by genre, format, and audience.",
     creatorsDescription:
@@ -1345,7 +1461,7 @@ export const SITE_SETTINGS_QUERY = `*[_id=="siteSettings"][0]{
   siteTitle,siteDescription,footer,discordUrl,socialLinks[]{platform,url},
   newsletter{heading,description,placeholder,buttonLabel,consent,successMessage,errorMessage},
   about{heading,body,faqHeading,faq[]{question,answer},seoTitle,seoDescription},aiLetter,aiUsage,
-  home,sections,empty,creatorIntake,bookIntake,mediaIntake,notifications,collab,
+  home,sections,empty,creatorIntake,bookIntake,mediaIntake,stripIntake,reviewNotice,notifications,collab,
   hero{background,headline,body,tagline,featureCtaLabel,featuredHeading,newHeading,ctas[]{label,href}},
   join{heading,editHeading,body,ctaLabel,formUrl,funnelHeading,funnelIntro,creatorsLabel,creatorsDesc,contactLabel,contactDesc,mediaLabel,mediaDesc,readersLabel,readersDesc,readersBadge,terms,termsWhy},
   contact{heading,linkLabel,body,nameLabel,emailLabel,subjectLabel,messageLabel,submitLabel,successMessage,errorMessage},
@@ -1456,6 +1572,8 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     creatorIntake: mergeGroup(DEFAULTS.creatorIntake, data.creatorIntake),
     bookIntake: mergeGroup(DEFAULTS.bookIntake, data.bookIntake),
     mediaIntake: mergeGroup(DEFAULTS.mediaIntake, data.mediaIntake),
+    stripIntake: mergeGroup(DEFAULTS.stripIntake, data.stripIntake),
+    reviewNotice: mergeGroup(DEFAULTS.reviewNotice, data.reviewNotice),
     collab: mergeGroup(DEFAULTS.collab, data.collab),
     contact: {
       // Field-by-field like `join` above: a blank string falls back to the

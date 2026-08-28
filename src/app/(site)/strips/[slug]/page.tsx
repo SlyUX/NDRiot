@@ -43,7 +43,10 @@ export default async function StripPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const strip = await safeFetch<StripDetail | null>(STRIP_QUERY, { slug }, null);
+  const [strip, settings] = await Promise.all([
+    safeFetch<StripDetail | null>(STRIP_QUERY, { slug }, null),
+    getSiteSettings(),
+  ]);
   if (!strip) notFound();
 
   const dims = strip.dimensions;
@@ -75,6 +78,21 @@ export default async function StripPage({
           </Badge>
         )}
       </div>
+
+      {/* Part of a series — the through-line to related strips. */}
+      {strip.series?.slug && strip.series.title && (
+        <p className="mt-3 text-sm">
+          <span className="text-muted-foreground">
+            {settings.sections.seriesPartOfLabel}{" "}
+          </span>
+          <Link
+            href={`/series/${strip.series.slug}`}
+            className="text-primary font-semibold hover:underline"
+          >
+            {strip.series.title}
+          </Link>
+        </p>
+      )}
 
       {/* The strip itself — shown at its natural aspect, whatever shape it is. */}
       <div className="bg-muted mt-6">

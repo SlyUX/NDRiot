@@ -120,6 +120,7 @@ export default async function MediaIntakePage({
           key={initial?.updateId ?? 'new'}
           copy={copy}
           common={common}
+          reviewNotice={settings.reviewNotice}
           media={media}
           initial={initial}
         />

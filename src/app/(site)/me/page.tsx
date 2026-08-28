@@ -15,6 +15,7 @@ import { InitialsAvatar } from "@/components/initials-avatar";
 import { NewsletterOptIn } from "@/components/newsletter-opt-in";
 import { SavedItemRow } from "@/components/saved-item-row";
 import { SectionHeading } from "@/components/section-heading";
+import { StripComposer } from "@/components/strip-composer";
 import {
   type ComposerTarget,
   type MentionOption,
@@ -36,6 +37,7 @@ import {
   CREATORS_QUERY,
   MEDIA_QUERY,
   OWNED_APPEARANCES_QUERY,
+  INTAKE_OWNED_SERIES_QUERY,
   OWNED_BOOKS_QUERY,
   OWNED_DOCS_QUERY,
   OWNED_MEDIA_QUERY,
@@ -200,6 +202,17 @@ export default async function AccountPage() {
 
   const isCreator = ownedCreators.length > 0;
   const hasSaves = savedBooks.length > 0 || savedCreators.length > 0;
+
+  // The creators' existing (published) series — the strip composer's dropdown,
+  // filtered per creator at render. Drafts a creator just started show up once
+  // published; the composer's "new series" field covers the interim.
+  const ownedSeries = ownedCreatorIds.length
+    ? await safeFetch<{ _id: string; title: string | null; creatorId: string | null }[]>(
+        INTAKE_OWNED_SERIES_QUERY,
+        { ids: ownedCreatorIds },
+        [],
+      )
+    : [];
 
   // Collaboration requests — incoming (respond) + sent (status). Creator-only;
   // the private request docs resolve to public identities via COLLAB_CREATORS_QUERY.
@@ -458,6 +471,24 @@ export default async function AccountPage() {
                                 </Link>
                               </Button>
                             )}
+                            {/* Post a single-page strip hosted on ND Riot — a
+                                modal on the dashboard, scoped to this creator
+                                and review-gated. */}
+                            <StripComposer
+                              copy={settings.stripIntake}
+                              common={settings.creatorIntake}
+                              reviewNotice={settings.reviewNotice}
+                              creator={{
+                                _id: creator._id,
+                                name: creator.name ?? "Your profile",
+                              }}
+                              series={ownedSeries
+                                .filter((se) => se.creatorId === creator._id)
+                                .map((se) => ({
+                                  _id: se._id,
+                                  title: se.title ?? "Untitled series",
+                                }))}
+                            />
                           </div>
                         </div>
                       </div>

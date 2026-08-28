@@ -25,7 +25,11 @@ import {
 } from "@/lib/taxonomy";
 import { urlFor } from "@/sanity/image";
 import { cn } from "@/lib/utils";
-import type { CreatorIntakeSettings } from "@/lib/site-settings";
+import { ReviewNotice } from "@/components/review-notice";
+import type {
+  CreatorIntakeSettings,
+  ReviewNoticeSettings,
+} from "@/lib/site-settings";
 import type { SanityImage } from "@/lib/types";
 
 /**
@@ -299,12 +303,14 @@ function SocialLinksField({
 
 export function CreatorIntakeForm({
   copy,
+  reviewNotice,
   organizations,
   collectives,
   creators,
   initial,
 }: {
   copy: CreatorIntakeSettings;
+  reviewNotice: ReviewNoticeSettings;
   /** All orgs — the studio dropdown. */
   organizations: CreatorIntakeOrg[];
   /** Orgs that are NOT used as a studio — the Collectives checkboxes. */
@@ -382,12 +388,15 @@ export function CreatorIntakeForm({
 
   if (state.status === "success") {
     return (
-      <p
-        role="status"
-        className="border-primary text-foreground border-l-2 py-2 pl-4 text-sm"
-      >
-        {copy.successMessage}
-      </p>
+      <div className="space-y-4">
+        <p
+          role="status"
+          className="border-primary text-foreground border-l-2 py-2 pl-4 text-sm"
+        >
+          {copy.successMessage}
+        </p>
+        <ReviewNotice copy={reviewNotice} variant="full" />
+      </div>
     );
   }
 
@@ -956,6 +965,8 @@ export function CreatorIntakeForm({
             {state.message ?? copy.errorMessage}
           </p>
         )}
+
+        <ReviewNotice copy={reviewNotice} variant="compact" />
 
         <Button
           type="submit"
