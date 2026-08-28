@@ -116,7 +116,7 @@ function BookPicker({ books, copy }: { books: BookPickerItem[]; copy: BookIntake
           matches.map((b) => (
             <li key={b._id}>
               <a
-                href={`/join/books?editing=${encodeURIComponent(b._id)}`}
+                href={`/join/comics?editing=${encodeURIComponent(b._id)}`}
                 className="hover:bg-primary/10 hover:text-primary focus-visible:bg-primary/10 block px-3 py-2 text-sm focus-visible:outline-none"
               >
                 {b.title}
@@ -358,7 +358,7 @@ export function BookIntakeForm({
       {editing && (
         <div className="border-primary/40 mb-10 border-l-2 py-2 pl-4">
           <p className="text-sm">{copy.editingNotice.replace('{name}', initial!.title)}</p>
-          <a href="/join/books?new" className="text-primary mt-1 inline-block text-xs underline underline-offset-4">
+          <a href="/join/comics?new" className="text-primary mt-1 inline-block text-xs underline underline-offset-4">
             {copy.editingResetLabel}
           </a>
         </div>

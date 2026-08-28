@@ -25,7 +25,7 @@ ${settings.aiUsage}
 
 ## Key sections
 
-- [Comics](${SITE_URL}/books): the directory of independent comics.
+- [Comics](${SITE_URL}/comics): the directory of independent comics.
 - [Comic Creators](${SITE_URL}/creators): the creators behind the work.
 - [Conventions](${SITE_URL}/conventions): comics conventions worth a creator's table.
 - [Media Outlets](${SITE_URL}/media): independent outlets covering indie comics.

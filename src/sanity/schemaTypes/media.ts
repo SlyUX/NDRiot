@@ -9,7 +9,7 @@ import { slugField } from './slugField'
  * A media outlet that covers independent comics — a podcast, channel, review
  * site, or newsletter. Deliberately NOT a creator and NOT a comic: it covers
  * the work, it does not make it, so it lives in its own type and never appears
- * on /creators or /books.
+ * on /creators or /comics.
  *
  * The point is a curated, mission-aligned list a creator can reach out to when
  * releasing a project (hence `genresCovered` and `pitchInfo`), and a discovery

@@ -57,7 +57,7 @@ export async function generateMetadata({
   return pageMetadata({
     title: book.title,
     description: book.descriptionText,
-    path: `/books/${slug}`,
+    path: `/comics/${slug}`,
     siteTitle: settings.siteTitle,
   });
 }
@@ -125,7 +125,7 @@ export default async function BookPage({
         data={jsonLdGraph(
           comicSchema({
             title: book.title,
-            url: absoluteUrl(`/books/${slug}`),
+            url: absoluteUrl(`/comics/${slug}`),
             cover: book.cover,
             authorName: creator?.name,
             genres: book.genres,
@@ -133,8 +133,8 @@ export default async function BookPage({
           }),
           breadcrumbSchema([
             { name: "Home", path: "/" },
-            { name: "Comics", path: "/books" },
-            { name: book.title, path: `/books/${slug}` },
+            { name: "Comics", path: "/comics" },
+            { name: book.title, path: `/comics/${slug}` },
           ]),
         )}
       />
@@ -264,7 +264,7 @@ export default async function BookPage({
               )}
               <ShareBar
                 title={book.title}
-                url={absoluteUrl(`/books/${slug}`)}
+                url={absoluteUrl(`/comics/${slug}`)}
                 label={settings.sections.shareLabel}
                 copiedLabel={settings.sections.linkCopiedLabel}
               />

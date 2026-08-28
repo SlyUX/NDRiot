@@ -171,7 +171,7 @@ export const previews: Record<string, ReactNode> = {
 
   // No preview: FilterBar reads and writes the real URL, so a demo would
   // navigate the styleguide itself. The registry entry documents it; the
-  // live version is on /books and /creators.
+  // live version is on /comics and /creators.
   'organization-link': (
     <>
       <Row label="Text fallback — no logo, with a website">

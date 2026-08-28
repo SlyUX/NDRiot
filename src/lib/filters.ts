@@ -80,7 +80,7 @@ export function bookFacets(genres: readonly string[]): Facet[] {
  * The comics row carries a "Currently funding" toggle — a fast route to work
  * with a live campaign, the one time-sensitive thing on the page. The creators
  * set omits the section-only facets (creator collaboration lives on /creators);
- * book status likewise stays on /books, a way-in row being narrower than the
+ * book status likewise stays on /comics, a way-in row being narrower than the
  * full listing.
  */
 export function homeBookFacets(genres: readonly string[]): Facet[] {

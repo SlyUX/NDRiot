@@ -33,12 +33,12 @@ export const dynamic = 'force-dynamic'
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings()
-  // Canonical is the bare /books — so the filter permutations (?genre=…&sort=…)
+  // Canonical is the bare /comics — so the filter permutations (?genre=…&sort=…)
   // all fold into one ranking target rather than splitting it.
   return pageMetadata({
     title: settings.sections.booksHeading,
     description: settings.sections.booksDescription,
-    path: '/books',
+    path: '/comics',
     siteTitle: settings.siteTitle,
     feeds: [{ url: '/feeds/comics.xml', title: settings.sections.booksHeading }],
   })
@@ -68,8 +68,8 @@ function TabBar({
   )
   return (
     <div className="border-border mt-6 flex gap-1 border-b">
-      {tab(settings.sections.booksHeading, '/books', active === 'comics')}
-      {tab(settings.sections.stripsHeading, '/books?tab=strips', active === 'strips')}
+      {tab(settings.sections.booksHeading, '/comics', active === 'comics')}
+      {tab(settings.sections.stripsHeading, '/comics?tab=strips', active === 'strips')}
     </div>
   )
 }

@@ -427,7 +427,7 @@ export default async function Home({
             ) : undefined
           }
           padding="md"
-          viewAllHref="/books"
+          viewAllHref="/comics"
           viewAllLabel={settings.home.viewAllLabel}
           emptyMessage={
             booksFiltering ? settings.empty.filteredBooks : settings.empty.books
@@ -500,7 +500,7 @@ export default async function Home({
             columns={5}
             scroll
             padding="md"
-            viewAllHref="/books?tab=strips"
+            viewAllHref="/comics?tab=strips"
             viewAllLabel={settings.home.viewAllLabel}
             emptyMessage=""
           />

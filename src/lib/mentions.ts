@@ -10,7 +10,7 @@ export function mentionHref(mention: {
 }): string {
   switch (mention._type) {
     case "book":
-      return `/books/${mention.slug}`;
+      return `/comics/${mention.slug}`;
     case "convention":
       return `/conventions/${mention.slug}`;
     case "media":

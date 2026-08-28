@@ -9,7 +9,7 @@ import type { UpdateFeedItem } from "@/lib/types";
 export function updateTargetHref(update: UpdateFeedItem): string | null {
   if (!update.targetSlug) return null;
   return update.targetType === "book"
-    ? `/books/${update.targetSlug}`
+    ? `/comics/${update.targetSlug}`
     : `/creators/${update.targetSlug}`;
 }
 

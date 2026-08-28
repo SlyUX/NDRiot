@@ -1473,7 +1473,7 @@ export default defineType({
           name: "footerJoinComicsLabel",
           title: "Footer — list a comic link",
           type: "string",
-          description: 'Links to /join/books — e.g. "Comics".',
+          description: 'Links to /join/comics — e.g. "Comics".',
         }),
         defineField({
           name: "footerJoinMediaLabel",
@@ -2372,7 +2372,7 @@ export default defineType({
       group: "bookIntake",
       options: { collapsible: true, collapsed: true },
       description:
-        'Labels for the on-site "add a comic" form (/join/books). Generic strings (sign-in button, add/remove, image errors) are shared with the creator form. Option lists (genres, formats, statuses, link kinds) come from the taxonomy.',
+        'Labels for the on-site "add a comic" form (/join/comics). Generic strings (sign-in button, add/remove, image errors) are shared with the creator form. Option lists (genres, formats, statuses, link kinds) come from the taxonomy.',
       fields: [
         defineField({
           name: "heading",
@@ -2975,7 +2975,7 @@ export default defineType({
               title: "Landing path",
               type: "string",
               description:
-                "Optional. Where the panel’s own title links to — e.g. /books. Leave blank for a label that only opens the menu.",
+                "Optional. Where the panel’s own title links to — e.g. /comics. Leave blank for a label that only opens the menu.",
               validation: (rule) =>
                 rule.custom((value) => !value || sitePath(value)),
             }),
