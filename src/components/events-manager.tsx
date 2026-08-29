@@ -66,7 +66,7 @@ export function EventsManager({
 
   return (
     <div className="space-y-4">
-      <SectionHeading as="h2" size="sm" tone="personalize" action={action}>
+      <SectionHeading as="h2" size="sm" tone="dashboard" action={action}>
         {labels.heading}
       </SectionHeading>
 

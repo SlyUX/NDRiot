@@ -16,14 +16,26 @@ export type YourComicsBook = {
   coverUrl: string | null;
 };
 
+/** A strip in the rail — its natural aspect, sized to the rail height. */
+export type YourComicsStrip = {
+  id: string;
+  title: string;
+  href: string;
+  imageUrl: string;
+  width: number;
+  height: number;
+};
+
 export function YourComics({
   books,
+  strips,
   heading,
   editLabel,
   addHref,
   addLabel,
 }: {
   books: YourComicsBook[];
+  strips: YourComicsStrip[];
   /** Accessible name for the rail (no visible heading). */
   heading: string;
   editLabel: string;
@@ -65,6 +77,26 @@ export function YourComics({
               className="focus-visible:ring-ring absolute right-0 bottom-0 inline-flex bg-black/70 p-1.5 text-white transition-colors hover:text-white/70 focus-visible:ring-2 focus-visible:-outline-offset-2 focus-visible:outline-none"
             >
               <Pencil aria-hidden="true" className="size-3.5" />
+            </Link>
+          </li>
+        ))}
+        {/* Strips — the creator's single-page comics, at their natural aspect
+            sized to the rail height. The whole tile links to the strip. */}
+        {strips.map((strip) => (
+          <li key={strip.id} className="h-[105px] shrink-0">
+            <Link
+              href={strip.href}
+              aria-label={strip.title}
+              className="focus-visible:ring-ring block h-full focus-visible:ring-2 focus-visible:-outline-offset-2 focus-visible:outline-none"
+            >
+              <Image
+                src={strip.imageUrl}
+                alt=""
+                width={strip.width}
+                height={strip.height}
+                sizes="160px"
+                className="h-full w-auto bg-white/10 object-contain"
+              />
             </Link>
           </li>
         ))}

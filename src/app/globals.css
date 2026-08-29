@@ -113,10 +113,11 @@
      6.88:1 (clears AA). Replaced the former --creator pink and --reader cyan. */
   --personalize: #2fa4b6;
   --personalize-foreground: #000000;
-  /* Dashboard band — the creator's private /me management zone. A black-text
-     surface: black 7.32:1 (AAA), white 2.87:1 FAILS. Distinct from --personalize
-     (teal, "for you") which stays on the home feed rail. */
-  --dashboard: #2f9cff;
+  /* Dashboard / Creator accent — the /me band + its h2 accents. A black-text
+     surface: black 11.89:1 (AAA), white 1.63:1 FAILS; as accent text on
+     --background it's 11.48:1 (AAA). Distinct from --personalize (teal, "for
+     you"), which stays on the home feed rail. */
+  --dashboard: #88cafc;
   --dashboard-foreground: #000000;
   /* zinc-400 is the floor for muted text — zinc-500 is 4.27:1 and fails AA. */
   --muted-foreground: #a1a1aa;

@@ -24,7 +24,11 @@ import {
 } from "@/components/update-composer";
 import { PostUpdateDialog } from "@/components/post-update-dialog";
 import { UpdateFeed } from "@/components/update-feed";
-import { YourComics, type YourComicsBook } from "@/components/your-comics";
+import {
+  YourComics,
+  type YourComicsBook,
+  type YourComicsStrip,
+} from "@/components/your-comics";
 import { composerLabelsFrom, updateOwnerConfig } from "@/lib/composer-labels";
 import { isSubscribedToNewsletter } from "@/lib/mailerlite";
 import { formatPlace } from "@/lib/place";
@@ -38,6 +42,7 @@ import {
   BOOKS_QUERY,
   CONVENTIONS_QUERY,
   CREATORS_QUERY,
+  CREATOR_STRIPS_QUERY,
   MEDIA_QUERY,
   OWNED_APPEARANCES_QUERY,
   INTAKE_OWNED_SERIES_QUERY,
@@ -62,6 +67,7 @@ import type {
   ConventionSummary,
   CosignCreator,
   CreatorSummary,
+  StripSummary,
   MediaSummary,
   OwnedAppearance,
   UpdateFeedItem,
@@ -290,6 +296,26 @@ export default async function AccountPage() {
     coverUrl: book.cover ? urlFor(book.cover).width(300).url() : null,
   }));
 
+  // The creator's strips, shown in the same rail as their comics.
+  const yourStrips: YourComicsStrip[] = (
+    ownedCreatorIds.length
+      ? await safeFetch<StripSummary[]>(
+          CREATOR_STRIPS_QUERY,
+          { id: ownedCreatorIds[0] },
+          [],
+        )
+      : []
+  )
+    .filter((strip) => strip.slug)
+    .map((strip) => ({
+      id: strip._id,
+      title: strip.title,
+      href: `/strips/${strip.slug}`,
+      imageUrl: urlFor(strip.image).width(320).url(),
+      width: strip.dimensions?.width ?? 800,
+      height: strip.dimensions?.height ?? 600,
+    }));
+
   // What a creator can post about: each creator they own, plus each of those
   // creators' comics. The action re-checks ownership — this only shapes the picker.
   const composerTargets: ComposerTarget[] = [
@@ -418,42 +444,8 @@ export default async function AccountPage() {
     });
   }
 
+  // Saved Comics leads (default tab), then Cosigns.
   const col2Tabs: PanelTab[] = [];
-  if (cosigns.length > 0) {
-    col2Tabs.push({
-      id: "cosigns",
-      label: s.accountCosignsHeading,
-      content: (
-        <ul className={tileGrid}>
-          {cosigns.map((c) => (
-            <li key={c._id}>
-              <Link
-                href={c.slug ? `/creators/${c.slug}` : "#"}
-                className="group focus-visible:ring-ring block focus-visible:ring-2 focus-visible:outline-none"
-              >
-                <div className="bg-muted relative aspect-square w-full overflow-hidden">
-                  {c.photo ? (
-                    <Image
-                      src={urlFor(c.photo).width(200).url()}
-                      alt=""
-                      fill
-                      sizes="6rem"
-                      className="object-cover"
-                    />
-                  ) : (
-                    <InitialsAvatar name={c.name ?? ""} className="text-xl" />
-                  )}
-                </div>
-                <p className="group-hover:text-primary mt-1 truncate text-xs">
-                  {c.name}
-                </p>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      ),
-    });
-  }
   if (savedBooks.length > 0) {
     col2Tabs.push({
       id: "saved-comics",
@@ -490,6 +482,41 @@ export default async function AccountPage() {
       ),
     });
   }
+  if (cosigns.length > 0) {
+    col2Tabs.push({
+      id: "cosigns",
+      label: s.accountCosignsHeading,
+      content: (
+        <ul className={tileGrid}>
+          {cosigns.map((c) => (
+            <li key={c._id}>
+              <Link
+                href={c.slug ? `/creators/${c.slug}` : "#"}
+                className="group focus-visible:ring-ring block focus-visible:ring-2 focus-visible:outline-none"
+              >
+                <div className="bg-muted relative aspect-square w-full overflow-hidden">
+                  {c.photo ? (
+                    <Image
+                      src={urlFor(c.photo).width(200).url()}
+                      alt=""
+                      fill
+                      sizes="6rem"
+                      className="object-cover"
+                    />
+                  ) : (
+                    <InitialsAvatar name={c.name ?? ""} className="text-xl" />
+                  )}
+                </div>
+                <p className="group-hover:text-primary mt-1 truncate text-xs">
+                  {c.name}
+                </p>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      ),
+    });
+  }
 
   return (
     <div>
@@ -514,7 +541,16 @@ export default async function AccountPage() {
         <Section padding="md" background={isCreator ? "dashboard" : "charcoal"}>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h1 className="text-2xl font-black tracking-tighter uppercase sm:text-4xl">
+              {/* A creator's identity band below is the visible header, so the
+                  page h1 stays for a11y (§10) but is hidden for them; a plain
+                  reader still sees it. */}
+              <h1
+                className={
+                  isCreator
+                    ? "sr-only"
+                    : "text-2xl font-black tracking-tighter uppercase sm:text-4xl"
+                }
+              >
                 {isCreator ? s.accountUserCreatorHeading : s.accountUserHeading}
               </h1>
               {/* Name + email only for a plain reader — a creator's identity is
@@ -621,6 +657,7 @@ export default async function AccountPage() {
               <div className="mt-6 min-w-0 lg:mt-0 lg:flex-1">
                 <YourComics
                   books={yourComicsBooks}
+                  strips={yourStrips}
                   heading={s.accountComicsHeading}
                   editLabel={s.accountEditLabel}
                   addHref="/join/comics"
