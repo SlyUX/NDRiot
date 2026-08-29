@@ -49,7 +49,7 @@ export default async function StripPage({
   ): StripNeighbor | null => (n?.slug ? { slug: n.slug, title: n.title } : null);
 
   return (
-    <Section padding="md" maxWidth="4xl">
+    <Section padding="md" maxWidth="wide">
       <StripView
         headingLevel="h1"
         strip={{

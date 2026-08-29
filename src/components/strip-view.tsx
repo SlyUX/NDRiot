@@ -97,6 +97,9 @@ export function StripView({
   onClose?: () => void;
 }) {
   const Heading = headingLevel;
+  // Landscape strips fill the stage width; tall/portrait strips are height-
+  // capped at 75vh instead (so the thumbnail grid still peeks below).
+  const landscape = (strip.width ?? 0) > (strip.height ?? 0);
   return (
     <div className="relative">
       {onClose && (
@@ -157,17 +160,17 @@ export function StripView({
         </div>
       )}
 
-      {/* The strip itself — natural aspect, capped at 75vh so the thumbnails
-          below peek into the viewport (the "stage" doesn't fill the screen). */}
+      {/* The strip itself. Landscape fills the stage width; portrait is capped
+          at 75vh (natural width, centered) so the grid below peeks in. */}
       {strip.image && (
         <div className="bg-muted mt-6 flex justify-center">
           <Image
-            src={urlFor(strip.image).width(1600).url()}
+            src={urlFor(strip.image).width(2000).url()}
             alt={strip.image.alt ?? strip.title}
             width={strip.width ?? 1600}
             height={strip.height ?? 2400}
-            sizes="(max-width: 56rem) 100vw, 56rem"
-            className="max-h-[75vh] w-auto max-w-full"
+            sizes="(max-width: 90rem) 100vw, 90rem"
+            className={landscape ? "h-auto w-full" : "max-h-[75vh] w-auto max-w-full"}
             priority
           />
         </div>

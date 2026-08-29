@@ -144,7 +144,7 @@ export function StripGallery({
           <div className="overflow-hidden">
             {/* No top padding on the open stage — the page header already
                 spaces it; keep only the horizontal + a little below. */}
-            <Section padding="none" maxWidth="4xl" className="px-6 pb-2">
+            <Section padding="none" maxWidth="wide" className="px-6 pb-2">
               <div ref={readerRef} className="scroll-mt-24">
                 <StripView
                   strip={{
