@@ -344,6 +344,7 @@ export default defineType({
         "Copy for the on-site “post a strip” form (a single-page comic hosted here). Generic strings (sign-in button, image errors, optional marker) are reused from the Comic Creator intake form.",
       fields: [
         defineField({ name: "heading", title: "Page heading", type: "string" }),
+        defineField({ name: "composerButton", title: "Dashboard button label (shown uppercase)", type: "string" }),
         defineField({ name: "intro", title: "Intro", type: "text", rows: 3 }),
         defineField({ name: "signInPrompt", title: "Sign-in prompt (signed out)", type: "string" }),
         defineField({ name: "signInBody", title: "Sign-in body (signed out)", type: "text", rows: 3 }),
@@ -1148,13 +1149,6 @@ export default defineType({
           description: 'On each owned item — e.g. "Edit".',
         }),
         defineField({
-          name: "accountViewCreatorLabel",
-          title: "Reader home — view creator page button",
-          type: "string",
-          description:
-            'Links to the public creator page — e.g. "Creator Profile".',
-        }),
-        defineField({
           name: "accountRiotingSince",
           title: "Reader home — creator tenure line",
           type: "string",
@@ -1169,15 +1163,15 @@ export default defineType({
         }),
         defineField({
           name: "accountSavedComicsHeading",
-          title: "Reader home — saved comics heading",
+          title: "Dashboard — Saved Comics tab",
           type: "string",
-          description: 'e.g. "Saved Comics".',
+          description: 'The saved-comics tab in the dashboard\'s second column — e.g. "Saved Comics".',
         }),
         defineField({
-          name: "accountSavedCreatorsHeading",
-          title: "Reader home — saved creators heading",
+          name: "accountCosignsHeading",
+          title: "Dashboard — Cosigns tab",
           type: "string",
-          description: 'e.g. "Favorite Creators".',
+          description: 'The tab showing creators you have Cosigned (your public endorsements) — e.g. "Cosigns".',
         }),
         defineField({
           name: "accountRemoveLabel",
@@ -1553,25 +1547,25 @@ export default defineType({
             'Submit button in the edit-update dialog — e.g. "Save changes".',
         }),
         defineField({
-          name: "profileOwnerBanner",
-          title: "Creator page — owner band text",
+          name: "profileTabLabel",
+          title: "Owner tab — Profile",
           type: "string",
           description:
-            'Shown in a thin band when a creator views their own profile. The words "public profile", if present, are emphasized to distinguish this reader-facing page from the private dashboard — e.g. "This is your public profile.".',
+            'The "Profile" tab in the owner-only tab bar (shown on both a creator\'s public page and their dashboard) → the public /creators/{slug} view. e.g. "Profile".',
+        }),
+        defineField({
+          name: "dashboardTabLabel",
+          title: "Owner tab — Dashboard",
+          type: "string",
+          description:
+            'The "Dashboard" tab in the owner-only tab bar → the private /me dashboard. e.g. "Dashboard".',
         }),
         defineField({
           name: "profileOwnerEditLabel",
           title: "Creator page — owner edit link",
           type: "string",
           description:
-            'The edit link in the owner band → the full edit form — e.g. "Edit your Profile".',
-        }),
-        defineField({
-          name: "profileOwnerDashboardLabel",
-          title: "Creator page — owner dashboard link",
-          type: "string",
-          description:
-            'The dashboard link in the owner band → /me — e.g. "Your Dashboard".',
+            'The edit shortcut beside the owner tab bar → the full edit form — e.g. "Edit your Profile".',
         }),
         defineField({
           name: "profileManageUpdatesLabel",

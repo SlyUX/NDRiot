@@ -23,6 +23,8 @@ const sectionVariants = cva("", {
       charcoal: "bg-charcoal",
       primary: "bg-primary text-primary-foreground",
       personalize: "bg-personalize text-personalize-foreground",
+      /** The creator's private dashboard band on /me (§9 — black-text blue). */
+      dashboard: "bg-dashboard text-dashboard-foreground",
     },
     padding: {
       none: "",

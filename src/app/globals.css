@@ -52,6 +52,8 @@
   --color-funding: var(--funding);
   --color-personalize: var(--personalize);
   --color-personalize-foreground: var(--personalize-foreground);
+  --color-dashboard: var(--dashboard);
+  --color-dashboard-foreground: var(--dashboard-foreground);
   --color-surface-alt: var(--surface-alt);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
@@ -111,6 +113,11 @@
      6.88:1 (clears AA). Replaced the former --creator pink and --reader cyan. */
   --personalize: #2fa4b6;
   --personalize-foreground: #000000;
+  /* Dashboard band — the creator's private /me management zone. A black-text
+     surface: black 7.32:1 (AAA), white 2.87:1 FAILS. Distinct from --personalize
+     (teal, "for you") which stays on the home feed rail. */
+  --dashboard: #2f9cff;
+  --dashboard-foreground: #000000;
   /* zinc-400 is the floor for muted text — zinc-500 is 4.27:1 and fails AA. */
   --muted-foreground: #a1a1aa;
   --accent: #18181b;

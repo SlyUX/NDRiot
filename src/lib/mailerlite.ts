@@ -44,3 +44,36 @@ export async function subscribeToNewsletter(email: string): Promise<boolean> {
     return false
   }
 }
+
+/**
+ * Whether `email` is an active (confirmed) ND Noise subscriber — used to hide
+ * the /me opt-in from people who already joined. MailerLite is the sole source
+ * of truth (no local marker to drift), so this reads it live via the connect
+ * API (which accepts the email as the subscriber identifier).
+ *
+ * Fail-SOFT toward showing the invite: a missing key, a 404 (not a subscriber),
+ * an unconfirmed/unsubscribed status, or any hiccup all return false, so the
+ * worst case is that a subscriber occasionally still sees the opt-in — never
+ * that a non-subscriber is denied the chance to join.
+ */
+export async function isSubscribedToNewsletter(email: string): Promise<boolean> {
+  const clean = email.trim().toLowerCase()
+  const apiKey = process.env.MAILERLITE_API_KEY
+  if (!clean || !apiKey) return false
+
+  try {
+    const res = await fetch(
+      `https://connect.mailerlite.com/api/subscribers/${encodeURIComponent(clean)}`,
+      { headers: { Authorization: `Bearer ${apiKey}`, Accept: 'application/json' } },
+    )
+    if (!res.ok) return false // 404 = not a subscriber; any other error → fail soft
+    const body: unknown = await res.json()
+    const status = (body as { data?: { status?: unknown } })?.data?.status
+    // 'active' = confirmed + subscribed; unconfirmed/unsubscribed/bounced/junk
+    // all mean we should still invite them.
+    return status === 'active'
+  } catch (cause) {
+    console.error('[mailerlite] status check failed', cause)
+    return false
+  }
+}

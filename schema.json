@@ -5266,6 +5266,13 @@
               },
               "optional": true
             },
+            "composerButton": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "intro": {
               "type": "objectAttribute",
               "value": {
@@ -6511,13 +6518,6 @@
               },
               "optional": true
             },
-            "accountViewCreatorLabel": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
             "accountRiotingSince": {
               "type": "objectAttribute",
               "value": {
@@ -6539,7 +6539,7 @@
               },
               "optional": true
             },
-            "accountSavedCreatorsHeading": {
+            "accountCosignsHeading": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"
@@ -6945,7 +6945,14 @@
               },
               "optional": true
             },
-            "profileOwnerBanner": {
+            "profileTabLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "dashboardTabLabel": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"
@@ -6953,13 +6960,6 @@
               "optional": true
             },
             "profileOwnerEditLabel": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
-            "profileOwnerDashboardLabel": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

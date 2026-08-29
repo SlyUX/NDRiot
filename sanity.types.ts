@@ -883,6 +883,7 @@ export type SiteSettings = {
   };
   stripIntake?: {
     heading?: string;
+    composerButton?: string;
     intro?: string;
     signInPrompt?: string;
     signInBody?: string;
@@ -1062,11 +1063,10 @@ export type SiteSettings = {
     accountComicsHeading?: string;
     accountMediaHeading?: string;
     accountEditLabel?: string;
-    accountViewCreatorLabel?: string;
     accountRiotingSince?: string;
     accountViewMediaLabel?: string;
     accountSavedComicsHeading?: string;
-    accountSavedCreatorsHeading?: string;
+    accountCosignsHeading?: string;
     accountRemoveLabel?: string;
     accountRemovedLabel?: string;
     accountUndoLabel?: string;
@@ -1124,9 +1124,9 @@ export type SiteSettings = {
     updateUndoLabel?: string;
     updateEditLabel?: string;
     updateEditSubmit?: string;
-    profileOwnerBanner?: string;
+    profileTabLabel?: string;
+    dashboardTabLabel?: string;
     profileOwnerEditLabel?: string;
-    profileOwnerDashboardLabel?: string;
     profileManageUpdatesLabel?: string;
     creatorWorksHeading?: string;
     creatorOrganizationsHeading?: string;
@@ -3251,6 +3251,16 @@ export type COLLAB_CREATORS_QUERY_RESULT = Array<{
 export type COSIGNED_IDS_QUERY_RESULT = Array<string | null> | null;
 
 // Source: src/lib/queries.ts
+// Variable: OWNED_COSIGNS_QUERY
+// Query: *[_type=="creator" && _id==$id][0].favoriteCreators[defined(onSite)].onSite->{    _id,name,"slug":slug.current,photo  }
+export type OWNED_COSIGNS_QUERY_RESULT = Array<{
+  _id: string;
+  name: string;
+  slug: string;
+  photo: ImageWithAlt | null;
+} | null> | null;
+
+// Source: src/lib/queries.ts
 // Variable: ALLIES_QUERY
 // Query: *[_type=="ally" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,offering,logo,about}
 export type ALLIES_QUERY_RESULT = Array<{
@@ -4174,6 +4184,7 @@ declare module "@sanity/client" {
     '*[_type=="creator" && _id==$id][0].place.region': OWNED_CREATOR_REGION_QUERY_RESULT;
     '*[_type=="creator" && _id in $ids]{_id,name,"slug":slug.current}': COLLAB_CREATORS_QUERY_RESULT;
     '*[_type=="creator" && _id==$id][0].favoriteCreators[defined(onSite)].onSite._ref': COSIGNED_IDS_QUERY_RESULT;
+    '*[_type=="creator" && _id==$id][0].favoriteCreators[defined(onSite)].onSite->{\n    _id,name,"slug":slug.current,photo\n  }': OWNED_COSIGNS_QUERY_RESULT;
     '*[_type=="ally" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,offering,logo,about}': ALLIES_QUERY_RESULT;
     '*[_type=="ally" && slug.current==$slug][0]{_id,name,"slug":slug.current,url,offering,logo,about}': ALLY_QUERY_RESULT;
     '*[_type=="strip" && defined(slug.current)]|order(publishedAt desc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}': STRIPS_QUERY_RESULT;

@@ -157,16 +157,17 @@ export function StripView({
         </div>
       )}
 
-      {/* The strip itself — shown at its natural aspect, whatever shape it is. */}
+      {/* The strip itself — natural aspect, capped at 75vh so the thumbnails
+          below peek into the viewport (the "stage" doesn't fill the screen). */}
       {strip.image && (
-        <div className="bg-muted mt-6">
+        <div className="bg-muted mt-6 flex justify-center">
           <Image
             src={urlFor(strip.image).width(1600).url()}
             alt={strip.image.alt ?? strip.title}
             width={strip.width ?? 1600}
             height={strip.height ?? 2400}
             sizes="(max-width: 56rem) 100vw, 56rem"
-            className="h-auto w-full"
+            className="max-h-[75vh] w-auto max-w-full"
             priority
           />
         </div>

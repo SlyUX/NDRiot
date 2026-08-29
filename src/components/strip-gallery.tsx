@@ -142,7 +142,9 @@ export function StripGallery({
           onAnimationEnd={finalizeClose}
         >
           <div className="overflow-hidden">
-            <Section padding={padding} maxWidth="4xl" className="pb-2">
+            {/* No top padding on the open stage — the page header already
+                spaces it; keep only the horizontal + a little below. */}
+            <Section padding="none" maxWidth="4xl" className="px-6 pb-2">
               <div ref={readerRef} className="scroll-mt-24">
                 <StripView
                   strip={{

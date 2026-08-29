@@ -14,6 +14,7 @@ import PortableTextBody from "@/components/PortableTextBody";
 import { CollabRequestButton } from "@/components/collab-request-button";
 import { CosignButton } from "@/components/cosign-button";
 import { InitialsAvatar } from "@/components/initials-avatar";
+import { OwnerTabs } from "@/components/owner-tabs";
 import { SaveButton } from "@/components/save-button";
 import SocialLinks from "@/components/SocialLinks";
 import { SocialIcon } from "@/components/social-icon";
@@ -59,27 +60,6 @@ import type {
 import { urlFor } from "@/sanity/image";
 
 export const dynamic = "force-dynamic";
-
-/**
- * Render the owner-band copy with the phrase "public profile" bolded, so the
- * owner reads it as "this is the reader-facing page, not my dashboard." The copy
- * stays CMS-editable (§2); if an editor rewrites it without that phrase, it just
- * renders plain.
- */
-function ownerBanner(text: string) {
-  const term = "public profile";
-  const i = text.toLowerCase().indexOf(term);
-  if (i === -1) return text;
-  return (
-    <>
-      {text.slice(0, i)}
-      <strong className="font-bold text-white">
-        {text.slice(i, i + term.length)}
-      </strong>
-      {text.slice(i + term.length)}
-    </>
-  );
-}
 
 export async function generateMetadata({
   params,
@@ -254,33 +234,23 @@ export default async function CreatorPage({
         )}
       />
 
-      {/* Owner band — only when you're viewing your own profile. A thin notice
-          plus the owner's two shortcuts, inline: the dashboard (manage
-          everything) and the edit form. Links are white (pink is only 3.34:1 on
-          charcoal — fails AA, §9); no inline editing on the public page itself. */}
+      {/* Owner-only tab bar — flip between this public Profile and the private
+          Dashboard, with an Edit shortcut. Identical bar sits atop /me. */}
       {isOwner && (
-        <div className="bg-charcoal">
-          <div className="mx-auto flex max-w-[90rem] flex-wrap items-center gap-x-3 gap-y-1 px-6 py-1.5 text-sm text-white/80">
-            <span>{ownerBanner(settings.sections.profileOwnerBanner)}</span>
-            <span className="flex items-center gap-2">
-              <Link
-                href="/me"
-                className="focus-visible:ring-ring text-white underline underline-offset-2 hover:no-underline focus-visible:ring-2 focus-visible:outline-none"
-              >
-                {settings.sections.profileOwnerDashboardLabel}
-              </Link>
-              <span aria-hidden="true" className="text-white/30">
-                |
-              </span>
-              <Link
-                href={`/join/creators?editing=${encodeURIComponent(creator._id)}`}
-                className="focus-visible:ring-ring text-white underline underline-offset-2 hover:no-underline focus-visible:ring-2 focus-visible:outline-none"
-              >
-                {settings.sections.profileOwnerEditLabel}
-              </Link>
-            </span>
-          </div>
-        </div>
+        <OwnerTabs
+          active="profile"
+          profileHref={`/creators/${slug}`}
+          profileLabel={settings.sections.profileTabLabel}
+          dashboardLabel={settings.sections.dashboardTabLabel}
+          action={
+            <Link
+              href={`/join/creators?editing=${encodeURIComponent(creator._id)}`}
+              className="focus-visible:ring-ring text-primary text-xs font-bold tracking-widest uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none"
+            >
+              {settings.sections.profileOwnerEditLabel}
+            </Link>
+          }
+        />
       )}
 
       {/* Everything below the owner band shares the alternating rhythm (§9). */}

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Eye, Pencil } from "lucide-react";
+import { Eye, Pencil, Plus } from "lucide-react";
 
 /**
  * A creator's comics on /me — a bare horizontal rail of covers beside the
@@ -20,11 +20,16 @@ export function YourComics({
   books,
   heading,
   editLabel,
+  addHref,
+  addLabel,
 }: {
   books: YourComicsBook[];
   /** Accessible name for the rail (no visible heading). */
   heading: string;
   editLabel: string;
+  /** The "add a comic" tile at the end of the rail → the intake form. */
+  addHref: string;
+  addLabel: string;
 }) {
   return (
     <section aria-label={heading}>
@@ -63,6 +68,16 @@ export function YourComics({
             </Link>
           </li>
         ))}
+        {/* Add-a-comic tile — same footprint as a cover, closing the rail. */}
+        <li className="shrink-0">
+          <Link
+            href={addHref}
+            aria-label={addLabel}
+            className="focus-visible:ring-ring flex aspect-[2/3] w-[70px] items-center justify-center bg-black text-white transition-colors hover:bg-black/80 focus-visible:ring-2 focus-visible:-outline-offset-2 focus-visible:outline-none"
+          >
+            <Plus aria-hidden="true" className="size-8" strokeWidth={3} />
+          </Link>
+        </li>
       </ul>
     </section>
   );

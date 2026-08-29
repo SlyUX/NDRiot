@@ -13,8 +13,10 @@ import { EventDialog } from "@/components/event-dialog";
 import { EventsManager } from "@/components/events-manager";
 import { InitialsAvatar } from "@/components/initials-avatar";
 import { NewsletterOptIn } from "@/components/newsletter-opt-in";
+import { OwnerTabs } from "@/components/owner-tabs";
 import { SavedItemRow } from "@/components/saved-item-row";
 import { SectionHeading } from "@/components/section-heading";
+import { TabbedPanel, type PanelTab } from "@/components/tabbed-panel";
 import { StripComposer } from "@/components/strip-composer";
 import {
   type ComposerTarget,
@@ -24,6 +26,7 @@ import { PostUpdateDialog } from "@/components/post-update-dialog";
 import { UpdateFeed } from "@/components/update-feed";
 import { YourComics, type YourComicsBook } from "@/components/your-comics";
 import { composerLabelsFrom, updateOwnerConfig } from "@/lib/composer-labels";
+import { isSubscribedToNewsletter } from "@/lib/mailerlite";
 import { formatPlace } from "@/lib/place";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/ui/section";
@@ -39,6 +42,7 @@ import {
   OWNED_APPEARANCES_QUERY,
   INTAKE_OWNED_SERIES_QUERY,
   OWNED_BOOKS_QUERY,
+  OWNED_COSIGNS_QUERY,
   OWNED_DOCS_QUERY,
   OWNED_MEDIA_QUERY,
   SAVED_BOOKS_QUERY,
@@ -56,6 +60,7 @@ import { urlFor } from "@/sanity/image";
 import type {
   BookSummary,
   ConventionSummary,
+  CosignCreator,
   CreatorSummary,
   MediaSummary,
   OwnedAppearance,
@@ -202,6 +207,15 @@ export default async function AccountPage() {
 
   const isCreator = ownedCreators.length > 0;
   const hasSaves = savedBooks.length > 0 || savedCreators.length > 0;
+  // Hide the ND Noise opt-in from anyone already subscribed (MailerLite live).
+  const newsletterSubscribed = await isSubscribedToNewsletter(email);
+  // The creators this creator has Cosigned — the dashboard's Cosigns tab. A
+  // dangling reference resolves to null, so drop those.
+  const cosigns = (
+    isCreator
+      ? await safeFetch<CosignCreator[]>(OWNED_COSIGNS_QUERY, { id: ownedCreatorIds[0] }, [])
+      : []
+  ).filter((c): c is NonNullable<CosignCreator> => c != null);
 
   // The creators' existing (published) series — the strip composer's dropdown,
   // filtered per creator at render. Drafts a creator just started show up once
@@ -362,8 +376,133 @@ export default async function AccountPage() {
     postedLabel: s.accountEventPosted,
   };
 
+  // Two tabbed dashboard columns — Updates|Feed and Cosigns|Saved Comics. The
+  // panels are headingless; the tab label is the heading. Empty tabs are
+  // dropped, empty columns aren't rendered.
+  const tileGrid =
+    "grid grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))] gap-3";
+
+  const col1Tabs: PanelTab[] = [];
+  if (isCreator) {
+    col1Tabs.push({
+      id: "updates",
+      label: s.accountMyUpdatesHeading,
+      action:
+        composerTargets.length > 0 ? (
+          <PostUpdateDialog
+            targets={composerTargets}
+            kinds={UPDATE_KINDS}
+            mentions={mentionOptions}
+            labels={composerLabelsFrom(s)}
+          />
+        ) : undefined,
+      content: (
+        <div id="your-updates" className="scroll-mt-24">
+          <UpdateFeed
+            emptyLabel={s.accountMyUpdatesEmpty}
+            updates={myUpdates}
+            owner={updateOwnerConfig(s, mentionOptions)}
+            scrollCap
+          />
+        </div>
+      ),
+    });
+  }
+  if (followIds.length > 0) {
+    col1Tabs.push({
+      id: "feed",
+      label: s.accountFeedHeading,
+      content: (
+        <UpdateFeed emptyLabel={s.accountFeedEmpty} updates={updates} scrollCap />
+      ),
+    });
+  }
+
+  const col2Tabs: PanelTab[] = [];
+  if (cosigns.length > 0) {
+    col2Tabs.push({
+      id: "cosigns",
+      label: s.accountCosignsHeading,
+      content: (
+        <ul className={tileGrid}>
+          {cosigns.map((c) => (
+            <li key={c._id}>
+              <Link
+                href={c.slug ? `/creators/${c.slug}` : "#"}
+                className="group focus-visible:ring-ring block focus-visible:ring-2 focus-visible:outline-none"
+              >
+                <div className="bg-muted relative aspect-square w-full overflow-hidden">
+                  {c.photo ? (
+                    <Image
+                      src={urlFor(c.photo).width(200).url()}
+                      alt=""
+                      fill
+                      sizes="6rem"
+                      className="object-cover"
+                    />
+                  ) : (
+                    <InitialsAvatar name={c.name ?? ""} className="text-xl" />
+                  )}
+                </div>
+                <p className="group-hover:text-primary mt-1 truncate text-xs">
+                  {c.name}
+                </p>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      ),
+    });
+  }
+  if (savedBooks.length > 0) {
+    col2Tabs.push({
+      id: "saved-comics",
+      label: s.accountSavedComicsHeading,
+      content: (
+        <ul className={tileGrid}>
+          {savedBooks.map((book) => (
+            <SavedItemRow
+              key={book._id}
+              layout="tile"
+              itemId={book._id}
+              itemType="book"
+              title={book.title ?? "Untitled"}
+              href={book.slug ? `/comics/${book.slug}` : null}
+              removeLabel={s.accountRemoveLabel}
+              removedLabel={s.accountRemovedLabel}
+              undoLabel={s.accountUndoLabel}
+              thumb={
+                <div className="bg-muted relative aspect-[2/3] w-full overflow-hidden">
+                  {book.cover && (
+                    <Image
+                      src={urlFor(book.cover).width(200).url()}
+                      alt=""
+                      fill
+                      sizes="6rem"
+                      className="object-cover"
+                    />
+                  )}
+                </div>
+              }
+            />
+          ))}
+        </ul>
+      ),
+    });
+  }
+
   return (
     <div>
+      {/* Owner-only tab bar — the same Profile ↔ Dashboard flip that sits atop
+          the public profile; here Dashboard is active. */}
+      {isCreator && ownedCreators[0]?.slug && (
+        <OwnerTabs
+          active="dashboard"
+          profileHref={`/creators/${ownedCreators[0].slug}`}
+          profileLabel={s.profileTabLabel}
+          dashboardLabel={s.dashboardTabLabel}
+        />
+      )}
       {/* The top user/creator zone keeps its own band (creator-pink / charcoal),
           so it's the one section that sits out the alternating rhythm below —
           AlternatingSections leaves any section with an explicit background
@@ -372,7 +511,7 @@ export default async function AccountPage() {
         {/* Profile — a creator gets the personalization-teal zone holding their
             identity beside their comics; a plain reader gets the charcoal band
             with just their details. Teal is a black-text surface (§9). */}
-        <Section padding="md" background={isCreator ? "personalize" : "charcoal"}>
+        <Section padding="md" background={isCreator ? "dashboard" : "charcoal"}>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h1 className="text-2xl font-black tracking-tighter uppercase sm:text-4xl">
@@ -417,146 +556,125 @@ export default async function AccountPage() {
                         })
                       : null;
                     return (
-                      <div key={creator._id} className="flex gap-3 sm:gap-4">
-                        {/* Avatar sized to the Your Comics covers beside it (105px). */}
-                        <div className="relative aspect-square w-[105px] shrink-0 overflow-hidden bg-black/10">
-                          {creator.photo ? (
-                            <Image
-                              src={urlFor(creator.photo).width(320).url()}
-                              alt=""
-                              fill
-                              sizes="105px"
-                              className="object-cover"
-                            />
-                          ) : (
-                            <InitialsAvatar
-                              name={creator.name ?? ""}
-                              className="text-3xl"
-                            />
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate font-bold text-black">
-                            {creator.name}
-                          </p>
-                          {sub && (
-                            <p className="truncate text-sm text-black/70">
-                              {sub}
-                            </p>
-                          )}
-                          {joined && (
-                            <p className="truncate text-xs text-black/60">
-                              {s.accountRiotingSince.replace("{date}", joined)}
-                            </p>
-                          )}
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            {/* Edit lives in the profile's owner band + the edit
-                                form; hidden on phones to declutter the block. */}
-                            <Button
-                              asChild
-                              variant="inverse"
-                              size="sm"
-                              className="max-sm:hidden"
-                            >
-                              <Link
-                                href={`/join/creators?editing=${encodeURIComponent(creator._id)}`}
-                              >
-                                {s.accountEditLabel}
-                              </Link>
-                            </Button>
-                            {creator.slug && (
-                              <Button asChild variant="inverse" size="sm">
-                                <Link href={`/creators/${creator.slug}`}>
-                                  {s.accountViewCreatorLabel}
-                                </Link>
-                              </Button>
+                      <div key={creator._id} className="space-y-3">
+                        <div className="flex gap-3 sm:gap-4">
+                          {/* Avatar sized to the Your Comics covers beside it (105px). */}
+                          <div className="relative aspect-square w-[105px] shrink-0 overflow-hidden bg-black/10">
+                            {creator.photo ? (
+                              <Image
+                                src={urlFor(creator.photo).width(320).url()}
+                                alt=""
+                                fill
+                                sizes="105px"
+                                className="object-cover"
+                              />
+                            ) : (
+                              <InitialsAvatar
+                                name={creator.name ?? ""}
+                                className="text-3xl"
+                              />
                             )}
-                            {/* Post a single-page strip hosted on ND Riot — a
-                                modal on the dashboard, scoped to this creator
-                                and review-gated. */}
-                            <StripComposer
-                              copy={settings.stripIntake}
-                              common={settings.creatorIntake}
-                              reviewNotice={settings.reviewNotice}
-                              creator={{
-                                _id: creator._id,
-                                name: creator.name ?? "Your profile",
-                              }}
-                              series={ownedSeries
-                                .filter((se) => se.creatorId === creator._id)
-                                .map((se) => ({
-                                  _id: se._id,
-                                  title: se.title ?? "Untitled series",
-                                }))}
-                            />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate font-bold text-black">
+                              {creator.name}
+                            </p>
+                            {sub && (
+                              <p className="truncate text-sm text-black/70">
+                                {sub}
+                              </p>
+                            )}
+                            {joined && (
+                              <p className="truncate text-xs text-black/60">
+                                {s.accountRiotingSince.replace("{date}", joined)}
+                              </p>
+                            )}
                           </div>
                         </div>
+                        {/* Post a strip — the card's one action, full-width
+                            beneath the identity. Edit + View live in the owner
+                            tab bar now (Edit is a Profile concern). */}
+                        <StripComposer
+                          className="w-full"
+                          copy={settings.stripIntake}
+                          common={settings.creatorIntake}
+                          reviewNotice={settings.reviewNotice}
+                          creator={{
+                            _id: creator._id,
+                            name: creator.name ?? "Your profile",
+                          }}
+                          series={ownedSeries
+                            .filter((se) => se.creatorId === creator._id)
+                            .map((se) => ({
+                              _id: se._id,
+                              title: se.title ?? "Untitled series",
+                            }))}
+                        />
                       </div>
                     );
                   })}
                 </div>
               </div>
 
-              {yourComicsBooks.length > 0 && (
-                <div className="mt-6 min-w-0 lg:mt-0 lg:flex-1">
-                  <YourComics
-                    books={yourComicsBooks}
-                    heading={s.accountComicsHeading}
-                    editLabel={s.accountEditLabel}
-                  />
-                </div>
-              )}
+              {/* Always shown for a creator: even with no comics yet, the rail
+                  carries the add-a-comic tile. */}
+              <div className="mt-6 min-w-0 lg:mt-0 lg:flex-1">
+                <YourComics
+                  books={yourComicsBooks}
+                  heading={s.accountComicsHeading}
+                  editLabel={s.accountEditLabel}
+                  addHref="/join/comics"
+                  addLabel={settings.bookIntake.heading}
+                />
+              </div>
             </div>
           )}
         </Section>
 
-        {/* Your events — the creator's convention appearances (attending/tabling). */}
-        {isCreator && (
-          <Section padding="md">
-            <EventsManager
-              current={ownedAppearances}
-              labels={{
-                heading: s.accountEventsHeading,
-                empty: s.accountEventsEmpty,
-                tablePrefix: s.tableLabel,
-                tbaLabel: s.eventDateTba,
-                removeLabel: s.accountRemoveLabel,
-                editLabel: s.accountEventEditHeading,
-              }}
-              editForm={
-                composerTargets.length > 0
-                  ? { creators: eventFormCreators, labels: eventFormLabels }
-                  : undefined
-              }
-              action={
-                composerTargets.length > 0 ? (
-                  <EventDialog
-                    creators={eventFormCreators}
-                    conventions={eventConventions}
-                    labels={eventFormLabels}
-                  />
-                ) : undefined
-              }
-            />
-          </Section>
-        )}
-
-        {/* Collaboration requests — creators only. Incoming (respond with a
+        {/* Your events + Collaboration requests, side by side (creators only).
+            Events = convention appearances; Collab = incoming (respond with a
             canned preset) + sent (status). */}
         {isCreator && (
           <Section padding="md">
-            <CollabRequests
-              incoming={incomingCollab}
-              sent={sentCollab}
-              copy={settings.collab}
-            />
+            <div className="grid gap-8 lg:grid-cols-2">
+              <EventsManager
+                current={ownedAppearances}
+                labels={{
+                  heading: s.accountEventsHeading,
+                  empty: s.accountEventsEmpty,
+                  tablePrefix: s.tableLabel,
+                  tbaLabel: s.eventDateTba,
+                  removeLabel: s.accountRemoveLabel,
+                  editLabel: s.accountEventEditHeading,
+                }}
+                editForm={
+                  composerTargets.length > 0
+                    ? { creators: eventFormCreators, labels: eventFormLabels }
+                    : undefined
+                }
+                action={
+                  composerTargets.length > 0 ? (
+                    <EventDialog
+                      creators={eventFormCreators}
+                      conventions={eventConventions}
+                      labels={eventFormLabels}
+                    />
+                  ) : undefined
+                }
+              />
+              <CollabRequests
+                incoming={incomingCollab}
+                sent={sentCollab}
+                copy={settings.collab}
+              />
+            </div>
           </Section>
         )}
 
         {/* Your Media — owners of an outlet (creator or not). Plain feed rows. */}
         {ownedMedia.length > 0 && (
           <Section padding="md">
-            <SectionHeading as="h2" size="sm" tone="personalize">
+            <SectionHeading as="h2" size="sm" tone="dashboard">
               {s.accountMediaHeading}
             </SectionHeading>
             <ul className={FEED_GRID}>
@@ -611,133 +729,13 @@ export default async function AccountPage() {
           </Section>
         )}
 
-        {/* Your Updates (your own posts) + Your Feed (who you follow). "Post an
-            Update" sits across from the Your Updates heading. */}
-        {(followIds.length > 0 || isCreator) && (
+        {/* Two tabbed columns: [Your Updates | Your Feed] and [Cosigns | Saved
+            Comics]. Each column flips its panels in place. */}
+        {(col1Tabs.length > 0 || col2Tabs.length > 0) && (
           <Section padding="md">
             <div className="grid gap-8 lg:grid-cols-2">
-              {isCreator && (
-                // Anchor target for the "manage your updates" link on a creator's
-                // own profile; scroll-mt clears the fixed nav on the jump.
-                <div id="your-updates" className="scroll-mt-24">
-                  <UpdateFeed
-                    heading={s.accountMyUpdatesHeading}
-                    headingTone="personalize"
-                    emptyLabel={s.accountMyUpdatesEmpty}
-                    updates={myUpdates}
-                    owner={updateOwnerConfig(s, mentionOptions)}
-                    action={
-                      composerTargets.length > 0 ? (
-                        <PostUpdateDialog
-                          targets={composerTargets}
-                          kinds={UPDATE_KINDS}
-                          mentions={mentionOptions}
-                          labels={composerLabelsFrom(s)}
-                        />
-                      ) : undefined
-                    }
-                    scrollCap
-                  />
-                </div>
-              )}
-              {followIds.length > 0 && (
-                <UpdateFeed
-                  heading={s.accountFeedHeading}
-                  headingTone="personalize"
-                  emptyLabel={s.accountFeedEmpty}
-                  updates={updates}
-                  scrollCap
-                />
-              )}
-            </div>
-          </Section>
-        )}
-
-        {/* Favorite Creators + Your Saved Comics, side by side. */}
-        {(savedCreators.length > 0 || savedBooks.length > 0) && (
-          <Section padding="md">
-            <div className="grid gap-8 lg:grid-cols-2">
-              {savedCreators.length > 0 && (
-                <div>
-                  <SectionHeading as="h2" size="sm" tone="personalize">
-                    {s.accountSavedCreatorsHeading}
-                  </SectionHeading>
-                  {/* A wrapping grid of square portraits, name beneath — mirrors
-                      Your Saved Comics, but a face needs its name to be legible. */}
-                  <ul className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))] gap-3">
-                    {savedCreators.map((creator) => (
-                      <SavedItemRow
-                        key={creator._id}
-                        layout="tile"
-                        tileAspect="square"
-                        caption
-                        itemId={creator._id}
-                        itemType="creator"
-                        title={creator.name ?? "Comic Creator"}
-                        href={creator.slug ? `/creators/${creator.slug}` : null}
-                        removeLabel={s.accountRemoveLabel}
-                        removedLabel={s.accountRemovedLabel}
-                        undoLabel={s.accountUndoLabel}
-                        thumb={
-                          <div className="bg-muted relative aspect-square w-full overflow-hidden">
-                            {creator.photo ? (
-                              <Image
-                                src={urlFor(creator.photo).width(200).url()}
-                                alt=""
-                                fill
-                                sizes="6rem"
-                                className="object-cover"
-                              />
-                            ) : (
-                              <InitialsAvatar
-                                name={creator.name ?? ""}
-                                className="text-xl"
-                              />
-                            )}
-                          </div>
-                        }
-                      />
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {savedBooks.length > 0 && (
-                <div>
-                  <SectionHeading as="h2" size="sm" tone="personalize">
-                    {s.accountSavedComicsHeading}
-                  </SectionHeading>
-                  {/* A wrapping grid of covers — each links to the book, Remove in
-                    the corner. */}
-                  <ul className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))] gap-3">
-                    {savedBooks.map((book) => (
-                      <SavedItemRow
-                        key={book._id}
-                        layout="tile"
-                        itemId={book._id}
-                        itemType="book"
-                        title={book.title ?? "Untitled"}
-                        href={book.slug ? `/comics/${book.slug}` : null}
-                        removeLabel={s.accountRemoveLabel}
-                        removedLabel={s.accountRemovedLabel}
-                        undoLabel={s.accountUndoLabel}
-                        thumb={
-                          <div className="bg-muted relative aspect-[2/3] w-full overflow-hidden">
-                            {book.cover && (
-                              <Image
-                                src={urlFor(book.cover).width(200).url()}
-                                alt=""
-                                fill
-                                sizes="6rem"
-                                className="object-cover"
-                              />
-                            )}
-                          </div>
-                        }
-                      />
-                    ))}
-                  </ul>
-                </div>
-              )}
+              {col1Tabs.length > 0 && <TabbedPanel tabs={col1Tabs} />}
+              {col2Tabs.length > 0 && <TabbedPanel tabs={col2Tabs} />}
             </div>
           </Section>
         )}
@@ -757,16 +755,19 @@ export default async function AccountPage() {
           </Section>
         )}
 
-        {/* Monthly-email opt-in — every signed-in reader, explicit only (§3). */}
-        <Section padding="md">
-          <NewsletterOptIn
-            heading={s.accountNewsletterHeading}
-            body={s.accountNewsletterBody}
-            cta={s.accountNewsletterCta}
-            successLabel={settings.newsletter.successMessage}
-            errorLabel={settings.newsletter.errorMessage}
-          />
-        </Section>
+        {/* Monthly-email opt-in — explicit only (§3), and only for people who
+            aren't already subscribed (MailerLite is the source of truth). */}
+        {!newsletterSubscribed && (
+          <Section padding="md">
+            <NewsletterOptIn
+              heading={s.accountNewsletterHeading}
+              body={s.accountNewsletterBody}
+              cta={s.accountNewsletterCta}
+              successLabel={settings.newsletter.successMessage}
+              errorLabel={settings.newsletter.errorMessage}
+            />
+          </Section>
+        )}
       </AlternatingSections>
     </div>
   );

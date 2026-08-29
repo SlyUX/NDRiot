@@ -28,9 +28,11 @@ const headingVariants = cva('font-black tracking-tighter', {
     tone: {
       default: 'text-foreground',
       primary: 'text-primary',
-      /** Personalization teal — headings of a section tuned to the signed-in
-       *  person (the /me dashboard, the home "My Feed" rail). */
+      /** Personalization teal — headings tuned to the signed-in person (the
+       *  home "My Feed" rail). */
       personalize: 'text-personalize',
+      /** The /me dashboard's blue accent (§9 --dashboard), 7.07:1 on background. */
+      dashboard: 'text-dashboard',
     },
     uppercase: {
       true: 'uppercase',

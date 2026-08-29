@@ -412,6 +412,12 @@ export const COLLAB_CREATORS_QUERY = defineQuery(
 export const COSIGNED_IDS_QUERY = defineQuery(
   `*[_type=="creator" && _id==$id][0].favoriteCreators[defined(onSite)].onSite._ref`,
 );
+// The creators one creator has cosigned, resolved — the dashboard's Cosigns tab.
+export const OWNED_COSIGNS_QUERY = defineQuery(
+  `*[_type=="creator" && _id==$id][0].favoriteCreators[defined(onSite)].onSite->{
+    _id,name,"slug":slug.current,photo
+  }`,
+);
 
 // ---- Allies ----
 // Vetted partner services, alphabetical (neutral order, §3). Curated in Studio.

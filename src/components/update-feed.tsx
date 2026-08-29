@@ -21,7 +21,8 @@ export function UpdateFeed({
   scrollCap = false,
   action,
 }: {
-  heading: string;
+  /** Omit inside a tabbed panel, where the tab label is the heading. */
+  heading?: string;
   /** Teal on the personalized dashboard ("Your Feed"); default on a public profile. */
   headingTone?: "default" | "primary" | "personalize";
   emptyLabel: string;
@@ -53,9 +54,11 @@ export function UpdateFeed({
 
   return (
     <div>
-      <SectionHeading as="h2" size="sm" tone={headingTone} action={action}>
-        {heading}
-      </SectionHeading>
+      {heading && (
+        <SectionHeading as="h2" size="sm" tone={headingTone} action={action}>
+          {heading}
+        </SectionHeading>
+      )}
       {updates.length === 0 ? (
         <p className="text-muted-foreground text-sm">{emptyLabel}</p>
       ) : scrollCap ? (

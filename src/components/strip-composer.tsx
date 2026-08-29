@@ -8,6 +8,7 @@ import {
   type OwnedCreator,
   type SeriesOption,
 } from '@/components/strip-intake-form'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -35,20 +36,27 @@ export function StripComposer({
   reviewNotice,
   creator,
   series,
+  className,
 }: {
   copy: StripIntakeSettings
   common: CreatorIntakeSettings
   reviewNotice: ReviewNoticeSettings
   creator: OwnedCreator
   series: SeriesOption[]
+  /** Applied to the trigger button — e.g. `w-full` to fill the card. */
+  className?: string
 }) {
   const [open, setOpen] = useState(false)
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="inverse" size="sm">
+        <Button
+          variant="inverse"
+          size="sm"
+          className={cn("font-black tracking-wide uppercase", className)}
+        >
           <Plus aria-hidden="true" className="size-4" />
-          {copy.heading}
+          {copy.composerButton}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">

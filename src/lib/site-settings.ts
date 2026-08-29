@@ -310,6 +310,8 @@ export type ReviewNoticeSettings = {
  */
 export type StripIntakeSettings = {
   heading: string;
+  /** Short label on the dashboard trigger button (shown uppercase, "+" icon). */
+  composerButton: string;
   intro: string;
   signInPrompt: string;
   signInBody: string;
@@ -577,12 +579,11 @@ export interface SiteSettings {
     accountComicsHeading: string;
     accountMediaHeading: string;
     accountEditLabel: string;
-    accountViewCreatorLabel: string;
     /** Creator tenure line under the name — "{date}" becomes the join month/year. */
     accountRiotingSince: string;
     accountViewMediaLabel: string;
     accountSavedComicsHeading: string;
-    accountSavedCreatorsHeading: string;
+    accountCosignsHeading: string;
     accountRemoveLabel: string;
     accountRemovedLabel: string;
     accountUndoLabel: string;
@@ -644,9 +645,10 @@ export interface SiteSettings {
     updateUndoLabel: string;
     updateEditLabel: string;
     updateEditSubmit: string;
-    profileOwnerBanner: string;
+    /** Owner-only Profile ↔ Dashboard tab bar (on both /creators/{slug} and /me). */
+    profileTabLabel: string;
+    dashboardTabLabel: string;
     profileOwnerEditLabel: string;
-    profileOwnerDashboardLabel: string;
     /** Owner-only link beside their profile's updates → the editable "Your Updates" on the dashboard. */
     profileManageUpdatesLabel: string;
     creatorWorksHeading: string;
@@ -966,7 +968,7 @@ const DEFAULTS: SiteSettings = {
     workUrlPlaceholder: "https://…",
     workAddLabel: "Add another",
     workRemoveLabel: "Remove",
-    photoLabel: "A photo or avatar of you",
+    photoLabel: "Profile Pic",
     photoHint: "PNG or JPG, up to 8MB.",
     photoCurrentHint:
       "This is your current image — upload a new one only if you want to replace it.",
@@ -1068,6 +1070,7 @@ const DEFAULTS: SiteSettings = {
   },
   stripIntake: {
     heading: "Post a strip",
+    composerButton: "Strip",
     intro:
       "A strip is a single-page comic that lives right here on ND Riot — the page itself, shown on the site. A title, one of your comic creators, the page, and permission are all it needs.",
     signInPrompt: "Sign in to post a strip",
@@ -1308,11 +1311,10 @@ const DEFAULTS: SiteSettings = {
     accountComicsHeading: "Your Comics",
     accountMediaHeading: "Your Media",
     accountEditLabel: "Edit",
-    accountViewCreatorLabel: "Public Profile",
     accountRiotingSince: "Rioting since {date}",
     accountViewMediaLabel: "Media Page",
-    accountSavedComicsHeading: "Comics You Follow",
-    accountSavedCreatorsHeading: "Creators You Follow",
+    accountSavedComicsHeading: "Saved Comics",
+    accountCosignsHeading: "Cosigns",
     accountRemoveLabel: "Remove",
     accountRemovedLabel: "Removed",
     accountUndoLabel: "Undo",
@@ -1375,9 +1377,9 @@ const DEFAULTS: SiteSettings = {
     updateUndoLabel: "Undo",
     updateEditLabel: "Edit update",
     updateEditSubmit: "Save changes",
-    profileOwnerBanner: "This is your public profile.",
+    profileTabLabel: "Profile",
+    dashboardTabLabel: "Dashboard",
     profileOwnerEditLabel: "Edit your Profile",
-    profileOwnerDashboardLabel: "Your Dashboard",
     profileManageUpdatesLabel: "Manage on your dashboard",
     creatorWorksHeading: "Where to find {name}’s work",
     creatorOrganizationsHeading: "Member of",
