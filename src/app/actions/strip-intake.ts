@@ -124,34 +124,69 @@ export async function submitStrip(
     }
   }
 
-  // The creator this strip is credited to must be one you own.
+  // Update mode: the strip must exist and belong to a creator you own; its
+  // creator and slug (the URL) are preserved.
+  const submittedUpdateId = String(formData.get('updateId') ?? '').trim()
+  let target: { _id: string; slug: string | null; creatorId: string | null } | null = null
+  if (submittedUpdateId) {
+    try {
+      target = await client.fetch<typeof target>(
+        `*[_type=="strip" && _id==$id][0]{_id,"slug":slug.current,"creatorId":creator._ref}`,
+        { id: submittedUpdateId },
+      )
+    } catch (cause) {
+      console.error('[strip-intake] update target read failed', cause)
+    }
+  }
+  const isUpdate = Boolean(target)
+  if (isUpdate && !(target!.creatorId && ownedCreatorIds.has(target!.creatorId))) {
+    return { status: 'error', message: 'You can only edit a strip under a creator you own.', values }
+  }
+
+  // The creator this strip is credited to must be one you own (on an update it
+  // stays with its existing creator).
   const submittedCreator = String(formData.get('creator') ?? '').trim()
-  const creatorId = ownedCreatorIds.has(submittedCreator) ? submittedCreator : null
+  const creatorId = ownedCreatorIds.has(submittedCreator)
+    ? submittedCreator
+    : isUpdate
+      ? target!.creatorId ?? null
+      : null
   if (!creatorId) {
     return { status: 'error', fieldErrors: { creator: 'Please choose one of your creators.' }, values }
   }
 
-  // The page is required — a strip IS its image, so a missing/failed upload is
-  // fatal here (unlike an optional book cover).
+  // The page is required on CREATE (a strip IS its image); on an update it's
+  // optional — a missing upload keeps the existing page.
   const image = formData.get('image')
-  if (!(image instanceof File) || image.size === 0) {
+  const hasNewImage = image instanceof File && image.size > 0
+  if (!isUpdate && !hasNewImage) {
     return { status: 'error', fieldErrors: { image: 'Please add the strip’s page image.' }, values }
   }
 
-  let takenIds: Set<string>
-  try {
-    const stripIds = await client.fetch<string[]>(INTAKE_STRIP_IDS_QUERY)
-    takenIds = new Set((stripIds ?? []).map((id) => id.replace(/^drafts\./, '')))
-  } catch (cause) {
-    console.error('[strip-intake] strip-id read failed', cause)
-    return { status: 'error', message: 'Something went wrong — please try again.', values }
+  // Slug (the URL) is preserved on an update; a new strip gets a unique one.
+  let slug: string
+  if (isUpdate) {
+    slug = target!.slug ?? slugify(values.title)
+  } else {
+    let takenIds: Set<string>
+    try {
+      const stripIds = await client.fetch<string[]>(INTAKE_STRIP_IDS_QUERY)
+      takenIds = new Set((stripIds ?? []).map((id) => id.replace(/^drafts\./, '')))
+    } catch (cause) {
+      console.error('[strip-intake] strip-id read failed', cause)
+      return { status: 'error', message: 'Something went wrong — please try again.', values }
+    }
+    slug = uniqueSlug(slugify(values.title), takenIds)
   }
 
-  const slug = uniqueSlug(slugify(values.title), takenIds)
-
-  const upload = await uploadImageFile(image, `${slug}-strip`)
-  if (!('assetId' in upload)) {
-    return { status: 'error', fieldErrors: { image: `The image didn’t upload — ${upload.error}.` }, values }
+  // Upload only when a new page was supplied; otherwise the existing one stays.
+  let newAssetId: string | null = null
+  if (hasNewImage) {
+    const upload = await uploadImageFile(image, `${slug}-strip`)
+    if (!('assetId' in upload)) {
+      return { status: 'error', fieldErrors: { image: `The image didn’t upload — ${upload.error}.` }, values }
+    }
+    newAssetId = upload.assetId
   }
 
   // Single-select in the form; stored as the schema's genre array (one entry).
@@ -207,27 +242,52 @@ export async function submitStrip(
   const fields: Record<string, unknown> = {
     title: values.title,
     creator: { _type: 'reference', _ref: creatorId },
-    image: {
-      _type: 'imageWithAlt',
-      asset: { _type: 'reference', _ref: upload.assetId },
-      alt: values.imageAlt || undefined,
-    },
-    // Set now so ordering works the moment it's published; a reviewer can adjust.
-    publishedAt: new Date().toISOString(),
   }
+  if (newAssetId) {
+    fields.image = {
+      _type: 'imageWithAlt',
+      asset: { _type: 'reference', _ref: newAssetId },
+      alt: values.imageAlt || undefined,
+    }
+  } else if (isUpdate && values.imageAlt) {
+    // No new page — just refresh the alt on the existing one.
+    fields['image.alt'] = values.imageAlt
+  }
+  // Set publishedAt only on create; an update keeps the strip's original order.
+  if (!isUpdate) fields.publishedAt = new Date().toISOString()
   if (values.caption) fields.caption = values.caption.slice(0, LIMITS.caption)
   if (genres.length) fields.genres = genres
   if (maturity) fields.maturity = maturity
   if (seriesRef) fields.series = seriesRef
 
-  const draftId = `drafts.strip-${slug}`
+  const targetId = isUpdate ? target!._id.replace(/^drafts\./, '') : `strip-${slug}`
+  const draftId = `drafts.${targetId}`
   try {
-    await client.create({
-      _id: draftId,
-      _type: 'strip',
-      slug: { _type: 'slug', current: slug },
-      ...fields,
-    })
+    if (isUpdate) {
+      // Seed the review draft from the published strip, then patch the changes —
+      // so a pending edit carries the full doc, not just the edited fields.
+      const published = await client.fetch<Record<string, unknown> | null>(`*[_id==$id][0]`, {
+        id: targetId,
+      })
+      const seed: Record<string, unknown> = published
+        ? { ...published, _id: draftId }
+        : { _id: draftId, _type: 'strip', slug: { _type: 'slug', current: slug } }
+      delete seed._rev
+      delete seed._createdAt
+      delete seed._updatedAt
+      await client
+        .transaction()
+        .createIfNotExists(seed as { _id: string; _type: string })
+        .patch(draftId, (p) => p.set(fields))
+        .commit()
+    } else {
+      await client.create({
+        _id: draftId,
+        _type: 'strip',
+        slug: { _type: 'slug', current: slug },
+        ...fields,
+      })
+    }
   } catch (cause) {
     console.error('[strip-intake] draft write failed', cause)
     return { status: 'error', message: 'Something went wrong saving your strip — please try again.', values }
@@ -235,8 +295,8 @@ export async function submitStrip(
 
   const notifications = (await getSiteSettings()).notifications
   await Promise.all([
-    notifyTeam({ title: values.title, email, slug, newSeries: newSeriesCreated }),
-    notifyCreator({ email, title: values.title, copy: notifications }),
+    notifyTeam({ title: values.title, email, slug, isUpdate, newSeries: newSeriesCreated }),
+    notifyCreator({ email, title: values.title, isUpdate, copy: notifications }),
   ])
 
   return { status: 'success' }
@@ -247,6 +307,7 @@ async function notifyTeam(input: {
   title: string
   email: string
   slug: string
+  isUpdate: boolean
   newSeries: string | null
 }): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY
@@ -255,7 +316,7 @@ async function notifyTeam(input: {
   if (!apiKey || !from || !to) return
 
   const lines = [
-    `New strip: ${input.title}`,
+    input.isUpdate ? `Strip update: ${input.title}` : `New strip: ${input.title}`,
     `Review + publish in the Studio (draft id: drafts.strip-${input.slug}).`,
     ``,
     `Submitted by (consent on file, not stored in Sanity): ${input.email}`,
@@ -275,7 +336,7 @@ async function notifyTeam(input: {
         from,
         to: [to],
         reply_to: input.email,
-        subject: `[ND Riot] New strip: ${input.title}`,
+        subject: `[ND Riot] ${input.isUpdate ? 'Strip update' : 'New strip'}: ${input.title}`,
         text: lines.join('\n'),
       }),
     })
@@ -284,12 +345,29 @@ async function notifyTeam(input: {
   }
 }
 
-/** Confirmation to the submitter — CMS-managed "strip submitted" copy (§2). */
+/** Confirmation to the submitter — CMS-managed "strip submitted" copy (§2); an
+ *  update gets a lighter fixed confirmation. */
 async function notifyCreator(input: {
   email: string
   title: string
+  isUpdate: boolean
   copy: NotificationsSettings
 }): Promise<void> {
+  if (input.isUpdate) {
+    await sendEmail({
+      to: input.email,
+      subject: 'An update to your strip has been submitted to NDRiot.com',
+      text: [
+        'Thanks — your strip update has been received.',
+        '',
+        'A person reviews every change before it goes live, so it’ll appear shortly.',
+        '',
+        '— ND Riot',
+      ].join('\n'),
+      replyTo: CREATOR_REPLY_TO,
+    })
+    return
+  }
   await sendEmail({
     to: input.email,
     subject: input.copy.stripSubmitSubject,

@@ -344,6 +344,7 @@ export default defineType({
         "Copy for the on-site “post a strip” form (a single-page comic hosted here). Generic strings (sign-in button, image errors, optional marker) are reused from the Comic Creator intake form.",
       fields: [
         defineField({ name: "heading", title: "Page heading", type: "string" }),
+        defineField({ name: "editHeading", title: "Dialog title when editing", type: "string" }),
         defineField({ name: "composerButton", title: "Dashboard button label (shown uppercase)", type: "string" }),
         defineField({ name: "intro", title: "Intro", type: "text", rows: 3 }),
         defineField({ name: "signInPrompt", title: "Sign-in prompt (signed out)", type: "string" }),
@@ -1148,6 +1149,9 @@ export default defineType({
           type: "string",
           description: 'On each owned item — e.g. "Edit".',
         }),
+        defineField({ name: "accountAddBookLabel", title: "Dashboard — + Book button", type: "string", description: 'Shown with a "+" icon, e.g. "Comic".' }),
+        defineField({ name: "accountAddUpdateLabel", title: "Dashboard — + Update button", type: "string" }),
+        defineField({ name: "accountAddEventLabel", title: "Dashboard — + Event button", type: "string" }),
         defineField({
           name: "accountRiotingSince",
           title: "Reader home — creator tenure line",

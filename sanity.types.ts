@@ -883,6 +883,7 @@ export type SiteSettings = {
   };
   stripIntake?: {
     heading?: string;
+    editHeading?: string;
     composerButton?: string;
     intro?: string;
     signInPrompt?: string;
@@ -1063,6 +1064,9 @@ export type SiteSettings = {
     accountComicsHeading?: string;
     accountMediaHeading?: string;
     accountEditLabel?: string;
+    accountAddBookLabel?: string;
+    accountAddUpdateLabel?: string;
+    accountAddEventLabel?: string;
     accountRiotingSince?: string;
     accountViewMediaLabel?: string;
     accountSavedComicsHeading?: string;

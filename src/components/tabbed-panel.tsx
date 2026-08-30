@@ -22,14 +22,28 @@ export interface PanelTab {
  * their data is fetched up front and switching tabs is instant. A single-tab
  * column still renders (one tab, no flip) — callers drop empty columns.
  */
-export function TabbedPanel({ tabs }: { tabs: PanelTab[] }) {
+export function TabbedPanel({
+  tabs,
+  tone = "default",
+}: {
+  tabs: PanelTab[];
+  /** "onColor" for a black-text surface like the /me dashboard band, where the
+   *  default white/pink tabs would fail contrast. */
+  tone?: "default" | "onColor";
+}) {
   const [active, setActive] = useState(tabs[0]?.id);
   const current = tabs.find((t) => t.id === active) ?? tabs[0];
   if (!current) return null;
 
+  const onColor = tone === "onColor";
   return (
     <div>
-      <div className="border-border flex items-center justify-between gap-2 border-b">
+      <div
+        className={cn(
+          "flex items-center justify-between gap-2 border-b",
+          onColor ? "border-black/20" : "border-border",
+        )}
+      >
         <div className="flex gap-1" role="tablist">
           {tabs.map((t) => (
             <button
@@ -41,8 +55,12 @@ export function TabbedPanel({ tabs }: { tabs: PanelTab[] }) {
               className={cn(
                 "focus-visible:ring-ring -mb-px border-b-2 px-3 py-2 text-xs font-black tracking-widest uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none",
                 t.id === current.id
-                  ? "border-primary text-foreground"
-                  : "text-muted-foreground hover:text-foreground border-transparent",
+                  ? onColor
+                    ? "border-black text-black"
+                    : "border-primary text-foreground"
+                  : onColor
+                    ? "border-transparent text-black/50 hover:text-black"
+                    : "text-muted-foreground hover:text-foreground border-transparent",
               )}
             >
               {t.label}

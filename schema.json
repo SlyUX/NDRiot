@@ -5266,6 +5266,13 @@
               },
               "optional": true
             },
+            "editHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "composerButton": {
               "type": "objectAttribute",
               "value": {
@@ -6512,6 +6519,27 @@
               "optional": true
             },
             "accountEditLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "accountAddBookLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "accountAddUpdateLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "accountAddEventLabel": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

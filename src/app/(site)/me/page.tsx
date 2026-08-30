@@ -17,6 +17,7 @@ import { OwnerTabs } from "@/components/owner-tabs";
 import { SavedItemRow } from "@/components/saved-item-row";
 import { SectionHeading } from "@/components/section-heading";
 import { TabbedPanel, type PanelTab } from "@/components/tabbed-panel";
+import { Plus, Pencil } from "lucide-react";
 import { StripComposer } from "@/components/strip-composer";
 import {
   type ComposerTarget,
@@ -296,7 +297,15 @@ export default async function AccountPage() {
     coverUrl: book.cover ? urlFor(book.cover).width(300).url() : null,
   }));
 
-  // The creator's strips, shown in the same rail as their comics.
+  // The creator's strips, shown in the same rail as their comics — each with an
+  // edit chip that opens the composer pre-filled (same deps as the create one).
+  const stripComposerCreator = {
+    _id: ownedCreatorIds[0] ?? "",
+    name: ownedCreators[0]?.name ?? "Your profile",
+  };
+  const stripComposerSeries = ownedSeries
+    .filter((se) => se.creatorId === ownedCreatorIds[0])
+    .map((se) => ({ _id: se._id, title: se.title ?? "Untitled series" }));
   const yourStrips: YourComicsStrip[] = (
     ownedCreatorIds.length
       ? await safeFetch<StripSummary[]>(
@@ -314,6 +323,34 @@ export default async function AccountPage() {
       imageUrl: urlFor(strip.image).width(320).url(),
       width: strip.dimensions?.width ?? 800,
       height: strip.dimensions?.height ?? 600,
+      editTrigger: (
+        <StripComposer
+          copy={settings.stripIntake}
+          common={settings.creatorIntake}
+          reviewNotice={settings.reviewNotice}
+          creator={stripComposerCreator}
+          series={stripComposerSeries}
+          initial={{
+            updateId: strip._id,
+            title: strip.title,
+            caption: strip.caption ?? "",
+            imageAlt: strip.image?.alt ?? "",
+            genre: strip.genres?.[0] ?? "",
+            maturity: strip.maturity ?? "",
+            seriesId: strip.seriesId ?? null,
+            imageUrl: urlFor(strip.image).width(600).url(),
+          }}
+          trigger={
+            <button
+              type="button"
+              aria-label={`${s.accountEditLabel} — ${strip.title}`}
+              className="focus-visible:ring-ring inline-flex bg-black/70 p-1.5 text-white transition-colors hover:text-white/70 focus-visible:ring-2 focus-visible:-outline-offset-2 focus-visible:outline-none"
+            >
+              <Pencil aria-hidden="true" className="size-3.5" />
+            </button>
+          }
+        />
+      ),
     }));
 
   // What a creator can post about: each creator they own, plus each of those
@@ -413,15 +450,6 @@ export default async function AccountPage() {
     col1Tabs.push({
       id: "updates",
       label: s.accountMyUpdatesHeading,
-      action:
-        composerTargets.length > 0 ? (
-          <PostUpdateDialog
-            targets={composerTargets}
-            kinds={UPDATE_KINDS}
-            mentions={mentionOptions}
-            labels={composerLabelsFrom(s)}
-          />
-        ) : undefined,
       content: (
         <div id="your-updates" className="scroll-mt-24">
           <UpdateFeed
@@ -538,7 +566,12 @@ export default async function AccountPage() {
         {/* Profile — a creator gets the personalization-teal zone holding their
             identity beside their comics; a plain reader gets the charcoal band
             with just their details. Teal is a black-text surface (§9). */}
-        <Section padding="md" background={isCreator ? "dashboard" : "charcoal"}>
+        {/* A tight 24px band — the identity leads, no oversized md padding. */}
+        <Section
+          padding="none"
+          background={isCreator ? "dashboard" : "charcoal"}
+          className="px-6 py-6"
+        >
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               {/* A creator's identity band below is the visible header, so the
@@ -566,19 +599,20 @@ export default async function AccountPage() {
                 </>
               )}
             </div>
-            <SignOutButton
-              label={settings.creatorIntake.signOutLabel}
-              redirectTo="/"
-              className={
-                isCreator ? "text-black/70 hover:text-black" : undefined
-              }
-            />
+            {/* A creator's Sign Out moves into their card below (beneath the
+                tenure line); a plain reader keeps it here. */}
+            {!isCreator && (
+              <SignOutButton
+                label={settings.creatorIntake.signOutLabel}
+                redirectTo="/"
+              />
+            )}
           </div>
 
           {isCreator && (
             // One row on desktop: the creator block sized to its content, Your
             // Comics filling the rest; they stack on phones.
-            <div className="mt-6 lg:flex lg:items-start lg:gap-8">
+            <div className="lg:flex lg:items-start lg:gap-8">
               <div className="lg:w-80 lg:shrink-0">
                 <div className="space-y-4">
                   {ownedCreators.map((creator) => {
@@ -611,7 +645,7 @@ export default async function AccountPage() {
                               />
                             )}
                           </div>
-                          <div className="min-w-0 flex-1">
+                          <div className="flex min-w-0 flex-1 flex-col">
                             <p className="truncate font-bold text-black">
                               {creator.name}
                             </p>
@@ -625,43 +659,114 @@ export default async function AccountPage() {
                                 {s.accountRiotingSince.replace("{date}", joined)}
                               </p>
                             )}
+                            {/* Sign Out sits at the bottom of the identity block. */}
+                            <SignOutButton
+                              label={settings.creatorIntake.signOutLabel}
+                              redirectTo="/"
+                              className="mt-auto self-start pt-2 text-black/70 hover:text-black"
+                            />
                           </div>
                         </div>
-                        {/* Post a strip — the card's one action, full-width
-                            beneath the identity. Edit + View live in the owner
-                            tab bar now (Edit is a Profile concern). */}
-                        <StripComposer
-                          className="w-full"
-                          copy={settings.stripIntake}
-                          common={settings.creatorIntake}
-                          reviewNotice={settings.reviewNotice}
-                          creator={{
-                            _id: creator._id,
-                            name: creator.name ?? "Your profile",
-                          }}
-                          series={ownedSeries
-                            .filter((se) => se.creatorId === creator._id)
-                            .map((se) => ({
-                              _id: se._id,
-                              title: se.title ?? "Untitled series",
-                            }))}
-                        />
+                        {/* The card's actions — Post an Update / add an Event,
+                            each filling half the width. */}
+                        {composerTargets.length > 0 && (
+                          <div className="flex gap-2">
+                            <PostUpdateDialog
+                              targets={composerTargets}
+                              kinds={UPDATE_KINDS}
+                              mentions={mentionOptions}
+                              labels={composerLabelsFrom(s)}
+                              trigger={
+                                <Button
+                                  variant="inverse"
+                                  size="sm"
+                                  className="flex-1 font-black tracking-wide uppercase"
+                                >
+                                  <Plus aria-hidden="true" className="size-4" />
+                                  {s.accountAddUpdateLabel}
+                                </Button>
+                              }
+                            />
+                            <EventDialog
+                              creators={eventFormCreators}
+                              conventions={eventConventions}
+                              labels={eventFormLabels}
+                              trigger={
+                                <Button
+                                  variant="inverse"
+                                  size="sm"
+                                  className="flex-1 font-black tracking-wide uppercase"
+                                >
+                                  <Plus aria-hidden="true" className="size-4" />
+                                  {s.accountAddEventLabel}
+                                </Button>
+                              }
+                            />
+                          </div>
+                        )}
                       </div>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Always shown for a creator: even with no comics yet, the rail
-                  carries the add-a-comic tile. */}
+              {/* Comics ↔ Strips as tabs so neither rail overwhelms the other;
+                  each tab carries its own add button beneath. */}
               <div className="mt-6 min-w-0 lg:mt-0 lg:flex-1">
-                <YourComics
-                  books={yourComicsBooks}
-                  strips={yourStrips}
-                  heading={s.accountComicsHeading}
-                  editLabel={s.accountEditLabel}
-                  addHref="/join/comics"
-                  addLabel={settings.bookIntake.heading}
+                <TabbedPanel
+                  tone="onColor"
+                  tabs={[
+                    {
+                      id: "comics",
+                      label: settings.sections.booksHeading,
+                      content: (
+                        <div>
+                          <YourComics
+                            books={yourComicsBooks}
+                            strips={[]}
+                            heading={s.accountComicsHeading}
+                            editLabel={s.accountEditLabel}
+                          />
+                          <div className="mt-3">
+                            <Button
+                              asChild
+                              variant="inverse"
+                              size="sm"
+                              className="font-black tracking-wide uppercase"
+                            >
+                              <Link href="/join/comics">
+                                <Plus aria-hidden="true" className="size-4" />
+                                {s.accountAddBookLabel}
+                              </Link>
+                            </Button>
+                          </div>
+                        </div>
+                      ),
+                    },
+                    {
+                      id: "strips",
+                      label: settings.sections.stripsHeading,
+                      content: (
+                        <div>
+                          <YourComics
+                            books={[]}
+                            strips={yourStrips}
+                            heading={settings.sections.stripsHeading}
+                            editLabel={s.accountEditLabel}
+                          />
+                          <div className="mt-3">
+                            <StripComposer
+                              copy={settings.stripIntake}
+                              common={settings.creatorIntake}
+                              reviewNotice={settings.reviewNotice}
+                              creator={stripComposerCreator}
+                              series={stripComposerSeries}
+                            />
+                          </div>
+                        </div>
+                      ),
+                    },
+                  ]}
                 />
               </div>
             </div>
@@ -688,15 +793,6 @@ export default async function AccountPage() {
                   composerTargets.length > 0
                     ? { creators: eventFormCreators, labels: eventFormLabels }
                     : undefined
-                }
-                action={
-                  composerTargets.length > 0 ? (
-                    <EventDialog
-                      creators={eventFormCreators}
-                      conventions={eventConventions}
-                      labels={eventFormLabels}
-                    />
-                  ) : undefined
                 }
               />
               <CollabRequests

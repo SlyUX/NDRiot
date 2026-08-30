@@ -310,6 +310,8 @@ export type ReviewNoticeSettings = {
  */
 export type StripIntakeSettings = {
   heading: string;
+  /** Dialog title when editing an existing strip. */
+  editHeading: string;
   /** Short label on the dashboard trigger button (shown uppercase, "+" icon). */
   composerButton: string;
   intro: string;
@@ -579,6 +581,10 @@ export interface SiteSettings {
     accountComicsHeading: string;
     accountMediaHeading: string;
     accountEditLabel: string;
+    /** Dashboard add/action buttons (shown with a "+" icon). */
+    accountAddBookLabel: string;
+    accountAddUpdateLabel: string;
+    accountAddEventLabel: string;
     /** Creator tenure line under the name — "{date}" becomes the join month/year. */
     accountRiotingSince: string;
     accountViewMediaLabel: string;
@@ -1070,6 +1076,7 @@ const DEFAULTS: SiteSettings = {
   },
   stripIntake: {
     heading: "Post a strip",
+    editHeading: "Edit strip",
     composerButton: "Strip",
     intro:
       "A strip is a single-page comic that lives right here on ND Riot — the page itself, shown on the site. A title, one of your comic creators, the page, and permission are all it needs.",
@@ -1311,6 +1318,9 @@ const DEFAULTS: SiteSettings = {
     accountComicsHeading: "Your Comics",
     accountMediaHeading: "Your Media",
     accountEditLabel: "Edit",
+    accountAddBookLabel: "Comic",
+    accountAddUpdateLabel: "Update",
+    accountAddEventLabel: "Event",
     accountRiotingSince: "Rioting since {date}",
     accountViewMediaLabel: "Media Page",
     accountSavedComicsHeading: "Saved Comics",

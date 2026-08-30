@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Plus } from 'lucide-react'
 
 import {
   StripIntakeForm,
   type OwnedCreator,
   type SeriesOption,
+  type StripIntakeInitial,
 } from '@/components/strip-intake-form'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -37,37 +38,47 @@ export function StripComposer({
   creator,
   series,
   className,
+  initial,
+  trigger,
 }: {
   copy: StripIntakeSettings
   common: CreatorIntakeSettings
   reviewNotice: ReviewNoticeSettings
   creator: OwnedCreator
   series: SeriesOption[]
-  /** Applied to the trigger button — e.g. `w-full` to fill the card. */
+  /** Applied to the default trigger button — e.g. `w-full` to fill the card. */
   className?: string
+  /** Prefilled values → the dialog opens in edit mode. */
+  initial?: StripIntakeInitial
+  /** A custom trigger (e.g. the edit chip); defaults to the "+ STRIP" button. */
+  trigger?: ReactNode
 }) {
   const [open, setOpen] = useState(false)
+  const editing = Boolean(initial)
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          variant="inverse"
-          size="sm"
-          className={cn("font-black tracking-wide uppercase", className)}
-        >
-          <Plus aria-hidden="true" className="size-4" />
-          {copy.composerButton}
-        </Button>
+        {trigger ?? (
+          <Button
+            variant="inverse"
+            size="sm"
+            className={cn("font-black tracking-wide uppercase", className)}
+          >
+            <Plus aria-hidden="true" className="size-4" />
+            {copy.composerButton}
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
-        <DialogTitle>{copy.heading}</DialogTitle>
-        <p className="text-muted-foreground text-sm">{copy.intro}</p>
+        <DialogTitle>{editing ? copy.editHeading : copy.heading}</DialogTitle>
+        {!editing && <p className="text-muted-foreground text-sm">{copy.intro}</p>}
         <StripIntakeForm
           copy={copy}
           common={common}
           reviewNotice={reviewNotice}
           creator={creator}
           series={series}
+          initial={initial}
         />
       </DialogContent>
     </Dialog>

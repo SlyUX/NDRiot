@@ -1,6 +1,7 @@
+import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Eye, Pencil, Plus } from "lucide-react";
+import { Eye, Pencil } from "lucide-react";
 
 /**
  * A creator's comics on /me — a bare horizontal rail of covers beside the
@@ -24,6 +25,8 @@ export type YourComicsStrip = {
   imageUrl: string;
   width: number;
   height: number;
+  /** The edit affordance (a composer trigger), rendered as a corner chip. */
+  editTrigger: ReactNode;
 };
 
 export function YourComics({
@@ -31,17 +34,12 @@ export function YourComics({
   strips,
   heading,
   editLabel,
-  addHref,
-  addLabel,
 }: {
   books: YourComicsBook[];
   strips: YourComicsStrip[];
   /** Accessible name for the rail (no visible heading). */
   heading: string;
   editLabel: string;
-  /** The "add a comic" tile at the end of the rail → the intake form. */
-  addHref: string;
-  addLabel: string;
 }) {
   return (
     <section aria-label={heading}>
@@ -80,36 +78,28 @@ export function YourComics({
             </Link>
           </li>
         ))}
-        {/* Strips — the creator's single-page comics, at their natural aspect
-            sized to the rail height. The whole tile links to the strip. */}
+        {/* Strips — natural aspect, sized to the rail height, with the same
+            view + edit chips as a cover. */}
         {strips.map((strip) => (
-          <li key={strip.id} className="h-[105px] shrink-0">
+          <li key={strip.id} className="relative h-[105px] shrink-0">
+            <Image
+              src={strip.imageUrl}
+              alt=""
+              width={strip.width}
+              height={strip.height}
+              sizes="160px"
+              className="h-full w-auto bg-white/10 object-contain"
+            />
             <Link
               href={strip.href}
               aria-label={strip.title}
-              className="focus-visible:ring-ring block h-full focus-visible:ring-2 focus-visible:-outline-offset-2 focus-visible:outline-none"
+              className="focus-visible:ring-ring absolute bottom-0 left-0 inline-flex bg-black/70 p-1.5 text-white transition-colors hover:text-white/70 focus-visible:ring-2 focus-visible:-outline-offset-2 focus-visible:outline-none"
             >
-              <Image
-                src={strip.imageUrl}
-                alt=""
-                width={strip.width}
-                height={strip.height}
-                sizes="160px"
-                className="h-full w-auto bg-white/10 object-contain"
-              />
+              <Eye aria-hidden="true" className="size-3.5" />
             </Link>
+            <div className="absolute right-0 bottom-0">{strip.editTrigger}</div>
           </li>
         ))}
-        {/* Add-a-comic tile — same footprint as a cover, closing the rail. */}
-        <li className="shrink-0">
-          <Link
-            href={addHref}
-            aria-label={addLabel}
-            className="focus-visible:ring-ring flex aspect-[2/3] w-[70px] items-center justify-center bg-black text-white transition-colors hover:bg-black/80 focus-visible:ring-2 focus-visible:-outline-offset-2 focus-visible:outline-none"
-          >
-            <Plus aria-hidden="true" className="size-8" strokeWidth={3} />
-          </Link>
-        </li>
       </ul>
     </section>
   );

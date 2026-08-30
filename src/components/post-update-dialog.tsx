@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Plus } from 'lucide-react'
 
 import {
@@ -23,20 +23,25 @@ export function PostUpdateDialog({
   kinds,
   mentions,
   labels,
+  trigger,
 }: {
   targets: ComposerTarget[]
   kinds: readonly string[]
   mentions: MentionOption[]
   labels: ComposerLabels
+  /** A custom trigger; defaults to the "+ {heading}" button. */
+  trigger?: ReactNode
 }) {
   const [open, setOpen] = useState(false)
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="inverse" className="font-black tracking-wide uppercase">
-          <Plus aria-hidden="true" className="size-4" />
-          {labels.heading}
-        </Button>
+        {trigger ?? (
+          <Button variant="inverse" className="font-black tracking-wide uppercase">
+            <Plus aria-hidden="true" className="size-4" />
+            {labels.heading}
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-xl">
         <DialogTitle className="sr-only">{labels.heading}</DialogTitle>

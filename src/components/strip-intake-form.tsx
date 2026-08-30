@@ -46,6 +46,18 @@ export interface SeriesOption {
   title: string
 }
 
+/** Prefilled values when editing an existing strip. */
+export interface StripIntakeInitial {
+  updateId: string
+  title: string
+  caption: string
+  imageAlt: string
+  genre: string
+  maturity: string
+  seriesId: string | null
+  imageUrl: string | null
+}
+
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
     <h2 className="border-primary/40 text-primary border-b pb-2 text-sm font-black tracking-widest uppercase">
@@ -68,13 +80,16 @@ export function StripIntakeForm({
   reviewNotice,
   creator,
   series,
+  initial,
 }: {
   copy: StripIntakeSettings
   common: CreatorIntakeSettings
   reviewNotice: ReviewNoticeSettings
   creator: OwnedCreator
   series: SeriesOption[]
+  initial?: StripIntakeInitial
 }) {
+  const editing = Boolean(initial)
   const [state, action, pending] = useActionState(submitStrip, INITIAL)
 
   const timingRef = useRef<HTMLInputElement>(null)
@@ -128,6 +143,7 @@ export function StripIntakeForm({
       {/* Creator is known (this composer opened from their card) — posted, not
           asked. The action re-checks that the signed-in email owns it. */}
       <input type="hidden" name="creator" value={creator._id} />
+      {editing && <input type="hidden" name="updateId" value={initial!.updateId} />}
 
       {/* — What it is — */}
       <fieldset className="space-y-5">
@@ -143,7 +159,7 @@ export function StripIntakeForm({
             type="text"
             required
             maxLength={200}
-            defaultValue={values?.title ?? ''}
+            defaultValue={values?.title ?? initial?.title ?? ''}
             aria-invalid={Boolean(errors.title)}
             aria-describedby={errors.title ? 'title-error' : undefined}
             className={fieldClass}
@@ -169,12 +185,20 @@ export function StripIntakeForm({
           <label htmlFor="image" className={labelClass}>
             {copy.imageLabel}
           </label>
+          {editing && initial?.imageUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={initial.imageUrl}
+              alt=""
+              className="mb-2 max-h-32 w-auto border border-white/10"
+            />
+          )}
           <input
             id="image"
             name="image"
             type="file"
             accept="image/*"
-            required
+            required={!editing}
             onChange={onImagePick}
             aria-invalid={Boolean(errors.image)}
             className={cn(
@@ -195,7 +219,7 @@ export function StripIntakeForm({
             id="maturity"
             name="maturity"
             required
-            defaultValue=""
+            defaultValue={initial?.maturity ?? ''}
             aria-invalid={Boolean(errors.maturity)}
             className={cn(fieldClass, 'appearance-none')}
           >
@@ -210,8 +234,8 @@ export function StripIntakeForm({
         </div>
       </fieldset>
 
-      {/* — Optional details, collapsed by default so the modal stays short — */}
-      <details className="group border-border border">
+      {/* — Optional details, collapsed by default (open when editing) — */}
+      <details className="group border-border border" open={editing}>
         <summary className="text-primary flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-black tracking-widest uppercase">
           {copy.optionalDetailsLabel}
           <ChevronDown
@@ -229,7 +253,7 @@ export function StripIntakeForm({
               id="imageAlt"
               name="imageAlt"
               type="text"
-              defaultValue={values?.imageAlt ?? ''}
+              defaultValue={values?.imageAlt ?? initial?.imageAlt ?? ''}
               className={fieldClass}
             />
             <p className={hintClass}>{copy.imageAltHint}</p>
@@ -245,7 +269,7 @@ export function StripIntakeForm({
               name="caption"
               rows={2}
               maxLength={150}
-              defaultValue={values?.caption ?? ''}
+              defaultValue={values?.caption ?? initial?.caption ?? ''}
               className={cn(fieldClass, 'resize-y')}
             />
             <p className={hintClass}>{copy.captionHint}</p>
@@ -256,7 +280,7 @@ export function StripIntakeForm({
               {copy.genreLabel}
               <Optional label={common.optionalLabel} />
             </label>
-            <select id="genre" name="genre" defaultValue="" className={cn(fieldClass, 'appearance-none')}>
+            <select id="genre" name="genre" defaultValue={initial?.genre ?? ''} className={cn(fieldClass, 'appearance-none')}>
               <option value="">{copy.genrePlaceholder}</option>
               {GENRES.map((g) => (
                 <option key={g} value={g}>
@@ -275,7 +299,7 @@ export function StripIntakeForm({
               <Optional label={common.optionalLabel} />
             </label>
             {series.length > 0 && (
-              <select id="seriesId" name="seriesId" defaultValue="" className={cn(fieldClass, 'appearance-none')}>
+              <select id="seriesId" name="seriesId" defaultValue={initial?.seriesId ?? ''} className={cn(fieldClass, 'appearance-none')}>
                 <option value="">{copy.seriesNoneLabel}</option>
                 {series.map((s) => (
                   <option key={s._id} value={s._id}>
@@ -306,6 +330,7 @@ export function StripIntakeForm({
             name="permission"
             value="yes"
             required
+            defaultChecked={editing}
             aria-invalid={Boolean(errors.permission)}
             className="mt-0.5 size-4 accent-[var(--primary)]"
           />
