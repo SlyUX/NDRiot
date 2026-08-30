@@ -7,6 +7,7 @@ import Link from "next/link";
 import { X } from "lucide-react";
 
 import { removeSaveAction, toggleSaveAction } from "@/app/actions/saves";
+import type { SavedItemType } from "@/sanity/reader-client";
 
 /**
  * A saved item on the dashboard with a destructive Remove. Two layouts: `row` (a
@@ -35,7 +36,7 @@ export function SavedItemRow({
   caption = false,
 }: {
   itemId: string;
-  itemType: "book" | "creator";
+  itemType: SavedItemType;
   title: string;
   href: string | null;
   thumb: ReactNode;

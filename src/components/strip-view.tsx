@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
@@ -85,6 +86,7 @@ export function StripView({
   headingLevel = "h2",
   onNavigate,
   onClose,
+  action,
 }: {
   strip: StripViewData;
   date: string | null;
@@ -95,6 +97,10 @@ export function StripView({
   headingLevel?: "h1" | "h2";
   onNavigate?: (slug: string) => void;
   onClose?: () => void;
+  /** Reader-level control, right-aligned on the meta row — the Save/Follow
+   *  button. A ReactNode so it renders in both the server page and the client
+   *  gallery. */
+  action?: ReactNode;
 }) {
   const Heading = headingLevel;
   // Landscape strips fill the stage width; tall/portrait strips are height-
@@ -137,6 +143,7 @@ export function StripView({
             {strip.maturity}
           </Badge>
         )}
+        {action && <span className="ml-auto">{action}</span>}
       </div>
 
       {/* Part of a series — the through-line + prev/next installments. */}

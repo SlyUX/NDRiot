@@ -17,7 +17,7 @@ import { OwnerTabs } from "@/components/owner-tabs";
 import { SavedItemRow } from "@/components/saved-item-row";
 import { SectionHeading } from "@/components/section-heading";
 import { TabbedPanel, type PanelTab } from "@/components/tabbed-panel";
-import { Plus, Pencil } from "lucide-react";
+import { Plus, Pencil, Handshake } from "lucide-react";
 import { StripComposer } from "@/components/strip-composer";
 import {
   type ComposerTarget,
@@ -52,6 +52,7 @@ import {
   OWNED_MEDIA_QUERY,
   SAVED_BOOKS_QUERY,
   SAVED_CREATORS_QUERY,
+  SAVED_STRIPS_QUERY,
   UPDATES_FEED_QUERY,
   APPEARANCE_FEED_QUERY,
   COLLAB_CREATORS_QUERY,
@@ -133,6 +134,9 @@ export default async function AccountPage() {
   const creatorIds = saves
     .filter((x) => x.itemType === "creator")
     .map((x) => x.itemId);
+  const stripIds = saves
+    .filter((x) => x.itemType === "strip")
+    .map((x) => x.itemId);
 
   // Owned docs resolve to their type first, so comics can be looked up by the
   // creator ids they belong to and media by their own ids.
@@ -154,6 +158,7 @@ export default async function AccountPage() {
   const [
     savedBooks,
     savedCreators,
+    savedStrips,
     ownedCreators,
     ownedBooks,
     ownedMedia,
@@ -170,6 +175,9 @@ export default async function AccountPage() {
           [],
         )
       : Promise.resolve<CreatorSummary[]>([]),
+    stripIds.length
+      ? safeFetch<StripSummary[]>(SAVED_STRIPS_QUERY, { ids: stripIds }, [])
+      : Promise.resolve<StripSummary[]>([]),
     ownedCreatorIds.length
       ? safeFetch<CreatorSummary[]>(
           SAVED_CREATORS_QUERY,
@@ -212,7 +220,10 @@ export default async function AccountPage() {
   );
 
   const isCreator = ownedCreators.length > 0;
-  const hasSaves = savedBooks.length > 0 || savedCreators.length > 0;
+  const hasSaves =
+    savedBooks.length > 0 ||
+    savedCreators.length > 0 ||
+    savedStrips.length > 0;
   // Hide the ND Noise opt-in from anyone already subscribed (MailerLite live).
   const newsletterSubscribed = await isSubscribedToNewsletter(email);
   // The creator's Cosigns — the creators they mutually follow (each follows the
@@ -470,7 +481,8 @@ export default async function AccountPage() {
     });
   }
 
-  // Saved Comics leads (default tab), then Cosigns.
+  // Column two — the reader's own saved work: Saved Comics leads (default tab),
+  // then Saved Strips. Both are removable saves.
   const col2Tabs: PanelTab[] = [];
   if (savedBooks.length > 0) {
     col2Tabs.push({
@@ -508,8 +520,49 @@ export default async function AccountPage() {
       ),
     });
   }
-  if (cosigns.length > 0) {
+  if (savedStrips.length > 0) {
     col2Tabs.push({
+      id: "saved-strips",
+      label: s.accountSavedStripsHeading,
+      content: (
+        <ul className={tileGrid}>
+          {savedStrips.map((strip) => (
+            <SavedItemRow
+              key={strip._id}
+              layout="tile"
+              itemId={strip._id}
+              itemType="strip"
+              title={strip.title ?? "Untitled"}
+              href={strip.slug ? `/strips/${strip.slug}` : null}
+              removeLabel={s.accountRemoveLabel}
+              removedLabel={s.accountRemovedLabel}
+              undoLabel={s.accountUndoLabel}
+              thumb={
+                <div className="bg-muted relative aspect-square w-full overflow-hidden">
+                  {strip.image && (
+                    <Image
+                      src={urlFor(strip.image).width(200).height(200).url()}
+                      alt=""
+                      fill
+                      sizes="6rem"
+                      className="object-cover"
+                    />
+                  )}
+                </div>
+              }
+            />
+          ))}
+        </ul>
+      ),
+    });
+  }
+
+  // Column three — the reader's relationships with creators: Cosigns (mutual
+  // follows, derived — read-only tiles marked with the handshake) then Followed
+  // Creators (their own follows, removable).
+  const col3Tabs: PanelTab[] = [];
+  if (cosigns.length > 0) {
+    col3Tabs.push({
       id: "cosigns",
       label: s.accountCosignsHeading,
       content: (
@@ -532,12 +585,59 @@ export default async function AccountPage() {
                   ) : (
                     <InitialsAvatar name={c.name ?? ""} className="text-xl" />
                   )}
+                  {/* Handshake badge — marks the mutual (cosigned) tie. Pink on a
+                      black circle (5.69:1); rounded per request, the one round in
+                      an otherwise square UI. */}
+                  <span
+                    aria-hidden="true"
+                    className="absolute bottom-1 left-1 flex size-5 items-center justify-center rounded-full bg-black"
+                  >
+                    <Handshake className="text-primary size-3" />
+                  </span>
                 </div>
                 <p className="group-hover:text-primary mt-1 truncate text-xs">
                   {c.name}
                 </p>
               </Link>
             </li>
+          ))}
+        </ul>
+      ),
+    });
+  }
+  if (savedCreators.length > 0) {
+    col3Tabs.push({
+      id: "followed-creators",
+      label: s.accountFollowedCreatorsHeading,
+      content: (
+        <ul className={tileGrid}>
+          {savedCreators.map((c) => (
+            <SavedItemRow
+              key={c._id}
+              layout="tile"
+              itemId={c._id}
+              itemType="creator"
+              title={c.name ?? "Creator"}
+              href={c.slug ? `/creators/${c.slug}` : null}
+              removeLabel={s.accountRemoveLabel}
+              removedLabel={s.accountRemovedLabel}
+              undoLabel={s.accountUndoLabel}
+              thumb={
+                <div className="bg-muted relative aspect-square w-full overflow-hidden">
+                  {c.photo ? (
+                    <Image
+                      src={urlFor(c.photo).width(200).url()}
+                      alt=""
+                      fill
+                      sizes="6rem"
+                      className="object-cover"
+                    />
+                  ) : (
+                    <InitialsAvatar name={c.name ?? ""} className="text-xl" />
+                  )}
+                </div>
+              }
+            />
           ))}
         </ul>
       ),
@@ -860,13 +960,23 @@ export default async function AccountPage() {
           </Section>
         )}
 
-        {/* Two tabbed columns: [Your Updates | Your Feed] and [Cosigns | Saved
-            Comics]. Each column flips its panels in place. */}
+        {/* First tabbed row: [Your Updates | Your Feed] and [Saved Comics |
+            Saved Strips]. Each column flips its panels in place. */}
         {(col1Tabs.length > 0 || col2Tabs.length > 0) && (
           <Section padding="md">
             <div className="grid gap-8 lg:grid-cols-2">
               {col1Tabs.length > 0 && <TabbedPanel tabs={col1Tabs} />}
               {col2Tabs.length > 0 && <TabbedPanel tabs={col2Tabs} />}
+            </div>
+          </Section>
+        )}
+
+        {/* Second tabbed row: [Cosigns | Followed Creators] in the first half;
+            the second half is intentionally empty for now. */}
+        {col3Tabs.length > 0 && (
+          <Section padding="md">
+            <div className="grid gap-8 lg:grid-cols-2">
+              <TabbedPanel tabs={col3Tabs} />
             </div>
           </Section>
         )}

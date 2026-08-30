@@ -20,10 +20,20 @@ import {
   pageLimit,
   randomSeed,
   seededShuffle,
+  stripFacets,
+  stripFilters,
   type SearchParams,
 } from '@/lib/filters'
 import { pageMetadata } from '@/lib/page-metadata'
-import { safeFetch, BOOKS_QUERY, FILTERED_BOOKS_QUERY, GENRES_WITH_BOOKS_QUERY, STRIPS_QUERY } from '@/lib/queries'
+import {
+  safeFetch,
+  BOOKS_QUERY,
+  FILTERED_BOOKS_QUERY,
+  GENRES_WITH_BOOKS_QUERY,
+  FILTERED_STRIPS_QUERY,
+  STRIP_SERIES_OPTIONS_QUERY,
+  STRIP_CREATOR_OPTIONS_QUERY,
+} from '@/lib/queries'
 import { auth } from '@/auth'
 import { savedItems } from '@/sanity/reader-client'
 import { getSiteSettings, type SiteSettings } from '@/lib/site-settings'
@@ -86,10 +96,54 @@ export default async function BooksPage({
   const onStrips =
     (Array.isArray(params.tab) ? params.tab[0] : params.tab) === 'strips'
   if (onStrips) {
-    const [strips, settings] = await Promise.all([
-      safeFetch<StripSummary[]>(STRIPS_QUERY, {}, []),
+    const [seriesOptions, creatorOptions, settings, session] = await Promise.all([
+      safeFetch<{ title: string | null; slug: string | null }[]>(
+        STRIP_SERIES_OPTIONS_QUERY,
+        {},
+        [],
+      ),
+      safeFetch<{ name: string | null; slug: string | null }[]>(
+        STRIP_CREATOR_OPTIONS_QUERY,
+        {},
+        [],
+      ),
       getSiteSettings(),
+      auth(),
     ])
+
+    const stripQuery = stripFilters(params, seriesOptions, creatorOptions)
+    const stripFiltering = hasActiveFilters(stripQuery)
+    // Recency by default; the FilterBar's shuffle action reorders to random
+    // (§3, user-directed). No Load More on strips, so the seed need not persist.
+    const stripSeed = discoverSeed(params, 'sort', 'seed')
+    const stripResult = await safeFetch<StripSummary[]>(
+      FILTERED_STRIPS_QUERY,
+      stripQuery,
+      [],
+    )
+    const strips =
+      stripSeed === null ? stripResult : seededShuffle(stripResult, stripSeed)
+
+    // Card + reader Save (§3, explicit only). The signed-in reader's saved strip
+    // ids seed each chip; signed out, a tap opens the sign-in modal.
+    const stripEmail = session?.user?.email ?? null
+    const savedStripIds = stripEmail
+      ? (await savedItems(stripEmail))
+          .filter((x) => x.itemType === 'strip')
+          .map((x) => x.itemId)
+      : []
+    const stripSave = {
+      signedIn: Boolean(stripEmail),
+      savedIds: savedStripIds,
+      saveLabel: settings.sections.followLabel,
+      savedLabel: settings.sections.followingLabel,
+      signInCopy: {
+        title: settings.sections.accountSignInTitle,
+        body: settings.sections.accountSignInBody,
+        cta: settings.sections.accountSignInCta,
+      },
+    }
+
     return (
       <div>
         <Section as="header" padding="md" className="pb-6">
@@ -97,14 +151,32 @@ export default async function BooksPage({
             {settings.sections.stripsHeading}
           </h1>
           <TabBar active="strips" settings={settings} />
+          <Suspense fallback={null}>
+            <FilterBar
+              facets={stripFacets(
+                seriesOptions.map((s) => s.title).filter((t): t is string => Boolean(t)),
+                creatorOptions.map((c) => c.name).filter((n): n is string => Boolean(n)),
+              )}
+              resultCount={strips.length}
+              searchLabel={settings.sections.searchStripsLabel}
+              discoverLabel={settings.sections.stripsShuffleLabel}
+              showDiscoverText
+              control="select"
+              collapsible
+              className="mt-8"
+            />
+          </Suspense>
         </Section>
         <StripGallery
           strips={strips}
+          save={stripSave}
           partOfLabel={settings.sections.seriesPartOfLabel}
           columns={5}
           padding="md"
           gridClassName="pt-6"
-          emptyMessage={settings.empty.strips}
+          emptyMessage={
+            stripFiltering ? settings.empty.filteredStrips : settings.empty.strips
+          }
         />
       </div>
     )

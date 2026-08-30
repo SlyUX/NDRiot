@@ -5,8 +5,10 @@ import { useSearchParams } from "next/navigation";
 
 import {
   ContentCardGrid,
+  type CardSaveConfig,
   type GridColumns,
 } from "@/components/content-card-grid";
+import { SaveButton } from "@/components/save-button";
 import { StripView, type StripNeighbor } from "@/components/strip-view";
 import { Section } from "@/components/ui/section";
 import { formatDate, stripToCard } from "@/lib/card-mappers";
@@ -33,6 +35,7 @@ export function StripGallery({
   padding = "md",
   gridClassName,
   emptyMessage,
+  save,
 }: {
   strips: StripSummary[];
   partOfLabel: string;
@@ -42,6 +45,9 @@ export function StripGallery({
   padding?: "none" | "sm" | "md" | "lg";
   gridClassName?: string;
   emptyMessage: string;
+  /** Card-level Save chips + the opened reader's Save button. Omit for surfaces
+   *  without saving (e.g. a signed-out context that never resolves saved ids). */
+  save?: CardSaveConfig;
 }) {
   const searchParams = useSearchParams();
 
@@ -166,6 +172,19 @@ export function StripGallery({
                   next={neighbors.next}
                   onNavigate={select}
                   onClose={requestClose}
+                  action={
+                    save && selected._id ? (
+                      <SaveButton
+                        itemType="strip"
+                        itemId={selected._id}
+                        initialSaved={save.savedIds.includes(selected._id)}
+                        signedIn={save.signedIn}
+                        saveLabel={save.saveLabel}
+                        savedLabel={save.savedLabel}
+                        signInCopy={save.signInCopy}
+                      />
+                    ) : undefined
+                  }
                 />
               </div>
             </Section>
@@ -176,6 +195,7 @@ export function StripGallery({
       <div onClickCapture={onGridClick}>
         <ContentCardGrid
           cards={strips.map(stripToCard)}
+          save={save}
           heading={heading}
           headingSize={headingSize}
           columns={columns}

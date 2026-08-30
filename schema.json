@@ -6374,6 +6374,20 @@
               },
               "optional": true
             },
+            "searchStripsLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "stripsShuffleLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "everythingElseHeading": {
               "type": "objectAttribute",
               "value": {
@@ -6521,7 +6535,21 @@
               },
               "optional": true
             },
+            "accountSavedStripsHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "accountCosignsHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "accountFollowedCreatorsHeading": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"
@@ -7189,6 +7217,13 @@
               "optional": true
             },
             "strips": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "filteredStrips": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

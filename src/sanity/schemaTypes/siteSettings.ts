@@ -1055,6 +1055,19 @@ export default defineType({
           description: 'e.g. "Search creators and studios".',
         }),
         defineField({
+          name: "searchStripsLabel",
+          title: "Strips search placeholder",
+          type: "string",
+          description: 'Search box on the Strips listing — e.g. "Search strips".',
+        }),
+        defineField({
+          name: "stripsShuffleLabel",
+          title: "Strips shuffle button",
+          type: "string",
+          description:
+            'The button that reorders the Strips listing from Recent to a random shuffle — e.g. "Shuffle".',
+        }),
+        defineField({
           name: "everythingElseHeading",
           title: "Heading above the fallback row",
           type: "string",
@@ -1172,10 +1185,22 @@ export default defineType({
           description: 'The saved-comics tab in the dashboard\'s second column — e.g. "Saved Comics".',
         }),
         defineField({
+          name: "accountSavedStripsHeading",
+          title: "Dashboard — Saved Strips tab",
+          type: "string",
+          description: 'The saved-strips tab beside Saved Comics — e.g. "Saved Strips".',
+        }),
+        defineField({
           name: "accountCosignsHeading",
           title: "Dashboard — Cosigns tab",
           type: "string",
           description: 'The tab showing your Cosigns — creators you and they both follow (a mutual follow) — e.g. "Cosigns".',
+        }),
+        defineField({
+          name: "accountFollowedCreatorsHeading",
+          title: "Dashboard — Followed Creators tab",
+          type: "string",
+          description: 'The tab showing every creator you follow (beside Cosigns) — e.g. "Followed Creators".',
         }),
         defineField({
           name: "accountRemoveLabel",
@@ -1774,6 +1799,13 @@ export default defineType({
           name: "strips",
           title: "No strips",
           type: "string",
+        }),
+        defineField({
+          name: "filteredStrips",
+          title: "No strips match the filters",
+          type: "string",
+          description:
+            "Shown on the Strips listing when a series/creator/search filter matches nothing — offer to clear, don't dead-end (§3).",
         }),
         defineField({
           name: "ragIssues",

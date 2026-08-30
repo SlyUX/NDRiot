@@ -34,7 +34,7 @@ function client(): SanityClient {
 
 const normalizeEmail = (email: string) => email.trim().toLowerCase()
 
-export type SavedItemType = 'book' | 'creator'
+export type SavedItemType = 'book' | 'creator' | 'strip'
 export interface SavedItem {
   itemType: SavedItemType
   itemId: string

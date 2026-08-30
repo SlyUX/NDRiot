@@ -563,6 +563,9 @@ export interface SiteSettings {
     searchHomeLabel: string;
     searchBooksLabel: string;
     searchCreatorsLabel: string;
+    /** The Strips listing filter bar — search box + the Recent→Random shuffle. */
+    searchStripsLabel: string;
+    stripsShuffleLabel: string;
     downloadCta: string;
     previewCta: string;
     previewNote: string;
@@ -589,7 +592,9 @@ export interface SiteSettings {
     accountRiotingSince: string;
     accountViewMediaLabel: string;
     accountSavedComicsHeading: string;
+    accountSavedStripsHeading: string;
     accountCosignsHeading: string;
+    accountFollowedCreatorsHeading: string;
     accountRemoveLabel: string;
     accountRemovedLabel: string;
     accountUndoLabel: string;
@@ -695,6 +700,7 @@ export interface SiteSettings {
     conventions: string;
     allies: string;
     strips: string;
+    filteredStrips: string;
     ragIssues: string;
     media: string;
     saved: string;
@@ -1304,6 +1310,8 @@ const DEFAULTS: SiteSettings = {
     searchHomeLabel: "Search comics and comic creators",
     searchBooksLabel: "Search titles and comic creators",
     searchCreatorsLabel: "Search comic creators and studios",
+    searchStripsLabel: "Search strips",
+    stripsShuffleLabel: "Shuffle",
     downloadCta: "Download",
     previewCta: "Read a preview (PDF)",
     previewNote: "Opens in a new tab on the host’s site",
@@ -1323,7 +1331,9 @@ const DEFAULTS: SiteSettings = {
     accountRiotingSince: "Rioting since {date}",
     accountViewMediaLabel: "Media Page",
     accountSavedComicsHeading: "Saved Comics",
+    accountSavedStripsHeading: "Saved Strips",
     accountCosignsHeading: "Cosigns",
+    accountFollowedCreatorsHeading: "Followed Creators",
     accountRemoveLabel: "Remove",
     accountRemovedLabel: "Removed",
     accountUndoLabel: "Undo",
@@ -1428,6 +1438,8 @@ const DEFAULTS: SiteSettings = {
     conventions: "No conventions listed yet — check back soon.",
     allies: "No allies listed yet — check back soon.",
     strips: "No strips yet — check back soon.",
+    filteredStrips:
+      "No strips match those filters yet. Clear them to see every strip.",
     ragIssues: "The first issue is on its way — check back soon.",
     media: "No media listed yet.",
     saved:

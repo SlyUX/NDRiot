@@ -166,6 +166,49 @@ export function searchTerm(value: string | string[] | undefined): string | null 
   return cleaned ? `${cleaned}*` : null
 }
 
+/**
+ * The Strips listing filters by series and creator (single-select dropdowns).
+ * Options carry display text (series title / creator name); the stored filter
+ * value is the slug, so stripFilters maps the picked name back to its slug —
+ * like conventionFacets maps a state name to its code. Order (Recent/Random) is
+ * the FilterBar's own shuffle action, not a facet.
+ */
+export interface StripOption {
+  title?: string | null
+  name?: string | null
+  slug: string | null
+}
+
+export function stripFacets(
+  seriesTitles: readonly string[],
+  creatorNames: readonly string[],
+): Facet[] {
+  return [
+    { param: 'series', label: 'Series', options: seriesTitles },
+    { param: 'creator', label: 'Creator', options: creatorNames },
+  ]
+}
+
+export function stripFilters(
+  params: SearchParams,
+  seriesOptions: readonly StripOption[],
+  creatorOptions: readonly StripOption[],
+) {
+  const seriesTitle = one(params.series)
+  const creatorName = one(params.creator)
+  // An unknown name (hand-typed, or content since removed) drops to null — show
+  // everything, not nothing (same rule as the taxonomy filters above).
+  return {
+    seriesSlug: seriesTitle
+      ? (seriesOptions.find((s) => s.title === seriesTitle)?.slug ?? null)
+      : null,
+    creatorSlug: creatorName
+      ? (creatorOptions.find((c) => c.name === creatorName)?.slug ?? null)
+      : null,
+    q: searchTerm(params.q),
+  }
+}
+
 export function bookFilters(params: SearchParams) {
   return {
     genres: allowed(many(params.genre), GENRES),

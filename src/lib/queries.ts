@@ -428,6 +428,28 @@ const STRIP_CARD = `_id,title,"slug":slug.current,image,caption,"dimensions":ima
 export const STRIPS_QUERY = defineQuery(
   `*[_type=="strip" && defined(slug.current)]|order(publishedAt desc){${STRIP_CARD}}`,
 );
+// The Strips listing, filtered — by series, creator, and a title search. Absent
+// params fall through (`!defined`), so an unfiltered call equals STRIPS_QUERY.
+// Recency order; the page reshuffles to random when asked (§3, user-directed).
+export const FILTERED_STRIPS_QUERY = defineQuery(
+  `*[_type=="strip" && defined(slug.current)
+    && (!defined($seriesSlug) || series->slug.current==$seriesSlug)
+    && (!defined($creatorSlug) || creator->slug.current==$creatorSlug)
+    && (!defined($q) || title match $q)
+  ]|order(publishedAt desc){${STRIP_CARD}}`,
+);
+// The reader's saved strips — resolved from the private save store's ids.
+export const SAVED_STRIPS_QUERY = defineQuery(
+  `*[_type=="strip" && _id in $ids && defined(slug.current)]|order(publishedAt desc){${STRIP_CARD}}`,
+);
+// Facet option lists for the Strips filter bar — only series/creators that
+// actually have a published strip (offering an empty one lands on a dead page).
+export const STRIP_SERIES_OPTIONS_QUERY = defineQuery(
+  `*[_type=="stripSeries" && defined(slug.current) && count(*[_type=="strip" && references(^._id) && defined(slug.current)])>0]|order(title asc){title,"slug":slug.current}`,
+);
+export const STRIP_CREATOR_OPTIONS_QUERY = defineQuery(
+  `*[_type=="creator" && defined(slug.current) && count(*[_type=="strip" && creator._ref==^._id && defined(slug.current)])>0]|order(name asc){name,"slug":slug.current}`,
+);
 // A single creator's strips — the profile gallery.
 export const CREATOR_STRIPS_QUERY = defineQuery(
   `*[_type=="strip" && creator._ref==$id && defined(slug.current)]|order(publishedAt desc){${STRIP_CARD}}`,

@@ -30,7 +30,7 @@ import { isUpcomingDate } from "@/lib/conventions";
 import { pageMetadata } from "@/lib/page-metadata";
 import { GENRES } from "@/lib/taxonomy";
 import { auth } from "@/auth";
-import { isSaved } from "@/sanity/reader-client";
+import { isSaved, savedItems } from "@/sanity/reader-client";
 import { mutualCosignIds } from "@/sanity/cosign-client";
 import { ownsCreator, creatorsOwnedBy } from "@/sanity/ownership-client";
 import { sentRequest, type CollabStatus } from "@/sanity/collab-client";
@@ -106,6 +106,25 @@ export default async function CreatorPage({
         ownsCreator(email, creator._id),
       ])
     : [false, false];
+
+  // Saved strip ids — so this profile's strip gallery carries the same Save
+  // chips + reader button as the /comics Strips tab (§3, explicit only).
+  const savedStripIds = email
+    ? (await savedItems(email))
+        .filter((x) => x.itemType === "strip")
+        .map((x) => x.itemId)
+    : [];
+  const stripSave = {
+    signedIn: Boolean(email),
+    savedIds: savedStripIds,
+    saveLabel: settings.sections.followLabel,
+    savedLabel: settings.sections.followingLabel,
+    signInCopy: {
+      title: settings.sections.accountSignInTitle,
+      body: settings.sections.accountSignInBody,
+      cta: settings.sections.accountSignInCta,
+    },
+  };
 
   // A signed-in creator viewing ANOTHER profile: resolve their own creator id.
   // Used to gate the collab request (below) and the follow-becomes-a-Cosign hint
@@ -505,6 +524,7 @@ export default async function CreatorPage({
         {strips.length > 0 && (
           <StripGallery
             strips={strips}
+            save={stripSave}
             partOfLabel={settings.sections.seriesPartOfLabel}
             heading={stripsHeading}
             headingSize="sm"

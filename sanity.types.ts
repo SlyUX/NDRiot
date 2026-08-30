@@ -1039,6 +1039,8 @@ export type SiteSettings = {
     searchHomeLabel?: string;
     searchBooksLabel?: string;
     searchCreatorsLabel?: string;
+    searchStripsLabel?: string;
+    stripsShuffleLabel?: string;
     everythingElseHeading?: string;
     genreCreatorsHeading?: string;
     downloadCta?: string;
@@ -1060,7 +1062,9 @@ export type SiteSettings = {
     accountRiotingSince?: string;
     accountViewMediaLabel?: string;
     accountSavedComicsHeading?: string;
+    accountSavedStripsHeading?: string;
     accountCosignsHeading?: string;
+    accountFollowedCreatorsHeading?: string;
     accountRemoveLabel?: string;
     accountRemovedLabel?: string;
     accountUndoLabel?: string;
@@ -1157,6 +1161,7 @@ export type SiteSettings = {
     conventions?: string;
     allies?: string;
     strips?: string;
+    filteredStrips?: string;
     ragIssues?: string;
     media?: string;
   };
@@ -3288,6 +3293,100 @@ export type STRIPS_QUERY_RESULT = Array<{
 }>;
 
 // Source: src/lib/queries.ts
+// Variable: FILTERED_STRIPS_QUERY
+// Query: *[_type=="strip" && defined(slug.current)    && (!defined($seriesSlug) || series->slug.current==$seriesSlug)    && (!defined($creatorSlug) || creator->slug.current==$creatorSlug)    && (!defined($q) || title match $q)  ]|order(publishedAt desc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}
+export type FILTERED_STRIPS_QUERY_RESULT = Array<{
+  _id: string;
+  title: string;
+  slug: string;
+  image: ImageWithAlt;
+  caption: string | null;
+  dimensions: {
+    width: number;
+    height: number;
+  } | null;
+  genres: Array<
+    | "Action & Adventure"
+    | "Crime & Noir"
+    | "Drama"
+    | "Fantasy"
+    | "Historical"
+    | "Horror"
+    | "Humor & Satire"
+    | "Memoir & Autobio"
+    | "Punk & Protest"
+    | "Queer"
+    | "Romance"
+    | "Sci-Fi"
+    | "Slice of Life"
+    | "Superhero"
+    | "Weird & Experimental"
+  > | null;
+  maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
+  publishedAt: string | null;
+  creatorName: string;
+  creatorSlug: string;
+  seriesId: string | null;
+  seriesTitle: string | null;
+  seriesSlug: string | null;
+}>;
+
+// Source: src/lib/queries.ts
+// Variable: SAVED_STRIPS_QUERY
+// Query: *[_type=="strip" && _id in $ids && defined(slug.current)]|order(publishedAt desc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}
+export type SAVED_STRIPS_QUERY_RESULT = Array<{
+  _id: string;
+  title: string;
+  slug: string;
+  image: ImageWithAlt;
+  caption: string | null;
+  dimensions: {
+    width: number;
+    height: number;
+  } | null;
+  genres: Array<
+    | "Action & Adventure"
+    | "Crime & Noir"
+    | "Drama"
+    | "Fantasy"
+    | "Historical"
+    | "Horror"
+    | "Humor & Satire"
+    | "Memoir & Autobio"
+    | "Punk & Protest"
+    | "Queer"
+    | "Romance"
+    | "Sci-Fi"
+    | "Slice of Life"
+    | "Superhero"
+    | "Weird & Experimental"
+  > | null;
+  maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
+  publishedAt: string | null;
+  creatorName: string;
+  creatorSlug: string;
+  seriesId: string | null;
+  seriesTitle: string | null;
+  seriesSlug: string | null;
+}>;
+
+// Source: src/lib/queries.ts
+// Variable: STRIP_SERIES_OPTIONS_QUERY
+// Query: *[_type=="stripSeries" && defined(slug.current) && count(*[_type=="strip" && references(^._id) && defined(slug.current)])>0]|order(title asc){title,"slug":slug.current}
+export type STRIP_SERIES_OPTIONS_QUERY_RESULT = Array<{
+  title: string;
+  slug: string;
+}>;
+
+// Source: src/lib/queries.ts
+// Variable: STRIP_CREATOR_OPTIONS_QUERY
+// Query: *[_type=="creator" && defined(slug.current) && count(*[_type=="strip" && creator._ref==^._id && defined(slug.current)])>0]|order(name asc){name,"slug":slug.current}
+export type STRIP_CREATOR_OPTIONS_QUERY_RESULT = Array<{
+  name: string;
+  slug: string;
+}>;
+
+// Source: src/lib/queries.ts
 // Variable: CREATOR_STRIPS_QUERY
 // Query: *[_type=="strip" && creator._ref==$id && defined(slug.current)]|order(publishedAt desc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}
 export type CREATOR_STRIPS_QUERY_RESULT = Array<{
@@ -4149,6 +4248,10 @@ declare module "@sanity/client" {
     '*[_type=="ally" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,offering,logo,about}': ALLIES_QUERY_RESULT;
     '*[_type=="ally" && slug.current==$slug][0]{_id,name,"slug":slug.current,url,offering,logo,about}': ALLY_QUERY_RESULT;
     '*[_type=="strip" && defined(slug.current)]|order(publishedAt desc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}': STRIPS_QUERY_RESULT;
+    '*[_type=="strip" && defined(slug.current)\n    && (!defined($seriesSlug) || series->slug.current==$seriesSlug)\n    && (!defined($creatorSlug) || creator->slug.current==$creatorSlug)\n    && (!defined($q) || title match $q)\n  ]|order(publishedAt desc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}': FILTERED_STRIPS_QUERY_RESULT;
+    '*[_type=="strip" && _id in $ids && defined(slug.current)]|order(publishedAt desc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}': SAVED_STRIPS_QUERY_RESULT;
+    '*[_type=="stripSeries" && defined(slug.current) && count(*[_type=="strip" && references(^._id) && defined(slug.current)])>0]|order(title asc){title,"slug":slug.current}': STRIP_SERIES_OPTIONS_QUERY_RESULT;
+    '*[_type=="creator" && defined(slug.current) && count(*[_type=="strip" && creator._ref==^._id && defined(slug.current)])>0]|order(name asc){name,"slug":slug.current}': STRIP_CREATOR_OPTIONS_QUERY_RESULT;
     '*[_type=="strip" && creator._ref==$id && defined(slug.current)]|order(publishedAt desc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}': CREATOR_STRIPS_QUERY_RESULT;
     '*[_type=="strip" && slug.current==$slug][0]{_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,creator->{name,"slug":slug.current,photo},"series":series->{title,"slug":slug.current},\n    "prevInSeries": *[_type=="strip" && defined(^.series._ref) && series._ref==^.series._ref && publishedAt < ^.publishedAt && defined(slug.current)]|order(publishedAt desc)[0]{title,"slug":slug.current},\n    "nextInSeries": *[_type=="strip" && defined(^.series._ref) && series._ref==^.series._ref && publishedAt > ^.publishedAt && defined(slug.current)]|order(publishedAt asc)[0]{title,"slug":slug.current}}': STRIP_QUERY_RESULT;
     '*[_type=="stripSeries" && slug.current==$slug][0]{\n    _id,title,description,"slug":slug.current,\n    creator->{name,"slug":slug.current},\n    "strips": *[_type=="strip" && references(^._id) && defined(slug.current)]|order(publishedAt asc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}\n  }': SERIES_QUERY_RESULT;

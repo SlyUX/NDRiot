@@ -116,6 +116,10 @@ export function stripToCard(strip: StripSummary): ContentCardProps {
   return {
     title: strip.title,
     href: `/strips/${strip.slug}`,
+    // Save = Follow on strips too (§3, explicit only) — an itemType + itemId
+    // lets a grid render the bookmark chip, exactly like a book or creator card.
+    itemType: "strip",
+    itemId: strip._id,
     image: strip.image,
     // The title sits beside the card, so the thumbnail is decorative here; a
     // creator's own alt (describing the page) wins on the detail view.

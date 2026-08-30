@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { SaveButton } from "@/components/save-button";
 import { StripView, type StripNeighbor } from "@/components/strip-view";
 import { Section } from "@/components/ui/section";
 import { formatDate } from "@/lib/card-mappers";
@@ -8,6 +9,8 @@ import { pageMetadata } from "@/lib/page-metadata";
 import { safeFetch, STRIP_QUERY } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
 import type { StripDetail } from "@/lib/types";
+import { auth } from "@/auth";
+import { isSaved } from "@/sanity/reader-client";
 
 export const dynamic = "force-dynamic";
 
@@ -38,11 +41,16 @@ export default async function StripPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [strip, settings] = await Promise.all([
+  const [strip, settings, session] = await Promise.all([
     safeFetch<StripDetail | null>(STRIP_QUERY, { slug }, null),
     getSiteSettings(),
+    auth(),
   ]);
   if (!strip) notFound();
+
+  // Save = Follow (§3, explicit only). Already dynamic + authed, so this is free.
+  const email = session?.user?.email;
+  const saved = email ? await isSaved(email, strip._id) : false;
 
   const toNeighbor = (
     n: { slug: string | null; title: string } | null,
@@ -69,6 +77,21 @@ export default async function StripPage({
         partOfLabel={settings.sections.seriesPartOfLabel}
         prev={toNeighbor(strip.prevInSeries)}
         next={toNeighbor(strip.nextInSeries)}
+        action={
+          <SaveButton
+            itemType="strip"
+            itemId={strip._id}
+            initialSaved={saved}
+            signedIn={Boolean(email)}
+            saveLabel={settings.sections.followLabel}
+            savedLabel={settings.sections.followingLabel}
+            signInCopy={{
+              title: settings.sections.accountSignInTitle,
+              body: settings.sections.accountSignInBody,
+              cta: settings.sections.accountSignInCta,
+            }}
+          />
+        }
       />
     </Section>
   );
