@@ -178,14 +178,10 @@ export default defineType({
         },
       ],
     }),
-    defineField({
-      name: "favoriteCreators",
-      title: "Cosigns",
-      type: "array",
-      of: [{ type: "favoriteCreator" }],
-      description:
-        'ND Riot creators this creator publicly cosigns (shouts out) — shown as "{name}\'s Cosigns" on their profile. Creators can also add these themselves via the Cosign button on another creator\'s profile.',
-    }),
+    // Cosigns are no longer stored here — a Cosign is now a MUTUAL follow between
+    // two creators, derived from the private save store (src/sanity/cosign-client.ts)
+    // and shown as "{name}'s Cosigns". The old favoriteCreators data stays on the
+    // documents (Sanity keeps unknown-field data) as a one-time migration source.
   ],
   preview: {
     select: {

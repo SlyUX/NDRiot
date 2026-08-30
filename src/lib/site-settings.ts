@@ -659,14 +659,13 @@ export interface SiteSettings {
     profileManageUpdatesLabel: string;
     creatorWorksHeading: string;
     creatorOrganizationsHeading: string;
+    /** A creator's Cosigns — creators they mutually follow. "{name}" → first name. */
     creatorFavoritesHeading: string;
     /** A creator's single-page comics (strips) hosted on ND Riot. */
     creatorStripsHeading: string;
-    /** The Cosign button (creator-to-creator public endorsement) + its info tooltip. */
-    cosignLabel: string;
-    cosignedLabel: string;
-    cosignInfoLabel: string;
-    cosignTooltip: string;
+    /** Shown beside Follow when a creator views another creator: a mutual follow
+     *  becomes a public Cosign. */
+    followCosignHint: string;
     otherBooksHeading: string;
     bookCreatorsHeading: string;
     bookVideosHeading: string;
@@ -1395,11 +1394,7 @@ const DEFAULTS: SiteSettings = {
     creatorOrganizationsHeading: "Member of",
     creatorFavoritesHeading: "{name}’s Cosigns",
     creatorStripsHeading: "{name}’s Strips",
-    cosignLabel: "Cosign",
-    cosignedLabel: "Cosigned",
-    cosignInfoLabel: "What is a Cosign?",
-    cosignTooltip:
-      "A public shout-out to a fellow creator. Cosigning adds them to your Cosigns — shown on your profile — to vouch for work you rate. It’s public and creators-only, separate from a private Save, and never counted or ranked.",
+    followCosignHint: "When two creators follow each other, it becomes a public Cosign — shown on both profiles.",
     otherBooksHeading: "Other comics by {name}",
     bookCreatorsHeading: "Comic Creators:",
     bookVideosHeading: "Videos",

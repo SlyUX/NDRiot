@@ -7,7 +7,6 @@ import type {
   ConventionSummary,
   CreatorSummary,
   DownloadSummary,
-  FavoriteCreator,
   HomeEditorial,
   InterviewSummary,
   MediaSummary,
@@ -71,34 +70,6 @@ export function bookToCard(book: BookSummary): ContentCardProps {
     hoverText: truncate(book.descriptionText, 200),
     aspectRatio: "cover",
   };
-}
-
-/**
- * A "favorite creator" shout-out → a card.
- *
- * These are all on-site in practice, so the common path is a full creator card
- * that links to their profile with their portrait and a bio preview. An
- * off-site favourite (name + url, no ND Riot profile) becomes a plain linked
- * card; one with neither a profile nor a link has nothing to point at and is
- * dropped by the caller.
- */
-export function favoriteToCard(
-  favorite: FavoriteCreator,
-): ContentCardProps | null {
-  if (favorite.onSite?.slug) {
-    const c = favorite.onSite;
-    return {
-      title: c.name ?? "Creator",
-      href: `/creators/${c.slug}`,
-      image: c.photo,
-      fallbackInitials: c.name ?? "Creator",
-      imageAlt: `Portrait of ${c.name ?? "creator"}`,
-      eyebrow: c.studio?.name ?? formatPlace(c.place),
-      summary: truncate(c.bioText, 160),
-      aspectRatio: "square",
-    };
-  }
-  return null;
 }
 
 export function creatorToCard(creator: CreatorSummary): ContentCardProps {

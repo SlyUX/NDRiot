@@ -18,7 +18,6 @@ import hubPage from "./hubPage";
 import bookLink from "./bookLink";
 import mediaLink from "./mediaLink";
 import socialLink from "./socialLink";
-import favoriteCreator from "./favoriteCreator";
 import imageWithAlt from "./imageWithAlt";
 import place from "./place";
 import organization from "./organization";
@@ -47,7 +46,6 @@ export const schemaTypes = [
   bookLink,
   mediaLink,
   socialLink,
-  favoriteCreator,
   imageWithAlt,
   place,
 ];

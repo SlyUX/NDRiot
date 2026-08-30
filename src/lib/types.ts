@@ -32,7 +32,6 @@ import type {
   STRIPS_QUERY_RESULT,
   STRIP_QUERY_RESULT,
   SERIES_QUERY_RESULT,
-  OWNED_COSIGNS_QUERY_RESULT,
   MEDIA_DETAIL_QUERY_RESULT,
   HUB_PAGE_QUERY_RESULT,
   ImageWithAlt,
@@ -83,7 +82,6 @@ export type AllyDetail = NonNullable<ALLY_QUERY_RESULT>;
 export type StripSummary = STRIPS_QUERY_RESULT[number];
 export type StripDetail = NonNullable<STRIP_QUERY_RESULT>;
 export type SeriesDetail = NonNullable<SERIES_QUERY_RESULT>;
-export type CosignCreator = NonNullable<OWNED_COSIGNS_QUERY_RESULT>[number];
 export type HeroBook = HERO_BOOKS_QUERY_RESULT[number];
 export type HomeEditorial = HOME_EDITORIAL_QUERY_RESULT[number];
 export type HomeNewItem = HOME_NEW_QUERY_RESULT[number];
@@ -96,9 +94,6 @@ export type DownloadDetail = NonNullable<DOWNLOAD_QUERY_RESULT>;
 
 export type Organization = NonNullable<CreatorDetail["studio"]>;
 export type SocialLink = NonNullable<CreatorDetail["socials"]>[number];
-export type FavoriteCreator = NonNullable<
-  CreatorDetail["favoriteCreators"]
->[number];
 export type BookLink = NonNullable<
   NonNullable<BOOK_QUERY_RESULT>["links"]
 >[number];

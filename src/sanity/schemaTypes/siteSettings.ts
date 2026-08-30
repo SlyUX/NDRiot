@@ -1175,7 +1175,7 @@ export default defineType({
           name: "accountCosignsHeading",
           title: "Dashboard — Cosigns tab",
           type: "string",
-          description: 'The tab showing creators you have Cosigned (your public endorsements) — e.g. "Cosigns".',
+          description: 'The tab showing your Cosigns — creators you and they both follow (a mutual follow) — e.g. "Cosigns".',
         }),
         defineField({
           name: "accountRemoveLabel",
@@ -1649,7 +1649,7 @@ export default defineType({
           title: "Creator page — cosigns heading",
           type: "string",
           description:
-            'A creator’s public list of creators they endorse ("cosigns"). Use {name} for their first name — e.g. "{name}’s Cosigns" renders as "Stephen’s Cosigns".',
+            'A creator’s Cosigns — the creators they mutually follow (each follows the other). Derived, not curated. Use {name} for their first name — e.g. "{name}’s Cosigns" renders as "Stephen’s Cosigns".',
         }),
         defineField({
           name: "creatorStripsHeading",
@@ -1659,32 +1659,12 @@ export default defineType({
             'Above a creator’s single-page comics (strips) hosted on ND Riot. Use {name} — e.g. "{name}’s Strips".',
         }),
         defineField({
-          name: "cosignLabel",
-          title: "Cosign button — default",
-          type: "string",
-          description:
-            'Shown to a signed-in creator on ANOTHER creator\'s profile — e.g. "Cosign".',
-        }),
-        defineField({
-          name: "cosignedLabel",
-          title: "Cosign button — active (already cosigned)",
-          type: "string",
-          description: 'The pressed state — e.g. "Cosigned".',
-        }),
-        defineField({
-          name: "cosignInfoLabel",
-          title: "Cosign info icon — accessible name",
-          type: "string",
-          description:
-            'Accessible label for the (i) info icon beside the Cosign button — e.g. "What is a Cosign?".',
-        }),
-        defineField({
-          name: "cosignTooltip",
-          title: "Cosign info tooltip",
+          name: "followCosignHint",
+          title: "Creator page — follow-becomes-cosign hint",
           type: "text",
-          rows: 3,
+          rows: 2,
           description:
-            "The explanation shown in the (i) tooltip: what cosigning does, that it's public + creators-only, and that it's never ranked (§3).",
+            "Shown beside Follow when a signed-in creator views ANOTHER creator's profile: a mutual follow (both follow each other) becomes a public Cosign. Not shown to readers.",
         }),
         defineField({
           name: "otherBooksHeading",

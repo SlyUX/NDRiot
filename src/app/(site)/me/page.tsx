@@ -48,7 +48,6 @@ import {
   OWNED_APPEARANCES_QUERY,
   INTAKE_OWNED_SERIES_QUERY,
   OWNED_BOOKS_QUERY,
-  OWNED_COSIGNS_QUERY,
   OWNED_DOCS_QUERY,
   OWNED_MEDIA_QUERY,
   SAVED_BOOKS_QUERY,
@@ -60,13 +59,13 @@ import {
 import { appearanceToFeedItem, mergeFeed } from "@/lib/feed-mappers";
 import { getSiteSettings } from "@/lib/site-settings";
 import { ownedDocIds } from "@/sanity/ownership-client";
+import { mutualCosignIds } from "@/sanity/cosign-client";
 import { incomingRequests, sentRequests } from "@/sanity/collab-client";
 import { savedItems } from "@/sanity/reader-client";
 import { urlFor } from "@/sanity/image";
 import type {
   BookSummary,
   ConventionSummary,
-  CosignCreator,
   CreatorSummary,
   StripSummary,
   MediaSummary,
@@ -216,13 +215,12 @@ export default async function AccountPage() {
   const hasSaves = savedBooks.length > 0 || savedCreators.length > 0;
   // Hide the ND Noise opt-in from anyone already subscribed (MailerLite live).
   const newsletterSubscribed = await isSubscribedToNewsletter(email);
-  // The creators this creator has Cosigned — the dashboard's Cosigns tab. A
-  // dangling reference resolves to null, so drop those.
-  const cosigns = (
-    isCreator
-      ? await safeFetch<CosignCreator[]>(OWNED_COSIGNS_QUERY, { id: ownedCreatorIds[0] }, [])
-      : []
-  ).filter((c): c is NonNullable<CosignCreator> => c != null);
+  // The creator's Cosigns — the creators they mutually follow (each follows the
+  // other), derived from the save store, resolved to cards for the Cosigns tab.
+  const cosignIds = isCreator ? await mutualCosignIds(ownedCreatorIds[0]) : [];
+  const cosigns = cosignIds.length
+    ? await safeFetch<CreatorSummary[]>(SAVED_CREATORS_QUERY, { ids: cosignIds }, [])
+    : [];
 
   // The creators' existing (published) series — the strip composer's dropdown,
   // filtered per creator at render. Drafts a creator just started show up once

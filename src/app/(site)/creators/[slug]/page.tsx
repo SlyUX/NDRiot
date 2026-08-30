@@ -12,7 +12,6 @@ import { JsonLd } from "@/components/json-ld";
 import { OrganizationLink } from "@/components/organization-link";
 import PortableTextBody from "@/components/PortableTextBody";
 import { CollabRequestButton } from "@/components/collab-request-button";
-import { CosignButton } from "@/components/cosign-button";
 import { InitialsAvatar } from "@/components/initials-avatar";
 import { OwnerTabs } from "@/components/owner-tabs";
 import { SaveButton } from "@/components/save-button";
@@ -25,13 +24,14 @@ import { GenreBadge } from "@/components/genre-badge";
 import { Badge } from "@/components/ui/badge";
 import { externalHref } from "@/lib/utils";
 import { Section } from "@/components/ui/section";
-import { bookToCard, favoriteToCard } from "@/lib/card-mappers";
+import { bookToCard, creatorToCard } from "@/lib/card-mappers";
 import { formatPlace } from "@/lib/place";
 import { isUpcomingDate } from "@/lib/conventions";
 import { pageMetadata } from "@/lib/page-metadata";
 import { GENRES } from "@/lib/taxonomy";
 import { auth } from "@/auth";
 import { isSaved } from "@/sanity/reader-client";
+import { mutualCosignIds } from "@/sanity/cosign-client";
 import { ownsCreator, creatorsOwnedBy } from "@/sanity/ownership-client";
 import { sentRequest, type CollabStatus } from "@/sanity/collab-client";
 import { fetchFeed } from "@/lib/feed-parse";
@@ -42,7 +42,7 @@ import {
   CREATOR_UPDATES_QUERY,
   CREATOR_APPEARANCES_QUERY,
   CREATOR_STRIPS_QUERY,
-  COSIGNED_IDS_QUERY,
+  SAVED_CREATORS_QUERY,
 } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
 import { absoluteUrl } from "@/lib/site-url";
@@ -54,6 +54,7 @@ import {
 import type {
   CreatorAppearance,
   CreatorDetail,
+  CreatorSummary,
   StripSummary,
   UpdateFeedItem,
 } from "@/lib/types";
@@ -106,40 +107,38 @@ export default async function CreatorPage({
       ])
     : [false, false];
 
-  // A signed-in creator viewing ANOTHER profile can Cosign it (any creator) and,
-  // if it's open to collaboration, send a collab request. Resolve their own
-  // creator id once, then both states off it.
+  // A signed-in creator viewing ANOTHER profile: resolve their own creator id.
+  // Used to gate the collab request (below) and the follow-becomes-a-Cosign hint
+  // — a mutual creator↔creator follow is what a Cosign now is.
   const viewerCreatorId =
     email && !isOwner ? ((await creatorsOwnedBy(email))[0] ?? null) : null;
 
-  // Cosign: has the viewer already cosigned this profile? (null = don't show it.)
-  let cosigned: boolean | null = null;
   // Collab: any existing request (one per creator, ever → a status line once sent).
   let collab: {
     status: CollabStatus | null;
     response: string | null;
   } | null = null;
-  if (viewerCreatorId) {
-    const [cosignedRefs, collabReq] = await Promise.all([
-      safeFetch<string[]>(COSIGNED_IDS_QUERY, { id: viewerCreatorId }, []),
-      creator.openToCollaboration
-        ? sentRequest(viewerCreatorId, creator._id)
-        : Promise.resolve(null),
-    ]);
-    cosigned = cosignedRefs.includes(creator._id);
-    if (creator.openToCollaboration) {
-      collab = {
-        status: collabReq?.status ?? null,
-        response: collabReq?.response ?? null,
-      };
-    }
+  if (viewerCreatorId && creator.openToCollaboration) {
+    const collabReq = await sentRequest(viewerCreatorId, creator._id);
+    collab = {
+      status: collabReq?.status ?? null,
+      response: collabReq?.response ?? null,
+    };
   }
 
-  // Favorites are shown as horizontal creator cards. All on-site in practice;
-  // any without a profile or link are dropped.
-  const favoriteCards = (creator.favoriteCreators ?? [])
-    .map(favoriteToCard)
-    .filter((card): card is NonNullable<typeof card> => card !== null);
+  // This creator's Cosigns — the creators they mutually follow (each follows the
+  // other), derived from the private save store. Public by definition (both
+  // opted in), so safe to surface. Resolved to cards, name-ordered (§3).
+  const cosignIds = await mutualCosignIds(creator._id);
+  const cosignCards = (
+    cosignIds.length
+      ? await safeFetch<CreatorSummary[]>(
+          SAVED_CREATORS_QUERY,
+          { ids: cosignIds },
+          [],
+        )
+      : []
+  ).map(creatorToCard);
 
   // Possessive, personal headings on this page — favorites and works — take the
   // creator's first name via the {name} placeholder in their CMS copy.
@@ -386,7 +385,9 @@ export default async function CreatorPage({
                   <div className="mt-5 flex flex-wrap items-center gap-3">
                     {/* No Follow on your own profile — you can't follow yourself.
                         For everyone else it's "Follow", not "Save": truer for a
-                        person, and the same underlying saved signal (§3). */}
+                        person, and the same underlying saved signal (§3). Between
+                        two creators, a mutual follow becomes a Cosign — see the
+                        hint below. */}
                     {!isOwner && (
                       <SaveButton
                         itemType="creator"
@@ -400,16 +401,6 @@ export default async function CreatorPage({
                           body: settings.sections.accountSignInBody,
                           cta: settings.sections.accountSignInCta,
                         }}
-                      />
-                    )}
-                    {cosigned !== null && (
-                      <CosignButton
-                        targetId={creator._id}
-                        initialCosigned={cosigned}
-                        cosignLabel={settings.sections.cosignLabel}
-                        cosignedLabel={settings.sections.cosignedLabel}
-                        infoLabel={settings.sections.cosignInfoLabel}
-                        tooltip={settings.sections.cosignTooltip}
                       />
                     )}
                     {collab && (
@@ -429,6 +420,13 @@ export default async function CreatorPage({
                       copiedLabel={settings.sections.linkCopiedLabel}
                     />
                   </div>
+                  {/* Only a signed-in creator viewing another creator sees this:
+                      following each other turns the follow into a public Cosign. */}
+                  {viewerCreatorId && (
+                    <p className="text-muted-foreground mt-2 max-w-prose text-xs">
+                      {settings.sections.followCosignHint}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -516,11 +514,11 @@ export default async function CreatorPage({
           />
         )}
 
-        {favoriteCards.length > 0 && (
+        {cosignCards.length > 0 && (
           <ContentCardGrid
             heading={favoritesHeading}
             headingSize="sm"
-            cards={favoriteCards}
+            cards={cosignCards}
             layout="horizontal"
             columns={4}
             summaryLines={4}

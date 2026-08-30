@@ -327,60 +327,6 @@
     }
   },
   {
-    "type": "type",
-    "name": "creator.reference",
-    "value": {
-      "type": "object",
-      "attributes": {
-        "_ref": {
-          "type": "objectAttribute",
-          "value": {
-            "type": "string"
-          }
-        },
-        "_type": {
-          "type": "objectAttribute",
-          "value": {
-            "type": "string",
-            "value": "reference"
-          }
-        },
-        "_weak": {
-          "type": "objectAttribute",
-          "value": {
-            "type": "boolean"
-          },
-          "optional": true
-        }
-      },
-      "dereferencesTo": "creator"
-    }
-  },
-  {
-    "name": "favoriteCreator",
-    "type": "type",
-    "value": {
-      "type": "object",
-      "attributes": {
-        "_type": {
-          "type": "objectAttribute",
-          "value": {
-            "type": "string",
-            "value": "favoriteCreator"
-          }
-        },
-        "onSite": {
-          "type": "objectAttribute",
-          "value": {
-            "type": "inline",
-            "name": "creator.reference"
-          },
-          "optional": true
-        }
-      }
-    }
-  },
-  {
     "name": "socialLink",
     "type": "type",
     "value": {
@@ -849,6 +795,36 @@
         }
       },
       "dereferencesTo": "book"
+    }
+  },
+  {
+    "type": "type",
+    "name": "creator.reference",
+    "value": {
+      "type": "object",
+      "attributes": {
+        "_ref": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string"
+          }
+        },
+        "_type": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string",
+            "value": "reference"
+          }
+        },
+        "_weak": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "boolean"
+          },
+          "optional": true
+        }
+      },
+      "dereferencesTo": "creator"
     }
   },
   {
@@ -4686,28 +4662,6 @@
           }
         },
         "optional": true
-      },
-      "favoriteCreators": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "array",
-          "of": {
-            "type": "object",
-            "attributes": {
-              "_key": {
-                "type": "objectAttribute",
-                "value": {
-                  "type": "string"
-                }
-              }
-            },
-            "rest": {
-              "type": "inline",
-              "name": "favoriteCreator"
-            }
-          }
-        },
-        "optional": true
       }
     }
   },
@@ -7092,28 +7046,7 @@
               },
               "optional": true
             },
-            "cosignLabel": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
-            "cosignedLabel": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
-            "cosignInfoLabel": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
-            "cosignTooltip": {
+            "followCosignHint": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

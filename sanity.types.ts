@@ -95,18 +95,6 @@ export type ImageWithAlt = {
   alt?: string;
 };
 
-export type CreatorReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "creator";
-};
-
-export type FavoriteCreator = {
-  _type: "favoriteCreator";
-  onSite?: CreatorReference;
-};
-
 export type SocialLink = {
   _type: "socialLink";
   platform:
@@ -190,6 +178,13 @@ export type BookReference = {
   _type: "reference";
   _weak?: boolean;
   [internalGroqTypeReferenceTo]?: "book";
+};
+
+export type CreatorReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "creator";
 };
 
 export type ColumnReference = {
@@ -792,11 +787,6 @@ export type Creator = {
     _type: "workLink";
     _key: string;
   }>;
-  favoriteCreators?: Array<
-    {
-      _key: string;
-    } & FavoriteCreator
-  >;
 };
 
 export type Organization = {
@@ -1145,10 +1135,7 @@ export type SiteSettings = {
     linkCopiedLabel?: string;
     creatorFavoritesHeading?: string;
     creatorStripsHeading?: string;
-    cosignLabel?: string;
-    cosignedLabel?: string;
-    cosignInfoLabel?: string;
-    cosignTooltip?: string;
+    followCosignHint?: string;
     otherBooksHeading?: string;
     bookCreatorsHeading?: string;
     bookVideosHeading?: string;
@@ -1548,13 +1535,12 @@ export type AllSanitySchemaTypes =
   | Place
   | SanityImageAssetReference
   | ImageWithAlt
-  | CreatorReference
-  | FavoriteCreator
   | SocialLink
   | MediaLink
   | BookLink
   | HubPage
   | BookReference
+  | CreatorReference
   | ColumnReference
   | InterviewReference
   | HomepageFeature
@@ -1632,7 +1618,7 @@ export type CREATORS_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: CREATOR_QUERY
-// Query: *[_type=="creator" && slug.current==$slug][0]{  _id,name,place,website,feedUrl,bio,"bioText":pt::text(bio),photo,socials,openToCollaboration,genres,formats,audience,  works[]{label,url},  studio->{_id,name,"slug":slug.current,website,logo},  organizations[]->{_id,name,"slug":slug.current,website,logo},  favoriteCreators[defined(onSite)]{onSite->{name,"slug":slug.current,place,photo,"bioText":pt::text(bio),studio->{name}}},  "books": *[_type=="book" && references(^._id)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}}
+// Query: *[_type=="creator" && slug.current==$slug][0]{  _id,name,place,website,feedUrl,bio,"bioText":pt::text(bio),photo,socials,openToCollaboration,genres,formats,audience,  works[]{label,url},  studio->{_id,name,"slug":slug.current,website,logo},  organizations[]->{_id,name,"slug":slug.current,website,logo},  "books": *[_type=="book" && references(^._id)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}}
 export type CREATOR_QUERY_RESULT = {
   _id: string;
   name: string;
@@ -1710,18 +1696,6 @@ export type CREATOR_QUERY_RESULT = {
     slug: string;
     website: string | null;
     logo: ImageWithAlt | null;
-  }> | null;
-  favoriteCreators: Array<{
-    onSite: {
-      name: string;
-      slug: string;
-      place: Place | null;
-      photo: ImageWithAlt | null;
-      bioText: string;
-      studio: {
-        name: string;
-      } | null;
-    } | null;
   }> | null;
   books: Array<{
     _id: string;
@@ -3250,21 +3224,6 @@ export type COLLAB_CREATORS_QUERY_RESULT = Array<{
 }>;
 
 // Source: src/lib/queries.ts
-// Variable: COSIGNED_IDS_QUERY
-// Query: *[_type=="creator" && _id==$id][0].favoriteCreators[defined(onSite)].onSite._ref
-export type COSIGNED_IDS_QUERY_RESULT = Array<string | null> | null;
-
-// Source: src/lib/queries.ts
-// Variable: OWNED_COSIGNS_QUERY
-// Query: *[_type=="creator" && _id==$id][0].favoriteCreators[defined(onSite)].onSite->{    _id,name,"slug":slug.current,photo  }
-export type OWNED_COSIGNS_QUERY_RESULT = Array<{
-  _id: string;
-  name: string;
-  slug: string;
-  photo: ImageWithAlt | null;
-} | null> | null;
-
-// Source: src/lib/queries.ts
 // Variable: ALLIES_QUERY
 // Query: *[_type=="ally" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,offering,logo,about}
 export type ALLIES_QUERY_RESULT = Array<{
@@ -4146,7 +4105,7 @@ import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
     '*[_type=="creator"]|order(name asc){_id,name,"slug":slug.current,place,photo,genres,openToCollaboration,"joinedAt":_createdAt,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}': CREATORS_QUERY_RESULT;
-    '*[_type=="creator" && slug.current==$slug][0]{\n  _id,name,place,website,feedUrl,bio,"bioText":pt::text(bio),photo,socials,openToCollaboration,genres,formats,audience,\n  works[]{label,url},\n  studio->{_id,name,"slug":slug.current,website,logo},\n  organizations[]->{_id,name,"slug":slug.current,website,logo},\n  favoriteCreators[defined(onSite)]{onSite->{name,"slug":slug.current,place,photo,"bioText":pt::text(bio),studio->{name}}},\n  "books": *[_type=="book" && references(^._id)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}\n}': CREATOR_QUERY_RESULT;
+    '*[_type=="creator" && slug.current==$slug][0]{\n  _id,name,place,website,feedUrl,bio,"bioText":pt::text(bio),photo,socials,openToCollaboration,genres,formats,audience,\n  works[]{label,url},\n  studio->{_id,name,"slug":slug.current,website,logo},\n  organizations[]->{_id,name,"slug":slug.current,website,logo},\n  "books": *[_type=="book" && references(^._id)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}\n}': CREATOR_QUERY_RESULT;
     '*[_type=="conventionAppearance" && creator._ref==$creatorId && defined(venue)]{\n  _id,status,tableNumber,note,forDate,\n  "venue":venue->{_id,name,"slug":slug.current,website,startDate,endDate,place}\n}': CREATOR_APPEARANCES_QUERY_RESULT;
     '*[_type=="conventionAppearance" && creator._ref in $creatorIds && defined(venue)]\n  | order(venue->name asc){\n  _id,status,tableNumber,note,forDate,\n  "creatorId":creator._ref,\n  "venueId":venue._ref,\n  "venue":venue->{_id,name,"slug":slug.current,website,startDate,endDate,place}\n}': OWNED_APPEARANCES_QUERY_RESULT;
     '*[_type=="book"]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}': BOOKS_QUERY_RESULT;
@@ -4187,8 +4146,6 @@ declare module "@sanity/client" {
     'array::unique(*[_type=="convention" && defined(slug.current) && defined(place.region)].place.region)': CONVENTION_REGIONS_QUERY_RESULT;
     '*[_type=="creator" && _id==$id][0].place.region': OWNED_CREATOR_REGION_QUERY_RESULT;
     '*[_type=="creator" && _id in $ids]{_id,name,"slug":slug.current}': COLLAB_CREATORS_QUERY_RESULT;
-    '*[_type=="creator" && _id==$id][0].favoriteCreators[defined(onSite)].onSite._ref': COSIGNED_IDS_QUERY_RESULT;
-    '*[_type=="creator" && _id==$id][0].favoriteCreators[defined(onSite)].onSite->{\n    _id,name,"slug":slug.current,photo\n  }': OWNED_COSIGNS_QUERY_RESULT;
     '*[_type=="ally" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,offering,logo,about}': ALLIES_QUERY_RESULT;
     '*[_type=="ally" && slug.current==$slug][0]{_id,name,"slug":slug.current,url,offering,logo,about}': ALLY_QUERY_RESULT;
     '*[_type=="strip" && defined(slug.current)]|order(publishedAt desc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}': STRIPS_QUERY_RESULT;
