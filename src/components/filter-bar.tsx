@@ -88,11 +88,23 @@ export interface FilterBarProps {
   searchParam?: string
   sortParam?: string
   seedParam?: string
+  /**
+   * Sibling state to carry through on every navigation from this bar, so
+   * interacting here never disturbs another section. On the homepage the comics
+   * bar carries the hero's pinned feature + the creators row's shuffle seed (and
+   * vice versa), which is what keeps each shuffle control to its own section.
+   * Only fills a key that isn't already in the URL, so a value the reader set
+   * themselves is never overwritten. Empty (the default) is a no-op.
+   */
+  extraParams?: Record<string, string>
   className?: string
 }
 
 /** Long enough that typing a word is one request, short enough to feel live. */
 const SEARCH_DEBOUNCE_MS = 300
+
+/** Stable empty default so the apply() callback identity doesn't churn. */
+const NO_EXTRA_PARAMS: Record<string, string> = {}
 
 export function FilterBar({
   facets,
@@ -105,6 +117,7 @@ export function FilterBar({
   searchParam = 'q',
   sortParam = 'sort',
   seedParam = 'seed',
+  extraParams = NO_EXTRA_PARAMS,
   className,
 }: FilterBarProps) {
   const router = useRouter()
@@ -135,13 +148,19 @@ export function FilterBar({
 
   const apply = useCallback(
     (next: URLSearchParams) => {
+      // Pin sibling sections' state so a navigation from THIS bar never
+      // reshuffles them. Only fills keys not already present, so a value the
+      // reader set stays put.
+      for (const [key, value] of Object.entries(extraParams)) {
+        if (value && !next.has(key)) next.set(key, value)
+      }
       const query = next.toString()
       // scroll: false — the filters sit above the results, and jumping to the
       // top of the page on every toggle loses your place in the row you are
       // reading.
       router.push(query ? `${pathname}?${query}` : pathname, { scroll: false })
     },
-    [pathname, router],
+    [pathname, router, extraParams],
   )
 
   /** Sets or clears one value. Used by the dropdowns. */

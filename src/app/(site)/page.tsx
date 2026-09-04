@@ -92,21 +92,28 @@ export async function generateMetadata(): Promise<Metadata> {
  * Two queries because GROQ has no random(): fetch identifiers, pick one, fetch
  * only that — cost stays flat as the roster grows.
  */
-async function pickFeatureBook(exclude?: string): Promise<HeroBook | null> {
+async function pickFeatureBook(
+  pinned?: string,
+): Promise<{ book: HeroBook | null; id: string | null; nextId: string | null }> {
   const ids = await safeFetch<string[]>(BOOK_IDS_QUERY, {}, []);
-  if (ids.length === 0) return null;
+  if (ids.length === 0) return { book: null, id: null, nextId: null };
 
-  // "Discover" passes the current book so the next press lands on a different
-  // one — unless it is the only book, where there is nothing else to show.
-  const pool = exclude ? ids.filter((id) => id !== exclude) : ids;
-  const from = pool.length ? pool : ids;
-  const id = from[Math.floor(Math.random() * from.length)];
-  const [book] = await safeFetch<HeroBook[]>(
-    HERO_BOOKS_QUERY,
-    { ids: [id] },
-    [],
-  );
-  return book ?? null;
+  // Deterministic when the URL pins a feature (`?feat=`), so an unrelated
+  // navigation — including spinning another section — never re-rolls the hero.
+  // With no pin it's a fresh random pick, so each visit still lands somewhere
+  // new (AGENTS.md §3: every book gets the same odds of the front page).
+  const id =
+    pinned && ids.includes(pinned)
+      ? pinned
+      : ids[Math.floor(Math.random() * ids.length)];
+  // The book "Spin the Rack" lands on next — a different one, unless it's the
+  // only book. Chosen here so the Spin link points straight at it.
+  const pool = ids.filter((other) => other !== id);
+  const nextId = pool.length
+    ? pool[Math.floor(Math.random() * pool.length)]
+    : id;
+  const [book] = await safeFetch<HeroBook[]>(HERO_BOOKS_QUERY, { ids: [id] }, []);
+  return { book: book ?? null, id, nextId };
 }
 
 export default async function Home({
@@ -149,11 +156,12 @@ export default async function Home({
     ? pageLimit(params, "climit", creatorsPage)
     : HOME_ROW_LIMIT;
 
-  // The book the hero last showed, so "Discover" re-rolls to a different one.
-  const notFeature = Array.isArray(params.notf) ? params.notf[0] : params.notf;
+  // The pinned hero feature (`?feat=`), if any — set once the reader spins the
+  // rack, and carried by the row bars so their own shuffles leave it alone.
+  const featParam = Array.isArray(params.feat) ? params.feat[0] : params.feat;
 
   const [
-    feature,
+    featureData,
     booksResult,
     creatorsResult,
     genresWithBooks,
@@ -167,7 +175,7 @@ export default async function Home({
     // Deliberately unfiltered. The hero is the guaranteed route to work
     // nobody went looking for (AGENTS.md §3), so narrowing the page must
     // never narrow it.
-    pickFeatureBook(notFeature),
+    pickFeatureBook(featParam),
     safeFetch<Paginated<BookSummary>>(
       FILTERED_BOOKS_QUERY,
       { ...booksFilters, limit: booksLimit },
@@ -186,8 +194,30 @@ export default async function Home({
     getSiteSettings(),
     auth(),
   ]);
+  const feature = featureData.book;
+  const featureId = featureData.id;
+  const nextFeatureId = featureData.nextId;
   const books = booksResult.items;
   const creators = creatorsResult.items;
+
+  // Effective seed per row: the URL's when a shuffle is active, else a fresh one
+  // (a new order each visit). Hoisted above the bars so each section's control
+  // can pin the OTHER sections at their current state — that's what keeps a
+  // shuffle to its own row instead of reshuffling the whole page.
+  const effBookSeed = bookSeed ?? randomSeed();
+  const effCreatorSeed = creatorSeed ?? randomSeed();
+
+  // How each section's current state is written to the URL, so any OTHER
+  // section's control carries it through unchanged. The hero is pinned by its
+  // feature id; each row by its shuffle seed (skipped when the row is filtered,
+  // where the order is the query's, not a shuffle).
+  const heroPin: Record<string, string> = featureId ? { feat: featureId } : {};
+  const booksPin: Record<string, string> = booksFiltering
+    ? {}
+    : { sort: "random", seed: String(effBookSeed) };
+  const creatorsPin: Record<string, string> = creatorsFiltering
+    ? {}
+    : { csort: "random", cseed: String(effCreatorSeed) };
 
   // The hero's featured comic is savable too — its saved state, and a Save
   // button passed as a slot so the client component stays out of the server hero.
@@ -310,6 +340,9 @@ export default async function Home({
         resultCount={booksResult.total}
         searchLabel={settings.sections.searchBooksLabel}
         discoverLabel={settings.sections.spinLabel}
+        // Spinning/filtering comics pins the hero + creators row so only comics
+        // moves.
+        extraParams={{ ...heroPin, ...creatorsPin }}
       />
     </Suspense>
   );
@@ -326,6 +359,9 @@ export default async function Home({
         searchParam="cq"
         sortParam="csort"
         seedParam="cseed"
+        // Spinning/filtering creators pins the hero + comics row so only
+        // creators moves.
+        extraParams={{ ...heroPin, ...booksPin }}
       />
     </Suspense>
   );
@@ -341,13 +377,14 @@ export default async function Home({
   // More doesn't reshuffle under the reader; Spin re-rolls to a specific seed.
   const displayBooks = booksFiltering
     ? books
-    : seededShuffle(books, bookSeed ?? randomSeed());
+    : seededShuffle(books, effBookSeed);
   const displayCreators = creatorsFiltering
     ? creators
-    : seededShuffle(creators, creatorSeed ?? randomSeed());
+    : seededShuffle(creators, effCreatorSeed);
 
-  // "Discover" re-rolls the feature: the same URL with `notf` set to the current
-  // book, so the next render excludes it. Carries the other params through.
+  // "Spin the Rack" re-rolls ONLY the hero: it navigates to the next feature
+  // (`feat`) while pinning both rows at their current seed, so they hold still.
+  // Carries every other param through too.
   const discoverParams = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
     if (value == null) continue;
@@ -355,7 +392,9 @@ export default async function Home({
       value.forEach((v) => discoverParams.append(key, v));
     else discoverParams.set(key, value);
   }
-  if (feature) discoverParams.set("notf", feature._id);
+  if (nextFeatureId) discoverParams.set("feat", nextFeatureId);
+  for (const [k, v] of Object.entries(booksPin)) discoverParams.set(k, v);
+  for (const [k, v] of Object.entries(creatorsPin)) discoverParams.set(k, v);
 
   // The pink newsletter band, rendered in two positions and toggled by
   // breakpoint: after the hero on desktop, after the Comics row on phones.
