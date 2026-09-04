@@ -15,7 +15,7 @@
   "dependencies": {
     "@portabletext/react": "^6.2.0",
     "@sanity/image-url": "^2.1.1",
-    "@sanity/vision": "^6.5.0",
+    "@sanity/vision": "6.5.0",
     "@vercel/analytics": "^2.0.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -27,7 +27,7 @@
     "radix-ui": "^1.6.4",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "sanity": "^6.5.0",
+    "sanity": "6.5.0",
     "shadcn": "^4.13.1",
     "styled-components": "^6.4.4",
     "tailwind-merge": "^3.6.0",
