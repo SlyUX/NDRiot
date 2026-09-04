@@ -3,6 +3,7 @@ import { Suspense } from "react";
 
 import { AlternatingSections } from "@/components/alternating-sections";
 import { ContentCardGrid } from "@/components/content-card-grid";
+import { ShuffleRow } from "@/components/shuffle-row";
 import { FilterBar } from "@/components/filter-bar";
 import { Hero } from "@/components/hero";
 import { JsonLd } from "@/components/json-ld";
@@ -165,21 +166,11 @@ export default async function Home({
   const creators = creatorsResult.items;
 
   // Effective seed per row: the URL's when a shuffle is active, else a fresh one
-  // (a new order each visit). Hoisted above the bars so each section's control
-  // can pin the OTHER sections at their current state — that's what keeps a
-  // shuffle to its own row instead of reshuffling the whole page.
+  // (a new order each visit). Each row's shuffle now reorders on the client
+  // (ShuffleRow), so a shuffle touches only its own row with no pinning; this
+  // just seeds the initial server-rendered order.
   const effBookSeed = bookSeed ?? randomSeed();
   const effCreatorSeed = creatorSeed ?? randomSeed();
-
-  // Each row writes its current shuffle seed to the URL so the OTHER row's
-  // control carries it through unchanged (the hero is client state now, so it
-  // needs no pinning). Skipped when a row is filtered — its order is the query's.
-  const booksPin: Record<string, string> = booksFiltering
-    ? {}
-    : { sort: "random", seed: String(effBookSeed) };
-  const creatorsPin: Record<string, string> = creatorsFiltering
-    ? {}
-    : { csort: "random", cseed: String(effCreatorSeed) };
 
   const email = session?.user?.email;
 
@@ -296,8 +287,6 @@ export default async function Home({
         resultCount={booksResult.total}
         searchLabel={settings.sections.searchBooksLabel}
         discoverLabel={settings.sections.spinLabel}
-        // Spinning/filtering comics pins the creators row so only comics moves.
-        extraParams={creatorsPin}
       />
     </Suspense>
   );
@@ -314,8 +303,6 @@ export default async function Home({
         searchParam="cq"
         sortParam="csort"
         seedParam="cseed"
-        // Spinning/filtering creators pins the comics row so only creators moves.
-        extraParams={booksPin}
       />
     </Suspense>
   );
@@ -387,13 +374,17 @@ export default async function Home({
       <AlternatingSections>
         {/* Books: one scrolling row while browsing; a two-row grid with "Load
             more" once a search narrows it. "View all" links to the full listing. */}
-        <ContentCardGrid
+        <ShuffleRow
+          // Keyed by content (order-independent): a filter change (new books)
+          // remounts + re-seeds; a client reshuffle (same books) does not, and
+          // the other row's filtering never disturbs this order.
+          key={displayBooks
+            .map((book) => book._id)
+            .sort()
+            .join(",")}
           heading={settings.home.booksHeading}
           toolbar={booksBar}
           cards={displayBooks.map(bookToCard)}
-          // Slides the row in when its arrangement changes (a comics shuffle or
-          // filter); unchanged by a hero/creators spin, which pins this order.
-          slideToken={displayBooks.map((book) => book._id).join(",")}
           columns={BOOKS_COLS}
           scroll={!booksFiltering}
           scrollRows={2}
@@ -424,13 +415,14 @@ export default async function Home({
 
         {/* Creators: wide horizontal cards. Same browse-scroll / search-grid split
             as the books row above. */}
-        <ContentCardGrid
+        <ShuffleRow
+          key={displayCreators
+            .map((creator) => creator._id)
+            .sort()
+            .join(",")}
           heading={settings.home.creatorsHeading}
           toolbar={creatorsBar}
           cards={displayCreators.map(creatorToCard)}
-          // Slides in on a creators shuffle/filter; pinned (still) on a
-          // hero/comics spin — matches the comics row above.
-          slideToken={displayCreators.map((creator) => creator._id).join(",")}
           layout="horizontal"
           columns={CREATORS_COLS}
           summaryLines={4}

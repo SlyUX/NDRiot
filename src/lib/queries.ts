@@ -425,8 +425,11 @@ export const ALLY_QUERY = defineQuery(
 // caption, series) without a second fetch — the whole point of the same-page
 // expand. `seriesId` groups a series' installments for prev/next.
 const STRIP_CARD = `_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current`;
+// The home Strips row (the only caller) — newest first, capped to a rowful so
+// the fetch stays bounded as the strip catalog grows. The full Strips browse is
+// FILTERED_STRIPS_QUERY on /comics?tab=strips.
 export const STRIPS_QUERY = defineQuery(
-  `*[_type=="strip" && defined(slug.current)]|order(publishedAt desc){${STRIP_CARD}}`,
+  `*[_type=="strip" && defined(slug.current)]|order(publishedAt desc)[0...8]{${STRIP_CARD}}`,
 );
 // The Strips listing, filtered — by series, creator, and a title search. Absent
 // params fall through (`!defined`), so an unfiltered call equals STRIPS_QUERY.

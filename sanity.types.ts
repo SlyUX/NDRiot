@@ -3255,7 +3255,7 @@ export type ALLY_QUERY_RESULT = {
 
 // Source: src/lib/queries.ts
 // Variable: STRIPS_QUERY
-// Query: *[_type=="strip" && defined(slug.current)]|order(publishedAt desc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}
+// Query: *[_type=="strip" && defined(slug.current)]|order(publishedAt desc)[0...8]{_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}
 export type STRIPS_QUERY_RESULT = Array<{
   _id: string;
   title: string;
@@ -4247,7 +4247,7 @@ declare module "@sanity/client" {
     '*[_type=="creator" && _id in $ids]{_id,name,"slug":slug.current}': COLLAB_CREATORS_QUERY_RESULT;
     '*[_type=="ally" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,offering,logo,about}': ALLIES_QUERY_RESULT;
     '*[_type=="ally" && slug.current==$slug][0]{_id,name,"slug":slug.current,url,offering,logo,about}': ALLY_QUERY_RESULT;
-    '*[_type=="strip" && defined(slug.current)]|order(publishedAt desc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}': STRIPS_QUERY_RESULT;
+    '*[_type=="strip" && defined(slug.current)]|order(publishedAt desc)[0...8]{_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}': STRIPS_QUERY_RESULT;
     '*[_type=="strip" && defined(slug.current)\n    && (!defined($seriesSlug) || series->slug.current==$seriesSlug)\n    && (!defined($creatorSlug) || creator->slug.current==$creatorSlug)\n    && (!defined($q) || title match $q)\n  ]|order(publishedAt desc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}': FILTERED_STRIPS_QUERY_RESULT;
     '*[_type=="strip" && _id in $ids && defined(slug.current)]|order(publishedAt desc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}': SAVED_STRIPS_QUERY_RESULT;
     '*[_type=="stripSeries" && defined(slug.current) && count(*[_type=="strip" && references(^._id) && defined(slug.current)])>0]|order(title asc){title,"slug":slug.current}': STRIP_SERIES_OPTIONS_QUERY_RESULT;

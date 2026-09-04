@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { ChevronDown, Search, Shuffle, X } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
+import { useRowShuffle } from '@/components/row-shuffle-context'
 import { cn } from '@/lib/utils'
 
 /**
@@ -123,6 +124,10 @@ export function FilterBar({
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  // When this bar sits in a homepage ShuffleRow, its shuffle reorders that row
+  // in place instead of navigating (instant, touches only the row). Absent
+  // elsewhere → the shuffle keeps its normal seed-in-the-URL navigation.
+  const rowShuffle = useRowShuffle()
 
   const urlQuery = searchParams.get(searchParam) ?? ''
   const [term, setTerm] = useState(urlQuery)
@@ -226,11 +231,17 @@ export function FilterBar({
    * restores the default order.
    */
   const discover = useCallback(() => {
+    // Inside a ShuffleRow: reorder that row in place, instantly, without a
+    // navigation — the shuffle is an action, so it touches only its own row.
+    if (rowShuffle) {
+      rowShuffle()
+      return
+    }
     const next = new URLSearchParams(searchParams.toString())
     next.set(sortParam, 'random')
     next.set(seedParam, String(Math.floor(Math.random() * 1_000_000)))
     apply(next)
-  }, [apply, searchParams, sortParam, seedParam])
+  }, [rowShuffle, apply, searchParams, sortParam, seedParam])
 
   const clearAll = useCallback(() => {
     setTerm('')
