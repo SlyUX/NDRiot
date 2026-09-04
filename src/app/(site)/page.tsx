@@ -8,7 +8,6 @@ import { Hero } from "@/components/hero";
 import { JsonLd } from "@/components/json-ld";
 import { LoadMore } from "@/components/load-more";
 import { NewsletterForm } from "@/components/newsletter-form";
-import { SaveButton } from "@/components/save-button";
 import {
   organizationSchema,
   jsonLdGraph,
@@ -38,9 +37,7 @@ import {
 import { orderConventionsUpcomingFirst } from "@/lib/conventions";
 import {
   safeFetch,
-  BOOK_IDS_QUERY,
   GENRES_WITH_BOOKS_QUERY,
-  HERO_BOOKS_QUERY,
   HOME_NEW_QUERY,
   HOME_RESOURCES_QUERY,
   CONVENTIONS_QUERY,
@@ -52,15 +49,19 @@ import {
   CREATOR_HERO_QUERY,
 } from "@/lib/queries";
 import { appearanceToRailItem, mergeFeed } from "@/lib/feed-mappers";
+import {
+  pickHeroBooks,
+  annotateHeroItems,
+  type HeroFeatureItem,
+} from "@/lib/hero-queue";
 import { getSiteSettings } from "@/lib/site-settings";
 import { auth } from "@/auth";
-import { isSaved, savedItems } from "@/sanity/reader-client";
+import { savedItems } from "@/sanity/reader-client";
 import { creatorsOwnedBy } from "@/sanity/ownership-client";
 import { SITE_URL } from "@/lib/site-url";
 import type {
   BookSummary,
   CreatorSummary,
-  HeroBook,
   HomeNewItem,
   ConventionSummary,
   StripSummary,
@@ -82,39 +83,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return { alternates: { canonical: SITE_URL } };
 }
 
-/**
- * One random book for the hero spotlight.
- *
- * Random per request, not curated. Every book gets the same odds of the front
- * page, which is the point (AGENTS.md §3): a directory that hand-picks its
- * spotlight is ranking its contributors, and this one deliberately does not.
- *
- * Two queries because GROQ has no random(): fetch identifiers, pick one, fetch
- * only that — cost stays flat as the roster grows.
- */
-async function pickFeatureBook(
-  pinned?: string,
-): Promise<{ book: HeroBook | null; id: string | null; nextId: string | null }> {
-  const ids = await safeFetch<string[]>(BOOK_IDS_QUERY, {}, []);
-  if (ids.length === 0) return { book: null, id: null, nextId: null };
-
-  // Deterministic when the URL pins a feature (`?feat=`), so an unrelated
-  // navigation — including spinning another section — never re-rolls the hero.
-  // With no pin it's a fresh random pick, so each visit still lands somewhere
-  // new (AGENTS.md §3: every book gets the same odds of the front page).
-  const id =
-    pinned && ids.includes(pinned)
-      ? pinned
-      : ids[Math.floor(Math.random() * ids.length)];
-  // The book "Spin the Rack" lands on next — a different one, unless it's the
-  // only book. Chosen here so the Spin link points straight at it.
-  const pool = ids.filter((other) => other !== id);
-  const nextId = pool.length
-    ? pool[Math.floor(Math.random() * pool.length)]
-    : id;
-  const [book] = await safeFetch<HeroBook[]>(HERO_BOOKS_QUERY, { ids: [id] }, []);
-  return { book: book ?? null, id, nextId };
-}
+/** How many hero picks to preload for instant, fair spins (see hero-queue.ts). */
+const HERO_QUEUE_SIZE = 8;
 
 export default async function Home({
   searchParams,
@@ -156,12 +126,8 @@ export default async function Home({
     ? pageLimit(params, "climit", creatorsPage)
     : HOME_ROW_LIMIT;
 
-  // The pinned hero feature (`?feat=`), if any — set once the reader spins the
-  // rack, and carried by the row bars so their own shuffles leave it alone.
-  const featParam = Array.isArray(params.feat) ? params.feat[0] : params.feat;
-
   const [
-    featureData,
+    heroBooks,
     booksResult,
     creatorsResult,
     genresWithBooks,
@@ -172,10 +138,11 @@ export default async function Home({
     settings,
     session,
   ] = await Promise.all([
-    // Deliberately unfiltered. The hero is the guaranteed route to work
-    // nobody went looking for (AGENTS.md §3), so narrowing the page must
-    // never narrow it.
-    pickFeatureBook(featParam),
+    // A preloaded queue of uniform-random picks for the instant hero. Deliberately
+    // unfiltered — the hero is the guaranteed route to work nobody went looking
+    // for (§3), so narrowing the page never narrows it. The queue is client
+    // state, so it also can't be disturbed by a row shuffle.
+    pickHeroBooks(HERO_QUEUE_SIZE),
     safeFetch<Paginated<BookSummary>>(
       FILTERED_BOOKS_QUERY,
       { ...booksFilters, limit: booksLimit },
@@ -194,9 +161,6 @@ export default async function Home({
     getSiteSettings(),
     auth(),
   ]);
-  const feature = featureData.book;
-  const featureId = featureData.id;
-  const nextFeatureId = featureData.nextId;
   const books = booksResult.items;
   const creators = creatorsResult.items;
 
@@ -207,11 +171,9 @@ export default async function Home({
   const effBookSeed = bookSeed ?? randomSeed();
   const effCreatorSeed = creatorSeed ?? randomSeed();
 
-  // How each section's current state is written to the URL, so any OTHER
-  // section's control carries it through unchanged. The hero is pinned by its
-  // feature id; each row by its shuffle seed (skipped when the row is filtered,
-  // where the order is the query's, not a shuffle).
-  const heroPin: Record<string, string> = featureId ? { feat: featureId } : {};
+  // Each row writes its current shuffle seed to the URL so the OTHER row's
+  // control carries it through unchanged (the hero is client state now, so it
+  // needs no pinning). Skipped when a row is filtered — its order is the query's.
   const booksPin: Record<string, string> = booksFiltering
     ? {}
     : { sort: "random", seed: String(effBookSeed) };
@@ -219,8 +181,6 @@ export default async function Home({
     ? {}
     : { csort: "random", cseed: String(effCreatorSeed) };
 
-  // The hero's featured comic is savable too — its saved state, and a Save
-  // button passed as a slot so the client component stays out of the server hero.
   const email = session?.user?.email;
 
   // The rail's updates section — updates from creators/comics this reader
@@ -228,9 +188,10 @@ export default async function Home({
   // reader with follows; everyone else gets the New Creators & Books rail alone.
   // Per-session, so who you follow never leaks past the request; no follow counts.
   let followedUpdates: RailUpdate[] = [];
-  // Hoisted so the hero's save slot can check whether the featured comic is the
-  // viewer's own — a creator can't save what they publish.
+  // Hoisted so the hero queue can tag each pick with this viewer's state — which
+  // books they've saved, and which creators they own (no Save on your own work).
   let ownedCreatorIds: string[] = [];
+  let savedBookIds = new Set<string>();
   // The signed-in creator's profile name + slug (hero greeting + "Your Public
   // Profile" link).
   let profile: { name: string; slug: string } | null = null;
@@ -240,6 +201,9 @@ export default async function Home({
       creatorsOwnedBy(email),
     ]);
     ownedCreatorIds = owned;
+    savedBookIds = new Set(
+      saves.filter((s) => s.itemType === "book").map((s) => s.itemId),
+    );
     if (ownedCreatorIds.length) {
       profile = await safeFetch<{ name: string; slug: string } | null>(
         CREATOR_HERO_QUERY,
@@ -301,32 +265,24 @@ export default async function Home({
         ],
       }
     : undefined;
-  const featureSaved =
-    feature && email ? await isSaved(email, feature._id) : false;
-  // No save on your own comic, even in the random hero spotlight.
-  const featureOwned = Boolean(
-    feature?.creatorId && ownedCreatorIds.includes(feature.creatorId),
+  // The hero queue, tagged with this viewer's save/ownership state (§3 fairness
+  // in hero-queue.ts). [0] is the server-rendered first pick; SpinnerRack cycles
+  // the rest instantly and refills in the background.
+  const heroItems: HeroFeatureItem[] = annotateHeroItems(
+    heroBooks,
+    savedBookIds,
+    ownedCreatorIds,
   );
-  const featureSave =
-    feature && !featureOwned ? (
-      <SaveButton
-        // Keyed by the book so Discover swapping the feature remounts the button
-        // (its saved state lives in useState, which only reads initialSaved once).
-        key={feature._id}
-        itemType="book"
-        itemId={feature._id}
-        initialSaved={featureSaved}
-        signedIn={Boolean(email)}
-        variant="outline"
-        saveLabel={settings.sections.followLabel}
-        savedLabel={settings.sections.followingLabel}
-        signInCopy={{
-          title: settings.sections.accountSignInTitle,
-          body: settings.sections.accountSignInBody,
-          cta: settings.sections.accountSignInCta,
-        }}
-      />
-    ) : null;
+  const heroSave = {
+    signedIn: Boolean(email),
+    saveLabel: settings.sections.followLabel,
+    savedLabel: settings.sections.followingLabel,
+    signInCopy: {
+      title: settings.sections.accountSignInTitle,
+      body: settings.sections.accountSignInBody,
+      cta: settings.sections.accountSignInCta,
+    },
+  };
 
   // Both rows offer the same genres — the set a book actually uses.
   const genres = genreOptions(genresWithBooks);
@@ -340,9 +296,8 @@ export default async function Home({
         resultCount={booksResult.total}
         searchLabel={settings.sections.searchBooksLabel}
         discoverLabel={settings.sections.spinLabel}
-        // Spinning/filtering comics pins the hero + creators row so only comics
-        // moves.
-        extraParams={{ ...heroPin, ...creatorsPin }}
+        // Spinning/filtering comics pins the creators row so only comics moves.
+        extraParams={creatorsPin}
       />
     </Suspense>
   );
@@ -359,9 +314,8 @@ export default async function Home({
         searchParam="cq"
         sortParam="csort"
         seedParam="cseed"
-        // Spinning/filtering creators pins the hero + comics row so only
-        // creators moves.
-        extraParams={{ ...heroPin, ...booksPin }}
+        // Spinning/filtering creators pins the comics row so only creators moves.
+        extraParams={booksPin}
       />
     </Suspense>
   );
@@ -382,19 +336,6 @@ export default async function Home({
     ? creators
     : seededShuffle(creators, effCreatorSeed);
 
-  // "Spin the Rack" re-rolls ONLY the hero: it navigates to the next feature
-  // (`feat`) while pinning both rows at their current seed, so they hold still.
-  // Carries every other param through too.
-  const discoverParams = new URLSearchParams();
-  for (const [key, value] of Object.entries(params)) {
-    if (value == null) continue;
-    if (Array.isArray(value))
-      value.forEach((v) => discoverParams.append(key, v));
-    else discoverParams.set(key, value);
-  }
-  if (nextFeatureId) discoverParams.set("feat", nextFeatureId);
-  for (const [k, v] of Object.entries(booksPin)) discoverParams.set(k, v);
-  for (const [k, v] of Object.entries(creatorsPin)) discoverParams.set(k, v);
 
   // The pink newsletter band, rendered in two positions and toggled by
   // breakpoint: after the hero on desktop, after the Comics row on phones.
@@ -424,13 +365,12 @@ export default async function Home({
       />
       <Hero
         hero={settings.hero}
-        feature={feature}
+        heroItems={heroItems}
+        heroSave={heroSave}
         newItems={newItems}
         feedItems={feedItems}
         feedHeading={feedHeading}
-        discoverHref={feature ? `?${discoverParams.toString()}` : undefined}
         discoverLabel={settings.sections.spinLabel}
-        saveSlot={featureSave}
         account={account}
       />
 

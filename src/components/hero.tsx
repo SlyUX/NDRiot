@@ -1,15 +1,14 @@
-import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Shuffle } from "lucide-react";
 
 import { TaxonomyRow } from "@/components/content-card";
-import { SlideOnChange } from "@/components/slide-on-change";
+import { SpinnerRack } from "@/components/spinner-rack";
 import PortableTextBody from "@/components/PortableTextBody";
 import { Button } from "@/components/ui/button";
 import { MentionedText } from "@/components/mentioned-text";
+import type { HeroFeatureItem } from "@/lib/hero-queue";
 import type { HeroSettings } from "@/lib/site-settings";
-import type { HeroBook, HomeNewItem, RailFeedItem } from "@/lib/types";
+import type { HomeNewItem, RailFeedItem } from "@/lib/types";
 import { cn, truncate } from "@/lib/utils";
 import { urlFor } from "@/sanity/image";
 
@@ -27,8 +26,18 @@ import { urlFor } from "@/sanity/image";
 
 export interface HeroProps {
   hero: HeroSettings;
-  /** One random book, chosen per request — the spotlight. */
-  feature: HeroBook | null;
+  /** The spotlight queue — a preloaded run of uniform-random picks the client
+   *  advances through instantly on "Spin the Rack" (SpinnerRack). [0] is shown
+   *  first and is server-rendered; empty hides the spotlight. */
+  heroItems: HeroFeatureItem[];
+  /** Save labels + sign-in copy for the featured comic (SpinnerRack renders the
+   *  button per pick). */
+  heroSave: {
+    signedIn: boolean;
+    saveLabel: string;
+    savedLabel: string;
+    signInCopy: { title: string; body: string; cta: string };
+  };
   /** Newest books and creators — the rail's fallback when there are no updates. */
   newItems: HomeNewItem[];
   /** The updates rail: My Feed (with follows) or the global Latest Updates. When
@@ -36,13 +45,8 @@ export interface HeroProps {
   feedItems: RailFeedItem[];
   /** Rail heading for the feed — reflects which feed is shown (§2 copy). */
   feedHeading: string;
-  /** URL that re-rolls the feature to a different random book. Omit to hide. */
-  discoverHref?: string;
-  /** Label for that button — CMS copy (AGENTS.md §2). */
+  /** Label for the "Spin the Rack" button — CMS copy (AGENTS.md §2). */
   discoverLabel?: string;
-  /** Save control for the featured comic — a client component passed as a slot
-   *  so the server hero doesn't import it. Rendered over the cover. */
-  saveSlot?: ReactNode;
   /** When signed in: greets the reader and shows their own CTAs in place of the
    *  evangelism tagline/subhead/buttons. */
   account?: { greeting: string; ctas: Cta[] };
@@ -57,107 +61,6 @@ type Cta = { label: string; href: string };
  * load, the way an empty singleton would otherwise render.
  */
 const BACKGROUND_FALLBACK = "/nd-riot-hero-bkgrd.jpg";
-
-/**
- * The featured book — the full cover flush left, filling the panel's height at
- * its native 2:3 (nothing cropped), with the title and blurb beside it. The
- * whole panel links to the book. Stays a two-column row down to phones.
- */
-function FeatureBook({
-  book,
-  ctaLabel,
-  saveSlot,
-}: {
-  book: HeroBook;
-  ctaLabel: string;
-  saveSlot?: ReactNode;
-}) {
-  const preview =
-    truncate(book.descriptionText, 280) ?? truncate(book.shortDescription, 280);
-  const href = `/comics/${book.slug}`;
-
-  // Not one big <Link> anymore: Save is a <button> and lives in the text column,
-  // which can't sit inside an anchor. So the cover, title, and CTA each link to
-  // the book instead; `group` keeps the whole-panel hover affordance.
-  return (
-    <div className="group border-border flex h-full min-h-[13rem] flex-row overflow-hidden border bg-black/40 sm:min-h-[26rem]">
-      {/* The cover fills the panel height at its native 2:3 (nothing cropped). */}
-      <Link
-        href={href}
-        aria-label={book.title}
-        className="focus-visible:ring-ring bg-muted relative aspect-[2/3] h-full w-auto shrink-0 overflow-hidden focus-visible:ring-2 focus-visible:outline-none"
-      >
-        {book.cover ? (
-          <Image
-            src={urlFor(book.cover).width(800).url()}
-            alt={book.cover.alt ?? ""}
-            fill
-            sizes="(max-width: 640px) 100vw, 320px"
-            className="object-cover"
-            priority
-          />
-        ) : (
-          <div className="h-full w-full" aria-hidden="true" />
-        )}
-        {book.fundingUrl && (
-          <span className="bg-funding absolute top-2 left-2 z-10 px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-black uppercase">
-            Now Funding
-          </span>
-        )}
-      </Link>
-
-      {/* pr-12 on mobile keeps the top lines clear of the Discover button in
-          the panel's corner; roomy uniform padding from sm up. */}
-      <div className="flex min-w-0 flex-1 flex-col justify-center gap-3 p-4 pr-12 sm:p-8">
-        {book.creatorName && (
-          <p className="text-primary truncate text-xs font-bold tracking-widest uppercase">
-            {book.creatorName}
-          </p>
-        )}
-        <Link
-          href={href}
-          className="focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none"
-        >
-          <h2 className="text-base leading-tight font-black tracking-tight text-white uppercase group-hover:underline sm:text-2xl lg:text-3xl">
-            {book.title}
-          </h2>
-        </Link>
-        {/* Save — in the text flow directly under the title. self-start so it
-            keeps its natural width instead of stretching the column. */}
-        {saveSlot && <div className="self-start">{saveSlot}</div>}
-        {/* Only the top genre on phones, where the column is tight; the full row
-            from sm up. */}
-        <TaxonomyRow
-          genres={book.genres}
-          format={book.format}
-          className="max-sm:[&>*:nth-child(n+2)]:hidden"
-        />
-        {/* The blurb is room-permitting: hidden in the tight phone column, back
-            from sm up. Cover + title + CTA carry the phone layout. */}
-        {preview && (
-          <p className="hidden text-sm leading-relaxed text-white/85 sm:line-clamp-4 sm:block sm:text-base">
-            {preview}
-          </p>
-        )}
-        {/* Primary CTA — "read it" is the point of the hero, so it's the pink
-            button; Save (over the cover) is the outline secondary beside it. */}
-        <Button
-          asChild
-          size="sm"
-          className="mt-1 self-start font-black tracking-widest uppercase"
-        >
-          <Link href={href}>
-            {ctaLabel}
-            <ArrowRight
-              aria-hidden="true"
-              className="size-3.5 transition-transform group-hover:translate-x-0.5 motion-reduce:transform-none"
-            />
-          </Link>
-        </Button>
-      </div>
-    </div>
-  );
-}
 
 /**
  * One rail row — a new book or creator as a compact text entry (no thumbnail).
@@ -325,15 +228,15 @@ function NewArrivals({
 
 export function Hero({
   hero,
-  feature,
+  heroItems,
+  heroSave,
   newItems,
   feedItems,
   feedHeading,
-  discoverHref,
   discoverLabel,
-  saveSlot,
   account,
 }: HeroProps) {
+  const hasFeature = heroItems.length > 0;
   const ctas = account?.ctas ?? hero.ctas;
   return (
     // Hand-rolled rather than <Section> so the background layers can span the
@@ -402,48 +305,19 @@ export function Hero({
 
         {/* The split: featured book left, updates rail right (new arrivals when
             there are no updates yet). */}
-        {(feature || feedItems.length > 0 || newItems.length > 0) && (
+        {(hasFeature || feedItems.length > 0 || newItems.length > 0) && (
           <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_350px] lg:items-start lg:gap-8">
-            {feature && (
-              <div className="flex h-full flex-col">
-                {/* Heading row: the section name left, the Spin control right —
-                    "spin the rack" reads as the action that re-rolls the pick. */}
-                <div className="mb-4 flex items-center gap-3">
-                  <h2 className="text-primary text-xs font-black tracking-[0.2em] uppercase">
-                    {hero.featuredHeading}
-                  </h2>
-                  <span
-                    className="h-px flex-1 bg-white/20"
-                    aria-hidden="true"
-                  />
-                  {discoverHref && (
-                    <Link
-                      href={discoverHref}
-                      scroll={false}
-                      aria-label={discoverLabel ?? "Spin the rack"}
-                      className="focus-visible:ring-ring border-border text-foreground hover:border-primary hover:text-primary inline-flex shrink-0 items-center gap-1.5 border px-3 py-1 text-xs font-bold tracking-widest uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                    >
-                      {discoverLabel ?? "Spin the rack"}
-                      <Shuffle
-                        aria-hidden="true"
-                        strokeWidth={2.5}
-                        className="size-3.5"
-                      />
-                    </Link>
-                  )}
-                </div>
-
-                {/* Slides in left-to-right each time the pick changes — i.e.
-                    only on "Spin the Rack" (the feature id is pinned on every
-                    other navigation, so it never twitches for an unrelated act). */}
-                <SlideOnChange token={feature._id} className="flex-1">
-                  <FeatureBook
-                    book={feature}
-                    ctaLabel={hero.featureCtaLabel}
-                    saveSlot={saveSlot}
-                  />
-                </SlideOnChange>
-              </div>
+            {hasFeature && (
+              // Instant "Spin the Rack": a client-advanced queue of uniform-random
+              // picks (fairness in src/lib/hero-queue.ts). Its pick is client
+              // state, so a row shuffle re-rendering this never disturbs the hero.
+              <SpinnerRack
+                items={heroItems}
+                featuredHeading={hero.featuredHeading}
+                discoverLabel={discoverLabel ?? "Spin the rack"}
+                ctaLabel={hero.featureCtaLabel}
+                save={heroSave}
+              />
             )}
 
             {/* Rail: a reader's followed updates (when any) stacked over the
@@ -455,7 +329,7 @@ export function Hero({
               <div
                 className={cn(
                   "punk-scroll space-y-8 lg:max-h-[500px] lg:overflow-y-scroll lg:pr-2",
-                  !feature && "lg:col-span-full",
+                  !hasFeature && "lg:col-span-full",
                 )}
               >
                 {feedItems.length > 0 && (
