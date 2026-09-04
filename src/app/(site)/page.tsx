@@ -451,6 +451,9 @@ export default async function Home({
           heading={settings.home.booksHeading}
           toolbar={booksBar}
           cards={displayBooks.map(bookToCard)}
+          // Slides the row in when its arrangement changes (a comics shuffle or
+          // filter); unchanged by a hero/creators spin, which pins this order.
+          slideToken={displayBooks.map((book) => book._id).join(",")}
           columns={BOOKS_COLS}
           scroll={!booksFiltering}
           scrollRows={2}
@@ -485,6 +488,9 @@ export default async function Home({
           heading={settings.home.creatorsHeading}
           toolbar={creatorsBar}
           cards={displayCreators.map(creatorToCard)}
+          // Slides in on a creators shuffle/filter; pinned (still) on a
+          // hero/comics spin — matches the comics row above.
+          slideToken={displayCreators.map((creator) => creator._id).join(",")}
           layout="horizontal"
           columns={CREATORS_COLS}
           summaryLines={4}

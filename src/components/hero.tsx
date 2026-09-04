@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowRight, Shuffle } from "lucide-react";
 
 import { TaxonomyRow } from "@/components/content-card";
+import { SlideOnChange } from "@/components/slide-on-change";
 import PortableTextBody from "@/components/PortableTextBody";
 import { Button } from "@/components/ui/button";
 import { MentionedText } from "@/components/mentioned-text";
@@ -432,13 +433,16 @@ export function Hero({
                   )}
                 </div>
 
-                <div className="flex-1">
+                {/* Slides in left-to-right each time the pick changes — i.e.
+                    only on "Spin the Rack" (the feature id is pinned on every
+                    other navigation, so it never twitches for an unrelated act). */}
+                <SlideOnChange token={feature._id} className="flex-1">
                   <FeatureBook
                     book={feature}
                     ctaLabel={hero.featureCtaLabel}
                     saveSlot={saveSlot}
                   />
-                </div>
+                </SlideOnChange>
               </div>
             )}
 

@@ -231,3 +231,22 @@
   grid-template-rows: 0fr;
   animation: strip-collapse 260ms ease-in;
 }
+
+/* Homepage shuffle — a section slides in left-to-right when it's re-rolled
+   (the hero's "Spin the Rack", the comics row's shuffle). SlideOnChange replays
+   it on each shuffle; the reduced-motion reset above makes it instant. The
+   offset stays within the section's horizontal padding, so nothing overflows
+   the viewport mid-slide. */
+@keyframes shuffle-slide {
+  from {
+    opacity: 0;
+    transform: translateX(-1.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.shuffle-slide {
+  animation: shuffle-slide 320ms ease-out;
+}

@@ -5,6 +5,7 @@ import { ContentCard, type ContentCardProps } from '@/components/content-card'
 import { HorizontalScroller } from '@/components/horizontal-scroller'
 import { SaveButton } from '@/components/save-button'
 import { SectionHeading } from '@/components/section-heading'
+import { SlideOnChange } from '@/components/slide-on-change'
 import { Section, type SectionProps } from '@/components/ui/section'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
@@ -93,6 +94,12 @@ export interface ContentCardGridProps {
    * row is still there to loosen.
    */
   toolbar?: React.ReactNode
+  /**
+   * When set, the cards region (not the heading/toolbar) slides in left-to-right
+   * whenever this token changes — the homepage passes the row's ordered ids so
+   * it animates on a shuffle/filter but stays still for unrelated navigations.
+   */
+  slideToken?: string
   /** Rendered under the grid, inside the section — e.g. a "Load more" control. */
   footer?: React.ReactNode
   /**
@@ -127,6 +134,7 @@ export function ContentCardGrid({
   emptyMessage,
   emptyEmphasis = false,
   toolbar,
+  slideToken,
   footer,
   scroll = false,
   scrollRows = 1,
@@ -234,10 +242,17 @@ export function ContentCardGrid({
           ))
 
           // One scrolling row (browse) or a plain wrapping grid.
-          return scroll ? (
+          const grid = scroll ? (
             <HorizontalScroller rows={scrollRows}>{cells}</HorizontalScroller>
           ) : (
             <div className={gridClassName}>{cells}</div>
+          )
+          // Slide the cards in when the row is re-rolled (token changes), leaving
+          // the heading + toolbar above it untouched.
+          return slideToken !== undefined ? (
+            <SlideOnChange token={slideToken}>{grid}</SlideOnChange>
+          ) : (
+            grid
           )
         })()
       )}
