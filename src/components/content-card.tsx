@@ -104,9 +104,10 @@ export interface ContentCardProps {
   metaFirst?: boolean
   layout?: 'vertical' | 'horizontal' | 'overlay'
   /** Treat the thumbnail as a logo plate (conventions): show the whole mark
-   *  letterboxed on a white ground (never cropped/pixelated), and when there's
-   *  no logo, render the initials tag on pink instead of charcoal. */
-  logoPlate?: boolean
+   *  letterboxed (never cropped/pixelated) on a light or dark ground — picked
+   *  per convention so a transparent PNG doesn't vanish — and when there's no
+   *  logo, render the initials tag on pink instead of charcoal. */
+  logoPlate?: "light" | "dark"
   aspectRatio?: keyof typeof ASPECT
   /** Fill the grid cell's height, for equal-height rows. */
   stretch?: boolean
@@ -280,7 +281,7 @@ export function ContentCard({
   rating,
   metaFirst = false,
   layout = 'vertical',
-  logoPlate = false,
+  logoPlate,
   aspectRatio = 'cover',
   stretch = false,
   className,
@@ -415,9 +416,13 @@ export function ContentCard({
         <div
           className={cn(
             'relative overflow-hidden',
-            // Logo plates (conventions) sit on white so a mark made for white
-            // reads; everything else on the muted surface.
-            logoPlate ? 'bg-white' : 'bg-muted',
+            // Logo plates (conventions) sit on the editor-chosen ground so a
+            // transparent mark reads; everything else on the muted surface.
+            logoPlate
+              ? logoPlate === 'dark'
+                ? 'bg-background'
+                : 'bg-white'
+              : 'bg-muted',
             ASPECT[aspectRatio],
           )}
         >

@@ -26,7 +26,7 @@ import {
   CON_RATING_CONTEXT_QUERY,
 } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
-import { externalHref } from "@/lib/utils";
+import { cn, externalHref } from "@/lib/utils";
 import { formatPlace } from "@/lib/place";
 import { formatOccurrence } from "@/lib/conventions";
 import { aggregateRatings } from "@/lib/ratings";
@@ -155,7 +155,12 @@ export default async function ConventionPage({
       {/* Square + object-contain, matching the cards (no odd cropping), just
           shown larger. No logo (the source found one for only ~⅗ of shows) →
           the same stylized initials tag a creator gets without an avatar. */}
-      <div className="relative aspect-square w-full max-w-md overflow-hidden bg-white">
+      <div
+        className={cn(
+          "relative aspect-square w-full max-w-md overflow-hidden",
+          convention.logoBackground === "dark" ? "bg-background" : "bg-white",
+        )}
+      >
         {convention.image?.asset ? (
           <Image
             src={urlFor(convention.image).width(900).url()}

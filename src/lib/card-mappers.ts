@@ -262,9 +262,9 @@ export function conventionToCard(
     // No logo (the source found one for only ~⅗ of shows) → stylized initials,
     // the same fallback creators without an avatar get.
     fallbackInitials: convention.name,
-    // A logo plate: the whole mark letterboxed on white (never cropped), and a
-    // pink/black initials tag when there's no logo.
-    logoPlate: true,
+    // A logo plate: the whole mark letterboxed on the editor-chosen ground
+    // (never cropped), and a pink/black initials tag when there's no logo.
+    logoPlate: convention.logoBackground === "dark" ? "dark" : "light",
     // Eyebrow leads with the kind (Comics-first / Zine fest / Broader) so the
     // classification reads at a glance, then the location.
     eyebrow:

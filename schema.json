@@ -1389,6 +1389,23 @@
           "name": "imageWithAlt"
         },
         "optional": true
+      },
+      "logoBackground": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "union",
+          "of": [
+            {
+              "type": "string",
+              "value": "light"
+            },
+            {
+              "type": "string",
+              "value": "dark"
+            }
+          ]
+        },
+        "optional": true
       }
     }
   },

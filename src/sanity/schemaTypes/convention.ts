@@ -138,6 +138,21 @@ export default defineType({
       description:
         "The convention’s logo or a banner. Optional; add real alt text.",
     }),
+    defineField({
+      name: "logoBackground",
+      title: "Logo background",
+      type: "string",
+      description:
+        "The plate behind the logo. Most marks are drawn for white (Light); pick Dark for a white/light logo so it doesn’t vanish. No effect when there’s no logo.",
+      options: {
+        list: [
+          { title: "Light (white)", value: "light" },
+          { title: "Dark", value: "dark" },
+        ],
+        layout: "radio",
+      },
+      initialValue: "light",
+    }),
   ],
   orderings: [
     { name: "alpha", title: "Name", by: [{ field: "name", direction: "asc" }] },

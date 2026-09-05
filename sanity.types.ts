@@ -278,6 +278,7 @@ export type Convention = {
   size?: string;
   organizer?: string;
   image?: ImageWithAlt;
+  logoBackground?: "light" | "dark";
 };
 
 export type Slug = {
@@ -3082,7 +3083,7 @@ export type RESOURCE_CATEGORIES_WITH_CONTENT_QUERY_RESULT = Array<
 
 // Source: src/lib/queries.ts
 // Variable: CONVENTIONS_QUERY
-// Query: *[_type=="convention" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,place,kind,whenHint,startDate,endDate,description,image,"ratings":*[_type=="venueRating" && target._ref==^._id]{benefits}}
+// Query: *[_type=="convention" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,place,kind,whenHint,startDate,endDate,description,image,logoBackground,"ratings":*[_type=="venueRating" && target._ref==^._id]{benefits}}
 export type CONVENTIONS_QUERY_RESULT = Array<{
   _id: string;
   name: string;
@@ -3094,6 +3095,7 @@ export type CONVENTIONS_QUERY_RESULT = Array<{
   endDate: string | null;
   description: string | null;
   image: ImageWithAlt | null;
+  logoBackground: "dark" | "light" | null;
   ratings: Array<{
     benefits: {
       focusOnComics?: number;
@@ -3108,7 +3110,7 @@ export type CONVENTIONS_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: FILTERED_CONVENTIONS_QUERY
-// Query: *[_type=="convention" && defined(slug.current)    && (!defined($region) || place.region == $region)    && (!defined($q) || name match $q || place.city match $q)  ]|order(name asc){_id,name,"slug":slug.current,place,kind,whenHint,startDate,endDate,description,image,"ratings":*[_type=="venueRating" && target._ref==^._id]{benefits}}
+// Query: *[_type=="convention" && defined(slug.current)    && (!defined($region) || place.region == $region)    && (!defined($q) || name match $q || place.city match $q)  ]|order(name asc){_id,name,"slug":slug.current,place,kind,whenHint,startDate,endDate,description,image,logoBackground,"ratings":*[_type=="venueRating" && target._ref==^._id]{benefits}}
 export type FILTERED_CONVENTIONS_QUERY_RESULT = Array<{
   _id: string;
   name: string;
@@ -3120,6 +3122,7 @@ export type FILTERED_CONVENTIONS_QUERY_RESULT = Array<{
   endDate: string | null;
   description: string | null;
   image: ImageWithAlt | null;
+  logoBackground: "dark" | "light" | null;
   ratings: Array<{
     benefits: {
       focusOnComics?: number;
@@ -3585,7 +3588,7 @@ export type AI_STATS_QUERY_RESULT = {
 
 // Source: src/lib/queries.ts
 // Variable: CONVENTION_QUERY
-// Query: *[_type=="convention" && slug.current==$slug][0]{  _id,name,"slug":slug.current,place,kind,whenHint,startDate,endDate,website,description,size,organizer,image}
+// Query: *[_type=="convention" && slug.current==$slug][0]{  _id,name,"slug":slug.current,place,kind,whenHint,startDate,endDate,website,description,size,organizer,image,logoBackground}
 export type CONVENTION_QUERY_RESULT = {
   _id: string;
   name: string;
@@ -3600,6 +3603,7 @@ export type CONVENTION_QUERY_RESULT = {
   size: string | null;
   organizer: string | null;
   image: ImageWithAlt | null;
+  logoBackground: "dark" | "light" | null;
 } | null;
 
 // Source: src/lib/queries.ts
@@ -4271,8 +4275,8 @@ declare module "@sanity/client" {
     '*[_type=="resource" && defined(slug.current)]|order(coalesce(publishedAt,_createdAt) desc)[0...8]{_id,title,"slug":slug.current,kind,category,description,image}': HOME_RESOURCES_QUERY_RESULT;
     '*[_type=="resource" && slug.current==$slug][0]{\n  _id,title,kind,category,description,body,videoUrl,url,image,publishedAt,source,\n  "fileUrl":file.asset->url,\n  "creatorName":creator->name,"creatorSlug":creator->slug.current\n}': RESOURCE_QUERY_RESULT;
     'array::unique(*[_type=="resource" && defined(slug.current) && defined(category)].category)': RESOURCE_CATEGORIES_WITH_CONTENT_QUERY_RESULT;
-    '*[_type=="convention" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,place,kind,whenHint,startDate,endDate,description,image,"ratings":*[_type=="venueRating" && target._ref==^._id]{benefits}}': CONVENTIONS_QUERY_RESULT;
-    '*[_type=="convention" && defined(slug.current)\n    && (!defined($region) || place.region == $region)\n    && (!defined($q) || name match $q || place.city match $q)\n  ]|order(name asc){_id,name,"slug":slug.current,place,kind,whenHint,startDate,endDate,description,image,"ratings":*[_type=="venueRating" && target._ref==^._id]{benefits}}': FILTERED_CONVENTIONS_QUERY_RESULT;
+    '*[_type=="convention" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,place,kind,whenHint,startDate,endDate,description,image,logoBackground,"ratings":*[_type=="venueRating" && target._ref==^._id]{benefits}}': CONVENTIONS_QUERY_RESULT;
+    '*[_type=="convention" && defined(slug.current)\n    && (!defined($region) || place.region == $region)\n    && (!defined($q) || name match $q || place.city match $q)\n  ]|order(name asc){_id,name,"slug":slug.current,place,kind,whenHint,startDate,endDate,description,image,logoBackground,"ratings":*[_type=="venueRating" && target._ref==^._id]{benefits}}': FILTERED_CONVENTIONS_QUERY_RESULT;
     'array::unique(*[_type=="convention" && defined(slug.current) && defined(place.region)].place.region)': CONVENTION_REGIONS_QUERY_RESULT;
     '*[_type=="creator" && _id==$id][0].place.region': OWNED_CREATOR_REGION_QUERY_RESULT;
     '*[_type=="creator" && _id in $ids]{_id,name,"slug":slug.current}': COLLAB_CREATORS_QUERY_RESULT;
@@ -4289,7 +4293,7 @@ declare module "@sanity/client" {
     '*[_type=="stripSeries" && creator._ref in $ids && defined(slug.current)]|order(title asc){_id,title,"creatorId":creator._ref}': INTAKE_OWNED_SERIES_QUERY_RESULT;
     '*[_type=="stripSeries"]{_id,"slug":slug.current,"creatorId":creator._ref}': INTAKE_SERIES_IDS_QUERY_RESULT;
     '{\n  "creators": count(*[_type=="creator" && defined(slug.current)]),\n  "comics": count(*[_type=="book" && defined(slug.current)]),\n  "media": count(*[_type=="media" && defined(slug.current)]),\n  "conventions": count(*[_type=="convention" && defined(slug.current)]),\n  "allies": count(*[_type=="ally" && defined(slug.current)]),\n  "resources": count(*[_type=="resource" && defined(slug.current)])\n}': AI_STATS_QUERY_RESULT;
-    '*[_type=="convention" && slug.current==$slug][0]{\n  _id,name,"slug":slug.current,place,kind,whenHint,startDate,endDate,website,description,size,organizer,image\n}': CONVENTION_QUERY_RESULT;
+    '*[_type=="convention" && slug.current==$slug][0]{\n  _id,name,"slug":slug.current,place,kind,whenHint,startDate,endDate,website,description,size,organizer,image,logoBackground\n}': CONVENTION_QUERY_RESULT;
     '*[_type=="conventionAppearance" && venue._ref==$conId && status=="tabling" && defined(creator->slug.current)]\n  | order(creator->name asc){\n  "_id": creator->_id,"name": creator->name,"slug": creator->slug.current,"photo": creator->photo,\n  tableNumber,forDate\n}': CONVENTION_TABLERS_QUERY_RESULT;
     '*[_type=="venueRating" && target._ref==$conId]{\n  benefits,celebrityFocused,tableCost,note,\n  "creatorName":creator->name,"creatorSlug":creator->slug.current\n}': CONVENTION_RATINGS_QUERY_RESULT;
     '*[_type=="creator" && _id in $creatorIds]{\n  _id,name,\n  "appearance": *[_type=="conventionAppearance" && creator._ref==^._id && venue._ref==$conId][0]{status,tableNumber,note},\n  "rating": *[_type=="venueRating" && creator._ref==^._id && target._ref==$conId][0]{benefits,celebrityFocused,tableCost,note}\n}': CON_RATING_CONTEXT_QUERY_RESULT;
