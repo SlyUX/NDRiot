@@ -23,7 +23,7 @@
 
 import { readFile } from "node:fs/promises";
 
-import { loadToken, mutate } from "./lib/sanity.mjs";
+import { loadToken, mutate, query, uploadImage } from "./lib/sanity.mjs";
 
 /** Slug from a name — matches scripts/lib/shared.mjs (inlined to avoid that
  *  module's taxonomy-load side effect). */
@@ -124,14 +124,90 @@ function toDoc(show) {
   return { slug, doc, place };
 }
 
+/**
+ * --logos pass: download each show's logo (where the source found one) and set
+ * it as the convention's image. Idempotent — skips a con that already has an
+ * image. Hotlink failures (403/404/moved) are reported and left for a hand-add.
+ */
+async function runLogos(path, commit) {
+  const shows = await loadShows(path);
+  const withLogo = shows.filter((s) => clean(s.logo));
+  const haveImage = new Set(
+    await query(`*[_type=="convention" && defined(image)].slug.current`),
+  );
+  console.log(`${withLogo.length} shows carry a logo URL.\n`);
+
+  const token = commit ? await loadToken() : null;
+  const mutations = [];
+  let uploaded = 0;
+  const failed = [];
+
+  for (const show of withLogo) {
+    const slug = slugify(show.n);
+    if (haveImage.has(slug)) {
+      console.log(`  · ${show.n} — already has an image, skipped`);
+      continue;
+    }
+    const result = await uploadImage(show.logo, {
+      token,
+      commit,
+      label: `${slug}-logo`,
+      // Logos are legitimately small (optimized PNGs, SVGs) — accept them, but
+      // still reject a broken sub-1KB response.
+      minBytes: 1000,
+    });
+    if (result.error) {
+      failed.push(`${show.n} — ${result.error}`);
+      console.log(`  ✗ ${show.n} — ${result.error}`);
+      continue;
+    }
+    uploaded++;
+    console.log(
+      `  ✓ ${show.n}${result.bytes ? ` (${(result.bytes / 1024).toFixed(0)}KB)` : " (dry run)"}`,
+    );
+    if (result.assetId) {
+      mutations.push({
+        patch: {
+          id: `convention-${slug}`,
+          set: {
+            image: {
+              _type: "imageWithAlt",
+              asset: { _type: "reference", _ref: result.assetId },
+              alt: `${show.n} logo`,
+            },
+          },
+        },
+      });
+    }
+  }
+
+  console.log(
+    `\n${uploaded} uploaded, ${failed.length} failed, ${withLogo.length - uploaded - failed.length} skipped.`,
+  );
+  if (failed.length) console.log(`\nAdd by hand in Studio:\n  ${failed.join("\n  ")}`);
+  if (!commit) {
+    console.log(`\n(dry run — pass --commit to upload + set images.)`);
+    return;
+  }
+  if (mutations.length) {
+    await mutate(mutations, { token, commit: true });
+    console.log(`\nSet ${mutations.length} convention images.`);
+  }
+}
+
 async function main() {
   const path = process.argv[2];
   if (!path) {
-    console.error("Usage: node scripts/import-conventions.mjs <file.html> [--commit] [--drafts]");
+    console.error("Usage: node scripts/import-conventions.mjs <file.html> [--commit] [--drafts] [--logos]");
     process.exit(1);
   }
   const commit = process.argv.includes("--commit");
   const drafts = process.argv.includes("--drafts");
+
+  if (process.argv.includes("--logos")) {
+    await runLogos(path, commit);
+    return;
+  }
 
   const shows = await loadShows(path);
   const mutations = [];

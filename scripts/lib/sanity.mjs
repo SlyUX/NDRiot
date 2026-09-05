@@ -90,8 +90,12 @@ function driveNote(isDrive, detail) {
  * Fetches an image and uploads it to Sanity, refusing anything that looks
  * like a placeholder rather than a real asset.
  */
-export async function uploadImage(rawUrl, { token, commit, label }) {
+export async function uploadImage(rawUrl, { token, commit, label, minBytes } = {}) {
   if (!rawUrl) return { skipped: 'none supplied' }
+  // The floor that rejects search-engine thumbnails. Covers use the 20KB
+  // default; logos are legitimately small (optimized PNGs, SVGs), so callers
+  // importing logos pass a lower floor.
+  const floor = minBytes ?? MIN_IMAGE_BYTES
 
   const driveUrl = normaliseDriveUrl(rawUrl)
   const url = driveUrl ?? rawUrl
@@ -121,7 +125,7 @@ export async function uploadImage(rawUrl, { token, commit, label }) {
   }
 
   const bytes = Buffer.from(await res.arrayBuffer())
-  if (bytes.length < MIN_IMAGE_BYTES) {
+  if (bytes.length < floor) {
     return { error: `only ${(bytes.length / 1024).toFixed(1)}KB — a thumbnail, not the original` }
   }
 
