@@ -525,10 +525,9 @@ export interface SiteSettings {
     conventionsPageTitle: string;
     conventionsPageDescription: string;
     conventionVisitLabel: string;
-    /** The convention detail "facts" row labels (size / organizer / tabling). */
+    /** The convention detail "facts" row labels (size / organizer). */
     conventionSizeLabel: string;
     conventionRunByLabel: string;
-    conventionTablingLabel: string;
     conventionAttendingLabel: string;
     conventionManageAttendingLabel: string;
     conventionCancelAttendingLabel: string;
@@ -1317,7 +1316,6 @@ const DEFAULTS: SiteSettings = {
     conventionVisitLabel: "Official site",
     conventionSizeLabel: "Size",
     conventionRunByLabel: "Run by",
-    conventionTablingLabel: "Tabling",
     conventionAttendingLabel: "I'm Attending",
     conventionManageAttendingLabel: "Manage Attendance",
     conventionCancelAttendingLabel: "Cancel attendance",

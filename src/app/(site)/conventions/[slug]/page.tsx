@@ -155,7 +155,7 @@ export default async function ConventionPage({
       {/* Square + object-contain, matching the cards (no odd cropping), just
           shown larger. No logo (the source found one for only ~⅗ of shows) →
           the same stylized initials tag a creator gets without an avatar. */}
-      <div className="bg-muted relative aspect-square w-full max-w-md overflow-hidden">
+      <div className="relative aspect-square w-full max-w-md overflow-hidden bg-white">
         {convention.image ? (
           <Image
             src={urlFor(convention.image).width(900).url()}
@@ -166,7 +166,7 @@ export default async function ConventionPage({
             priority
           />
         ) : (
-          <InitialsAvatar name={convention.name} className="text-8xl" />
+          <InitialsAvatar name={convention.name} tone="brand" className="text-8xl" />
         )}
       </div>
 
@@ -251,7 +251,6 @@ export default async function ConventionPage({
         const facts = [
           { label: settings.sections.conventionSizeLabel, value: convention.size },
           { label: settings.sections.conventionRunByLabel, value: convention.organizer },
-          { label: settings.sections.conventionTablingLabel, value: convention.tabling },
         ].filter((f) => f.value);
         if (facts.length === 0) return null;
         return (

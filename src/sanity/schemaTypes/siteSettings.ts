@@ -853,12 +853,6 @@ export default defineType({
           description: 'The organizer fact row label — e.g. "Run by".',
         }),
         defineField({
-          name: "conventionTablingLabel",
-          title: "Convention page — Tabling fact label",
-          type: "string",
-          description: 'The tabling/applications fact row label — e.g. "Tabling".',
-        }),
-        defineField({
           name: "conventionAttendingLabel",
           title: 'Convention page — "I\'m attending" button',
           type: "string",

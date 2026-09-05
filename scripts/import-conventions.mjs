@@ -108,7 +108,6 @@ function toDoc(show) {
     ...(show.url ? { website: show.url } : {}),
     ...(clean(show.size) ? { size: clean(show.size) } : {}),
     ...(clean(show.who) ? { organizer: clean(show.who) } : {}),
-    ...(clean(show.tab) ? { tabling: clean(show.tab) } : {}),
     datesVerified: false,
     communitySubmitted: false,
     imageApproved: true,
@@ -233,7 +232,7 @@ async function main() {
     `\nTarget: ${drafts ? "DRAFTS" : "PUBLISHED"} · datesVerified:false · logos skipped · DEAD list skipped.`,
   );
   console.log(
-    `Stored: name, place, kind, dates/hint, website, description, size, organizer, tabling.`,
+    `Stored: name, place, kind, dates/hint, website, description, size, organizer.`,
   );
   console.log(`Not stored: broad region (place uses the US state instead); logos.`);
   if (noRegion.length)

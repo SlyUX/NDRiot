@@ -132,14 +132,6 @@ export default defineType({
       description: "Who organizes it — the org, library, shop, or person behind it.",
     }),
     defineField({
-      name: "tabling",
-      title: "Tabling / applications",
-      type: "text",
-      rows: 2,
-      description:
-        "How a creator gets a table — the application pattern (lottery, juried, first-come), window, and fees, if known.",
-    }),
-    defineField({
       name: "image",
       title: "Logo or banner",
       type: "imageWithAlt",

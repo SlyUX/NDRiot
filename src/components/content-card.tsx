@@ -103,10 +103,10 @@ export interface ContentCardProps {
    *  Convention cards want Location · Name · Date · Rating · Description order. */
   metaFirst?: boolean
   layout?: 'vertical' | 'horizontal' | 'overlay'
-  /** How the image sits in its box. `cover` (default) fills + crops — right for
-   *  covers and photos; `contain` shows the whole image letterboxed — right for
-   *  logos (a convention's wide mark shouldn't be cropped). */
-  imageFit?: 'cover' | 'contain'
+  /** Treat the thumbnail as a logo plate (conventions): show the whole mark
+   *  letterboxed on a white ground (never cropped/pixelated), and when there's
+   *  no logo, render the initials tag on pink instead of charcoal. */
+  logoPlate?: boolean
   aspectRatio?: keyof typeof ASPECT
   /** Fill the grid cell's height, for equal-height rows. */
   stretch?: boolean
@@ -222,6 +222,7 @@ function CardImage({
   width,
   fit = 'cover',
   fallbackInitials,
+  initialsTone,
   className,
 }: {
   image?: SanityImage | null
@@ -232,11 +233,13 @@ function CardImage({
   fit?: 'cover' | 'contain'
   /** Drawn as an initials tag when there is no image (creators). */
   fallbackInitials?: string | null
+  /** Tone for that initials tag — `brand` (pink) for conventions. */
+  initialsTone?: 'default' | 'brand'
   className?: string
 }) {
   if (!image) {
     return fallbackInitials ? (
-      <InitialsAvatar name={fallbackInitials} className="h-full w-full text-4xl" />
+      <InitialsAvatar name={fallbackInitials} tone={initialsTone} className="h-full w-full text-4xl" />
     ) : (
       <div
         className={cn('bg-muted flex items-center justify-center', className)}
@@ -275,7 +278,7 @@ export function ContentCard({
   rating,
   metaFirst = false,
   layout = 'vertical',
-  imageFit,
+  logoPlate = false,
   aspectRatio = 'cover',
   stretch = false,
   className,
@@ -329,7 +332,7 @@ export function ContentCard({
           image={image}
           alt={imageAlt}
           width={600}
-          fit={imageFit}
+          fit={logoPlate ? 'contain' : undefined}
           className="transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none"
         />
         {maturity && <MaturityOverlay maturity={maturity} />}
@@ -407,7 +410,15 @@ export function ContentCard({
         href={href}
         className="focus-visible:ring-ring flex h-full flex-col focus-visible:ring-2 focus-visible:outline-none"
       >
-        <div className={cn('bg-muted relative overflow-hidden', ASPECT[aspectRatio])}>
+        <div
+          className={cn(
+            'relative overflow-hidden',
+            // Logo plates (conventions) sit on white so a mark made for white
+            // reads; everything else on the muted surface.
+            logoPlate ? 'bg-white' : 'bg-muted',
+            ASPECT[aspectRatio],
+          )}
+        >
           {/* When a funding bar tops the cover, drop the art below it so the
               banner never covers the artwork (FUNDING_BAR_OFFSET === bar h-6). */}
           <div className={cn('absolute', fundingUrl ? FUNDING_BAR_OFFSET : 'inset-0')}>
@@ -415,8 +426,9 @@ export function ContentCard({
               image={image}
               alt={imageAlt}
               width={400}
-              fit={imageFit}
+              fit={logoPlate ? 'contain' : undefined}
               fallbackInitials={fallbackInitials}
+              initialsTone={logoPlate ? 'brand' : undefined}
               className="transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none"
             />
           </div>

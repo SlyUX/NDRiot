@@ -1382,13 +1382,6 @@
         },
         "optional": true
       },
-      "tabling": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        },
-        "optional": true
-      },
       "image": {
         "type": "objectAttribute",
         "value": {
@@ -6276,13 +6269,6 @@
               "optional": true
             },
             "conventionRunByLabel": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
-            "conventionTablingLabel": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"
