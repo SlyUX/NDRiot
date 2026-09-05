@@ -103,6 +103,10 @@ export interface ContentCardProps {
    *  Convention cards want Location · Name · Date · Rating · Description order. */
   metaFirst?: boolean
   layout?: 'vertical' | 'horizontal' | 'overlay'
+  /** How the image sits in its box. `cover` (default) fills + crops — right for
+   *  covers and photos; `contain` shows the whole image letterboxed — right for
+   *  logos (a convention's wide mark shouldn't be cropped). */
+  imageFit?: 'cover' | 'contain'
   aspectRatio?: keyof typeof ASPECT
   /** Fill the grid cell's height, for equal-height rows. */
   stretch?: boolean
@@ -271,6 +275,7 @@ export function ContentCard({
   rating,
   metaFirst = false,
   layout = 'vertical',
+  imageFit,
   aspectRatio = 'cover',
   stretch = false,
   className,
@@ -324,6 +329,7 @@ export function ContentCard({
           image={image}
           alt={imageAlt}
           width={600}
+          fit={imageFit}
           className="transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none"
         />
         {maturity && <MaturityOverlay maturity={maturity} />}
@@ -409,6 +415,7 @@ export function ContentCard({
               image={image}
               alt={imageAlt}
               width={400}
+              fit={imageFit}
               fallbackInitials={fallbackInitials}
               className="transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none"
             />
