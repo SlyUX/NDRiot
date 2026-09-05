@@ -278,7 +278,7 @@ export type Convention = {
   size?: string;
   organizer?: string;
   image?: ImageWithAlt;
-  logoBackground?: "light" | "dark";
+  logoBackground?: "dark" | "light";
 };
 
 export type Slug = {

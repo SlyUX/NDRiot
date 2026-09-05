@@ -158,7 +158,7 @@ export default async function ConventionPage({
       <div
         className={cn(
           "relative aspect-square w-full max-w-md overflow-hidden",
-          convention.logoBackground === "dark" ? "bg-background" : "bg-white",
+          convention.logoBackground === "light" ? "bg-white" : "bg-background",
         )}
       >
         {convention.image?.asset ? (

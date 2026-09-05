@@ -1397,11 +1397,11 @@
           "of": [
             {
               "type": "string",
-              "value": "light"
+              "value": "dark"
             },
             {
               "type": "string",
-              "value": "dark"
+              "value": "light"
             }
           ]
         },
