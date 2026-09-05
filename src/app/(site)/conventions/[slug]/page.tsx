@@ -6,6 +6,7 @@ import { ArrowUpRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { InitialsAvatar } from "@/components/initials-avatar";
+import { ConventionRail } from "@/components/convention-rail";
 import { CONVENTION_KIND_LABEL } from "@/lib/card-mappers";
 import { EventDialog } from "@/components/event-dialog";
 import { ConventionTablers } from "@/components/convention-tablers";
@@ -24,15 +25,19 @@ import {
   CONVENTION_TABLERS_QUERY,
   CONVENTION_RATINGS_QUERY,
   CON_RATING_CONTEXT_QUERY,
+  CONVENTIONS_IN_STATE_QUERY,
+  UPCOMING_CONVENTIONS_QUERY,
 } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
 import { cn, externalHref } from "@/lib/utils";
 import { formatPlace } from "@/lib/place";
-import { formatOccurrence } from "@/lib/conventions";
+import { formatOccurrence, todayISO } from "@/lib/conventions";
+import { US_STATES } from "@/lib/taxonomy";
 import { aggregateRatings } from "@/lib/ratings";
 import { creatorsOwnedBy } from "@/sanity/ownership-client";
 import type {
   ConventionDetail,
+  ConventionRailRow,
   ConventionTabler,
   ConventionRatingRow,
   ConRatingContext,
@@ -80,8 +85,9 @@ export default async function ConventionPage({
   if (!convention) notFound();
 
   // Creators tabling at the upcoming occurrence (neutral order, §3) + all
-  // creator ratings, aggregated for display.
-  const [tablers, rawRatings] = await Promise.all([
+  // creator ratings, aggregated for display. Plus the right-rail lists: other
+  // cons in the same state, and the next few dated cons anywhere.
+  const [tablers, rawRatings, stateCons, upcomingCons] = await Promise.all([
     freshFetch<ConventionTabler[]>(
       CONVENTION_TABLERS_QUERY,
       { conId: convention._id },
@@ -92,8 +98,46 @@ export default async function ConventionPage({
       { conId: convention._id },
       [],
     ),
+    convention.place?.region
+      ? safeFetch<ConventionRailRow[]>(
+          CONVENTIONS_IN_STATE_QUERY,
+          { region: convention.place.region, excludeId: convention._id },
+          [],
+        )
+      : Promise.resolve<ConventionRailRow[]>([]),
+    safeFetch<ConventionRailRow[]>(
+      UPCOMING_CONVENTIONS_QUERY,
+      { today: todayISO(), excludeId: convention._id },
+      [],
+    ),
   ]);
   const ratings = aggregateRatings(rawRatings);
+
+  // Rail items: name + a compact meta line. In-state shows city + when (the
+  // state is the heading); upcoming leads with the date, then the place.
+  const railItem = (c: ConventionRailRow, meta: (string | null)[]) => ({
+    slug: c.slug ?? "",
+    name: c.name ?? "Convention",
+    meta: meta.filter(Boolean).join(" · "),
+  });
+  const stateRail = stateCons
+    .filter((c) => c.slug)
+    .map((c) =>
+      railItem(c, [
+        c.place?.city ?? null,
+        formatOccurrence(c.startDate, c.endDate) ?? c.whenHint,
+      ]),
+    );
+  const upcomingRail = upcomingCons
+    .filter((c) => c.slug)
+    .map((c) =>
+      railItem(c, [
+        formatOccurrence(c.startDate, c.endDate) ?? c.whenHint,
+        formatPlace(c.place),
+      ]),
+    );
+  const stateName =
+    US_STATES.find((s) => s.code === convention.place?.region)?.name ?? "";
 
   // The rate form is shown to any signed-in creator (the action re-checks
   // ownership). Prefilled from their existing rating. The same creators can mark
@@ -146,12 +190,9 @@ export default async function ConventionPage({
     .join(" · ");
 
   return (
-    <Section
-      as="article"
-      padding="md"
-      maxWidth="3xl"
-      innerClassName="space-y-6"
-    >
+    <Section padding="md" maxWidth="6xl">
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-12">
+        <article className="space-y-6">
       {/* Square + object-contain, matching the cards (no odd cropping), just
           shown larger. No logo (the source found one for only ~⅗ of shows) →
           the same stylized initials tag a creator gets without an avatar. */}
@@ -315,6 +356,22 @@ export default async function ConventionPage({
           }}
         />
       )}
+        </article>
+
+        <aside className="mt-12 space-y-8 lg:mt-0">
+          <ConventionRail
+            heading={settings.sections.conventionOtherInStateHeading.replace(
+              "{state}",
+              stateName,
+            )}
+            items={stateRail}
+          />
+          <ConventionRail
+            heading={settings.sections.conventionUpcomingHeading}
+            items={upcomingRail}
+          />
+        </aside>
+      </div>
     </Section>
   );
 }

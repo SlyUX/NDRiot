@@ -17,6 +17,7 @@ import type {
   RAG_ISSUES_QUERY_RESULT,
   RAG_ISSUE_QUERY_RESULT,
   CONVENTIONS_QUERY_RESULT,
+  CONVENTIONS_IN_STATE_QUERY_RESULT,
   CONVENTION_QUERY_RESULT,
   UPDATES_FEED_QUERY_RESULT,
   APPEARANCE_FEED_QUERY_RESULT,
@@ -62,6 +63,9 @@ export type RagIssueSummary = RAG_ISSUES_QUERY_RESULT[number];
 export type RagIssueDetail = NonNullable<RAG_ISSUE_QUERY_RESULT>;
 
 export type ConventionSummary = CONVENTIONS_QUERY_RESULT[number];
+/** The lean projection behind the convention page's right rail (same shape for
+ *  the other-in-state and upcoming queries). */
+export type ConventionRailRow = CONVENTIONS_IN_STATE_QUERY_RESULT[number];
 export type ConventionDetail = NonNullable<CONVENTION_QUERY_RESULT>;
 export type ConventionTabler = CONVENTION_TABLERS_QUERY_RESULT[number];
 export type CreatorAppearance = CREATOR_APPEARANCES_QUERY_RESULT[number];

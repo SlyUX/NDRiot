@@ -6295,6 +6295,20 @@
               },
               "optional": true
             },
+            "conventionOtherInStateHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "conventionUpcomingHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "conventionSizeLabel": {
               "type": "objectAttribute",
               "value": {

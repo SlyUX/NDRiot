@@ -527,6 +527,9 @@ export interface SiteSettings {
     conventionVisitLabel: string;
     /** "Also known as" prefix on a convention page (before its acronyms). */
     conventionAkaLabel: string;
+    /** Convention page right-rail headings ({state} = the state name). */
+    conventionOtherInStateHeading: string;
+    conventionUpcomingHeading: string;
     /** The convention detail "facts" row labels (size / organizer). */
     conventionSizeLabel: string;
     conventionRunByLabel: string;
@@ -1317,6 +1320,8 @@ const DEFAULTS: SiteSettings = {
       "Comics conventions worth a creator’s table — where to show your work, meet readers, and find your scene. Independent-comics focused.",
     conventionVisitLabel: "Official site",
     conventionAkaLabel: "Also known as",
+    conventionOtherInStateHeading: "Other cons in {state}",
+    conventionUpcomingHeading: "Upcoming cons",
     conventionSizeLabel: "Size",
     conventionRunByLabel: "Run by",
     conventionAttendingLabel: "I'm Attending",

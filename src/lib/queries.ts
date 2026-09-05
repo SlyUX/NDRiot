@@ -391,6 +391,16 @@ export const FILTERED_CONVENTIONS_QUERY = defineQuery(
     && (!defined($q) || name match $q || place.city match $q || count(aka[@ match $q]) > 0)
   ]|order(name asc){_id,name,"slug":slug.current,place,kind,whenHint,startDate,endDate,description,image,logoBackground,"ratings":*[_type=="venueRating" && target._ref==^._id]{benefits}}`,
 );
+// Sibling cons in the same state — the convention page's right rail. Excludes
+// the current con; alphabetical (neutral, §3); capped to a rail's worth.
+export const CONVENTIONS_IN_STATE_QUERY = defineQuery(
+  `*[_type=="convention" && defined(slug.current) && place.region==$region && _id != $excludeId]|order(name asc)[0...6]{_id,name,"slug":slug.current,place,whenHint,startDate,endDate}`,
+);
+// The next few dated cons anywhere — the convention page's "Upcoming" rail.
+// Only future starts, soonest first, excluding the current con.
+export const UPCOMING_CONVENTIONS_QUERY = defineQuery(
+  `*[_type=="convention" && defined(slug.current) && defined(startDate) && startDate >= $today && _id != $excludeId]|order(startDate asc)[0...4]{_id,name,"slug":slug.current,place,whenHint,startDate,endDate}`,
+);
 // The distinct US-state codes that actually have a convention — the region
 // facet's option set (a state nobody tables in is never offered).
 export const CONVENTION_REGIONS_QUERY = defineQuery(

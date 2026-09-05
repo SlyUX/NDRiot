@@ -848,6 +848,19 @@ export default defineType({
             'Precedes a convention\'s acronyms/nicknames on its page — e.g. "Also known as".',
         }),
         defineField({
+          name: "conventionOtherInStateHeading",
+          title: "Convention page — right rail, other-in-state heading",
+          type: "string",
+          description:
+            'Rail heading over cons in the same state. Use {state} for the state name — e.g. "Other cons in {state}".',
+        }),
+        defineField({
+          name: "conventionUpcomingHeading",
+          title: "Convention page — right rail, upcoming heading",
+          type: "string",
+          description: 'Rail heading over the next few dated cons — e.g. "Upcoming cons".',
+        }),
+        defineField({
           name: "conventionSizeLabel",
           title: "Convention page — Size fact label",
           type: "string",

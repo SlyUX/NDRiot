@@ -1027,6 +1027,8 @@ export type SiteSettings = {
     conventionsPageDescription?: string;
     conventionVisitLabel?: string;
     conventionAkaLabel?: string;
+    conventionOtherInStateHeading?: string;
+    conventionUpcomingHeading?: string;
     conventionSizeLabel?: string;
     conventionRunByLabel?: string;
     conventionAttendingLabel?: string;
@@ -3138,6 +3140,32 @@ export type FILTERED_CONVENTIONS_QUERY_RESULT = Array<{
 }>;
 
 // Source: src/lib/queries.ts
+// Variable: CONVENTIONS_IN_STATE_QUERY
+// Query: *[_type=="convention" && defined(slug.current) && place.region==$region && _id != $excludeId]|order(name asc)[0...6]{_id,name,"slug":slug.current,place,whenHint,startDate,endDate}
+export type CONVENTIONS_IN_STATE_QUERY_RESULT = Array<{
+  _id: string;
+  name: string;
+  slug: string;
+  place: Place | null;
+  whenHint: string | null;
+  startDate: string | null;
+  endDate: string | null;
+}>;
+
+// Source: src/lib/queries.ts
+// Variable: UPCOMING_CONVENTIONS_QUERY
+// Query: *[_type=="convention" && defined(slug.current) && defined(startDate) && startDate >= $today && _id != $excludeId]|order(startDate asc)[0...4]{_id,name,"slug":slug.current,place,whenHint,startDate,endDate}
+export type UPCOMING_CONVENTIONS_QUERY_RESULT = Array<{
+  _id: string;
+  name: string;
+  slug: string;
+  place: Place | null;
+  whenHint: string | null;
+  startDate: string | null;
+  endDate: string | null;
+}>;
+
+// Source: src/lib/queries.ts
 // Variable: CONVENTION_REGIONS_QUERY
 // Query: array::unique(*[_type=="convention" && defined(slug.current) && defined(place.region)].place.region)
 export type CONVENTION_REGIONS_QUERY_RESULT = Array<
@@ -4280,6 +4308,8 @@ declare module "@sanity/client" {
     'array::unique(*[_type=="resource" && defined(slug.current) && defined(category)].category)': RESOURCE_CATEGORIES_WITH_CONTENT_QUERY_RESULT;
     '*[_type=="convention" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,place,kind,whenHint,startDate,endDate,description,image,logoBackground,"ratings":*[_type=="venueRating" && target._ref==^._id]{benefits}}': CONVENTIONS_QUERY_RESULT;
     '*[_type=="convention" && defined(slug.current)\n    && (!defined($region) || place.region == $region)\n    && (!defined($q) || name match $q || place.city match $q || count(aka[@ match $q]) > 0)\n  ]|order(name asc){_id,name,"slug":slug.current,place,kind,whenHint,startDate,endDate,description,image,logoBackground,"ratings":*[_type=="venueRating" && target._ref==^._id]{benefits}}': FILTERED_CONVENTIONS_QUERY_RESULT;
+    '*[_type=="convention" && defined(slug.current) && place.region==$region && _id != $excludeId]|order(name asc)[0...6]{_id,name,"slug":slug.current,place,whenHint,startDate,endDate}': CONVENTIONS_IN_STATE_QUERY_RESULT;
+    '*[_type=="convention" && defined(slug.current) && defined(startDate) && startDate >= $today && _id != $excludeId]|order(startDate asc)[0...4]{_id,name,"slug":slug.current,place,whenHint,startDate,endDate}': UPCOMING_CONVENTIONS_QUERY_RESULT;
     'array::unique(*[_type=="convention" && defined(slug.current) && defined(place.region)].place.region)': CONVENTION_REGIONS_QUERY_RESULT;
     '*[_type=="creator" && _id==$id][0].place.region': OWNED_CREATOR_REGION_QUERY_RESULT;
     '*[_type=="creator" && _id in $ids]{_id,name,"slug":slug.current}': COLLAB_CREATORS_QUERY_RESULT;
