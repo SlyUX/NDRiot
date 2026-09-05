@@ -841,6 +841,13 @@ export default defineType({
             'Links out to the convention’s website — e.g. "Official site".',
         }),
         defineField({
+          name: "conventionAkaLabel",
+          title: "Convention page — Also-known-as prefix",
+          type: "string",
+          description:
+            'Precedes a convention\'s acronyms/nicknames on its page — e.g. "Also known as".',
+        }),
+        defineField({
           name: "conventionSizeLabel",
           title: "Convention page — Size fact label",
           type: "string",

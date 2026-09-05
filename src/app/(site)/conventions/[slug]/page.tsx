@@ -192,6 +192,11 @@ export default async function ConventionPage({
             {meta}
           </p>
         )}
+        {convention.aka && convention.aka.length > 0 && (
+          <p className="text-muted-foreground text-sm">
+            {settings.sections.conventionAkaLabel} {convention.aka.join(", ")}
+          </p>
+        )}
         {convention.description && (
           <p className="text-foreground/85 max-w-prose text-base">
             {convention.description}

@@ -36,6 +36,15 @@ export default defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
+      name: "aka",
+      title: "Also known as",
+      type: "array",
+      of: [{ type: "string" }],
+      description:
+        "Acronyms or nicknames people search by — e.g. \"SPX\" for Small Press Expo. Each is matched by the directory search.",
+      options: { layout: "tags" },
+    }),
+    defineField({
       name: "place",
       title: "Location",
       type: "place",

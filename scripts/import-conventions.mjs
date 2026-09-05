@@ -90,12 +90,24 @@ function whenHint(show) {
   return null;
 }
 
+/** The source `mark` is the shorthand — keep it as an alias only when it's not
+ *  just the name in caps (so "MICE"/"MICE" adds nothing, "SPX"/"Small Press
+ *  Expo" does). */
+function akaFrom(show) {
+  const mark = clean(show.mark);
+  if (!mark) return null;
+  const norm = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+  return norm(mark) === norm(show.n) ? null : [mark];
+}
+
 function toDoc(show) {
   const slug = slugify(show.n);
   const place = parsePlace(show.city);
+  const aka = akaFrom(show);
   const doc = {
     _type: "convention",
     name: show.n,
+    ...(aka ? { aka } : {}),
     slug: { _type: "slug", current: slug },
     place: {
       _type: "place",

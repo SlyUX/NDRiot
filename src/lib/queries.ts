@@ -388,7 +388,7 @@ export const CONVENTIONS_QUERY = defineQuery(
 export const FILTERED_CONVENTIONS_QUERY = defineQuery(
   `*[_type=="convention" && defined(slug.current)
     && (!defined($region) || place.region == $region)
-    && (!defined($q) || name match $q || place.city match $q)
+    && (!defined($q) || name match $q || place.city match $q || count(aka[@ match $q]) > 0)
   ]|order(name asc){_id,name,"slug":slug.current,place,kind,whenHint,startDate,endDate,description,image,logoBackground,"ratings":*[_type=="venueRating" && target._ref==^._id]{benefits}}`,
 );
 // The distinct US-state codes that actually have a convention — the region
@@ -494,7 +494,7 @@ export const AI_STATS_QUERY = defineQuery(`{
 // A single convention page.
 export const CONVENTION_QUERY =
   defineQuery(`*[_type=="convention" && slug.current==$slug][0]{
-  _id,name,"slug":slug.current,place,kind,whenHint,startDate,endDate,website,description,size,organizer,image,logoBackground
+  _id,name,aka,"slug":slug.current,place,kind,whenHint,startDate,endDate,website,description,size,organizer,image,logoBackground
 }`);
 // Creators tabling at a convention — from the appearance docs, creator resolved.
 // Neutral (alphabetical) order, never by anything rank-like (§3). The caller

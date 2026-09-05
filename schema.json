@@ -1283,6 +1283,16 @@
         },
         "optional": false
       },
+      "aka": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "array",
+          "of": {
+            "type": "string"
+          }
+        },
+        "optional": true
+      },
       "place": {
         "type": "objectAttribute",
         "value": {
@@ -6272,6 +6282,13 @@
               "optional": true
             },
             "conventionVisitLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "conventionAkaLabel": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"
