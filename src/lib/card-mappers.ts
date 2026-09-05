@@ -259,6 +259,9 @@ export function conventionToCard(
     // Real alt if the editor gave it (a logo/banner); the name sits beside it,
     // so a blank falls back to a plain box.
     imageAlt: convention.image?.alt ?? "",
+    // No logo (the source found one for only ~⅗ of shows) → stylized initials,
+    // the same fallback creators without an avatar get.
+    fallbackInitials: convention.name,
     // Eyebrow leads with the kind (Comics-first / Zine fest / Broader) so the
     // classification reads at a glance, then the location.
     eyebrow:

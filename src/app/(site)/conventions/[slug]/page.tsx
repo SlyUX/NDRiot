@@ -5,6 +5,7 @@ import { ArrowUpRight } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { InitialsAvatar } from "@/components/initials-avatar";
 import { CONVENTION_KIND_LABEL } from "@/lib/card-mappers";
 import { EventDialog } from "@/components/event-dialog";
 import { ConventionTablers } from "@/components/convention-tablers";
@@ -151,10 +152,11 @@ export default async function ConventionPage({
       maxWidth="3xl"
       innerClassName="space-y-6"
     >
-      {convention.image && (
-        // Square + object-contain, matching the cards (no odd cropping), just
-        // shown larger. Capped so the letterboxed square never dominates.
-        <div className="bg-muted relative aspect-square w-full max-w-md overflow-hidden">
+      {/* Square + object-contain, matching the cards (no odd cropping), just
+          shown larger. No logo (the source found one for only ~⅗ of shows) →
+          the same stylized initials tag a creator gets without an avatar. */}
+      <div className="bg-muted relative aspect-square w-full max-w-md overflow-hidden">
+        {convention.image ? (
           <Image
             src={urlFor(convention.image).width(900).url()}
             alt={convention.image.alt ?? ""}
@@ -163,8 +165,10 @@ export default async function ConventionPage({
             className="object-contain"
             priority
           />
-        </div>
-      )}
+        ) : (
+          <InitialsAvatar name={convention.name} className="text-8xl" />
+        )}
+      </div>
 
       <header className="space-y-2">
         {convention.kind && CONVENTION_KIND_LABEL[convention.kind] && (
