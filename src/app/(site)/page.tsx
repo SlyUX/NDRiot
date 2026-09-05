@@ -314,7 +314,18 @@ export default async function Home({
             {settings.newsletter.items.map((item) => (
               <li key={item} className="flex items-start gap-2">
                 <Check aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
-                <span>{item}</span>
+                {/* **word** → bold, so the key nouns stand out in the list. */}
+                <span>
+                  {item.split("**").map((part, i) =>
+                    i % 2 === 1 ? (
+                      <strong key={i} className="font-bold">
+                        {part}
+                      </strong>
+                    ) : (
+                      part
+                    ),
+                  )}
+                </span>
               </li>
             ))}
           </ul>

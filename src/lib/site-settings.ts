@@ -750,12 +750,13 @@ const DEFAULTS: SiteSettings = {
   newsletter: {
     heading: "Monthly Updates",
     description:
-      "One monthly email built around what you’re into — not what we have to say. New comics, creator updates, upcoming conventions, and Sunday Strips.",
+      "One monthly email built around what you’re into — not what we have to say.",
+    // **bold** marks the key nouns; the band renders those emphasized.
     items: [
-      "Updates from the creators and comics you follow",
-      "Upcoming conventions worth the trip",
+      "Updates from the **creators** and **comics** you follow",
+      "Upcoming **conventions** worth the trip",
       "Newly added books",
-      "Sunday Strips — a monthly roundup of new strips",
+      "**Sunday Strips** — a monthly roundup of new strips",
     ],
     placeholder: "you@email.com",
     buttonLabel: "Subscribe",
