@@ -861,6 +861,12 @@ export default defineType({
           description: 'Rail heading over the next few dated cons — e.g. "Upcoming cons".',
         }),
         defineField({
+          name: "conventionAllLabel",
+          title: "Convention page — right rail, all-conventions button",
+          type: "string",
+          description: 'Links back to the full /conventions directory — e.g. "All conventions".',
+        }),
+        defineField({
           name: "conventionSizeLabel",
           title: "Convention page — Size fact label",
           type: "string",

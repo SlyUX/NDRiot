@@ -1029,6 +1029,7 @@ export type SiteSettings = {
     conventionAkaLabel?: string;
     conventionOtherInStateHeading?: string;
     conventionUpcomingHeading?: string;
+    conventionAllLabel?: string;
     conventionSizeLabel?: string;
     conventionRunByLabel?: string;
     conventionAttendingLabel?: string;

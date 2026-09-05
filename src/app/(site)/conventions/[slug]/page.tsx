@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowLeft, ArrowUpRight } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -359,6 +360,17 @@ export default async function ConventionPage({
         </article>
 
         <aside className="mt-12 space-y-8 lg:mt-0">
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="w-full justify-center font-black tracking-widest uppercase"
+          >
+            <Link href="/conventions">
+              <ArrowLeft aria-hidden="true" className="size-4" />
+              {settings.sections.conventionAllLabel}
+            </Link>
+          </Button>
           <ConventionRail
             heading={settings.sections.conventionOtherInStateHeading.replace(
               "{state}",

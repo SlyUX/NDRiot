@@ -6309,6 +6309,13 @@
               },
               "optional": true
             },
+            "conventionAllLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "conventionSizeLabel": {
               "type": "objectAttribute",
               "value": {

@@ -530,6 +530,8 @@ export interface SiteSettings {
     /** Convention page right-rail headings ({state} = the state name). */
     conventionOtherInStateHeading: string;
     conventionUpcomingHeading: string;
+    /** The rail's "back to the full directory" button. */
+    conventionAllLabel: string;
     /** The convention detail "facts" row labels (size / organizer). */
     conventionSizeLabel: string;
     conventionRunByLabel: string;
@@ -1322,6 +1324,7 @@ const DEFAULTS: SiteSettings = {
     conventionAkaLabel: "Also known as",
     conventionOtherInStateHeading: "Other cons in {state}",
     conventionUpcomingHeading: "Upcoming cons",
+    conventionAllLabel: "All conventions",
     conventionSizeLabel: "Size",
     conventionRunByLabel: "Run by",
     conventionAttendingLabel: "I'm Attending",
