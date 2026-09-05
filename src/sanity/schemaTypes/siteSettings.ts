@@ -195,6 +195,14 @@ export default defineType({
           rows: 2,
         }),
         defineField({
+          name: "items",
+          title: "What it carries (list)",
+          type: "array",
+          of: [{ type: "string" }],
+          description:
+            "A short, scannable list of what each issue includes — reader-interest framed (e.g. \"Updates from the creators you follow\", \"Sunday Strips\"). Shown under the pink band's description.",
+        }),
+        defineField({
           name: "placeholder",
           title: "Email field placeholder",
           type: "string",
@@ -636,6 +644,39 @@ export default defineType({
           description:
             'The homepage rows open with two rows and reveal the next two on this button, e.g. "View more". "View all" (above) still links to the complete listing.',
         }),
+        defineField({
+          name: "forCreatorsHeading",
+          title: '"For Creators" row heading',
+          type: "string",
+          description:
+            'Heading over the funnel row beneath Creators (one card per creator-facing area), e.g. "For Creators".',
+        }),
+        defineField({
+          name: "forCreators",
+          title: '"For Creators" funnel cards',
+          type: "object",
+          description:
+            "One card per creator-facing area — a title + a short 'what's inside' blurb linking to the section (not a listing). Icons and links are fixed in code.",
+          options: { collapsible: true, collapsed: true },
+          fields: (
+            ["conventions", "resources", "media", "allies"] as const
+          ).map((area) =>
+            defineField({
+              name: area,
+              title: area.charAt(0).toUpperCase() + area.slice(1),
+              type: "object",
+              fields: [
+                defineField({ name: "title", title: "Title", type: "string" }),
+                defineField({
+                  name: "description",
+                  title: "Short description",
+                  type: "text",
+                  rows: 2,
+                }),
+              ],
+            }),
+          ),
+        }),
       ],
     }),
 
@@ -1026,6 +1067,13 @@ export default defineType({
           type: "string",
           description:
             'The comics-row shuffle button — the spinner-rack metaphor, shown as text beside the icon. e.g. "Spin the rack".',
+        }),
+        defineField({
+          name: "rowSpinLabel",
+          title: "Home row shuffle button (beside title)",
+          type: "string",
+          description:
+            'The shuffle button next to the home Comics/Creators row titles — reorders that row in place. e.g. "Spin".',
         }),
         defineField({
           name: "feedMineHeading",

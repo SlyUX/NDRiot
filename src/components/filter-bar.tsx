@@ -5,7 +5,6 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { ChevronDown, Search, Shuffle, X } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import { useRowShuffle } from '@/components/row-shuffle-context'
 import { cn } from '@/lib/utils'
 
 /**
@@ -124,10 +123,6 @@ export function FilterBar({
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  // When this bar sits in a homepage ShuffleRow, its shuffle reorders that row
-  // in place instead of navigating (instant, touches only the row). Absent
-  // elsewhere → the shuffle keeps its normal seed-in-the-URL navigation.
-  const rowShuffle = useRowShuffle()
 
   const urlQuery = searchParams.get(searchParam) ?? ''
   const [term, setTerm] = useState(urlQuery)
@@ -231,17 +226,11 @@ export function FilterBar({
    * restores the default order.
    */
   const discover = useCallback(() => {
-    // Inside a ShuffleRow: reorder that row in place, instantly, without a
-    // navigation — the shuffle is an action, so it touches only its own row.
-    if (rowShuffle) {
-      rowShuffle()
-      return
-    }
     const next = new URLSearchParams(searchParams.toString())
     next.set(sortParam, 'random')
     next.set(seedParam, String(Math.floor(Math.random() * 1_000_000)))
     apply(next)
-  }, [rowShuffle, apply, searchParams, sortParam, seedParam])
+  }, [apply, searchParams, sortParam, seedParam])
 
   const clearAll = useCallback(() => {
     setTerm('')
@@ -255,30 +244,42 @@ export function FilterBar({
     apply(next)
   }, [apply, facets, searchParams, searchParam, sortParam, seedParam])
 
+  // Inline select (the homepage rows): search + all facets share ONE wrapping
+  // row, no collapse — the shuffle lives up by the section title, not here.
+  const inlineSelect = control === 'select' && !collapsible
+
+  const searchField = (
+    <div className={cn('relative w-full', inlineSelect ? 'sm:w-56' : 'max-w-xs')}>
+      <Search
+        aria-hidden="true"
+        className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
+      />
+      <input
+        type="search"
+        value={term}
+        onChange={(event) => setTerm(event.target.value)}
+        // A visible placeholder is not a label — the input needs a name of its
+        // own for anyone who cannot see it.
+        aria-label={searchLabel}
+        placeholder={searchLabel}
+        className="focus-visible:ring-ring placeholder:text-muted-foreground w-full border border-white/20 bg-transparent py-2 pr-3 pl-9 text-sm focus-visible:ring-2 focus-visible:outline-none"
+      />
+    </div>
+  )
+
   return (
     <div className={cn('space-y-4', className)}>
       {/* Under `select` (the homepage rows): the search stays visible and the
           controls collapse behind a "Filters" toggle on mobile — like the chip
           pages — then sit inline from md up. Under `chips`, search stands alone
-          and the facets are their own panel below. */}
-      <div className={cn(control === 'select' && 'space-y-3')}>
+          and the facets are their own panel below. When `inlineSelect`, search +
+          facets share one wrapping row and nothing collapses. */}
+      <div className={cn(control === 'select' && !inlineSelect && 'space-y-3')}>
+        {/* Top row — its own line only when there's a discover button or the
+            controls collapse; inline-select folds search into the facets row. */}
+        {!inlineSelect && (
         <div className={cn((control === 'select' || discoverLabel) && 'flex flex-wrap items-center gap-2')}>
-          <div className="relative w-full max-w-xs">
-            <Search
-              aria-hidden="true"
-              className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
-            />
-            <input
-              type="search"
-              value={term}
-              onChange={(event) => setTerm(event.target.value)}
-              // A visible placeholder is not a label — the input needs a name of
-              // its own for anyone who cannot see it.
-              aria-label={searchLabel}
-              placeholder={searchLabel}
-              className="focus-visible:ring-ring placeholder:text-muted-foreground w-full border border-white/20 bg-transparent py-2 pr-3 pl-9 text-sm focus-visible:ring-2 focus-visible:outline-none"
-            />
-          </div>
+          {searchField}
 
           {/* Randomize sits right beside the search box — the two ways in (look
               for something / let the rack spin one up) share a row. A neutral
@@ -325,6 +326,7 @@ export function FilterBar({
             </button>
           )}
         </div>
+        )}
 
         {control === 'select' && (
           <div
@@ -335,6 +337,8 @@ export function FilterBar({
               collapsible && !open ? 'hidden md:flex' : 'flex',
             )}
           >
+          {/* Inline-select folds the search into this one wrapping row. */}
+          {inlineSelect && searchField}
           {facets.map((facet) => {
             // A flag is on or off — a two-option dropdown ("Any"/label) reads as
             // a choice with a default answer, which a toggle is not. Render it

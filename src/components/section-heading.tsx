@@ -69,6 +69,9 @@ export interface SectionHeadingProps extends VariantProps<typeof headingVariants
   subtitle?: string
   /** Trailing element — a "View all" link, a filter, etc. */
   action?: ReactNode
+  /** A control sitting immediately beside the title (e.g. a "Spin" button),
+   *  kept outside the heading element so it stays valid + accessible. */
+  titleAdornment?: ReactNode
   align?: 'left' | 'center'
   /** Heading level. Use `h1` only for page titles; never skip levels. */
   as?: 'h1' | 'h2' | 'h3'
@@ -79,6 +82,7 @@ export function SectionHeading({
   children,
   subtitle,
   action,
+  titleAdornment,
   align = 'left',
   as: Tag = 'h2',
   size,
@@ -100,7 +104,14 @@ export function SectionHeading({
       )}
     >
       <div className={cn(centered && 'flex flex-col items-center')}>
-        <Tag className={cn(headingVariants({ size, tone, uppercase }))}>{children}</Tag>
+        {titleAdornment ? (
+          <div className="flex flex-wrap items-center gap-3">
+            <Tag className={cn(headingVariants({ size, tone, uppercase }))}>{children}</Tag>
+            {titleAdornment}
+          </div>
+        ) : (
+          <Tag className={cn(headingVariants({ size, tone, uppercase }))}>{children}</Tag>
+        )}
         {subtitle && (
           <p className="text-muted-foreground mt-2 max-w-2xl text-sm">{subtitle}</p>
         )}

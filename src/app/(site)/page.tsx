@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { Check } from "lucide-react";
 
 import { AlternatingSections } from "@/components/alternating-sections";
 import { ContentCardGrid } from "@/components/content-card-grid";
+import { ForCreatorsRow } from "@/components/for-creators-row";
 import { ShuffleRow } from "@/components/shuffle-row";
 import { FilterBar } from "@/components/filter-bar";
 import { Hero } from "@/components/hero";
@@ -14,13 +16,7 @@ import {
   jsonLdGraph,
   websiteSchema,
 } from "@/lib/structured-data";
-import {
-  bookToCard,
-  creatorToCard,
-  conventionToCard,
-  resourceToCard,
-  stripToCard,
-} from "@/lib/card-mappers";
+import { bookToCard, creatorToCard, stripToCard } from "@/lib/card-mappers";
 import {
   HOME_ROW_LIMIT,
   bookFilters,
@@ -35,13 +31,10 @@ import {
   seededShuffle,
   type SearchParams,
 } from "@/lib/filters";
-import { orderConventionsUpcomingFirst } from "@/lib/conventions";
 import {
   safeFetch,
   GENRES_WITH_BOOKS_QUERY,
   HOME_NEW_QUERY,
-  HOME_RESOURCES_QUERY,
-  CONVENTIONS_QUERY,
   STRIPS_QUERY,
   FILTERED_BOOKS_QUERY,
   FILTERED_CREATORS_QUERY,
@@ -64,13 +57,11 @@ import type {
   BookSummary,
   CreatorSummary,
   HomeNewItem,
-  ConventionSummary,
   StripSummary,
   AppearanceFeedRow,
   Paginated,
   RailFeedItem,
   RailUpdate,
-  ResourceSummary,
 } from "@/lib/types";
 
 /** How many updates the hero rail holds before scrolling. */
@@ -133,8 +124,6 @@ export default async function Home({
     creatorsResult,
     genresWithBooks,
     newItems,
-    conventions,
-    homeResources,
     strips,
     settings,
     session,
@@ -156,8 +145,6 @@ export default async function Home({
     ),
     safeFetch<string[]>(GENRES_WITH_BOOKS_QUERY, {}, []),
     safeFetch<HomeNewItem[]>(HOME_NEW_QUERY, {}, []),
-    safeFetch<ConventionSummary[]>(CONVENTIONS_QUERY, {}, []),
-    safeFetch<ResourceSummary[]>(HOME_RESOURCES_QUERY, {}, []),
     safeFetch<StripSummary[]>(STRIPS_QUERY, {}, []),
     getSiteSettings(),
     auth(),
@@ -283,10 +270,8 @@ export default async function Home({
       <FilterBar
         facets={homeBookFacets(genres)}
         control="select"
-        collapsible
         resultCount={booksResult.total}
         searchLabel={settings.sections.searchBooksLabel}
-        discoverLabel={settings.sections.spinLabel}
       />
     </Suspense>
   );
@@ -296,10 +281,8 @@ export default async function Home({
       <FilterBar
         facets={homeCreatorFacets(genres)}
         control="select"
-        collapsible
         resultCount={creatorsResult.total}
         searchLabel={settings.sections.searchCreatorsLabel}
-        discoverLabel={settings.sections.discoverLabel}
         searchParam="cq"
         sortParam="csort"
         seedParam="cseed"
@@ -307,15 +290,9 @@ export default async function Home({
     </Suspense>
   );
 
-  // Home conventions row — a scrolling taste, ordered upcoming-first. (The
-  // profile-based "near me" toggle was removed; the full directory + State
-  // filter live on /conventions.)
-  const conventionsShown = orderConventionsUpcomingFirst(conventions).slice(0, 8);
-
   // Default browse is randomly ordered — a fresh, fair rotation each visit, so no
   // title keeps the top spot by its name (AGENTS.md §3: alphabetical was an MVP
-  // compromise, not the destination). A search leaves the order alone so Load
-  // More doesn't reshuffle under the reader; Spin re-rolls to a specific seed.
+  // compromise, not the destination). Rows reshuffle on the client (ShuffleRow).
   const displayBooks = booksFiltering
     ? books
     : seededShuffle(books, effBookSeed);
@@ -335,6 +312,16 @@ export default async function Home({
         <p className="mt-1 text-sm text-black">
           {settings.newsletter.description}
         </p>
+        {settings.newsletter.items.length > 0 && (
+          <ul className="mt-3 flex flex-col items-center gap-1 text-sm text-black sm:items-start">
+            {settings.newsletter.items.map((item) => (
+              <li key={item} className="flex items-start gap-2">
+                <Check aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
       <div className="w-full sm:max-w-md">
         <NewsletterForm copy={settings.newsletter} variant="band" />
@@ -383,6 +370,7 @@ export default async function Home({
             .sort()
             .join(",")}
           heading={settings.home.booksHeading}
+          spinLabel={settings.sections.rowSpinLabel}
           toolbar={booksBar}
           cards={displayBooks.map(bookToCard)}
           columns={BOOKS_COLS}
@@ -421,6 +409,7 @@ export default async function Home({
             .sort()
             .join(",")}
           heading={settings.home.creatorsHeading}
+          spinLabel={settings.sections.rowSpinLabel}
           toolbar={creatorsBar}
           cards={displayCreators.map(creatorToCard)}
           layout="horizontal"
@@ -448,23 +437,13 @@ export default async function Home({
           }
         />
 
-        {/* Resources: recent resources, where the editorial row used to sit.
-            Hidden when there are none. */}
-        {homeResources.length > 0 && (
-          <ContentCardGrid
-            heading={settings.home.resourcesHeading}
-            cards={homeResources.map(resourceToCard)}
-            layout="horizontal"
-            columns={4}
-            aspectRatio="landscape"
-            summaryLines={3}
-            scroll
-            padding="md"
-            viewAllHref="/resources"
-            viewAllLabel={settings.home.viewAllLabel}
-            emptyMessage=""
-          />
-        )}
+        {/* For Creators: a funnel beneath Creators — one card each for
+            Conventions, Resources, Media, and Allies (icon + blurb → section),
+            in place of the old on-home listing rows. */}
+        <ForCreatorsRow
+          heading={settings.home.forCreatorsHeading}
+          cards={settings.home.forCreators}
+        />
 
         {/* Strips: single-page comics you can read right here. A scrolling
             taste, newest first (§3: recency, never ranked); shows once there
@@ -478,28 +457,6 @@ export default async function Home({
             scroll
             padding="md"
             viewAllHref="/comics?tab=strips"
-            viewAllLabel={settings.home.viewAllLabel}
-            emptyMessage=""
-          />
-        )}
-
-        {/* Conventions: shows worth a creator's table. Bottom row, a scrolling
-            taste; the full directory (with ratings) is on /conventions. Each
-            card carries the average creator rating — §3: shown, never sorted on.
-            Hidden when there is none, like editorial. */}
-        {conventions.length > 0 && (
-          <ContentCardGrid
-            heading={settings.home.conventionsHeading}
-            cards={conventionsShown.map((c) =>
-              conventionToCard(c, settings.sections.conventionRatingCardEmpty),
-            )}
-            layout="horizontal"
-            columns={4}
-            aspectRatio="square"
-            summaryLines={3}
-            scroll
-            padding="md"
-            viewAllHref="/conventions"
             viewAllLabel={settings.home.viewAllLabel}
             emptyMessage=""
           />

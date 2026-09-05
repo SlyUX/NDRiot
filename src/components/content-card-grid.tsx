@@ -63,6 +63,8 @@ export interface ContentCardGridProps {
    */
   headingAs?: 'h1' | 'h2' | 'h3'
   headingSize?: 'sm' | 'md' | 'lg'
+  /** A control beside the title (e.g. a "Spin" button) — forwarded to the heading. */
+  titleAdornment?: React.ReactNode
   subtitle?: string
   layout?: ContentCardProps['layout']
   aspectRatio?: ContentCardProps['aspectRatio']
@@ -123,6 +125,7 @@ export function ContentCardGrid({
   heading,
   headingAs,
   headingSize,
+  titleAdornment,
   subtitle,
   layout = 'vertical',
   aspectRatio,
@@ -158,7 +161,13 @@ export function ContentCardGrid({
   return (
     <Section background={background} padding={padding} maxWidth={maxWidth} className={className}>
       {(heading || action) && (
-        <SectionHeading as={headingAs} size={headingSize} subtitle={subtitle} action={action}>
+        <SectionHeading
+          as={headingAs}
+          size={headingSize}
+          subtitle={subtitle}
+          action={action}
+          titleAdornment={titleAdornment}
+        >
           {heading}
         </SectionHeading>
       )}

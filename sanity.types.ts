@@ -847,6 +847,7 @@ export type SiteSettings = {
   newsletter?: {
     heading?: string;
     description?: string;
+    items?: Array<string>;
     placeholder?: string;
     buttonLabel?: string;
     consent?: string;
@@ -975,6 +976,25 @@ export type SiteSettings = {
     mediaHeading?: string;
     viewAllLabel?: string;
     viewMoreLabel?: string;
+    forCreatorsHeading?: string;
+    forCreators?: {
+      conventions?: {
+        title?: string;
+        description?: string;
+      };
+      resources?: {
+        title?: string;
+        description?: string;
+      };
+      media?: {
+        title?: string;
+        description?: string;
+      };
+      allies?: {
+        title?: string;
+        description?: string;
+      };
+    };
   };
   sections?: {
     editorialHeading?: string;
@@ -1035,6 +1055,7 @@ export type SiteSettings = {
     genreBooksHeading?: string;
     discoverLabel?: string;
     spinLabel?: string;
+    rowSpinLabel?: string;
     feedMineHeading?: string;
     searchHomeLabel?: string;
     searchBooksLabel?: string;

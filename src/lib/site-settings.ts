@@ -406,9 +406,14 @@ export interface AboutSettings {
   seoDescription: string;
 }
 
+/** One "For Creators" funnel card — an area's name + a short "what's inside". */
+export type FunnelCard = { title: string; description: string };
+
 export type NewsletterSettings = {
   heading: string;
   description: string;
+  /** What ND Noise carries — a short scannable list, reader-interest framed. */
+  items: string[];
   placeholder: string;
   buttonLabel: string;
   consent: string;
@@ -478,6 +483,15 @@ export interface SiteSettings {
     mediaHeading: string;
     viewAllLabel: string;
     viewMoreLabel: string;
+    /** The "For Creators" funnel row beneath Creators — a heading + one card per
+     *  creator-facing area (icon + blurb linking to the section, not a listing). */
+    forCreatorsHeading: string;
+    forCreators: {
+      conventions: FunnelCard;
+      resources: FunnelCard;
+      media: FunnelCard;
+      allies: FunnelCard;
+    };
   };
   sections: {
     editorialHeading: string;
@@ -558,6 +572,8 @@ export interface SiteSettings {
     /** The comics-specific randomise label — the spinner-rack metaphor. Shown as
      *  visible text on comics rows; comic-maker rows use the neutral discoverLabel. */
     spinLabel: string;
+    /** The home Comics/Creators rows' shuffle button, beside the section title. */
+    rowSpinLabel: string;
     /** Hero rail — heading over a reader's followed-creator updates (§2). */
     feedMineHeading: string;
     searchHomeLabel: string;
@@ -724,7 +740,13 @@ const DEFAULTS: SiteSettings = {
   newsletter: {
     heading: "Get ND Noise",
     description:
-      "Monthly updates about indie comics, creators, campaigns, and community.",
+      "One monthly email built around what you’re into — not what we have to say. New comics, creator updates, upcoming conventions, and Sunday Strips.",
+    items: [
+      "Updates from the creators and comics you follow",
+      "Upcoming conventions worth the trip",
+      "Newly added books",
+      "Sunday Strips — a monthly roundup of new strips",
+    ],
     placeholder: "you@email.com",
     buttonLabel: "Subscribe",
     consent: "We’ll only email you about ND Riot. Unsubscribe any time.",
@@ -1232,6 +1254,29 @@ const DEFAULTS: SiteSettings = {
     mediaHeading: "Media Outlets",
     viewAllLabel: "View all",
     viewMoreLabel: "View more",
+    forCreatorsHeading: "For Creators",
+    forCreators: {
+      conventions: {
+        title: "Conventions",
+        description:
+          "Shows worth a table — with creator ratings on cost, footfall, and payoff.",
+      },
+      resources: {
+        title: "Resources",
+        description:
+          "Guides, tools, and downloads for making and selling indie comics.",
+      },
+      media: {
+        title: "Media Outlets",
+        description:
+          "Podcasts, channels, and review sites that cover independent comics.",
+      },
+      allies: {
+        title: "Allies",
+        description:
+          "Vetted partners and services ND Riot vouches for.",
+      },
+    },
   },
   sections: {
     editorialHeading: "Editorial",
@@ -1306,6 +1351,7 @@ const DEFAULTS: SiteSettings = {
     everythingElseHeading: "While you are here",
     discoverLabel: "Discover",
     spinLabel: "Spin the rack",
+    rowSpinLabel: "Spin",
     feedMineHeading: "Your Feed",
     searchHomeLabel: "Search comics and comic creators",
     searchBooksLabel: "Search titles and comic creators",
@@ -1377,7 +1423,7 @@ const DEFAULTS: SiteSettings = {
     accountSignInCta: "Sign in with Google",
     accountNewsletterHeading: "ND Noise",
     accountNewsletterBody:
-      "New comics, creators, and indie-comics resources — once a month, no more. Confirm by email; unsubscribe anytime.",
+      "A monthly signal tuned to what you follow — creator updates, upcoming conventions, new books, and Sunday Strips. Confirm by email; unsubscribe anytime.",
     accountNewsletterCta: "Sign me up",
     footerGetListedHeading: "Get Listed",
     footerRiotHeading: "The Riot",
@@ -1478,7 +1524,7 @@ const DEFAULTS: SiteSettings = {
 
 export const SITE_SETTINGS_QUERY = `*[_id=="siteSettings"][0]{
   siteTitle,siteDescription,footer,discordUrl,socialLinks[]{platform,url},
-  newsletter{heading,description,placeholder,buttonLabel,consent,successMessage,errorMessage},
+  newsletter{heading,description,items,placeholder,buttonLabel,consent,successMessage,errorMessage},
   about{heading,body,faqHeading,faq[]{question,answer},seoTitle,seoDescription},aiLetter,aiUsage,
   home,sections,empty,creatorIntake,bookIntake,mediaIntake,stripIntake,reviewNotice,notifications,collab,
   hero{background,headline,body,tagline,featureCtaLabel,featuredHeading,newHeading,ctas[]{label,href}},
