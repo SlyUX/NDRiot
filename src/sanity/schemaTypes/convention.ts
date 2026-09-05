@@ -43,6 +43,20 @@ export default defineType({
         'Structured city + state. The state powers "shows in your region".',
     }),
     defineField({
+      name: "kind",
+      title: "Kind",
+      type: "string",
+      description:
+        "What kind of show it is — sets the badge on the directory card.",
+      options: {
+        list: [
+          { title: "Comics-first", value: "comics-first" },
+          { title: "Zine fest", value: "zine" },
+          { title: "Broader", value: "broader" },
+        ],
+      },
+    }),
+    defineField({
       name: "whenHint",
       title: "When (recurring hint)",
       type: "string",
@@ -104,6 +118,26 @@ export default defineType({
       rows: 3,
       description:
         "A short line on what it is and who it’s for. Shown on the card and the page.",
+    }),
+    defineField({
+      name: "size",
+      title: "Size / scale",
+      type: "string",
+      description: 'Rough scale — e.g. "150+ artists" or "several hundred exhibitors". Optional.',
+    }),
+    defineField({
+      name: "organizer",
+      title: "Run by",
+      type: "string",
+      description: "Who organizes it — the org, library, shop, or person behind it.",
+    }),
+    defineField({
+      name: "tabling",
+      title: "Tabling / applications",
+      type: "text",
+      rows: 2,
+      description:
+        "How a creator gets a table — the application pattern (lottery, juried, first-come), window, and fees, if known.",
     }),
     defineField({
       name: "image",

@@ -841,6 +841,24 @@ export default defineType({
             'Links out to the convention’s website — e.g. "Official site".',
         }),
         defineField({
+          name: "conventionSizeLabel",
+          title: "Convention page — Size fact label",
+          type: "string",
+          description: 'The "Size / scale" fact row label — e.g. "Size".',
+        }),
+        defineField({
+          name: "conventionRunByLabel",
+          title: "Convention page — Run-by fact label",
+          type: "string",
+          description: 'The organizer fact row label — e.g. "Run by".',
+        }),
+        defineField({
+          name: "conventionTablingLabel",
+          title: "Convention page — Tabling fact label",
+          type: "string",
+          description: 'The tabling/applications fact row label — e.g. "Tabling".',
+        }),
+        defineField({
           name: "conventionAttendingLabel",
           title: 'Convention page — "I\'m attending" button',
           type: "string",

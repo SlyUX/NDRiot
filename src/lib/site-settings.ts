@@ -525,6 +525,10 @@ export interface SiteSettings {
     conventionsPageTitle: string;
     conventionsPageDescription: string;
     conventionVisitLabel: string;
+    /** The convention detail "facts" row labels (size / organizer / tabling). */
+    conventionSizeLabel: string;
+    conventionRunByLabel: string;
+    conventionTablingLabel: string;
     conventionAttendingLabel: string;
     conventionManageAttendingLabel: string;
     conventionCancelAttendingLabel: string;
@@ -1311,6 +1315,9 @@ const DEFAULTS: SiteSettings = {
     conventionsPageDescription:
       "Comics conventions worth a creator’s table — where to show your work, meet readers, and find your scene. Independent-comics focused.",
     conventionVisitLabel: "Official site",
+    conventionSizeLabel: "Size",
+    conventionRunByLabel: "Run by",
+    conventionTablingLabel: "Tabling",
     conventionAttendingLabel: "I'm Attending",
     conventionManageAttendingLabel: "Manage Attendance",
     conventionCancelAttendingLabel: "Cancel attendance",

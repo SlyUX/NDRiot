@@ -3,7 +3,9 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CONVENTION_KIND_LABEL } from "@/lib/card-mappers";
 import { EventDialog } from "@/components/event-dialog";
 import { ConventionTablers } from "@/components/convention-tablers";
 import { ConventionRatings } from "@/components/convention-ratings";
@@ -165,6 +167,14 @@ export default async function ConventionPage({
       )}
 
       <header className="space-y-2">
+        {convention.kind && CONVENTION_KIND_LABEL[convention.kind] && (
+          <Badge
+            variant="outline"
+            className="border-primary/60 text-primary px-2.5 py-0.5 text-[10px] tracking-widest uppercase"
+          >
+            {CONVENTION_KIND_LABEL[convention.kind]}
+          </Badge>
+        )}
         <h1 className="text-3xl font-black tracking-tighter uppercase">
           {convention.name}
         </h1>
@@ -231,6 +241,28 @@ export default async function ConventionPage({
           )}
         </div>
       )}
+
+      {(() => {
+        // Facts a creator weighs — shown only where we have them.
+        const facts = [
+          { label: settings.sections.conventionSizeLabel, value: convention.size },
+          { label: settings.sections.conventionRunByLabel, value: convention.organizer },
+          { label: settings.sections.conventionTablingLabel, value: convention.tabling },
+        ].filter((f) => f.value);
+        if (facts.length === 0) return null;
+        return (
+          <dl className="border-border grid gap-3 border-t pt-6">
+            {facts.map((fact) => (
+              <div key={fact.label} className="flex flex-col gap-1 sm:flex-row sm:gap-4">
+                <dt className="text-muted-foreground w-28 shrink-0 text-[10px] tracking-widest uppercase sm:pt-0.5">
+                  {fact.label}
+                </dt>
+                <dd className="text-foreground/85 text-sm">{fact.value}</dd>
+              </div>
+            ))}
+          </dl>
+        );
+      })()}
 
       <ConventionTablers
         tablers={tablers}

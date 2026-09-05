@@ -221,6 +221,14 @@ export function mediaToCard(media: MediaSummary): ContentCardProps {
   };
 }
 
+/** Reader-facing label for a convention's kind — a system classification (like
+ *  a genre badge), so it lives in code, not the CMS. */
+export const CONVENTION_KIND_LABEL: Record<string, string> = {
+  "comics-first": "Comics-first",
+  zine: "Zine fest",
+  broader: "Broader",
+};
+
 export function conventionToCard(
   convention: ConventionSummary,
   /** CMS "no ratings yet" copy, shown muted when a con has no ratings. Omit to
@@ -251,11 +259,19 @@ export function conventionToCard(
     // Real alt if the editor gave it (a logo/banner); the name sits beside it,
     // so a blank falls back to a plain box.
     imageAlt: convention.image?.alt ?? "",
-    eyebrow: formatPlace(convention.place) ?? undefined,
+    // Eyebrow leads with the kind (Comics-first / Zine fest / Broader) so the
+    // classification reads at a glance, then the location.
+    eyebrow:
+      [
+        convention.kind ? CONVENTION_KIND_LABEL[convention.kind] : undefined,
+        formatPlace(convention.place),
+      ]
+        .filter(Boolean)
+        .join(" · ") || undefined,
     summary: truncate(convention.description, 160),
     date,
     rating,
-    // Con cards read Location · Name · Date · Rating · Description.
+    // Con cards read Kind · Location · Name · Date · Rating · Description.
     metaFirst: true,
     aspectRatio: "square",
   };

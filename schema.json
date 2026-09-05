@@ -1291,6 +1291,27 @@
         },
         "optional": true
       },
+      "kind": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "union",
+          "of": [
+            {
+              "type": "string",
+              "value": "comics-first"
+            },
+            {
+              "type": "string",
+              "value": "zine"
+            },
+            {
+              "type": "string",
+              "value": "broader"
+            }
+          ]
+        },
+        "optional": true
+      },
       "whenHint": {
         "type": "objectAttribute",
         "value": {
@@ -1341,6 +1362,27 @@
         "optional": true
       },
       "description": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
+      "size": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
+      "organizer": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
+      "tabling": {
         "type": "objectAttribute",
         "value": {
           "type": "string"
@@ -6220,6 +6262,27 @@
               "optional": true
             },
             "conventionVisitLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "conventionSizeLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "conventionRunByLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "conventionTablingLabel": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

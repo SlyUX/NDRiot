@@ -379,7 +379,7 @@ export const RESOURCE_CATEGORIES_WITH_CONTENT_QUERY = defineQuery(
 // Directory cards — every convention, alphabetical (neutral order, never by
 // rating; §3). A venue creators table at, not a contributor.
 export const CONVENTIONS_QUERY = defineQuery(
-  `*[_type=="convention" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,place,whenHint,startDate,endDate,description,image,"ratings":*[_type=="venueRating" && target._ref==^._id]{benefits}}`,
+  `*[_type=="convention" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,place,kind,whenHint,startDate,endDate,description,image,"ratings":*[_type=="venueRating" && target._ref==^._id]{benefits}}`,
 );
 // The same directory, narrowed by an explicit State filter (place.region, a
 // US-state code) and/or a name/city search. Absent params mean "no filter", not
@@ -389,7 +389,7 @@ export const FILTERED_CONVENTIONS_QUERY = defineQuery(
   `*[_type=="convention" && defined(slug.current)
     && (!defined($region) || place.region == $region)
     && (!defined($q) || name match $q || place.city match $q)
-  ]|order(name asc){_id,name,"slug":slug.current,place,whenHint,startDate,endDate,description,image,"ratings":*[_type=="venueRating" && target._ref==^._id]{benefits}}`,
+  ]|order(name asc){_id,name,"slug":slug.current,place,kind,whenHint,startDate,endDate,description,image,"ratings":*[_type=="venueRating" && target._ref==^._id]{benefits}}`,
 );
 // The distinct US-state codes that actually have a convention — the region
 // facet's option set (a state nobody tables in is never offered).
@@ -494,7 +494,7 @@ export const AI_STATS_QUERY = defineQuery(`{
 // A single convention page.
 export const CONVENTION_QUERY =
   defineQuery(`*[_type=="convention" && slug.current==$slug][0]{
-  _id,name,"slug":slug.current,place,whenHint,startDate,endDate,website,description,image
+  _id,name,"slug":slug.current,place,kind,whenHint,startDate,endDate,website,description,size,organizer,tabling,image
 }`);
 // Creators tabling at a convention — from the appearance docs, creator resolved.
 // Neutral (alphabetical) order, never by anything rank-like (§3). The caller
