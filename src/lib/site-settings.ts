@@ -748,7 +748,7 @@ const DEFAULTS: SiteSettings = {
   siteDescription: "Independent comics discovery. Support indie comics.",
   footer: "Support indie comics. · ND Riot",
   newsletter: {
-    heading: "Get ND Noise",
+    heading: "Monthly Updates",
     description:
       "One monthly email built around what you’re into — not what we have to say. New comics, creator updates, upcoming conventions, and Sunday Strips.",
     items: [

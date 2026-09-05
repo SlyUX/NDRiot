@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Check } from "lucide-react";
 
-import { AlternatingSections } from "@/components/alternating-sections";
 import { ContentCardGrid } from "@/components/content-card-grid";
 import { ForCreatorsRow } from "@/components/for-creators-row";
 import { ShuffleRow } from "@/components/shuffle-row";
@@ -304,16 +303,14 @@ export default async function Home({
   // The pink newsletter band, rendered in two positions and toggled by
   // breakpoint: after the hero on desktop, after the Comics row on phones.
   const newsletterBand = (
-    <div className="mx-auto flex max-w-[90rem] flex-col items-center gap-6 px-6 py-10 text-center sm:flex-row sm:justify-center sm:gap-12 lg:px-0">
+    <div className="mx-auto flex max-w-[90rem] flex-col gap-6 px-6 py-10 text-left sm:flex-row sm:items-start sm:justify-center sm:gap-12 lg:px-0">
+      {/* Left column: the heading + what each issue carries. */}
       <div className="max-w-xl">
         <h2 className="text-2xl font-black tracking-tighter uppercase sm:text-3xl">
           {settings.newsletter.heading}
         </h2>
-        <p className="mt-1 text-sm text-black">
-          {settings.newsletter.description}
-        </p>
         {settings.newsletter.items.length > 0 && (
-          <ul className="mt-3 flex flex-col items-center gap-1 text-sm text-black sm:items-start">
+          <ul className="mt-3 flex flex-col gap-1 text-sm text-black">
             {settings.newsletter.items.map((item) => (
               <li key={item} className="flex items-start gap-2">
                 <Check aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
@@ -323,7 +320,9 @@ export default async function Home({
           </ul>
         )}
       </div>
-      <div className="w-full sm:max-w-md">
+      {/* Right column: the pitch, then the form directly beneath it. */}
+      <div className="w-full space-y-3 sm:max-w-md">
+        <p className="text-sm text-black">{settings.newsletter.description}</p>
         <NewsletterForm copy={settings.newsletter} variant="band" />
       </div>
     </div>
@@ -348,17 +347,17 @@ export default async function Home({
         account={account}
       />
 
-      {/* Newsletter band — beneath the hero on desktop; on phones it moves below
-          the Comics row (the mobile copy inside AlternatingSections). §9 pink. */}
+      {/* Newsletter band — beneath the hero on desktop; on phones the copy
+          below moves under the Comics row. §9 pink. */}
       <section className="bg-primary text-primary-foreground max-md:hidden">
         {newsletterBand}
       </section>
 
-      {/* The content rows alternate --background / --surface-alt (§9), Comics
-          first. AlternatingSections injects each row's background, so no row
-          sets one itself; a hidden row (Resources/Media with nothing to show)
-          drops out without offsetting the rhythm. */}
-      <AlternatingSections>
+      {/* Each row sets its own background explicitly (§9): Comics on --background,
+          Comic Creators on --surface-alt, For Creators on --background, Strips on
+          --surface-alt. Explicit (not auto-alternated) because the interactive
+          rows are ShuffleRow/ForCreatorsRow, not bare Sections. */}
+      <>
         {/* Books: one scrolling row while browsing; a two-row grid with "Load
             more" once a search narrows it. "View all" links to the full listing. */}
         <ShuffleRow
@@ -370,6 +369,7 @@ export default async function Home({
             .sort()
             .join(",")}
           heading={settings.home.booksHeading}
+          background="background"
           spinLabel={settings.sections.rowSpinLabel}
           toolbar={booksBar}
           cards={displayBooks.map(bookToCard)}
@@ -395,8 +395,8 @@ export default async function Home({
           }
         />
 
-        {/* Newsletter band on phones only — sits after Comics. A raw <section>,
-            so AlternatingSections passes it through and the row rhythm is unbroken. */}
+        {/* Newsletter band on phones only — sits after Comics (a raw <section>
+            between the explicit-background rows). */}
         <section className="bg-primary text-primary-foreground md:hidden">
           {newsletterBand}
         </section>
@@ -409,6 +409,7 @@ export default async function Home({
             .sort()
             .join(",")}
           heading={settings.home.creatorsHeading}
+          background="alt"
           spinLabel={settings.sections.rowSpinLabel}
           toolbar={creatorsBar}
           cards={displayCreators.map(creatorToCard)}
@@ -443,6 +444,7 @@ export default async function Home({
         <ForCreatorsRow
           heading={settings.home.forCreatorsHeading}
           cards={settings.home.forCreators}
+          background="background"
         />
 
         {/* Strips: single-page comics you can read right here. A scrolling
@@ -451,6 +453,7 @@ export default async function Home({
         {strips.length >= 3 && (
           <ContentCardGrid
             heading={settings.sections.stripsHeading}
+            background="alt"
             cards={strips.slice(0, 8).map(stripToCard)}
             aspectRatio="cover"
             columns={5}
@@ -461,7 +464,7 @@ export default async function Home({
             emptyMessage=""
           />
         )}
-      </AlternatingSections>
+      </>
     </div>
   );
 }

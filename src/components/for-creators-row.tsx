@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CalendarDays, Wrench, Newspaper, Handshake } from "lucide-react";
 
 import { SectionHeading } from "@/components/section-heading";
-import { Section } from "@/components/ui/section";
+import { Section, type SectionProps } from "@/components/ui/section";
 import type { FunnelCard } from "@/lib/site-settings";
 
 /**
@@ -15,6 +15,7 @@ import type { FunnelCard } from "@/lib/site-settings";
 export function ForCreatorsRow({
   heading,
   cards,
+  background,
 }: {
   heading: string;
   cards: {
@@ -23,6 +24,7 @@ export function ForCreatorsRow({
     media: FunnelCard;
     allies: FunnelCard;
   };
+  background?: SectionProps["background"];
 }) {
   const areas = [
     { href: "/conventions", Icon: CalendarDays, card: cards.conventions },
@@ -32,8 +34,8 @@ export function ForCreatorsRow({
   ];
 
   return (
-    <Section padding="md">
-      <SectionHeading size="sm">{heading}</SectionHeading>
+    <Section padding="md" background={background}>
+      <SectionHeading size="md">{heading}</SectionHeading>
       <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {areas.map(({ href, Icon, card }) => (
           <li key={href}>
