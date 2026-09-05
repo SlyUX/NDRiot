@@ -237,7 +237,9 @@ function CardImage({
   initialsTone?: 'default' | 'brand'
   className?: string
 }) {
-  if (!image) {
+  // No asset (missing, or a Studio upload that never finalized into one) →
+  // fall back rather than render a broken box.
+  if (!image?.asset) {
     return fallbackInitials ? (
       <InitialsAvatar name={fallbackInitials} tone={initialsTone} className="h-full w-full text-4xl" />
     ) : (

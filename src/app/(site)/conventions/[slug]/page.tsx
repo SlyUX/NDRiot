@@ -156,7 +156,7 @@ export default async function ConventionPage({
           shown larger. No logo (the source found one for only ~⅗ of shows) →
           the same stylized initials tag a creator gets without an avatar. */}
       <div className="relative aspect-square w-full max-w-md overflow-hidden bg-white">
-        {convention.image ? (
+        {convention.image?.asset ? (
           <Image
             src={urlFor(convention.image).width(900).url()}
             alt={convention.image.alt ?? ""}
