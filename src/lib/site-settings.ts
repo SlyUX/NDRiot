@@ -931,7 +931,7 @@ const DEFAULTS: SiteSettings = {
       "— ND Riot",
     ].join("\n"),
   },
-  discordUrl: "https://discord.gg/fSSMjE5dw",
+  discordUrl: "https://discord.gg/YR9Y4mDSbK",
   // Discord (community) stays prominent up top; these are the traditional
   // social accounts, shown quietly in the footer. YouTube is a row away when
   // the channel is live.

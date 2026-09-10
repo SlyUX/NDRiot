@@ -9,6 +9,7 @@ import { signUnsubscribe } from "@/lib/noise-token";
 import { getSiteSettings } from "@/lib/site-settings";
 import { absoluteUrl } from "@/lib/site-url";
 import { client } from "@/sanity/client";
+import { getWriteClient } from "@/sanity/write-client";
 import {
   NOISE_ISSUE_BY_ID_QUERY,
   NOISE_LATEST_DRAFT_QUERY,
@@ -36,12 +37,15 @@ export async function GET(request: Request) {
   const id = url.searchParams.get("id");
   const asEmail = (url.searchParams.get("email") ?? admin ?? "").trim().toLowerCase();
 
+  // An explicit id (from the Studio "Preview this draft" action) reads through
+  // the token client so an UNPUBLISHED `drafts.` issue can be previewed. The
+  // default no-id path reads published issues via the public client.
   const issue = id
-    ? await client.fetch(NOISE_ISSUE_BY_ID_QUERY, { id })
+    ? await getWriteClient().fetch(NOISE_ISSUE_BY_ID_QUERY, { id })
     : await client.fetch(NOISE_LATEST_DRAFT_QUERY);
   if (!issue) {
     return new Response(
-      "No ND Noise draft found. Create a draft issue in the Studio first.",
+      "No ND Noise issue found. Create an issue in the Studio first (and save it).",
       { status: 404 },
     );
   }
