@@ -316,6 +316,37 @@ export type Update = {
   publishedAt: string;
 };
 
+export type NoiseIssue = {
+  _id: string;
+  _type: "noiseIssue";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title: string;
+  subject: string;
+  note?: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: "span";
+      _key: string;
+    }>;
+    style?: "normal" | "h3";
+    listItem?: "bullet";
+    markDefs?: Array<{
+      href?: string;
+      _type: "link";
+      _key: string;
+    }>;
+    level?: number;
+    _type: "block";
+    _key: string;
+  }>;
+  status: "draft" | "sent";
+  windowStart?: string;
+  sentAt?: string;
+};
+
 export type SanityFileAssetReference = {
   _ref: string;
   _type: "reference";
@@ -876,6 +907,23 @@ export type SiteSettings = {
     collabResponseBody?: string;
     collabIntroSubject?: string;
     collabIntroBody?: string;
+  };
+  noise?: {
+    greeting?: string;
+    greetingFallback?: string;
+    noteHeading?: string;
+    updatesHeading?: string;
+    conventionsHeading?: string;
+    newBooksHeading?: string;
+    stripsHeading?: string;
+    emptyFollowsNudge?: string;
+    signoff?: string;
+    footerLine?: string;
+    unsubscribeLabel?: string;
+    unsubscribedHeading?: string;
+    unsubscribedBody?: string;
+    reviewReadySubject?: string;
+    reviewReadyBody?: string;
   };
   stripIntake?: {
     heading?: string;
@@ -1588,6 +1636,7 @@ export type AllSanitySchemaTypes =
   | Slug
   | MediaReference
   | Update
+  | NoiseIssue
   | SanityFileAssetReference
   | RagIssue
   | Ally
@@ -4266,6 +4315,118 @@ export type GENRE_CREATORS_QUERY_RESULT = {
   total: number;
 };
 
+// Source: src/lib/queries.ts
+// Variable: NOISE_LATEST_DRAFT_QUERY
+// Query: *[_type=="noiseIssue" && status=="draft"]|order(_createdAt desc)[0]{_id,title,subject,note,status,windowStart,sentAt}
+export type NOISE_LATEST_DRAFT_QUERY_RESULT = {
+  _id: string;
+  title: string;
+  subject: string;
+  note: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: "span";
+      _key: string;
+    }>;
+    style?: "h3" | "normal";
+    listItem?: "bullet";
+    markDefs?: Array<{
+      href?: string;
+      _type: "link";
+      _key: string;
+    }>;
+    level?: number;
+    _type: "block";
+    _key: string;
+  }> | null;
+  status: "draft";
+  windowStart: string | null;
+  sentAt: string | null;
+} | null;
+
+// Source: src/lib/queries.ts
+// Variable: NOISE_ISSUE_BY_ID_QUERY
+// Query: *[_type=="noiseIssue" && _id==$id][0]{_id,title,subject,note,status,windowStart,sentAt}
+export type NOISE_ISSUE_BY_ID_QUERY_RESULT = {
+  _id: string;
+  title: string;
+  subject: string;
+  note: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: "span";
+      _key: string;
+    }>;
+    style?: "h3" | "normal";
+    listItem?: "bullet";
+    markDefs?: Array<{
+      href?: string;
+      _type: "link";
+      _key: string;
+    }>;
+    level?: number;
+    _type: "block";
+    _key: string;
+  }> | null;
+  status: "draft" | "sent";
+  windowStart: string | null;
+  sentAt: string | null;
+} | null;
+
+// Source: src/lib/queries.ts
+// Variable: NOISE_LAST_SENT_QUERY
+// Query: *[_type=="noiseIssue" && status=="sent" && defined(sentAt)]|order(sentAt desc)[0]{_id,sentAt}
+export type NOISE_LAST_SENT_QUERY_RESULT = {
+  _id: string;
+  sentAt: string;
+} | null;
+
+// Source: src/lib/queries.ts
+// Variable: NOISE_UPDATES_QUERY
+// Query: *[_type=="update" && target._ref in $ids && defined(publishedAt) && dateTime(publishedAt) >= dateTime($since)]|order(publishedAt desc)[0...$limit]{  _id,body,publishedAt,  "targetType":target->_type,  "targetName":coalesce(target->title,target->name),  "targetSlug":target->slug.current}
+export type NOISE_UPDATES_QUERY_RESULT = Array<{
+  _id: string;
+  body: string;
+  publishedAt: string;
+  targetType: "book" | "creator";
+  targetName: string | null;
+  targetSlug: string;
+}>;
+
+// Source: src/lib/queries.ts
+// Variable: NOISE_NEW_BOOKS_QUERY
+// Query: *[_type=="book" && creator._ref in $ids && defined(slug.current) && dateTime(_createdAt) >= dateTime($since)]|order(_createdAt desc)[0...$limit]{  _id,title,"slug":slug.current,"creatorName":creator->name}
+export type NOISE_NEW_BOOKS_QUERY_RESULT = Array<{
+  _id: string;
+  title: string;
+  slug: string;
+  creatorName: string;
+}>;
+
+// Source: src/lib/queries.ts
+// Variable: NOISE_APPEARANCES_QUERY
+// Query: *[_type=="conventionAppearance" && creator._ref in $ids && defined(creator->slug.current) && defined(venue->slug.current) && (!defined(forDate) || dateTime(forDate) > dateTime(now()))]|order(forDate asc)[0...$limit]{  _id,forDate,  "creatorName":creator->name,  "venueName":venue->name,  "venueSlug":venue->slug.current}
+export type NOISE_APPEARANCES_QUERY_RESULT = Array<{
+  _id: string;
+  forDate: string | null;
+  creatorName: string;
+  venueName: string;
+  venueSlug: string;
+}>;
+
+// Source: src/lib/queries.ts
+// Variable: NOISE_STRIPS_QUERY
+// Query: *[_type=="strip" && defined(slug.current) && defined(publishedAt) && dateTime(publishedAt) >= dateTime($since)]|order(publishedAt desc)[0...$limit]{  _id,title,"slug":slug.current,image,"creatorName":creator->name}
+export type NOISE_STRIPS_QUERY_RESULT = Array<{
+  _id: string;
+  title: string;
+  slug: string;
+  image: ImageWithAlt;
+  creatorName: string;
+}>;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
@@ -4353,5 +4514,12 @@ declare module "@sanity/client" {
     '*[_type=="media" && _id in $ids && defined(slug.current)]|order(name asc){_id,name}': INTAKE_OWNED_MEDIA_QUERY_RESULT;
     '*[_type=="media" && _id==$id][0]{\n  _id,name,"slug":slug.current,kinds,\n  "aboutText":about,\n  genresCovered,pitchInfo,\n  logo,"logoAlt":logo.alt,\n  links[]{label,url},\n  feedUrl,feedConsent\n}': INTAKE_MEDIA_EDIT_QUERY_RESULT;
     '{\n  "items": *[_type=="creator" && $genre in genres]|order(name asc)[0...$limit]{\n    _id,name,"slug":slug.current,place,photo,genres,openToCollaboration,\n    "bioText":pt::text(bio),\n    studio->{_id,name,"slug":slug.current,website,logo}\n  },\n  "total": count(*[_type=="creator" && $genre in genres])\n}': GENRE_CREATORS_QUERY_RESULT;
+    '*[_type=="noiseIssue" && status=="draft"]|order(_createdAt desc)[0]{_id,title,subject,note,status,windowStart,sentAt}': NOISE_LATEST_DRAFT_QUERY_RESULT;
+    '*[_type=="noiseIssue" && _id==$id][0]{_id,title,subject,note,status,windowStart,sentAt}': NOISE_ISSUE_BY_ID_QUERY_RESULT;
+    '*[_type=="noiseIssue" && status=="sent" && defined(sentAt)]|order(sentAt desc)[0]{_id,sentAt}': NOISE_LAST_SENT_QUERY_RESULT;
+    '*[_type=="update" && target._ref in $ids && defined(publishedAt) && dateTime(publishedAt) >= dateTime($since)]|order(publishedAt desc)[0...$limit]{\n  _id,body,publishedAt,\n  "targetType":target->_type,\n  "targetName":coalesce(target->title,target->name),\n  "targetSlug":target->slug.current\n}': NOISE_UPDATES_QUERY_RESULT;
+    '*[_type=="book" && creator._ref in $ids && defined(slug.current) && dateTime(_createdAt) >= dateTime($since)]|order(_createdAt desc)[0...$limit]{\n  _id,title,"slug":slug.current,"creatorName":creator->name\n}': NOISE_NEW_BOOKS_QUERY_RESULT;
+    '*[_type=="conventionAppearance" && creator._ref in $ids && defined(creator->slug.current) && defined(venue->slug.current) && (!defined(forDate) || dateTime(forDate) > dateTime(now()))]|order(forDate asc)[0...$limit]{\n  _id,forDate,\n  "creatorName":creator->name,\n  "venueName":venue->name,\n  "venueSlug":venue->slug.current\n}': NOISE_APPEARANCES_QUERY_RESULT;
+    '*[_type=="strip" && defined(slug.current) && defined(publishedAt) && dateTime(publishedAt) >= dateTime($since)]|order(publishedAt desc)[0...$limit]{\n  _id,title,"slug":slug.current,image,"creatorName":creator->name\n}': NOISE_STRIPS_QUERY_RESULT;
   }
 }

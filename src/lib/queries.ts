@@ -746,3 +746,57 @@ export const GENRE_CREATORS_QUERY = defineQuery(`{
   },
   "total": count(*[_type=="creator" && $genre in genres])
 }`);
+
+/* ---------------------------------------------------- ND Noise digest
+ * The monthly personalized newsletter (src/lib/noise-digest.ts) composes each
+ * subscriber's email from these. `$ids` are the reader's followed creator/comic
+ * ids (Save = Follow, §3); `$since` bounds "what's new" to the issue window.
+ * Recency only — never ranked or counted.
+ */
+
+/** The latest ND Noise issue still in draft — what a preview/send acts on. */
+export const NOISE_LATEST_DRAFT_QUERY = defineQuery(
+  `*[_type=="noiseIssue" && status=="draft"]|order(_createdAt desc)[0]{_id,title,subject,note,status,windowStart,sentAt}`,
+);
+
+/** A specific ND Noise issue by id (the send targets one explicitly). */
+export const NOISE_ISSUE_BY_ID_QUERY = defineQuery(
+  `*[_type=="noiseIssue" && _id==$id][0]{_id,title,subject,note,status,windowStart,sentAt}`,
+);
+
+/** The most recently SENT issue — its sentAt seeds the next window. */
+export const NOISE_LAST_SENT_QUERY = defineQuery(
+  `*[_type=="noiseIssue" && status=="sent" && defined(sentAt)]|order(sentAt desc)[0]{_id,sentAt}`,
+);
+
+/** Updates from followed creators/comics, published in the window. */
+export const NOISE_UPDATES_QUERY =
+  defineQuery(`*[_type=="update" && target._ref in $ids && defined(publishedAt) && dateTime(publishedAt) >= dateTime($since)]|order(publishedAt desc)[0...$limit]{
+  _id,body,publishedAt,
+  "targetType":target->_type,
+  "targetName":coalesce(target->title,target->name),
+  "targetSlug":target->slug.current
+}`);
+
+/** Newly added comics by followed creators, created in the window. */
+export const NOISE_NEW_BOOKS_QUERY =
+  defineQuery(`*[_type=="book" && creator._ref in $ids && defined(slug.current) && dateTime(_createdAt) >= dateTime($since)]|order(_createdAt desc)[0...$limit]{
+  _id,title,"slug":slug.current,"creatorName":creator->name
+}`);
+
+/** Upcoming convention appearances by followed creators (window-independent —
+ *  a follower wants the con that's still ahead, whenever it was announced). */
+export const NOISE_APPEARANCES_QUERY =
+  defineQuery(`*[_type=="conventionAppearance" && creator._ref in $ids && defined(creator->slug.current) && defined(venue->slug.current) && (!defined(forDate) || dateTime(forDate) > dateTime(now()))]|order(forDate asc)[0...$limit]{
+  _id,forDate,
+  "creatorName":creator->name,
+  "venueName":venue->name,
+  "venueSlug":venue->slug.current
+}`);
+
+/** New strips published in the window — the shared "Sunday Strips" roundup
+ *  (same for every subscriber; independent of follows). */
+export const NOISE_STRIPS_QUERY =
+  defineQuery(`*[_type=="strip" && defined(slug.current) && defined(publishedAt) && dateTime(publishedAt) >= dateTime($since)]|order(publishedAt desc)[0...$limit]{
+  _id,title,"slug":slug.current,image,"creatorName":creator->name
+}`);

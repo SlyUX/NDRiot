@@ -17,3 +17,8 @@ export function isAdminEmail(email?: string | null): boolean {
   if (!email) return false;
   return ADMIN_EMAILS.includes(email.trim().toLowerCase());
 }
+
+/** The admin allow-list — e.g. for a cron to email whoever reviews ND Noise. */
+export function adminEmails(): readonly string[] {
+  return ADMIN_EMAILS;
+}

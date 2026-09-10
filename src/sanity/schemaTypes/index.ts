@@ -9,6 +9,7 @@ import freeDownload from "./freeDownload";
 import resource from "./resource";
 import ally from "./ally";
 import ragIssue from "./ragIssue";
+import noiseIssue from "./noiseIssue";
 import update from "./update";
 import convention from "./convention";
 import conventionAppearance from "./conventionAppearance";
@@ -36,6 +37,7 @@ export const schemaTypes = [
   resource,
   ally,
   ragIssue,
+  noiseIssue,
   update,
   convention,
   conventionAppearance,

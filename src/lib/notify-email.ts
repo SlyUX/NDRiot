@@ -16,8 +16,13 @@ export function fillTokens(template: string, tokens: Record<string, string>): st
 export async function sendEmail(input: {
   to: string
   subject: string
+  /** Plain-text body. Always send one — it's the fallback for `html`. */
   text: string
+  /** Optional HTML body (the digest uses it); text remains the fallback part. */
+  html?: string
   replyTo?: string
+  /** Extra headers, e.g. `List-Unsubscribe` for the newsletter. */
+  headers?: Record<string, string>
 }): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY
   const from = process.env.CONTACT_FROM
@@ -35,6 +40,8 @@ export async function sendEmail(input: {
         reply_to: input.replyTo ?? DEFAULT_REPLY_TO,
         subject: input.subject,
         text: input.text,
+        ...(input.html ? { html: input.html } : {}),
+        ...(input.headers ? { headers: input.headers } : {}),
       }),
     })
     if (!res.ok) console.error('[email] Resend responded', res.status)

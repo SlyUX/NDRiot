@@ -422,6 +422,37 @@ export type NewsletterSettings = {
 };
 
 /**
+ * ND Noise — the monthly personalized digest email (src/lib/noise-digest.ts).
+ * Fixed chrome only; the per-issue subject and Note live on the `noiseIssue`
+ * document, and each subscriber's follow content is composed from live data.
+ * `{name}` in the greeting resolves to the subscriber's first name (or a
+ * neutral fallback when MailerLite has none).
+ */
+export type NoiseSettings = {
+  /** Opening line, e.g. "Hi {name}," — {name} falls back to `greetingFallback`. */
+  greeting: string;
+  greetingFallback: string;
+  /** Section headings inside the email. */
+  noteHeading: string;
+  updatesHeading: string;
+  conventionsHeading: string;
+  newBooksHeading: string;
+  stripsHeading: string;
+  /** Shown in place of the follow sections when a subscriber follows nothing yet. */
+  emptyFollowsNudge: string;
+  /** Footer: a sign-off line, the unsubscribe sentence, and the link label. */
+  signoff: string;
+  footerLine: string;
+  unsubscribeLabel: string;
+  /** Confirmation shown after a one-click unsubscribe. */
+  unsubscribedHeading: string;
+  unsubscribedBody: string;
+  /** The "an issue is ready to review" email to the admin (cron → you). */
+  reviewReadySubject: string;
+  reviewReadyBody: string;
+};
+
+/**
  * Transactional notification emails. Bodies support tokens replaced at send:
  * `{name}` (the creator's first name), `{title}` (a book), `{count}` + `{titles}`
  * (the daily book digest), `{link}` (the item's public URL), `{booksLink}` (the
@@ -452,6 +483,7 @@ export interface SiteSettings {
   siteDescription: string;
   footer: string;
   newsletter: NewsletterSettings;
+  noise: NoiseSettings;
   notifications: NotificationsSettings;
   /** Invite to the ND Riot Discord — shown in the nav and footer. Absent hides them. */
   discordUrl?: string;
@@ -765,6 +797,33 @@ const DEFAULTS: SiteSettings = {
     successMessage:
       "Almost there — check your inbox and confirm to finish subscribing.",
     errorMessage: "That didn’t go through. Please try again in a moment.",
+  },
+  noise: {
+    greeting: "Hi {name},",
+    greetingFallback: "there",
+    noteHeading: "A note from ND Riot",
+    updatesHeading: "From the creators and comics you follow",
+    conventionsHeading: "Upcoming conventions",
+    newBooksHeading: "Newly added comics",
+    stripsHeading: "Sunday Strips",
+    emptyFollowsNudge:
+      "You’re not following anyone yet. Save a creator or comic on ND Riot and next month this section fills with their news.",
+    signoff: "— ND Riot",
+    footerLine: "You’re getting ND Noise because you subscribed at ndriot.com.",
+    unsubscribeLabel: "Unsubscribe",
+    unsubscribedHeading: "You’re unsubscribed",
+    unsubscribedBody:
+      "You won’t receive ND Noise anymore. You can resubscribe any time at ndriot.com.",
+    reviewReadySubject: "ND Noise is ready to review",
+    reviewReadyBody: [
+      "This month’s ND Noise draft is ready.",
+      "",
+      "Preview it, edit the note, then send when you’re happy: {previewLink}",
+      "",
+      "Nothing goes out until you trigger the send.",
+      "",
+      "— ND Riot",
+    ].join("\n"),
   },
   notifications: {
     creatorSubmitSubject:
@@ -1543,7 +1602,7 @@ export const SITE_SETTINGS_QUERY = `*[_id=="siteSettings"][0]{
   siteTitle,siteDescription,footer,discordUrl,socialLinks[]{platform,url},
   newsletter{heading,description,items,placeholder,buttonLabel,consent,successMessage,errorMessage},
   about{heading,body,faqHeading,faq[]{question,answer},seoTitle,seoDescription},aiLetter,aiUsage,
-  home,sections,empty,creatorIntake,bookIntake,mediaIntake,stripIntake,reviewNotice,notifications,collab,
+  home,sections,empty,creatorIntake,bookIntake,mediaIntake,stripIntake,reviewNotice,notifications,noise,collab,
   hero{background,headline,body,tagline,featureCtaLabel,featuredHeading,newHeading,ctas[]{label,href}},
   join{heading,editHeading,body,ctaLabel,formUrl,funnelHeading,funnelIntro,creatorsLabel,creatorsDesc,contactLabel,contactDesc,mediaLabel,mediaDesc,readersLabel,readersDesc,readersBadge,terms,termsWhy},
   contact{heading,linkLabel,body,nameLabel,emailLabel,subjectLabel,messageLabel,submitLabel,successMessage,errorMessage},
@@ -1580,6 +1639,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     siteDescription: data.siteDescription?.trim() || DEFAULTS.siteDescription,
     footer: data.footer?.trim() || DEFAULTS.footer,
     newsletter: mergeGroup(DEFAULTS.newsletter, data.newsletter),
+    noise: mergeGroup(DEFAULTS.noise, data.noise),
     notifications: mergeGroup(DEFAULTS.notifications, data.notifications),
     discordUrl: data.discordUrl?.trim() || DEFAULTS.discordUrl,
     socialLinks: data.socialLinks?.length
