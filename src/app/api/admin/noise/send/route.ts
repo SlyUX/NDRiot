@@ -67,7 +67,7 @@ export async function POST(request: Request) {
 
   const settings = await getSiteSettings();
   const since = await resolveWindowSince(issue);
-  const strips = await fetchSharedStrips(since);
+  const strips = await fetchSharedStrips();
 
   let subscribers;
   try {
@@ -89,7 +89,6 @@ export async function POST(request: Request) {
       : absoluteUrl("/noise/unsubscribed");
     const { subject, html, text } = await composeSubscriberEmail({
       email: sub.email,
-      name: sub.name,
       issue,
       settings: settings.noise,
       strips,

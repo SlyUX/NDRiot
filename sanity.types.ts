@@ -909,13 +909,13 @@ export type SiteSettings = {
     collabIntroBody?: string;
   };
   noise?: {
-    greeting?: string;
-    greetingFallback?: string;
+    mastheadTitle?: string;
     noteHeading?: string;
     updatesHeading?: string;
     conventionsHeading?: string;
     newBooksHeading?: string;
     stripsHeading?: string;
+    stripsAllLabel?: string;
     emptyFollowsNudge?: string;
     signoff?: string;
     footerLine?: string;
@@ -4417,13 +4417,18 @@ export type NOISE_APPEARANCES_QUERY_RESULT = Array<{
 }>;
 
 // Source: src/lib/queries.ts
-// Variable: NOISE_STRIPS_QUERY
-// Query: *[_type=="strip" && defined(slug.current) && defined(publishedAt) && dateTime(publishedAt) >= dateTime($since)]|order(publishedAt desc)[0...$limit]{  _id,title,"slug":slug.current,image,"creatorName":creator->name}
-export type NOISE_STRIPS_QUERY_RESULT = Array<{
+// Variable: NOISE_LATEST_STRIPS_QUERY
+// Query: *[_type=="strip" && defined(slug.current) && defined(publishedAt)]|order(publishedAt desc)[0...$limit]{  _id,title,"slug":slug.current,caption,image,  "dimensions":image.asset->metadata.dimensions{width,height},  "creatorName":creator->name}
+export type NOISE_LATEST_STRIPS_QUERY_RESULT = Array<{
   _id: string;
   title: string;
   slug: string;
+  caption: string | null;
   image: ImageWithAlt;
+  dimensions: {
+    width: number;
+    height: number;
+  } | null;
   creatorName: string;
 }>;
 
@@ -4520,6 +4525,6 @@ declare module "@sanity/client" {
     '*[_type=="update" && target._ref in $ids && defined(publishedAt) && dateTime(publishedAt) >= dateTime($since)]|order(publishedAt desc)[0...$limit]{\n  _id,body,publishedAt,\n  "targetType":target->_type,\n  "targetName":coalesce(target->title,target->name),\n  "targetSlug":target->slug.current\n}': NOISE_UPDATES_QUERY_RESULT;
     '*[_type=="book" && creator._ref in $ids && defined(slug.current) && dateTime(_createdAt) >= dateTime($since)]|order(_createdAt desc)[0...$limit]{\n  _id,title,"slug":slug.current,"creatorName":creator->name\n}': NOISE_NEW_BOOKS_QUERY_RESULT;
     '*[_type=="conventionAppearance" && creator._ref in $ids && defined(creator->slug.current) && defined(venue->slug.current) && (!defined(forDate) || dateTime(forDate) > dateTime(now()))]|order(forDate asc)[0...$limit]{\n  _id,forDate,\n  "creatorName":creator->name,\n  "venueName":venue->name,\n  "venueSlug":venue->slug.current\n}': NOISE_APPEARANCES_QUERY_RESULT;
-    '*[_type=="strip" && defined(slug.current) && defined(publishedAt) && dateTime(publishedAt) >= dateTime($since)]|order(publishedAt desc)[0...$limit]{\n  _id,title,"slug":slug.current,image,"creatorName":creator->name\n}': NOISE_STRIPS_QUERY_RESULT;
+    '*[_type=="strip" && defined(slug.current) && defined(publishedAt)]|order(publishedAt desc)[0...$limit]{\n  _id,title,"slug":slug.current,caption,image,\n  "dimensions":image.asset->metadata.dimensions{width,height},\n  "creatorName":creator->name\n}': NOISE_LATEST_STRIPS_QUERY_RESULT;
   }
 }

@@ -52,7 +52,7 @@ export async function GET(request: Request) {
 
   const settings = await getSiteSettings();
   const since = await resolveWindowSince(issue);
-  const strips = await fetchSharedStrips(since);
+  const strips = await fetchSharedStrips();
   const token = signUnsubscribe(asEmail);
   const unsubscribeUrl = token
     ? absoluteUrl(`/api/noise/unsubscribe?token=${encodeURIComponent(token)}`)
@@ -60,7 +60,6 @@ export async function GET(request: Request) {
 
   const { html } = await composeSubscriberEmail({
     email: asEmail,
-    name: session?.user?.name,
     issue,
     settings: settings.noise,
     strips,

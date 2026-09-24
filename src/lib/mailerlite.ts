@@ -81,8 +81,6 @@ export async function isSubscribedToNewsletter(email: string): Promise<boolean> 
 export interface NoiseSubscriber {
   id: string
   email: string
-  /** First-name field when MailerLite has one; used for the digest greeting. */
-  name?: string
 }
 
 /**
@@ -114,16 +112,12 @@ export async function listGroupSubscribers(): Promise<NoiseSubscriber[]> {
       throw new Error(`MailerLite list responded ${res.status}`)
     }
     const body = (await res.json()) as {
-      data?: { id?: string | number; email?: string; fields?: { name?: string | null } }[]
+      data?: { id?: string | number; email?: string }[]
       meta?: { next_cursor?: string | null }
     }
     for (const sub of body.data ?? []) {
       if (!sub.email) continue
-      out.push({
-        id: String(sub.id ?? sub.email),
-        email: sub.email,
-        name: sub.fields?.name ?? undefined,
-      })
+      out.push({ id: String(sub.id ?? sub.email), email: sub.email })
     }
     cursor = body.meta?.next_cursor ?? null
     if (!cursor) break

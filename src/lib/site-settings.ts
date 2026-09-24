@@ -429,15 +429,16 @@ export type NewsletterSettings = {
  * neutral fallback when MailerLite has none).
  */
 export type NoiseSettings = {
-  /** Opening line, e.g. "Hi {name}," — {name} falls back to `greetingFallback`. */
-  greeting: string;
-  greetingFallback: string;
+  /** The newsletter's name, shown as the email masthead + text header. */
+  mastheadTitle: string;
   /** Section headings inside the email. */
   noteHeading: string;
   updatesHeading: string;
   conventionsHeading: string;
   newBooksHeading: string;
   stripsHeading: string;
+  /** The link beneath the strips to the full, recency-ordered strips listing. */
+  stripsAllLabel: string;
   /** Shown in place of the follow sections when a subscriber follows nothing yet. */
   emptyFollowsNudge: string;
   /** Footer: a sign-off line, the unsubscribe sentence, and the link label. */
@@ -799,13 +800,13 @@ const DEFAULTS: SiteSettings = {
     errorMessage: "That didn’t go through. Please try again in a moment.",
   },
   noise: {
-    greeting: "Hi {name},",
-    greetingFallback: "there",
+    mastheadTitle: "Sunday Strips and ND Riot Updates",
     noteHeading: "A note from ND Riot",
     updatesHeading: "From the creators and comics you follow",
     conventionsHeading: "Upcoming conventions",
     newBooksHeading: "Newly added comics",
     stripsHeading: "Sunday Strips",
+    stripsAllLabel: "See every strip at ND Riot →",
     emptyFollowsNudge:
       "You’re not following anyone yet. Save a creator or comic on ND Riot and next month this section fills with their news.",
     signoff: "— ND Riot",

@@ -794,9 +794,12 @@ export const NOISE_APPEARANCES_QUERY =
   "venueSlug":venue->slug.current
 }`);
 
-/** New strips published in the window — the shared "Sunday Strips" roundup
- *  (same for every subscriber; independent of follows). */
-export const NOISE_STRIPS_QUERY =
-  defineQuery(`*[_type=="strip" && defined(slug.current) && defined(publishedAt) && dateTime(publishedAt) >= dateTime($since)]|order(publishedAt desc)[0...$limit]{
-  _id,title,"slug":slug.current,image,"creatorName":creator->name
+/** The latest strips — the shared "Sunday Strips" showcase (same for every
+ *  subscriber; newest first, independent of follows or the issue window).
+ *  Carries image dimensions so the email can reserve each strip's height. */
+export const NOISE_LATEST_STRIPS_QUERY =
+  defineQuery(`*[_type=="strip" && defined(slug.current) && defined(publishedAt)]|order(publishedAt desc)[0...$limit]{
+  _id,title,"slug":slug.current,caption,image,
+  "dimensions":image.asset->metadata.dimensions{width,height},
+  "creatorName":creator->name
 }`);

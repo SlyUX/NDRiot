@@ -5518,14 +5518,7 @@
         "value": {
           "type": "object",
           "attributes": {
-            "greeting": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
-            "greetingFallback": {
+            "mastheadTitle": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"
@@ -5561,6 +5554,13 @@
               "optional": true
             },
             "stripsHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "stripsAllLabel": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

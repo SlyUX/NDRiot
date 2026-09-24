@@ -350,25 +350,25 @@ export default defineType({
       group: "noise",
       options: { collapsible: true, collapsed: true },
       description:
-        "Fixed wording for the monthly ND Noise digest. Each issue’s subject line and the note itself live on the ND Noise issue document, not here. {name} in the greeting is the subscriber’s first name.",
+        "Fixed wording for the monthly digest. Each issue’s subject line and the note itself live on the ND Noise issue document, not here.",
       fields: [
         defineField({
-          name: "greeting",
-          title: "Greeting line ({name})",
+          name: "mastheadTitle",
+          title: "Newsletter name (masthead)",
           type: "string",
-          description: "e.g. “Hi {name},”. {name} falls back to the value below.",
-        }),
-        defineField({
-          name: "greetingFallback",
-          title: "Greeting fallback (no name)",
-          type: "string",
-          description: "Used for {name} when MailerLite has no first name — e.g. “there”.",
+          description: "The name shown at the top of the email — e.g. “Sunday Strips and ND Riot Updates”.",
         }),
         defineField({ name: "noteHeading", title: "“Note from ND Riot” heading", type: "string" }),
         defineField({ name: "updatesHeading", title: "Follow updates — heading", type: "string" }),
         defineField({ name: "conventionsHeading", title: "Conventions — heading", type: "string" }),
         defineField({ name: "newBooksHeading", title: "New comics — heading", type: "string" }),
         defineField({ name: "stripsHeading", title: "Sunday Strips — heading", type: "string" }),
+        defineField({
+          name: "stripsAllLabel",
+          title: "Sunday Strips — “see all” link label",
+          type: "string",
+          description: "Links to the full strips listing (newest first).",
+        }),
         defineField({
           name: "emptyFollowsNudge",
           title: "Nudge when following nothing",
