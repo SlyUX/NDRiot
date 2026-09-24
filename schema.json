@@ -5560,6 +5560,13 @@
               },
               "optional": true
             },
+            "stripsSubline": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "stripsAllLabel": {
               "type": "objectAttribute",
               "value": {

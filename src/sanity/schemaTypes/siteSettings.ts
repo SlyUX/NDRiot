@@ -364,6 +364,13 @@ export default defineType({
         defineField({ name: "newBooksHeading", title: "New comics — heading", type: "string" }),
         defineField({ name: "stripsHeading", title: "Sunday Strips — heading", type: "string" }),
         defineField({
+          name: "stripsSubline",
+          title: "Sunday Strips — subline",
+          type: "text",
+          rows: 2,
+          description: "A one-line tagline shown under the strips heading.",
+        }),
+        defineField({
           name: "stripsAllLabel",
           title: "Sunday Strips — “see all” link label",
           type: "string",

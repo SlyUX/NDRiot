@@ -296,7 +296,12 @@ function newBooksSection(heading: string, books: NoiseNewBook[]): string {
  * a newspaper comics page, on a light-gray panel with a bold masthead and a
  * double rule. Ends with a link to the full, recency-ordered strips listing.
  */
-function stripsSection(heading: string, allLabel: string, strips: NoiseStrip[]): string {
+function stripsSection(
+  heading: string,
+  subline: string,
+  allLabel: string,
+  strips: NoiseStrip[],
+): string {
   if (strips.length === 0) return ''
   const items = strips
     .map((s) => {
@@ -332,9 +337,14 @@ function stripsSection(heading: string, allLabel: string, strips: NoiseStrip[]):
   )}" style="font-family:${SANS};font-weight:700;color:${INK};text-decoration:underline;">${escapeHtml(
     allLabel,
   )}</a></div>`
+  const sublineHtml = subline
+    ? `<div style="font-size:13px;font-style:italic;color:${INK_MUTED};margin-top:6px;">${escapeHtml(
+        subline,
+      )}</div>`
+    : ''
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${PANEL};margin:24px 0;"><tr><td style="padding:20px;"><div style="font-family:${SANS};text-align:center;border-bottom:3px double ${INK};padding-bottom:8px;margin-bottom:16px;"><div style="font-size:24px;font-weight:900;letter-spacing:0.02em;color:${INK};">${escapeHtml(
     heading,
-  )}</div></div>${items}${all}</td></tr></table>`
+  )}</div>${sublineHtml}</div>${items}${all}</td></tr></table>`
 }
 
 /** Format a date-only string (YYYY-MM-DD) in local time, no timezone drift. */
@@ -372,6 +382,7 @@ function buildText(input: RenderInput, hasFollow: boolean): string {
 
   if (strips.length) {
     lines.push(settings.stripsHeading.toUpperCase())
+    if (settings.stripsSubline) lines.push(settings.stripsSubline)
     for (const s of strips) lines.push(`• ${s.title ?? 'Strip'}${s.creatorName ? ` by ${s.creatorName}` : ''}${s.slug ? ` — ${absoluteUrl(`/strips/${s.slug}`)}` : ''}`)
     lines.push(`${settings.stripsAllLabel} ${absoluteUrl('/comics?tab=strips')}`, '')
   }
@@ -452,7 +463,7 @@ export function renderNoiseEmail(input: RenderInput): {
   // then the reader's personalized follow updates.
   const body = [
     noteBlock,
-    stripsSection(settings.stripsHeading, settings.stripsAllLabel, strips),
+    stripsSection(settings.stripsHeading, settings.stripsSubline, settings.stripsAllLabel, strips),
     conventionsSection(settings.conventionsHeading, conventions),
     followBlocks,
   ].join('\n')
@@ -471,9 +482,9 @@ export function renderNoiseEmail(input: RenderInput): {
   const subject = issue.subject ?? settings.mastheadTitle
   const html = `<!doctype html><html><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>${escapeHtml(
     subject,
-  )}</title></head><body style="margin:0;padding:0;background:${BG};"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BG};"><tr><td align="center" style="padding:24px 12px;"><table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;font-family:${SANS};color:${FG};"><tr><td><div style="text-align:center;margin:0 0 16px 0;"><img src="${escapeHtml(
+  )}</title></head><body style="margin:0;padding:0;background:${BG};"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BG};"><tr><td align="center" style="padding:24px 12px;"><table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;font-family:${SANS};color:${FG};"><tr><td><div style="text-align:left;margin:0 0 16px 0;"><img src="${escapeHtml(
     absoluteUrl(LOGO_PATH),
-  )}" width="150" alt="ND Riot" style="display:inline-block;width:150px;max-width:150px;height:auto;border:0;" /></div><div style="font-weight:900;letter-spacing:-0.01em;text-transform:uppercase;font-size:20px;line-height:1.2;color:${PINK};margin:0 0 12px 0;">${escapeHtml(
+  )}" width="150" alt="ND Riot" style="display:block;width:150px;max-width:150px;height:auto;border:0;" /></div><div style="font-weight:900;letter-spacing:-0.01em;text-transform:uppercase;font-size:20px;line-height:1.2;color:${PINK};margin:0 0 12px 0;">${escapeHtml(
     settings.mastheadTitle,
   )}</div>${body}${footer}</td></tr></table></td></tr></table></body></html>`
 

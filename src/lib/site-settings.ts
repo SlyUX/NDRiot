@@ -437,6 +437,8 @@ export type NoiseSettings = {
   conventionsHeading: string;
   newBooksHeading: string;
   stripsHeading: string;
+  /** A one-line tagline under the strips heading. */
+  stripsSubline: string;
   /** The link beneath the strips to the full, recency-ordered strips listing. */
   stripsAllLabel: string;
   /** Shown in place of the follow sections when a subscriber follows nothing yet. */
@@ -806,6 +808,8 @@ const DEFAULTS: SiteSettings = {
     conventionsHeading: "Upcoming conventions",
     newBooksHeading: "Newly added comics",
     stripsHeading: "• LET’S STRIP! •",
+    stripsSubline:
+      "Single-page comics to scratch that old ‘Sunday Comics’ itch – with just a dash of feistiness.",
     stripsAllLabel: "See every strip at ND Riot →",
     emptyFollowsNudge:
       "You’re not following anyone yet. Save a creator or comic on ND Riot and next month this section fills with their news.",
