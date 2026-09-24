@@ -49,7 +49,10 @@ const BORDER = '#282828'
 const CREAM = '#f5edd8'
 const INK = '#1a1a1a'
 const INK_MUTED = '#4a4a4a'
-const SERIF = "Georgia, 'Times New Roman', serif"
+// One sans-serif stack for the whole email, funnies panel included.
+const SANS = 'Helvetica, Arial, sans-serif'
+/** The ND Riot wordmark, displayed at 150px (rendered 2x for crispness). */
+const LOGO_PATH = '/nd-riot-logo-email.png'
 
 /** Escape text for safe interpolation into HTML. */
 // (No first-name greeting — see the module header.)
@@ -267,11 +270,11 @@ function stripsSection(heading: string, allLabel: string, strips: NoiseStrip[]):
             s.title ?? 'Strip',
           )}" style="display:block;width:100%;height:auto;border:1px solid ${INK};background:#ffffff;" />`
         : ''
-      const credit = `<div style="font-family:${SERIF};color:${INK};margin:6px 0 0 0;"><span style="font-weight:700;">${escapeHtml(
+      const credit = `<div style="font-family:${SANS};color:${INK};margin:6px 0 0 0;"><span style="font-weight:700;">${escapeHtml(
         s.title ?? 'Strip',
       )}</span>${s.creatorName ? ` <span style="font-style:italic;">by ${escapeHtml(s.creatorName)}</span>` : ''}</div>`
       const caption = s.caption
-        ? `<div style="font-family:${SERIF};font-style:italic;color:${INK_MUTED};font-size:13px;margin-top:2px;">${escapeHtml(
+        ? `<div style="font-family:${SANS};font-style:italic;color:${INK_MUTED};font-size:13px;margin-top:2px;">${escapeHtml(
             s.caption,
           )}</div>`
         : ''
@@ -284,10 +287,10 @@ function stripsSection(heading: string, allLabel: string, strips: NoiseStrip[]):
     .join('')
   const all = `<div style="text-align:center;margin:4px 0 0 0;"><a href="${escapeHtml(
     absoluteUrl('/comics?tab=strips'),
-  )}" style="font-family:${SERIF};font-weight:700;color:${INK};text-decoration:underline;">${escapeHtml(
+  )}" style="font-family:${SANS};font-weight:700;color:${INK};text-decoration:underline;">${escapeHtml(
     allLabel,
   )}</a></div>`
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${CREAM};margin:24px 0;"><tr><td style="padding:20px;"><div style="font-family:${SERIF};text-align:center;border-bottom:3px double ${INK};padding-bottom:8px;margin-bottom:16px;"><div style="font-size:24px;font-weight:900;letter-spacing:0.02em;color:${INK};">${escapeHtml(
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${CREAM};margin:24px 0;"><tr><td style="padding:20px;"><div style="font-family:${SANS};text-align:center;border-bottom:3px double ${INK};padding-bottom:8px;margin-bottom:16px;"><div style="font-size:24px;font-weight:900;letter-spacing:0.02em;color:${INK};">${escapeHtml(
     heading,
   )}</div></div>${items}${all}</td></tr></table>`
 }
@@ -417,7 +420,9 @@ export function renderNoiseEmail(input: RenderInput): {
   const subject = issue.subject ?? settings.mastheadTitle
   const html = `<!doctype html><html><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>${escapeHtml(
     subject,
-  )}</title></head><body style="margin:0;padding:0;background:${BG};"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BG};"><tr><td align="center" style="padding:24px 12px;"><table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;font-family:Helvetica,Arial,sans-serif;color:${FG};"><tr><td><div style="font-weight:900;letter-spacing:-0.01em;text-transform:uppercase;font-size:20px;line-height:1.2;color:${PINK};margin:0 0 12px 0;">${escapeHtml(
+  )}</title></head><body style="margin:0;padding:0;background:${BG};"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BG};"><tr><td align="center" style="padding:24px 12px;"><table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;font-family:${SANS};color:${FG};"><tr><td><div style="text-align:center;margin:0 0 16px 0;"><img src="${escapeHtml(
+    absoluteUrl(LOGO_PATH),
+  )}" width="150" alt="ND Riot" style="display:inline-block;width:150px;max-width:150px;height:auto;border:0;" /></div><div style="font-weight:900;letter-spacing:-0.01em;text-transform:uppercase;font-size:20px;line-height:1.2;color:${PINK};margin:0 0 12px 0;">${escapeHtml(
     settings.mastheadTitle,
   )}</div>${body}${footer}</td></tr></table></td></tr></table></body></html>`
 
