@@ -784,14 +784,15 @@ export const NOISE_NEW_BOOKS_QUERY =
   _id,title,"slug":slug.current,"creatorName":creator->name
 }`);
 
-/** Upcoming convention appearances by followed creators (window-independent —
- *  a follower wants the con that's still ahead, whenever it was announced). */
-export const NOISE_APPEARANCES_QUERY =
-  defineQuery(`*[_type=="conventionAppearance" && creator._ref in $ids && defined(creator->slug.current) && defined(venue->slug.current) && (!defined(forDate) || dateTime(forDate) > dateTime(now()))]|order(forDate asc)[0...$limit]{
-  _id,forDate,
-  "creatorName":creator->name,
-  "venueName":venue->name,
-  "venueSlug":venue->slug.current
+/** Upcoming conventions with CONFIRMED dates in the next 30 days — a shared
+ *  section (same for everyone, not follow-based). Each carries the creators
+ *  who've marked an appearance there, if any. `$today`/`$until` are date-only
+ *  strings (startDate is a `date`, so plain string compare is correct). */
+export const NOISE_UPCOMING_CONVENTIONS_QUERY =
+  defineQuery(`*[_type=="convention" && defined(slug.current) && datesVerified == true && defined(startDate) && startDate >= $today && startDate <= $until]|order(startDate asc)[0...$limit]{
+  _id,name,"slug":slug.current,startDate,endDate,
+  "city":place.city,"region":place.region,
+  "creators":*[_type=="conventionAppearance" && venue._ref == ^._id && defined(creator->name)]{"name":creator->name,"slug":creator->slug.current}
 }`);
 
 /** The latest strips — the shared "Sunday Strips" showcase (same for every

@@ -805,7 +805,7 @@ const DEFAULTS: SiteSettings = {
     updatesHeading: "From the creators and comics you follow",
     conventionsHeading: "Upcoming conventions",
     newBooksHeading: "Newly added comics",
-    stripsHeading: "Sunday Strips",
+    stripsHeading: "• LET’S STRIP! •",
     stripsAllLabel: "See every strip at ND Riot →",
     emptyFollowsNudge:
       "You’re not following anyone yet. Save a creator or comic on ND Riot and next month this section fills with their news.",

@@ -4406,14 +4406,72 @@ export type NOISE_NEW_BOOKS_QUERY_RESULT = Array<{
 }>;
 
 // Source: src/lib/queries.ts
-// Variable: NOISE_APPEARANCES_QUERY
-// Query: *[_type=="conventionAppearance" && creator._ref in $ids && defined(creator->slug.current) && defined(venue->slug.current) && (!defined(forDate) || dateTime(forDate) > dateTime(now()))]|order(forDate asc)[0...$limit]{  _id,forDate,  "creatorName":creator->name,  "venueName":venue->name,  "venueSlug":venue->slug.current}
-export type NOISE_APPEARANCES_QUERY_RESULT = Array<{
+// Variable: NOISE_UPCOMING_CONVENTIONS_QUERY
+// Query: *[_type=="convention" && defined(slug.current) && datesVerified == true && defined(startDate) && startDate >= $today && startDate <= $until]|order(startDate asc)[0...$limit]{  _id,name,"slug":slug.current,startDate,endDate,  "city":place.city,"region":place.region,  "creators":*[_type=="conventionAppearance" && venue._ref == ^._id && defined(creator->name)]{"name":creator->name,"slug":creator->slug.current}}
+export type NOISE_UPCOMING_CONVENTIONS_QUERY_RESULT = Array<{
   _id: string;
-  forDate: string | null;
-  creatorName: string;
-  venueName: string;
-  venueSlug: string;
+  name: string;
+  slug: string;
+  startDate: string | null;
+  endDate: string | null;
+  city: string | null;
+  region:
+    | "AK"
+    | "AL"
+    | "AR"
+    | "AZ"
+    | "CA"
+    | "CO"
+    | "CT"
+    | "DC"
+    | "DE"
+    | "FL"
+    | "GA"
+    | "HI"
+    | "IA"
+    | "ID"
+    | "IL"
+    | "IN"
+    | "KS"
+    | "KY"
+    | "LA"
+    | "MA"
+    | "MD"
+    | "ME"
+    | "MI"
+    | "MN"
+    | "MO"
+    | "MS"
+    | "MT"
+    | "NC"
+    | "ND"
+    | "NE"
+    | "NH"
+    | "NJ"
+    | "NM"
+    | "NV"
+    | "NY"
+    | "OH"
+    | "OK"
+    | "OR"
+    | "PA"
+    | "RI"
+    | "SC"
+    | "SD"
+    | "TN"
+    | "TX"
+    | "UT"
+    | "VA"
+    | "VT"
+    | "WA"
+    | "WI"
+    | "WV"
+    | "WY"
+    | null;
+  creators: Array<{
+    name: string;
+    slug: string;
+  }>;
 }>;
 
 // Source: src/lib/queries.ts
@@ -4524,7 +4582,7 @@ declare module "@sanity/client" {
     '*[_type=="noiseIssue" && status=="sent" && defined(sentAt)]|order(sentAt desc)[0]{_id,sentAt}': NOISE_LAST_SENT_QUERY_RESULT;
     '*[_type=="update" && target._ref in $ids && defined(publishedAt) && dateTime(publishedAt) >= dateTime($since)]|order(publishedAt desc)[0...$limit]{\n  _id,body,publishedAt,\n  "targetType":target->_type,\n  "targetName":coalesce(target->title,target->name),\n  "targetSlug":target->slug.current\n}': NOISE_UPDATES_QUERY_RESULT;
     '*[_type=="book" && creator._ref in $ids && defined(slug.current) && dateTime(_createdAt) >= dateTime($since)]|order(_createdAt desc)[0...$limit]{\n  _id,title,"slug":slug.current,"creatorName":creator->name\n}': NOISE_NEW_BOOKS_QUERY_RESULT;
-    '*[_type=="conventionAppearance" && creator._ref in $ids && defined(creator->slug.current) && defined(venue->slug.current) && (!defined(forDate) || dateTime(forDate) > dateTime(now()))]|order(forDate asc)[0...$limit]{\n  _id,forDate,\n  "creatorName":creator->name,\n  "venueName":venue->name,\n  "venueSlug":venue->slug.current\n}': NOISE_APPEARANCES_QUERY_RESULT;
+    '*[_type=="convention" && defined(slug.current) && datesVerified == true && defined(startDate) && startDate >= $today && startDate <= $until]|order(startDate asc)[0...$limit]{\n  _id,name,"slug":slug.current,startDate,endDate,\n  "city":place.city,"region":place.region,\n  "creators":*[_type=="conventionAppearance" && venue._ref == ^._id && defined(creator->name)]{"name":creator->name,"slug":creator->slug.current}\n}': NOISE_UPCOMING_CONVENTIONS_QUERY_RESULT;
     '*[_type=="strip" && defined(slug.current) && defined(publishedAt)]|order(publishedAt desc)[0...$limit]{\n  _id,title,"slug":slug.current,caption,image,\n  "dimensions":image.asset->metadata.dimensions{width,height},\n  "creatorName":creator->name\n}': NOISE_LATEST_STRIPS_QUERY_RESULT;
   }
 }

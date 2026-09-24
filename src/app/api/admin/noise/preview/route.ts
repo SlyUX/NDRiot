@@ -3,6 +3,7 @@ import { isAdminEmail } from "@/lib/admin";
 import {
   composeSubscriberEmail,
   fetchSharedStrips,
+  fetchUpcomingConventions,
   resolveWindowSince,
 } from "@/lib/noise-digest";
 import { signUnsubscribe } from "@/lib/noise-token";
@@ -52,7 +53,10 @@ export async function GET(request: Request) {
 
   const settings = await getSiteSettings();
   const since = await resolveWindowSince(issue);
-  const strips = await fetchSharedStrips();
+  const [strips, conventions] = await Promise.all([
+    fetchSharedStrips(),
+    fetchUpcomingConventions(),
+  ]);
   const token = signUnsubscribe(asEmail);
   const unsubscribeUrl = token
     ? absoluteUrl(`/api/noise/unsubscribe?token=${encodeURIComponent(token)}`)
@@ -63,6 +67,7 @@ export async function GET(request: Request) {
     issue,
     settings: settings.noise,
     strips,
+    conventions,
     since,
     unsubscribeUrl,
   });

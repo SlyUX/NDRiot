@@ -5,15 +5,15 @@ import { urlFor } from '@/sanity/image'
 import { savedItems } from '@/sanity/reader-client'
 import { absoluteUrl } from '@/lib/site-url'
 import {
-  NOISE_APPEARANCES_QUERY,
   NOISE_LAST_SENT_QUERY,
   NOISE_LATEST_STRIPS_QUERY,
   NOISE_NEW_BOOKS_QUERY,
+  NOISE_UPCOMING_CONVENTIONS_QUERY,
   NOISE_UPDATES_QUERY,
 } from '@/lib/queries'
 import type { NoiseSettings } from '@/lib/site-settings'
 import type {
-  NoiseAppearance,
+  NoiseConvention,
   NoiseIssue,
   NoiseNewBook,
   NoiseStrip,
@@ -37,6 +37,8 @@ const STRIP_LIMIT = 6
 const DEFAULT_WINDOW_DAYS = 30
 /** Full-width render size for a strip image (height scales to its aspect). */
 const STRIP_WIDTH = 600
+/** How far ahead the shared "upcoming conventions" section looks. */
+const CONVENTION_WINDOW_DAYS = 30
 
 // ---- brand-consistent inline styles (email clients ignore <style>) ----
 const BG = '#030303'
@@ -44,9 +46,9 @@ const FG = '#ffffff'
 const PINK = '#FF0095'
 const MUTED = '#A1A1AA'
 const BORDER = '#282828'
-// The "Sunday funnies" insert — a newsprint panel that stands apart from the
+// The "Sunday funnies" insert — a light-gray panel that stands apart from the
 // dark brand email, for that old-fashioned comics-page feel.
-const CREAM = '#f5edd8'
+const PANEL = '#cccccc'
 const INK = '#1a1a1a'
 const INK_MUTED = '#4a4a4a'
 // One sans-serif stack for the whole email, funnies panel included.
@@ -161,7 +163,6 @@ export async function fetchSharedStrips(): Promise<NoiseStrip[]> {
 export interface FollowContent {
   updates: NoiseUpdate[]
   newBooks: NoiseNewBook[]
-  appearances: NoiseAppearance[]
 }
 
 /** Everything a subscriber's own follows produced in the window. */
@@ -175,27 +176,42 @@ export async function fetchFollowContent(
   const updateIds = [...creatorIds, ...bookIds]
 
   if (updateIds.length === 0 && creatorIds.length === 0) {
-    return { updates: [], newBooks: [], appearances: [] }
+    return { updates: [], newBooks: [] }
   }
 
-  const [updates, newBooks, appearances] = await Promise.all([
+  const [updates, newBooks] = await Promise.all([
     updateIds.length
       ? client.fetch(NOISE_UPDATES_QUERY, { ids: updateIds, since, limit: SECTION_LIMIT })
       : Promise.resolve<NoiseUpdate[]>([]),
     creatorIds.length
       ? client.fetch(NOISE_NEW_BOOKS_QUERY, { ids: creatorIds, since, limit: SECTION_LIMIT })
       : Promise.resolve<NoiseNewBook[]>([]),
-    creatorIds.length
-      ? client.fetch(NOISE_APPEARANCES_QUERY, { ids: creatorIds, limit: SECTION_LIMIT })
-      : Promise.resolve<NoiseAppearance[]>([]),
   ])
-  return { updates, newBooks, appearances }
+  return { updates, newBooks }
+}
+
+/**
+ * Upcoming conventions with confirmed dates in the next 30 days — a SHARED
+ * section (same for every subscriber, not follow-based), each with the creators
+ * who've marked an appearance there. Dates are date-only strings, so the window
+ * bounds are computed the same way.
+ */
+export async function fetchUpcomingConventions(): Promise<NoiseConvention[]> {
+  const today = new Date()
+  const until = new Date()
+  until.setDate(until.getDate() + CONVENTION_WINDOW_DAYS)
+  const ymd = (d: Date) => d.toISOString().slice(0, 10)
+  return client.fetch(NOISE_UPCOMING_CONVENTIONS_QUERY, {
+    today: ymd(today),
+    until: ymd(until),
+    limit: SECTION_LIMIT,
+  })
 }
 
 // ---- HTML section builders --------------------------------------------
 
 function sectionHeading(text: string): string {
-  return `<h2 style="margin:28px 0 10px 0;font-size:14px;letter-spacing:0.08em;text-transform:uppercase;color:${PINK};border-bottom:1px solid ${BORDER};padding-bottom:6px;">${escapeHtml(
+  return `<h2 style="margin:28px 0 12px 0;font-size:21px;letter-spacing:0.06em;text-transform:uppercase;color:${PINK};border-bottom:1px solid ${BORDER};padding-bottom:8px;">${escapeHtml(
     text,
   )}</h2>`
 }
@@ -221,17 +237,33 @@ function updatesSection(heading: string, updates: NoiseUpdate[]): string {
   return sectionHeading(heading) + rows
 }
 
-function conventionsSection(heading: string, appearances: NoiseAppearance[]): string {
-  if (appearances.length === 0) return ''
-  const rows = appearances
-    .map((a) => {
-      const venue = a.venueSlug
-        ? link(`/conventions/${a.venueSlug}`, a.venueName ?? 'A convention')
-        : escapeHtml(a.venueName ?? 'A convention')
-      const when = a.forDate ? formatDate(a.forDate) : ''
-      const creator = escapeHtml(a.creatorName ?? 'A creator')
-      const tail = when ? ` · <span style="color:${MUTED};">${escapeHtml(when)}</span>` : ''
-      return `<div style="margin:0 0 8px 0;color:${FG};">${creator} at ${venue}${tail}</div>`
+/** Comma-list of the distinct creators attending a convention (empty if none). */
+function attendingNames(con: NoiseConvention): string[] {
+  const seen = new Set<string>()
+  for (const c of con.creators ?? []) {
+    const name = c.name?.trim()
+    if (name) seen.add(name)
+  }
+  return [...seen]
+}
+
+function conventionsSection(heading: string, conventions: NoiseConvention[]): string {
+  if (conventions.length === 0) return ''
+  const rows = conventions
+    .map((con) => {
+      const name = con.slug
+        ? link(`/conventions/${con.slug}`, con.name ?? 'A convention')
+        : escapeHtml(con.name ?? 'A convention')
+      const where = [con.city, con.region].filter(Boolean).join(', ')
+      const when = formatDateRange(con.startDate, con.endDate)
+      const meta = [when, where].filter(Boolean).join(' · ')
+      const names = attendingNames(con)
+      const attending = names.length
+        ? `<div style="color:${MUTED};line-height:1.5;">Attending: ${escapeHtml(names.join(', '))}</div>`
+        : ''
+      return `<div style="margin:0 0 14px 0;"><div style="font-weight:700;color:${FG};">${name}</div>${
+        meta ? `<div style="color:${MUTED};">${escapeHtml(meta)}</div>` : ''
+      }${attending}</div>`
     })
     .join('')
   return sectionHeading(heading) + rows
@@ -251,8 +283,8 @@ function newBooksSection(heading: string, books: NoiseNewBook[]): string {
 
 /**
  * The Sunday Strips showcase — the latest six strips, each shown FULL WIDTH like
- * a newspaper comics page, on a cream newsprint panel with a serif masthead and
- * a double rule. Ends with a link to the full, recency-ordered strips listing.
+ * a newspaper comics page, on a light-gray panel with a bold masthead and a
+ * double rule. Ends with a link to the full, recency-ordered strips listing.
  */
 function stripsSection(heading: string, allLabel: string, strips: NoiseStrip[]): string {
   if (strips.length === 0) return ''
@@ -290,21 +322,25 @@ function stripsSection(heading: string, allLabel: string, strips: NoiseStrip[]):
   )}" style="font-family:${SANS};font-weight:700;color:${INK};text-decoration:underline;">${escapeHtml(
     allLabel,
   )}</a></div>`
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${CREAM};margin:24px 0;"><tr><td style="padding:20px;"><div style="font-family:${SANS};text-align:center;border-bottom:3px double ${INK};padding-bottom:8px;margin-bottom:16px;"><div style="font-size:24px;font-weight:900;letter-spacing:0.02em;color:${INK};">${escapeHtml(
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${PANEL};margin:24px 0;"><tr><td style="padding:20px;"><div style="font-family:${SANS};text-align:center;border-bottom:3px double ${INK};padding-bottom:8px;margin-bottom:16px;"><div style="font-size:24px;font-weight:900;letter-spacing:0.02em;color:${INK};">${escapeHtml(
     heading,
   )}</div></div>${items}${all}</td></tr></table>`
 }
 
-function formatDate(iso: string): string {
-  try {
-    return new Date(iso).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    })
-  } catch {
-    return ''
-  }
+/** Format a date-only string (YYYY-MM-DD) in local time, no timezone drift. */
+function formatYmd(ymd?: string | null): string {
+  const m = ymd ? /^(\d{4})-(\d{2})-(\d{2})/.exec(ymd) : null
+  if (!m) return ''
+  const date = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]))
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+/** "Oct 15, 2026", or "Oct 15 – 17, 2026" when a multi-day end date exists. */
+function formatDateRange(start?: string | null, end?: string | null): string {
+  const startStr = formatYmd(start)
+  if (!startStr) return ''
+  if (!end || end === start) return startStr
+  return `${startStr} – ${formatYmd(end)}`
 }
 
 /** Flatten the Note's blocks to plain text, for the text/plain email part. */
@@ -319,7 +355,7 @@ function noteToText(blocks: NoteBlocks | undefined | null): string {
 
 /** A concise text/plain alternative — the same content + order, no markup. */
 function buildText(input: RenderInput, hasFollow: boolean): string {
-  const { issue, settings, follow, strips, unsubscribeUrl } = input
+  const { issue, settings, follow, strips, conventions, unsubscribeUrl } = input
   const lines: string[] = [settings.mastheadTitle.toUpperCase(), '']
   const note = noteToText(issue.note)
   if (note) lines.push(settings.noteHeading.toUpperCase(), note, '')
@@ -330,18 +366,23 @@ function buildText(input: RenderInput, hasFollow: boolean): string {
     lines.push(`${settings.stripsAllLabel} ${absoluteUrl('/comics?tab=strips')}`, '')
   }
 
+  if (conventions.length) {
+    lines.push(settings.conventionsHeading.toUpperCase())
+    for (const c of conventions) {
+      const meta = [formatDateRange(c.startDate, c.endDate), [c.city, c.region].filter(Boolean).join(', ')]
+        .filter(Boolean)
+        .join(' · ')
+      lines.push(`• ${c.name ?? 'A convention'}${meta ? ` (${meta})` : ''}`)
+      const names = attendingNames(c)
+      if (names.length) lines.push(`  Attending: ${names.join(', ')}`)
+    }
+    lines.push('')
+  }
+
   if (hasFollow) {
     if (follow.updates.length) {
       lines.push(settings.updatesHeading.toUpperCase())
       for (const u of follow.updates) lines.push(`• ${u.targetName ?? 'ND Riot'}: ${(u.body ?? '').trim()}`)
-      lines.push('')
-    }
-    if (follow.appearances.length) {
-      lines.push(settings.conventionsHeading.toUpperCase())
-      for (const a of follow.appearances) {
-        const when = a.forDate ? ` (${formatDate(a.forDate)})` : ''
-        lines.push(`• ${a.creatorName ?? 'A creator'} at ${a.venueName ?? 'a convention'}${when}`)
-      }
       lines.push('')
     }
     if (follow.newBooks.length) {
@@ -364,6 +405,7 @@ export interface RenderInput {
   settings: NoiseSettings
   follow: FollowContent
   strips: NoiseStrip[]
+  conventions: NoiseConvention[]
   unsubscribeUrl: string
 }
 
@@ -377,10 +419,9 @@ export function renderNoiseEmail(input: RenderInput): {
   text: string
   hasFollowContent: boolean
 } {
-  const { issue, settings, follow, strips, unsubscribeUrl } = input
+  const { issue, settings, follow, strips, conventions, unsubscribeUrl } = input
 
-  const hasFollowContent =
-    follow.updates.length > 0 || follow.newBooks.length > 0 || follow.appearances.length > 0
+  const hasFollowContent = follow.updates.length > 0 || follow.newBooks.length > 0
 
   const noteHtml = noteToHtml(issue.note)
   const noteBlock = noteHtml
@@ -390,7 +431,6 @@ export function renderNoiseEmail(input: RenderInput): {
   const followBlocks = hasFollowContent
     ? [
         updatesSection(settings.updatesHeading, follow.updates),
-        conventionsSection(settings.conventionsHeading, follow.appearances),
         newBooksSection(settings.newBooksHeading, follow.newBooks),
       ].join('')
     : `<p style="margin:20px 0;color:${MUTED};line-height:1.5;">${escapeHtml(
@@ -398,11 +438,12 @@ export function renderNoiseEmail(input: RenderInput): {
       )}</p>`
 
   // No greeting — we dive straight in (first-name guesses go wrong too often).
-  // Order mirrors the masthead: the note, then the Sunday Strips funnies, then
-  // the reader's personalized ND Riot updates.
+  // Order: the note, the Sunday Strips funnies, upcoming conventions (shared),
+  // then the reader's personalized follow updates.
   const body = [
     noteBlock,
     stripsSection(settings.stripsHeading, settings.stripsAllLabel, strips),
+    conventionsSection(settings.conventionsHeading, conventions),
     followBlocks,
   ].join('\n')
 
@@ -440,6 +481,7 @@ export async function composeSubscriberEmail(params: {
   issue: NoiseIssue
   settings: NoiseSettings
   strips: NoiseStrip[]
+  conventions: NoiseConvention[]
   since: string
   unsubscribeUrl: string
 }): Promise<{ subject: string; html: string; text: string; hasFollowContent: boolean }> {
@@ -449,6 +491,7 @@ export async function composeSubscriberEmail(params: {
     settings: params.settings,
     follow,
     strips: params.strips,
+    conventions: params.conventions,
     unsubscribeUrl: params.unsubscribeUrl,
   })
 }

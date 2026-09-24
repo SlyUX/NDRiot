@@ -35,7 +35,7 @@ import type {
   NOISE_ISSUE_BY_ID_QUERY_RESULT,
   NOISE_UPDATES_QUERY_RESULT,
   NOISE_NEW_BOOKS_QUERY_RESULT,
-  NOISE_APPEARANCES_QUERY_RESULT,
+  NOISE_UPCOMING_CONVENTIONS_QUERY_RESULT,
   NOISE_LATEST_STRIPS_QUERY_RESULT,
   SERIES_QUERY_RESULT,
   MEDIA_DETAIL_QUERY_RESULT,
@@ -96,7 +96,7 @@ export type StripDetail = NonNullable<STRIP_QUERY_RESULT>;
 export type NoiseIssue = NonNullable<NOISE_ISSUE_BY_ID_QUERY_RESULT>;
 export type NoiseUpdate = NOISE_UPDATES_QUERY_RESULT[number];
 export type NoiseNewBook = NOISE_NEW_BOOKS_QUERY_RESULT[number];
-export type NoiseAppearance = NOISE_APPEARANCES_QUERY_RESULT[number];
+export type NoiseConvention = NOISE_UPCOMING_CONVENTIONS_QUERY_RESULT[number];
 export type NoiseStrip = NOISE_LATEST_STRIPS_QUERY_RESULT[number];
 export type SeriesDetail = NonNullable<SERIES_QUERY_RESULT>;
 export type HeroBook = HERO_BOOKS_QUERY_RESULT[number];
