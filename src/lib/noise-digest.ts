@@ -237,14 +237,16 @@ function updatesSection(heading: string, updates: NoiseUpdate[]): string {
   return sectionHeading(heading) + rows
 }
 
-/** Comma-list of the distinct creators attending a convention (empty if none). */
-function attendingNames(con: NoiseConvention): string[] {
-  const seen = new Set<string>()
+/** The distinct creators attending a convention, with profile slugs (empty if none). */
+function attendingCreators(con: NoiseConvention): { name: string; slug: string | null }[] {
+  const seen = new Map<string, { name: string; slug: string | null }>()
   for (const c of con.creators ?? []) {
     const name = c.name?.trim()
-    if (name) seen.add(name)
+    if (!name) continue
+    const key = c.slug ?? name
+    if (!seen.has(key)) seen.set(key, { name, slug: c.slug ?? null })
   }
-  return [...seen]
+  return [...seen.values()]
 }
 
 function conventionsSection(heading: string, conventions: NoiseConvention[]): string {
@@ -257,9 +259,17 @@ function conventionsSection(heading: string, conventions: NoiseConvention[]): st
       const where = [con.city, con.region].filter(Boolean).join(', ')
       const when = formatDateRange(con.startDate, con.endDate)
       const meta = [when, where].filter(Boolean).join(' · ')
-      const names = attendingNames(con)
-      const attending = names.length
-        ? `<div style="color:${MUTED};line-height:1.5;">Attending: ${escapeHtml(names.join(', '))}</div>`
+      const people = attendingCreators(con)
+      const attending = people.length
+        ? `<div style="color:${FG};line-height:1.5;">Attending: ${people
+            .map((p) =>
+              p.slug
+                ? `<a href="${escapeHtml(
+                    absoluteUrl(`/creators/${p.slug}`),
+                  )}" style="color:${FG};text-decoration:underline;">${escapeHtml(p.name)}</a>`
+                : escapeHtml(p.name),
+            )
+            .join(', ')}</div>`
         : ''
       return `<div style="margin:0 0 14px 0;"><div style="font-weight:700;color:${FG};">${name}</div>${
         meta ? `<div style="color:${MUTED};">${escapeHtml(meta)}</div>` : ''
@@ -373,7 +383,7 @@ function buildText(input: RenderInput, hasFollow: boolean): string {
         .filter(Boolean)
         .join(' · ')
       lines.push(`• ${c.name ?? 'A convention'}${meta ? ` (${meta})` : ''}`)
-      const names = attendingNames(c)
+      const names = attendingCreators(c).map((p) => p.name)
       if (names.length) lines.push(`  Attending: ${names.join(', ')}`)
     }
     lines.push('')
