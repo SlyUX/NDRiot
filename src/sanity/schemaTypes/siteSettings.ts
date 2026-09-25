@@ -448,6 +448,7 @@ export default defineType({
         defineField({ name: "genrePlaceholder", title: "Genre — placeholder", type: "string" }),
         defineField({ name: "maturityLabel", title: "Appropriate-for — label", type: "string" }),
         defineField({ name: "maturityPlaceholder", title: "Appropriate-for — placeholder", type: "string" }),
+        defineField({ name: "maturityHint", title: "Appropriate-for — hint (why Strips cap at Teen)", type: "text", rows: 3 }),
         defineField({ name: "seriesLabel", title: "Series — label", type: "string" }),
         defineField({ name: "seriesHint", title: "Series — hint", type: "text", rows: 2 }),
         defineField({ name: "seriesNoneLabel", title: "Series — none option", type: "string" }),

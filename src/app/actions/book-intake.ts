@@ -5,8 +5,10 @@ import {
   FORMATS,
   LINK_KINDS,
   MATURITY_RATINGS,
+  LEGACY_MATURITY_TO_TIER,
   SINGLE_VOLUME_FORMATS,
   STATUSES,
+  type MaturityRating,
 } from '@/lib/taxonomy'
 import { honeypotTripped, rateLimited, submittedTooFast } from '@/lib/intake/anti-spam'
 import {
@@ -220,7 +222,12 @@ export async function submitBook(
   }
   if (genres.length) fields.genres = genres
   if (format) fields.format = format
-  if (maturity) fields.maturity = maturity
+  if (maturity) {
+    fields.maturity = maturity
+    // Populate the v2 gated rating on new submissions too (books may be mature).
+    fields.maturityRating = LEGACY_MATURITY_TO_TIER[maturity as MaturityRating]
+    fields.ratingSource = 'creator'
+  }
   if (status) fields.status = status
   if (issueCount !== undefined) fields.issueCount = issueCount
   if (values.shortDescription) fields.shortDescription = values.shortDescription.slice(0, LIMITS.short)

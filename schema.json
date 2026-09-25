@@ -5945,6 +5945,13 @@
               },
               "optional": true
             },
+            "maturityHint": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "seriesLabel": {
               "type": "objectAttribute",
               "value": {

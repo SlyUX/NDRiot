@@ -1,6 +1,16 @@
 'use server'
 
-import { GENRES, MATURITY_RATINGS } from '@/lib/taxonomy'
+import {
+  GENRES,
+  MATURITY_RATINGS,
+  RESTRICTED_RATING,
+  LEGACY_MATURITY_TO_TIER,
+  type MaturityRating,
+} from '@/lib/taxonomy'
+
+// Strips are public and cap at Teen — Mature is not an accepted value, even
+// against a hand-crafted POST that bypasses the form's dropdown.
+const STRIP_ALLOWED_RATINGS = MATURITY_RATINGS.filter((m) => m !== RESTRICTED_RATING)
 import { honeypotTripped, rateLimited, submittedTooFast } from '@/lib/intake/anti-spam'
 import { isYes, matchTaxonomy, slugify } from '@/lib/intake/mapping'
 import { uploadImageFile } from '@/lib/intake/uploads'
@@ -87,7 +97,7 @@ export async function submitStrip(
 
   // Required — a strip declares its own audience (removing the opt-out); on
   // creator-uploaded work that self-rating is a real content-safety signal.
-  const maturity = matchTaxonomy(String(formData.get('maturity') ?? ''), MATURITY_RATINGS, {
+  const maturity = matchTaxonomy(String(formData.get('maturity') ?? ''), STRIP_ALLOWED_RATINGS, {
     single: true,
   }).matched[0]
 
@@ -257,7 +267,12 @@ export async function submitStrip(
   if (!isUpdate) fields.publishedAt = new Date().toISOString()
   if (values.caption) fields.caption = values.caption.slice(0, LIMITS.caption)
   if (genres.length) fields.genres = genres
-  if (maturity) fields.maturity = maturity
+  if (maturity) {
+    fields.maturity = maturity
+    // Also set the v2 gated rating (allAges|teen — never mature for a strip).
+    fields.maturityRating = LEGACY_MATURITY_TO_TIER[maturity as MaturityRating]
+    fields.ratingSource = 'creator'
+  }
   if (seriesRef) fields.series = seriesRef
 
   const targetId = isUpdate ? target!._id.replace(/^drafts\./, '') : `strip-${slug}`

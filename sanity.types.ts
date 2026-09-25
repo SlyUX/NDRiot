@@ -961,6 +961,7 @@ export type SiteSettings = {
     genrePlaceholder?: string;
     maturityLabel?: string;
     maturityPlaceholder?: string;
+    maturityHint?: string;
     seriesLabel?: string;
     seriesHint?: string;
     seriesNoneLabel?: string;

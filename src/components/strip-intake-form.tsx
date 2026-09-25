@@ -7,7 +7,10 @@ import { submitStrip, type StripIntakeState } from '@/app/actions/strip-intake'
 import { ReviewNotice } from '@/components/review-notice'
 import { Button } from '@/components/ui/button'
 import { ALLOWED_IMAGE_TYPES, MAX_PICK_BYTES, downscaleImage } from '@/lib/intake/downscale'
-import { GENRES, MATURITY_RATINGS, MATURITY_DESCRIPTIONS } from '@/lib/taxonomy'
+import { GENRES, MATURITY_RATINGS, MATURITY_DESCRIPTIONS, RESTRICTED_RATING } from '@/lib/taxonomy'
+
+// Strips are public (no account, no gate), so they cap at Teen — never Mature.
+const STRIP_ALLOWED_RATINGS = MATURITY_RATINGS.filter((m) => m !== RESTRICTED_RATING)
 import { cn } from '@/lib/utils'
 import type {
   CreatorIntakeSettings,
@@ -224,13 +227,14 @@ export function StripIntakeForm({
             className={cn(fieldClass, 'appearance-none')}
           >
             <option value="">{copy.maturityPlaceholder}</option>
-            {MATURITY_RATINGS.map((m) => (
+            {STRIP_ALLOWED_RATINGS.map((m) => (
               <option key={m} value={m}>
                 {m} — {MATURITY_DESCRIPTIONS[m]}
               </option>
             ))}
           </select>
           {errors.maturity && <p className="text-destructive text-xs">{errors.maturity}</p>}
+          {copy.maturityHint && <p className={hintClass}>{copy.maturityHint}</p>}
         </div>
       </fieldset>
 

@@ -335,6 +335,7 @@ export type StripIntakeSettings = {
   genrePlaceholder: string;
   maturityLabel: string;
   maturityPlaceholder: string;
+  maturityHint: string;
   seriesLabel: string;
   seriesHint: string;
   seriesNoneLabel: string;
@@ -1211,6 +1212,8 @@ const DEFAULTS: SiteSettings = {
     genrePlaceholder: "Choose a genre",
     maturityLabel: "Appropriate for:",
     maturityPlaceholder: "Choose an audience",
+    maturityHint:
+      "Strips are read right here — no account, no sign-in — so they stay open to all ages, and that keeps our moderation and legal overhead light. That's why Strips cap at Teen. If a page needs nudity or heavy gore, list it as a book that links out to where you host it.",
     seriesLabel: "Series",
     seriesHint:
       "Optional — group this with related strips. Pick one of your series, or start a new one.",
