@@ -4,11 +4,11 @@ import {
   GENRES,
   FORMATS,
   LINK_KINDS,
-  MATURITY_RATINGS,
-  LEGACY_MATURITY_TO_TIER,
+  MATURITY_TIERS,
+  TIER_TO_LEGACY_MATURITY,
   SINGLE_VOLUME_FORMATS,
   STATUSES,
-  type MaturityRating,
+  type MaturityTier,
 } from '@/lib/taxonomy'
 import { honeypotTripped, rateLimited, submittedTooFast } from '@/lib/intake/anti-spam'
 import {
@@ -42,7 +42,7 @@ import { getWriteClient } from '@/sanity/write-client'
  * and patch supplied fields, preserving the slug (the URL).
  */
 
-type FieldName = 'title' | 'creator' | 'permission'
+type FieldName = 'title' | 'creator' | 'permission' | 'maturityRating'
 
 export type BookIntakeState = {
   status: 'idle' | 'success' | 'error'
@@ -171,9 +171,13 @@ export async function submitBook(
 
   const genres = matchTaxonomy(formData.getAll('genres').map(String), GENRES).matched.slice(0, 3)
   const format = matchTaxonomy(String(formData.get('format') ?? ''), FORMATS, { single: true }).matched[0]
-  const maturity = matchTaxonomy(String(formData.get('maturity') ?? ''), MATURITY_RATINGS, {
+  const maturityRating = matchTaxonomy(String(formData.get('maturityRating') ?? ''), MATURITY_TIERS, {
     single: true,
   }).matched[0]
+  const coverIsMature = String(formData.get('coverIsMature') ?? '') === 'yes'
+  if (!maturityRating) {
+    return { status: 'error', fieldErrors: { maturityRating: 'Please choose a rating.' }, values }
+  }
   const status = matchTaxonomy(String(formData.get('status') ?? ''), STATUSES, { single: true }).matched[0]
 
   // Issue count only for a serialised format, and only a positive integer.
@@ -222,12 +226,12 @@ export async function submitBook(
   }
   if (genres.length) fields.genres = genres
   if (format) fields.format = format
-  if (maturity) {
-    fields.maturity = maturity
-    // Populate the v2 gated rating on new submissions too (books may be mature).
-    fields.maturityRating = LEGACY_MATURITY_TO_TIER[maturity as MaturityRating]
-    fields.ratingSource = 'creator'
-  }
+  fields.maturityRating = maturityRating
+  fields.ratingSource = 'creator'
+  // Keep the legacy `maturity` field populated (still read by cards/filters)
+  // until consumers migrate in Phase 6.
+  fields.maturity = TIER_TO_LEGACY_MATURITY[maturityRating as MaturityTier]
+  fields.coverIsMature = coverIsMature
   if (status) fields.status = status
   if (issueCount !== undefined) fields.issueCount = issueCount
   if (values.shortDescription) fields.shortDescription = values.shortDescription.slice(0, LIMITS.short)

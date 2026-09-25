@@ -215,6 +215,7 @@ export type BookIntakeSettings = {
   genresHint: string;
   maturityLabel: string;
   maturitySkipLabel: string;
+  maturityHint: string;
   statusLabel: string;
   statusSkipLabel: string;
   issueCountLabel: string;
@@ -225,6 +226,8 @@ export type BookIntakeSettings = {
   fullDescHint: string;
   coverLabel: string;
   coverHint: string;
+  coverMatureLabel: string;
+  coverMatureHint: string;
   coverAltLabel: string;
   coverAltHint: string;
   previewUrlLabel: string;
@@ -300,6 +303,9 @@ export type ReviewNoticeSettings = {
   short: string;
   title: string;
   body: string;
+  /** The apparent-minor rule, shown on the book + strip submission forms near
+   *  the rating — the one rule creators must read before uploading. */
+  apparentMinorRule: string;
 };
 
 /**
@@ -1141,8 +1147,10 @@ const DEFAULTS: SiteSettings = {
     genresLabel: "Genres",
     genresHint:
       "What it’s ABOUT — up to three. Not format or audience; those are their own fields.",
-    maturityLabel: "Who’s it for?",
+    maturityLabel: "How should this be rated?",
     maturitySkipLabel: "Rather not say",
+    maturityHint:
+      "Rate the work as a reader meets it: if one page is Mature, the book is Mature. Don’t over-rate out of caution — that hides your work behind a gate for no reason.",
     statusLabel: "Publication status",
     statusSkipLabel: "Not sure",
     issueCountLabel: "Issues available",
@@ -1157,6 +1165,9 @@ const DEFAULTS: SiteSettings = {
     coverLabel: "Cover image",
     coverHint:
       "Portrait works best — covers show at 2:3. Highest resolution you have.",
+    coverMatureLabel: "The cover itself is Mature",
+    coverMatureHint:
+      "Covers show up in public browse before anyone has chosen to see anything, so they’re held to the All-Ages bar even when the book is Mature. If the cover itself is Mature, tick this and we’ll blur it in listings — your book stays in the directory either way.",
     coverAltLabel: "Describe the cover",
     coverAltHint:
       "For readers who can’t see it — describe what it SHOWS, not what the comic is. Skip if it’s just the title on a colour.",
@@ -1232,6 +1243,8 @@ const DEFAULTS: SiteSettings = {
     title: "Why there’s a wait",
     body:
       "A real person reviews every submission before it goes live. That pause protects you and everyone else here — it keeps ND Riot safe, properly credited, and free of anything that shouldn’t sit next to your name. We’re a very small volunteer team, so reviews happen as fast as real people can get to them. Thank you for your patience while we look yours over.",
+    apparentMinorRule:
+      "One rule with no exceptions: no nudity, partial nudity, or sexualized depiction of any character who appears to be under 18 — whatever the character’s stated age. A canonical age doesn’t change how a drawing reads. This one isn’t appealable, and we’d rather tell you now than take your work down later.",
   },
   mediaIntake: {
     heading: "List your outlet",

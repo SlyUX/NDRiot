@@ -14,8 +14,9 @@ import {
   GENRES,
   FORMATS,
   LINK_KINDS,
-  MATURITY_RATINGS,
-  MATURITY_DESCRIPTIONS,
+  MATURITY_TIERS,
+  MATURITY_TIER_LABELS,
+  MATURITY_TIER_DESCRIPTIONS,
   SINGLE_VOLUME_FORMATS,
   STATUSES,
   linkKindForHost,
@@ -67,6 +68,8 @@ export interface BookIntakeInitial {
   genres: string[]
   format: string
   maturity: string
+  maturityRating: string
+  coverIsMature: boolean
   status: string
   issueCount: string
   shortDescription: string
@@ -520,37 +523,33 @@ export function BookIntakeForm({
           </fieldset>
 
           <fieldset className="space-y-2">
-            <legend className={labelClass}>
-              {copy.maturityLabel}
-              <Optional label={common.optionalLabel} />
-            </legend>
+            <legend className={labelClass}>{copy.maturityLabel}</legend>
             <div className="space-y-2">
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="radio"
-                  name="maturity"
-                  value=""
-                  defaultChecked={!initial?.maturity}
-                  className="size-4 accent-[var(--primary)]"
-                />
-                {copy.maturitySkipLabel}
-              </label>
-              {MATURITY_RATINGS.map((m) => (
+              {MATURITY_TIERS.map((m) => (
                 <label key={m} className="flex items-start gap-2 text-sm">
                   <input
                     type="radio"
-                    name="maturity"
+                    name="maturityRating"
                     value={m}
-                    defaultChecked={initial?.maturity === m}
+                    required
+                    defaultChecked={initial?.maturityRating === m}
                     className="mt-0.5 size-4 accent-[var(--primary)]"
                   />
                   <span>
-                    <span className="font-semibold">{m}</span>
-                    <span className="text-muted-foreground"> — {MATURITY_DESCRIPTIONS[m]}</span>
+                    <span className="font-semibold">{MATURITY_TIER_LABELS[m]}</span>
+                    <span className="text-muted-foreground"> — {MATURITY_TIER_DESCRIPTIONS[m]}</span>
                   </span>
                 </label>
               ))}
             </div>
+            <p className={hintClass}>{copy.maturityHint}</p>
+            {errors.maturityRating && (
+              <p className="text-destructive text-xs">{errors.maturityRating}</p>
+            )}
+            {/* The one rule creators must read before uploading (§3, not appealable). */}
+            <p className="text-muted-foreground border-border mt-2 border-l-2 pl-3 text-xs leading-relaxed">
+              {reviewNotice.apparentMinorRule}
+            </p>
           </fieldset>
 
           <fieldset className="space-y-2">
@@ -672,6 +671,19 @@ export function BookIntakeForm({
             />
             {imageError && <p className="text-destructive text-xs">{imageError}</p>}
             <p className={hintClass}>{copy.coverHint}</p>
+            <label className="mt-2 flex items-start gap-2 text-sm">
+              <input
+                type="checkbox"
+                name="coverIsMature"
+                value="yes"
+                defaultChecked={initial?.coverIsMature}
+                className="mt-0.5 size-4 accent-[var(--primary)]"
+              />
+              <span>
+                <span className="font-semibold">{copy.coverMatureLabel}</span>
+                <span className="text-muted-foreground"> — {copy.coverMatureHint}</span>
+              </span>
+            </label>
           </div>
 
           <div className="space-y-1.5">

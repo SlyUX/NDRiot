@@ -6044,6 +6044,13 @@
                 "type": "string"
               },
               "optional": true
+            },
+            "apparentMinorRule": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
             }
           }
         },
@@ -8928,6 +8935,13 @@
               },
               "optional": true
             },
+            "maturityHint": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "statusLabel": {
               "type": "objectAttribute",
               "value": {
@@ -8992,6 +9006,20 @@
               "optional": true
             },
             "coverHint": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "coverMatureLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "coverMatureHint": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

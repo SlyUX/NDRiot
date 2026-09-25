@@ -692,7 +692,7 @@ export const INTAKE_BOOK_EDIT_QUERY =
   defineQuery(`*[_type=="book" && _id==$id][0]{
   _id,title,"slug":slug.current,
   "creatorId":creator._ref,
-  genres,format,maturity,status,issueCount,
+  genres,format,maturity,maturityRating,coverIsMature,status,issueCount,
   shortDescription,
   "descriptionText":pt::text(description),
   cover,"coverAlt":cover.alt,

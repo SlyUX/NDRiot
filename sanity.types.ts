@@ -976,6 +976,7 @@ export type SiteSettings = {
     short?: string;
     title?: string;
     body?: string;
+    apparentMinorRule?: string;
   };
   collab?: {
     requestButtonLabel?: string;
@@ -1392,6 +1393,7 @@ export type SiteSettings = {
     genresHint?: string;
     maturityLabel?: string;
     maturitySkipLabel?: string;
+    maturityHint?: string;
     statusLabel?: string;
     statusSkipLabel?: string;
     issueCountLabel?: string;
@@ -1402,6 +1404,8 @@ export type SiteSettings = {
     fullDescHint?: string;
     coverLabel?: string;
     coverHint?: string;
+    coverMatureLabel?: string;
+    coverMatureHint?: string;
     coverAltLabel?: string;
     coverAltHint?: string;
     previewUrlLabel?: string;
@@ -4115,7 +4119,7 @@ export type INTAKE_OWNED_BOOKS_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: INTAKE_BOOK_EDIT_QUERY
-// Query: *[_type=="book" && _id==$id][0]{  _id,title,"slug":slug.current,  "creatorId":creator._ref,  genres,format,maturity,status,issueCount,  shortDescription,  "descriptionText":pt::text(description),  cover,"coverAlt":cover.alt,  previewUrl,  links[]{kind,label,url,endDate},  videos[]{title,url}}
+// Query: *[_type=="book" && _id==$id][0]{  _id,title,"slug":slug.current,  "creatorId":creator._ref,  genres,format,maturity,maturityRating,coverIsMature,status,issueCount,  shortDescription,  "descriptionText":pt::text(description),  cover,"coverAlt":cover.alt,  previewUrl,  links[]{kind,label,url,endDate},  videos[]{title,url}}
 export type INTAKE_BOOK_EDIT_QUERY_RESULT = {
   _id: string;
   title: string;
@@ -4149,6 +4153,8 @@ export type INTAKE_BOOK_EDIT_QUERY_RESULT = {
     | "Zine"
     | null;
   maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
+  maturityRating: "allAges" | "mature" | "teen";
+  coverIsMature: boolean | null;
   status: "Complete" | "Ongoing" | "Upcoming" | null;
   issueCount: number | null;
   shortDescription: string | null;
@@ -4583,7 +4589,7 @@ declare module "@sanity/client" {
     '*[_type=="book"]._id': INTAKE_BOOK_IDS_QUERY_RESULT;
     '*[_type=="strip"]._id': INTAKE_STRIP_IDS_QUERY_RESULT;
     '*[_type=="book" && creator._ref in $ids && defined(slug.current)]|order(title asc){\n    _id,title,"creatorName":creator->name\n  }': INTAKE_OWNED_BOOKS_QUERY_RESULT;
-    '*[_type=="book" && _id==$id][0]{\n  _id,title,"slug":slug.current,\n  "creatorId":creator._ref,\n  genres,format,maturity,status,issueCount,\n  shortDescription,\n  "descriptionText":pt::text(description),\n  cover,"coverAlt":cover.alt,\n  previewUrl,\n  links[]{kind,label,url,endDate},\n  videos[]{title,url}\n}': INTAKE_BOOK_EDIT_QUERY_RESULT;
+    '*[_type=="book" && _id==$id][0]{\n  _id,title,"slug":slug.current,\n  "creatorId":creator._ref,\n  genres,format,maturity,maturityRating,coverIsMature,status,issueCount,\n  shortDescription,\n  "descriptionText":pt::text(description),\n  cover,"coverAlt":cover.alt,\n  previewUrl,\n  links[]{kind,label,url,endDate},\n  videos[]{title,url}\n}': INTAKE_BOOK_EDIT_QUERY_RESULT;
     '*[_type=="media" && defined(slug.current)]|order(name asc){\n    _id,name,"slug":slug.current,kinds,logo,about,genresCovered\n  }': MEDIA_QUERY_RESULT;
     '*[_type=="media" && slug.current==$slug][0]{\n  _id,name,kinds,logo,about,genresCovered,pitchInfo,feedUrl,feedConsent,\n  links[]{label,url}\n}': MEDIA_DETAIL_QUERY_RESULT;
     '*[_type=="media"]._id': INTAKE_MEDIA_IDS_QUERY_RESULT;

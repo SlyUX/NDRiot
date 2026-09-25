@@ -235,6 +235,10 @@ export function StripIntakeForm({
           </select>
           {errors.maturity && <p className="text-destructive text-xs">{errors.maturity}</p>}
           {copy.maturityHint && <p className={hintClass}>{copy.maturityHint}</p>}
+          {/* The one rule creators must read before uploading (§3, not appealable). */}
+          <p className="text-muted-foreground border-border mt-2 border-l-2 pl-3 text-xs leading-relaxed">
+            {reviewNotice.apparentMinorRule}
+          </p>
         </div>
       </fieldset>
 

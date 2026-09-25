@@ -338,6 +338,14 @@ export const LEGACY_MATURITY_TO_TIER: Record<MaturityRating, MaturityTier> = {
   Mature: "mature",
 };
 
+/** Map a v2 tier back onto a legacy label — so intake keeps populating the old
+ *  `maturity` field (still read by cards/filters) until consumers migrate. */
+export const TIER_TO_LEGACY_MATURITY: Record<MaturityTier, MaturityRating> = {
+  allAges: "All Ages",
+  teen: "Teen",
+  mature: "Mature",
+};
+
 /* --------------------------------------------------------------- socials */
 
 /**

@@ -489,6 +489,13 @@ export default defineType({
           rows: 5,
           description: "The three beats: why the wait protects them, the volunteer team, and gratitude for their patience.",
         }),
+        defineField({
+          name: "apparentMinorRule",
+          title: "Apparent-minor rule (book + strip forms)",
+          type: "text",
+          rows: 4,
+          description: "Shown near the rating on the comic + strip submission forms — the one rule creators must read before uploading. Not appealable.",
+        }),
       ],
     }),
 
@@ -2679,8 +2686,14 @@ export default defineType({
         }),
         defineField({
           name: "maturitySkipLabel",
-          title: 'Audience "rather not say"',
+          title: 'Audience "rather not say" (legacy — unused now rating is required)',
           type: "string",
+        }),
+        defineField({
+          name: "maturityHint",
+          title: "Rating hint (how to rate)",
+          type: "text",
+          rows: 2,
         }),
         defineField({
           name: "statusLabel",
@@ -2728,6 +2741,8 @@ export default defineType({
           type: "string",
         }),
         defineField({ name: "coverHint", title: "Cover hint", type: "string" }),
+        defineField({ name: "coverMatureLabel", title: "Cover-is-Mature checkbox label", type: "string" }),
+        defineField({ name: "coverMatureHint", title: "Cover-is-Mature hint", type: "text", rows: 2 }),
         defineField({
           name: "coverAltLabel",
           title: "Cover description label",

@@ -41,6 +41,8 @@ type EditBook = {
   genres: string[] | null
   format: string | null
   maturity: string | null
+  maturityRating: string | null
+  coverIsMature: boolean | null
   status: string | null
   issueCount: number | null
   shortDescription: string | null
@@ -61,6 +63,8 @@ function toInitial(b: EditBook): BookIntakeInitial {
     genres: b.genres ?? [],
     format: b.format ?? '',
     maturity: b.maturity ?? '',
+    maturityRating: b.maturityRating ?? '',
+    coverIsMature: b.coverIsMature ?? false,
     status: b.status ?? '',
     issueCount: b.issueCount != null ? String(b.issueCount) : '',
     shortDescription: b.shortDescription ?? '',
