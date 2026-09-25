@@ -1,8 +1,8 @@
 import 'server-only'
 
-import { createHash } from 'node:crypto'
-
 import { createClient, type SanityClient } from 'next-sanity'
+
+import { emailHmac, normalizeEmail, saveHmac } from '@/lib/email-hash'
 
 import { apiVersion, projectId } from './env'
 
@@ -10,11 +10,14 @@ import { apiVersion, projectId } from './env'
  * Reader saves — a signed-in reader's explicitly bookmarked comics and makers.
  *
  * Same private-dataset + token model as the ownership map (ownership-client.ts):
- * stored in `ndriot_auth`, never the world-readable `production` dataset,
- * because these tie a person's email to what they read (PII). No Studio schema
- * is needed — plain data documents written and read over the API. Each save is
- * its own tiny document, so adding and removing are idempotent create/delete
- * with no read-modify-write races.
+ * stored in `ndriot_auth`, never the world-readable `production` dataset.
+ *
+ * PRIVACY (upgraded 2026-09-25): a save doc stores NO plaintext email — only
+ * `emailHmac` (HMAC-SHA256 of the email, not brute-forceable from a mailing
+ * list the way a bare SHA-256 is) — and its `_id` is an HMAC of email+item, so
+ * the key can't be guessed to confirm "does X follow Y". This is what makes the
+ * privacy policy's "keyed to a one-way hash, not your email beside the list"
+ * true. Each save is its own tiny doc, so add/remove are idempotent.
  *
  * AGENTS.md §3: explicit personalisation ONLY. Saves serve the reader; they are
  * never aggregated into "popular" / "most-saved" or any ranking.
@@ -32,18 +35,15 @@ function client(): SanityClient {
   return cached
 }
 
-const normalizeEmail = (email: string) => email.trim().toLowerCase()
-
 export type SavedItemType = 'book' | 'creator' | 'strip'
 export interface SavedItem {
   itemType: SavedItemType
   itemId: string
 }
 
-/** A deterministic, _id-safe document id from (email, itemId). */
+/** A deterministic, _id-safe document id from (email, itemId) — HMAC-keyed. */
 function saveId(email: string, itemId: string): string {
-  const hash = createHash('sha256').update(`${normalizeEmail(email)}::${itemId}`).digest('hex')
-  return `save.${hash.slice(0, 40)}`
+  return `save.${saveHmac(email, itemId)}`
 }
 
 /** Every item this reader has saved. Fail-soft to none, like the ownership map. */
@@ -52,9 +52,10 @@ export async function savedItems(email: string): Promise<SavedItem[]> {
   if (!owner) return []
   try {
     return (
-      (await client().fetch<SavedItem[]>(`*[_type=="readerSave" && email==$email]{itemType, itemId}`, {
-        email: owner,
-      })) ?? []
+      (await client().fetch<SavedItem[]>(
+        `*[_type=="readerSave" && emailHmac==$hmac]{itemType, itemId}`,
+        { hmac: emailHmac(owner) },
+      )) ?? []
     )
   } catch (cause) {
     console.error('[reader] savedItems failed', cause)
@@ -90,7 +91,13 @@ export async function toggleSave(
     await client().delete(id)
     return false
   }
-  await client().createIfNotExists({ _id: id, _type: 'readerSave', email: owner, itemType, itemId })
+  await client().createIfNotExists({
+    _id: id,
+    _type: 'readerSave',
+    emailHmac: emailHmac(owner),
+    itemType,
+    itemId,
+  })
   return true
 }
 
