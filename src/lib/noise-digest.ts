@@ -29,10 +29,19 @@ import type {
  * us. No greeting by name: first-name guesses go wrong too often, so we dive in.
  */
 
-/** A generous per-section cap — an email shouldn't run to hundreds of rows. */
-const SECTION_LIMIT = 25
-/** The Sunday Strips showcase — the latest six, shown full width. */
-const STRIP_LIMIT = 6
+/** Per-section DISPLAY caps. When a section has more than its cap, we show a
+ *  random subset (per recipient) + a "view all" link — so the selection can't
+ *  be gamed by last-minute submissions, and nothing wins by recency/alphabet
+ *  (§3). Under the cap, the natural (recency) order is kept. */
+const STRIP_LIMIT = 12
+const UPDATES_LIMIT = 20
+const NEW_BOOKS_LIMIT = 12
+/** How many we FETCH per section — a pool larger than the cap to randomize from
+ *  (kept bounded so the query stays cheap). */
+const STRIP_POOL = 100
+const FOLLOW_POOL = 60
+/** Conventions aren't capped/randomized — chronological, and few in a month. */
+const CONVENTION_LIMIT = 25
 /** Fallback window when there's no prior issue: the last 30 days. */
 const DEFAULT_WINDOW_DAYS = 30
 /** Full-width render size for a strip image (height scales to its aspect). */
@@ -65,6 +74,30 @@ export function escapeHtml(input: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;')
+}
+
+/**
+ * Choose what to display for a section: if it fits within `limit`, keep the
+ * natural (recency) order; if it overflows, return a RANDOM subset (Fisher-Yates
+ * on a copy). Called per recipient, so the random pick differs for each — which
+ * is what stops last-minute submissions (or alphabetical order) from gaming
+ * which items get seen (§3). `hasMore` says whether to show a "view all" link.
+ */
+function pickForDisplay<T>(items: readonly T[], limit: number): { shown: T[]; hasMore: boolean } {
+  if (items.length <= limit) return { shown: items.slice(), hasMore: false }
+  const a = items.slice()
+  for (let i = a.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return { shown: a.slice(0, limit), hasMore: true }
+}
+
+/** A "view all" link shown at the bottom of a capped section (pink, underlined). */
+function viewAllLink(href: string, label: string): string {
+  return `<div style="margin:8px 0 0 0;"><a href="${escapeHtml(
+    absoluteUrl(href),
+  )}" style="color:${PINK};text-decoration:underline;font-weight:600;">${escapeHtml(label)}</a></div>`
 }
 
 /** Only http(s)/mailto hrefs survive — never javascript: etc. */
@@ -155,9 +188,10 @@ export async function resolveWindowSince(issue: NoiseIssue): Promise<string> {
   return fallback.toISOString()
 }
 
-/** The shared Sunday Strips showcase — the latest six, same for everyone. */
+/** The shared Sunday Strips pool — a bounded pool to randomize each recipient's
+ *  showcase from (the per-recipient pick happens at render). */
 export async function fetchSharedStrips(): Promise<NoiseStrip[]> {
-  return client.fetch(NOISE_LATEST_STRIPS_QUERY, { limit: STRIP_LIMIT })
+  return client.fetch(NOISE_LATEST_STRIPS_QUERY, { limit: STRIP_POOL })
 }
 
 export interface FollowContent {
@@ -181,10 +215,10 @@ export async function fetchFollowContent(
 
   const [updates, newBooks] = await Promise.all([
     updateIds.length
-      ? client.fetch(NOISE_UPDATES_QUERY, { ids: updateIds, since, limit: SECTION_LIMIT })
+      ? client.fetch(NOISE_UPDATES_QUERY, { ids: updateIds, since, limit: FOLLOW_POOL })
       : Promise.resolve<NoiseUpdate[]>([]),
     creatorIds.length
-      ? client.fetch(NOISE_NEW_BOOKS_QUERY, { ids: creatorIds, since, limit: SECTION_LIMIT })
+      ? client.fetch(NOISE_NEW_BOOKS_QUERY, { ids: creatorIds, since, limit: FOLLOW_POOL })
       : Promise.resolve<NoiseNewBook[]>([]),
   ])
   return { updates, newBooks }
@@ -204,7 +238,7 @@ export async function fetchUpcomingConventions(): Promise<NoiseConvention[]> {
   return client.fetch(NOISE_UPCOMING_CONVENTIONS_QUERY, {
     today: ymd(today),
     until: ymd(until),
-    limit: SECTION_LIMIT,
+    limit: CONVENTION_LIMIT,
   })
 }
 
@@ -222,7 +256,7 @@ function link(path: string, label: string): string {
   )}</a>`
 }
 
-function updatesSection(heading: string, updates: NoiseUpdate[]): string {
+function updatesSection(heading: string, updates: NoiseUpdate[], footer = ''): string {
   if (updates.length === 0) return ''
   const rows = updates
     .map((u) => {
@@ -234,7 +268,7 @@ function updatesSection(heading: string, updates: NoiseUpdate[]): string {
       return `<div style="margin:0 0 14px 0;"><div style="font-weight:700;color:${FG};">${who}</div><div style="color:${MUTED};line-height:1.5;">${body}</div></div>`
     })
     .join('')
-  return sectionHeading(heading) + rows
+  return sectionHeading(heading) + rows + footer
 }
 
 /** The distinct creators attending a convention, with profile slugs (empty if none). */
@@ -279,7 +313,7 @@ function conventionsSection(heading: string, conventions: NoiseConvention[]): st
   return sectionHeading(heading) + rows
 }
 
-function newBooksSection(heading: string, books: NoiseNewBook[]): string {
+function newBooksSection(heading: string, books: NoiseNewBook[], footer = ''): string {
   if (books.length === 0) return ''
   const rows = books
     .map((b) => {
@@ -288,19 +322,21 @@ function newBooksSection(heading: string, books: NoiseNewBook[]): string {
       return `<div style="margin:0 0 8px 0;color:${FG};">${title}${by}</div>`
     })
     .join('')
-  return sectionHeading(heading) + rows
+  return sectionHeading(heading) + rows + footer
 }
 
 /**
- * The Sunday Strips showcase — the latest six strips, each shown FULL WIDTH like
- * a newspaper comics page, on a light-gray panel with a bold masthead and a
- * double rule. Ends with a link to the full, recency-ordered strips listing.
+ * The Sunday Strips showcase — up to a dozen strips (a random subset per
+ * recipient when there are more), each shown FULL WIDTH like a newspaper comics
+ * page, on a light-gray panel with a bold masthead and a double rule. When a
+ * subset is shown, ends with a link to the full strips listing.
  */
 function stripsSection(
   heading: string,
   subline: string,
   allLabel: string,
   strips: NoiseStrip[],
+  hasMore: boolean,
 ): string {
   if (strips.length === 0) return ''
   const items = strips
@@ -332,11 +368,14 @@ function stripsSection(
       return `<div style="margin:0 0 22px 0;">${wrapped}</div>`
     })
     .join('')
-  const all = `<div style="text-align:center;margin:4px 0 0 0;"><a href="${escapeHtml(
-    absoluteUrl('/comics?tab=strips'),
-  )}" style="font-family:${SANS};font-weight:700;color:${INK};text-decoration:underline;">${escapeHtml(
-    allLabel,
-  )}</a></div>`
+  // Only offer "see all" when we're actually showing a subset.
+  const all = hasMore
+    ? `<div style="text-align:center;margin:4px 0 0 0;"><a href="${escapeHtml(
+        absoluteUrl('/comics?tab=strips'),
+      )}" style="font-family:${SANS};font-weight:700;color:${INK};text-decoration:underline;">${escapeHtml(
+        allLabel,
+      )}</a></div>`
+    : ''
   const sublineHtml = subline
     ? `<div style="font-size:13px;font-style:italic;color:${INK_MUTED};margin-top:6px;">${escapeHtml(
         subline,
@@ -373,23 +412,37 @@ function noteToText(blocks: NoteBlocks | undefined | null): string {
     .join('\n\n')
 }
 
+/** The per-recipient content actually shown (already capped/randomized), shared
+ *  by the HTML and text renderers so both show the identical selection. */
+interface DisplayContent {
+  strips: NoiseStrip[]
+  stripsMore: boolean
+  conventions: NoiseConvention[]
+  updates: NoiseUpdate[]
+  updatesMore: boolean
+  newBooks: NoiseNewBook[]
+  newBooksMore: boolean
+  hasFollow: boolean
+}
+
 /** A concise text/plain alternative — the same content + order, no markup. */
-function buildText(input: RenderInput, hasFollow: boolean): string {
-  const { issue, settings, follow, strips, conventions, unsubscribeUrl } = input
+function buildText(input: RenderInput, d: DisplayContent): string {
+  const { issue, settings, unsubscribeUrl } = input
   const lines: string[] = [settings.mastheadTitle.toUpperCase(), '']
   const note = noteToText(issue.note)
   if (note) lines.push(settings.noteHeading.toUpperCase(), note, '')
 
-  if (strips.length) {
+  if (d.strips.length) {
     lines.push(settings.stripsHeading.toUpperCase())
     if (settings.stripsSubline) lines.push(settings.stripsSubline)
-    for (const s of strips) lines.push(`• ${s.title ?? 'Strip'}${s.creatorName ? ` by ${s.creatorName}` : ''}${s.slug ? ` — ${absoluteUrl(`/strips/${s.slug}`)}` : ''}`)
-    lines.push(`${settings.stripsAllLabel} ${absoluteUrl('/comics?tab=strips')}`, '')
+    for (const s of d.strips) lines.push(`• ${s.title ?? 'Strip'}${s.creatorName ? ` by ${s.creatorName}` : ''}${s.slug ? ` — ${absoluteUrl(`/strips/${s.slug}`)}` : ''}`)
+    if (d.stripsMore) lines.push(`${settings.stripsAllLabel} ${absoluteUrl('/comics?tab=strips')}`)
+    lines.push('')
   }
 
-  if (conventions.length) {
+  if (d.conventions.length) {
     lines.push(settings.conventionsHeading.toUpperCase())
-    for (const c of conventions) {
+    for (const c of d.conventions) {
       const meta = [formatDateRange(c.startDate, c.endDate), [c.city, c.region].filter(Boolean).join(', ')]
         .filter(Boolean)
         .join(' · ')
@@ -400,15 +453,17 @@ function buildText(input: RenderInput, hasFollow: boolean): string {
     lines.push('')
   }
 
-  if (hasFollow) {
-    if (follow.updates.length) {
+  if (d.hasFollow) {
+    if (d.updates.length) {
       lines.push(settings.updatesHeading.toUpperCase())
-      for (const u of follow.updates) lines.push(`• ${u.targetName ?? 'ND Riot'}: ${(u.body ?? '').trim()}`)
+      for (const u of d.updates) lines.push(`• ${u.targetName ?? 'ND Riot'}: ${(u.body ?? '').trim()}`)
+      if (d.updatesMore) lines.push(`${settings.updatesAllLabel} ${absoluteUrl('/me')}`)
       lines.push('')
     }
-    if (follow.newBooks.length) {
+    if (d.newBooks.length) {
       lines.push(settings.newBooksHeading.toUpperCase())
-      for (const b of follow.newBooks) lines.push(`• ${b.title ?? 'Untitled'}${b.creatorName ? ` by ${b.creatorName}` : ''}`)
+      for (const b of d.newBooks) lines.push(`• ${b.title ?? 'Untitled'}${b.creatorName ? ` by ${b.creatorName}` : ''}`)
+      if (d.newBooksMore) lines.push(`${settings.newBooksAllLabel} ${absoluteUrl('/comics')}`)
       lines.push('')
     }
   } else {
@@ -442,7 +497,22 @@ export function renderNoiseEmail(input: RenderInput): {
 } {
   const { issue, settings, follow, strips, conventions, unsubscribeUrl } = input
 
-  const hasFollowContent = follow.updates.length > 0 || follow.newBooks.length > 0
+  // Cap + (per-recipient) randomize each list; conventions are left whole.
+  const stripPick = pickForDisplay(strips, STRIP_LIMIT)
+  const updatePick = pickForDisplay(follow.updates, UPDATES_LIMIT)
+  const newBookPick = pickForDisplay(follow.newBooks, NEW_BOOKS_LIMIT)
+  const hasFollowContent = updatePick.shown.length > 0 || newBookPick.shown.length > 0
+
+  const display: DisplayContent = {
+    strips: stripPick.shown,
+    stripsMore: stripPick.hasMore,
+    conventions,
+    updates: updatePick.shown,
+    updatesMore: updatePick.hasMore,
+    newBooks: newBookPick.shown,
+    newBooksMore: newBookPick.hasMore,
+    hasFollow: hasFollowContent,
+  }
 
   const noteHtml = noteToHtml(issue.note)
   const noteBlock = noteHtml
@@ -451,8 +521,16 @@ export function renderNoiseEmail(input: RenderInput): {
 
   const followBlocks = hasFollowContent
     ? [
-        updatesSection(settings.updatesHeading, follow.updates),
-        newBooksSection(settings.newBooksHeading, follow.newBooks),
+        updatesSection(
+          settings.updatesHeading,
+          display.updates,
+          display.updatesMore ? viewAllLink('/me', settings.updatesAllLabel) : '',
+        ),
+        newBooksSection(
+          settings.newBooksHeading,
+          display.newBooks,
+          display.newBooksMore ? viewAllLink('/comics', settings.newBooksAllLabel) : '',
+        ),
       ].join('')
     : `<p style="margin:20px 0;color:${MUTED};line-height:1.5;">${escapeHtml(
         settings.emptyFollowsNudge,
@@ -463,7 +541,13 @@ export function renderNoiseEmail(input: RenderInput): {
   // then the reader's personalized follow updates.
   const body = [
     noteBlock,
-    stripsSection(settings.stripsHeading, settings.stripsSubline, settings.stripsAllLabel, strips),
+    stripsSection(
+      settings.stripsHeading,
+      settings.stripsSubline,
+      settings.stripsAllLabel,
+      display.strips,
+      display.stripsMore,
+    ),
     conventionsSection(settings.conventionsHeading, conventions),
     followBlocks,
   ].join('\n')
@@ -488,7 +572,7 @@ export function renderNoiseEmail(input: RenderInput): {
     settings.mastheadTitle,
   )}</div>${body}${footer}</td></tr></table></td></tr></table></body></html>`
 
-  const text = buildText(input, hasFollowContent)
+  const text = buildText(input, display)
   return { subject, html, text, hasFollowContent }
 }
 

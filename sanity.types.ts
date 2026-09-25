@@ -917,6 +917,8 @@ export type SiteSettings = {
     stripsHeading?: string;
     stripsSubline?: string;
     stripsAllLabel?: string;
+    updatesAllLabel?: string;
+    newBooksAllLabel?: string;
     emptyFollowsNudge?: string;
     signoff?: string;
     footerLine?: string;

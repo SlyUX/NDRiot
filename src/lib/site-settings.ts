@@ -441,6 +441,9 @@ export type NoiseSettings = {
   stripsSubline: string;
   /** The link beneath the strips to the full, recency-ordered strips listing. */
   stripsAllLabel: string;
+  /** "View all" links shown when a section has more than its display limit. */
+  updatesAllLabel: string;
+  newBooksAllLabel: string;
   /** Shown in place of the follow sections when a subscriber follows nothing yet. */
   emptyFollowsNudge: string;
   /** Footer: a sign-off line, the unsubscribe sentence, and the link label. */
@@ -811,6 +814,8 @@ const DEFAULTS: SiteSettings = {
     stripsSubline:
       "Single-page comics to scratch that old ‘Sunday Comics’ itch – with just a dash of feistiness.",
     stripsAllLabel: "See every strip at ND Riot →",
+    updatesAllLabel: "See your full feed →",
+    newBooksAllLabel: "Browse all comics →",
     emptyFollowsNudge:
       "You’re not following anyone yet. Save a creator or comic on ND Riot and next month this section fills with their news.",
     signoff: "— ND Riot",

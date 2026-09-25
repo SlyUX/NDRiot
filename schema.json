@@ -5574,6 +5574,20 @@
               },
               "optional": true
             },
+            "updatesAllLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "newBooksAllLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "emptyFollowsNudge": {
               "type": "objectAttribute",
               "value": {

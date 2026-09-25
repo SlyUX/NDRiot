@@ -377,6 +377,18 @@ export default defineType({
           description: "Links to the full strips listing (newest first).",
         }),
         defineField({
+          name: "updatesAllLabel",
+          title: "Follow updates — “view all” link label",
+          type: "string",
+          description: "Shown when the section has more than its display limit; links to the reader’s dashboard feed.",
+        }),
+        defineField({
+          name: "newBooksAllLabel",
+          title: "New comics — “view all” link label",
+          type: "string",
+          description: "Shown when the section has more than its display limit; links to the comics listing.",
+        }),
+        defineField({
           name: "emptyFollowsNudge",
           title: "Nudge when following nothing",
           type: "text",
