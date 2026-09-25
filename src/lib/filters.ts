@@ -254,6 +254,9 @@ export function creatorHomeFilters(params: SearchParams) {
     genres: allowed(many(params.cgenre), GENRES),
     format: allowed(many(params.cformat), FORMATS)?.[0] ?? null,
     audience: allowed(many(params.caudience), MATURITY_RATINGS)?.[0] ?? null,
+    // The home row has no State facet — but FILTERED_CREATORS_QUERY references
+    // $region, so it must be PROVIDED (null = no region filter) or GROQ errors.
+    region: null,
     collaborating: null,
     q: searchTerm(params.cq),
   }
