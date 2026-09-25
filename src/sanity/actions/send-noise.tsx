@@ -76,10 +76,10 @@ export const SendNoiseAction: DocumentActionComponent = (props) => {
         error?: string;
       };
       if (res.ok && data.ok) {
-        const failed = data.failed ? `, ${data.failed} failed` : "";
+        const failed = data.failed ? ` (${data.failed} failed)` : "";
         setResult({
           ok: true,
-          msg: `Sent to ${data.sent} of ${data.subscribers} subscriber(s)${failed}.`,
+          msg: `Sent to ${data.sent} subscriber(s)${failed}.`,
         });
       } else {
         setResult({ ok: false, msg: data.error || `Failed (HTTP ${res.status}).` });
@@ -113,35 +113,71 @@ export const SendNoiseAction: DocumentActionComponent = (props) => {
       onClose: () => setOpen(false),
       content: (
         <div style={wrap}>
-          <p style={para}>
-            This sends this issue to <strong>every ND Noise subscriber</strong>,
-            right now. It can’t be undone. Make sure you’ve used{" "}
-            <strong>Preview this draft</strong> first.
-          </p>
-          {hasUnpublished && (
-            <p style={warn}>
-              You have unpublished changes. The send uses the published version —
-              publish first, or your latest edits won’t be included.
-            </p>
-          )}
-          <div style={row}>
-            <button type="button" onClick={send} disabled={sending} style={btnSend}>
-              {sending ? "Sending…" : "Send now"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              disabled={sending}
-              style={btnCancel}
-            >
-              Cancel
-            </button>
-            {result && (
-              <span style={{ fontSize: 13, color: result.ok ? "#1a7f37" : "#c0392b" }}>
+          {result ? (
+            // Once the send returns, the confirmation is replaced by the result.
+            <>
+              <p
+                style={{
+                  ...para,
+                  fontWeight: 600,
+                  color: result.ok ? "#1a7f37" : "#c0392b",
+                }}
+              >
                 {result.msg}
-              </span>
-            )}
-          </div>
+              </p>
+              <div style={row}>
+                {!result.ok && (
+                  <button
+                    type="button"
+                    onClick={() => setResult(null)}
+                    style={btnCancel}
+                  >
+                    Try again
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  style={btnCancel}
+                >
+                  Close
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p style={para}>
+                This sends this issue to{" "}
+                <strong>every ND Noise subscriber</strong>, right now. It can’t be
+                undone. Make sure you’ve used <strong>Preview this draft</strong>{" "}
+                first.
+              </p>
+              {hasUnpublished && (
+                <p style={warn}>
+                  You have unpublished changes. The send uses the published
+                  version — publish first, or your latest edits won’t be included.
+                </p>
+              )}
+              <div style={row}>
+                <button
+                  type="button"
+                  onClick={send}
+                  disabled={sending}
+                  style={btnSend}
+                >
+                  {sending ? "Sending…" : "Send now"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  disabled={sending}
+                  style={btnCancel}
+                >
+                  Cancel
+                </button>
+              </div>
+            </>
+          )}
         </div>
       ),
     },
