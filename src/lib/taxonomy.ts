@@ -298,6 +298,46 @@ export const MATURITY_DESCRIPTIONS: Record<MaturityRating, string> = {
 /** The rating that most needs surfacing to readers before they click. */
 export const RESTRICTED_RATING: MaturityRating = "Mature";
 
+/* ------------------------------------------------- maturity tiers (v2 gate)
+ * The Content Policy collapses the four legacy labels into THREE gated tiers.
+ * These power the new `maturityRating` field and the age gate. The legacy
+ * `MATURITY_RATINGS` above still drives current UI until consumers migrate.
+ *   All Ages / Teen / Teen+  →  allAges | teen   (public)
+ *   Mature                   →  mature           (18+ gated)
+ */
+export const MATURITY_TIERS = ["allAges", "teen", "mature"] as const;
+export type MaturityTier = (typeof MATURITY_TIERS)[number];
+
+/** Strips are public (no account, no gate), so they cap at Teen. */
+export const STRIP_MATURITY_TIERS = ["allAges", "teen"] as const;
+
+export const MATURITY_TIER_LABELS: Record<MaturityTier, string> = {
+  allAges: "All-Ages",
+  teen: "Teen",
+  mature: "Mature",
+};
+
+export const MATURITY_TIER_DESCRIPTIONS: Record<MaturityTier, string> = {
+  allAges: "Suitable for any reader. Cartoon violence at most.",
+  teen: "Ordinary comics violence, difficult subject matter, strong language.",
+  mature:
+    "Non-sexual nudity, graphic violence or gore, adult themes. Not sexual content — that's prohibited.",
+};
+
+/** The tier held behind the 18+ gate. */
+export const GATED_TIER: MaturityTier = "mature";
+
+export const RATING_SOURCES = ["creator", "operator"] as const;
+export type RatingSource = (typeof RATING_SOURCES)[number];
+
+/** Map a legacy four-tier label onto a v2 tier (for the backfill + fallback). */
+export const LEGACY_MATURITY_TO_TIER: Record<MaturityRating, MaturityTier> = {
+  "All Ages": "allAges",
+  Teen: "teen",
+  "Teen+": "teen",
+  Mature: "mature",
+};
+
 /* --------------------------------------------------------------- socials */
 
 /**

@@ -1,6 +1,14 @@
 import { defineType, defineField } from "sanity";
 
-import { GENRES, MATURITY_DESCRIPTIONS, MATURITY_RATINGS } from "@/lib/taxonomy";
+import {
+  GENRES,
+  MATURITY_DESCRIPTIONS,
+  MATURITY_RATINGS,
+  STRIP_MATURITY_TIERS,
+  MATURITY_TIER_LABELS,
+  MATURITY_TIER_DESCRIPTIONS,
+  RATING_SOURCES,
+} from "@/lib/taxonomy";
 
 /**
  * A Strip — a single-page comic HOSTED on ND Riot (the actual work is shown
@@ -79,6 +87,42 @@ export default defineType({
       },
       description:
         "Drives the same maturity handling as comic covers — a restricted strip is held behind the overlay in listings.",
+    }),
+    defineField({
+      name: "maturityRating",
+      title: "Rating (Content Policy)",
+      type: "string",
+      options: {
+        list: STRIP_MATURITY_TIERS.map((value) => ({
+          title: `${MATURITY_TIER_LABELS[value]} — ${MATURITY_TIER_DESCRIPTIONS[value]}`,
+          value,
+        })),
+        layout: "radio",
+      },
+      description:
+        "Strips are public — no account, no gate — so they cap at Teen. If a page needs Mature content, list it as a book that links out instead.",
+      // Enforce the cap even against API writes, not just the Studio dropdown.
+      validation: (rule) =>
+        rule
+          .required()
+          .custom((value) =>
+            value === undefined || (STRIP_MATURITY_TIERS as readonly string[]).includes(value)
+              ? true
+              : "Strips cannot be Mature — list it as a book that links out instead.",
+          ),
+    }),
+    defineField({
+      name: "ratingSource",
+      title: "Rating set by",
+      type: "string",
+      options: { list: RATING_SOURCES.map((value) => ({ title: value, value })) },
+      initialValue: "creator",
+      readOnly: true,
+    }),
+    defineField({
+      name: "ratingNote",
+      title: "Rating note (operator)",
+      type: "string",
     }),
     defineField({
       name: "publishedAt",

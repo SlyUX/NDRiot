@@ -314,6 +314,8 @@ export type Update = {
     CreatorReference | BookReference | ConventionReference | MediaReference
   >;
   publishedAt: string;
+  maturityRating: "allAges" | "teen" | "mature";
+  ratingSource?: "creator" | "operator";
 };
 
 export type NoiseIssue = {
@@ -653,6 +655,9 @@ export type Strip = {
     | "Punk & Protest"
   >;
   maturity?: "All Ages" | "Teen" | "Teen+" | "Mature";
+  maturityRating: "allAges" | "teen";
+  ratingSource?: "creator" | "operator";
+  ratingNote?: string;
   publishedAt?: string;
 };
 
@@ -705,6 +710,10 @@ export type Book = {
     | "Zine"
     | "Webcomic";
   maturity?: "All Ages" | "Teen" | "Teen+" | "Mature";
+  maturityRating: "allAges" | "teen" | "mature";
+  coverIsMature?: boolean;
+  ratingSource?: "creator" | "operator";
+  ratingNote?: string;
   status?: "Ongoing" | "Complete" | "Upcoming";
   issueCount?: number;
   shortDescription?: string;

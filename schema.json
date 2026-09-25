@@ -1605,6 +1605,44 @@
           "type": "string"
         },
         "optional": false
+      },
+      "maturityRating": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "union",
+          "of": [
+            {
+              "type": "string",
+              "value": "allAges"
+            },
+            {
+              "type": "string",
+              "value": "teen"
+            },
+            {
+              "type": "string",
+              "value": "mature"
+            }
+          ]
+        },
+        "optional": false
+      },
+      "ratingSource": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "union",
+          "of": [
+            {
+              "type": "string",
+              "value": "creator"
+            },
+            {
+              "type": "string",
+              "value": "operator"
+            }
+          ]
+        },
+        "optional": true
       }
     }
   },
@@ -3856,6 +3894,47 @@
         },
         "optional": true
       },
+      "maturityRating": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "union",
+          "of": [
+            {
+              "type": "string",
+              "value": "allAges"
+            },
+            {
+              "type": "string",
+              "value": "teen"
+            }
+          ]
+        },
+        "optional": false
+      },
+      "ratingSource": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "union",
+          "of": [
+            {
+              "type": "string",
+              "value": "creator"
+            },
+            {
+              "type": "string",
+              "value": "operator"
+            }
+          ]
+        },
+        "optional": true
+      },
+      "ratingNote": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
       "publishedAt": {
         "type": "objectAttribute",
         "value": {
@@ -4133,6 +4212,58 @@
               "value": "Mature"
             }
           ]
+        },
+        "optional": true
+      },
+      "maturityRating": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "union",
+          "of": [
+            {
+              "type": "string",
+              "value": "allAges"
+            },
+            {
+              "type": "string",
+              "value": "teen"
+            },
+            {
+              "type": "string",
+              "value": "mature"
+            }
+          ]
+        },
+        "optional": false
+      },
+      "coverIsMature": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "boolean"
+        },
+        "optional": true
+      },
+      "ratingSource": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "union",
+          "of": [
+            {
+              "type": "string",
+              "value": "creator"
+            },
+            {
+              "type": "string",
+              "value": "operator"
+            }
+          ]
+        },
+        "optional": true
+      },
+      "ratingNote": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
         },
         "optional": true
       },

@@ -6,6 +6,10 @@ import {
   GENRES,
   MATURITY_DESCRIPTIONS,
   MATURITY_RATINGS,
+  MATURITY_TIERS,
+  MATURITY_TIER_LABELS,
+  MATURITY_TIER_DESCRIPTIONS,
+  RATING_SOURCES,
   SINGLE_VOLUME_FORMATS,
   STATUSES,
   type BookFormat,
@@ -73,6 +77,44 @@ export default defineType({
       },
       description:
         'Who it is for. Comics have no ratings board — creators self-rate, and these tiers match the DC/Image system most publishers use. Leave blank if genuinely unsure; a wrong rating is worse than none.',
+    }),
+    defineField({
+      name: 'maturityRating',
+      title: 'Rating (Content Policy)',
+      type: 'string',
+      options: {
+        list: MATURITY_TIERS.map((value) => ({
+          title: `${MATURITY_TIER_LABELS[value]} — ${MATURITY_TIER_DESCRIPTIONS[value]}`,
+          value,
+        })),
+        layout: 'radio',
+      },
+      description:
+        'The gated rating. Mature = non-sexual nudity, graphic violence/gore, or adult themes — never sexual content, which is prohibited. Rate the work as a reader meets it: if one page is Mature, the book is Mature.',
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: 'coverIsMature',
+      title: 'Cover is Mature',
+      type: 'boolean',
+      initialValue: false,
+      description:
+        'Covers appear in public browse before anyone opts in, so they are held to the All-Ages bar. If the COVER itself is Mature, tick this — it gets blurred in listings while the listing stays visible.',
+    }),
+    defineField({
+      name: 'ratingSource',
+      title: 'Rating set by',
+      type: 'string',
+      options: { list: RATING_SOURCES.map((value) => ({ title: value, value })) },
+      initialValue: 'creator',
+      readOnly: true,
+      description: 'Whether the creator set the rating or an operator corrected it. Set programmatically.',
+    }),
+    defineField({
+      name: 'ratingNote',
+      title: 'Rating note (operator)',
+      type: 'string',
+      description: 'If an operator changed the rating, the reason — shown to the creator.',
     }),
     defineField({
       name: 'status',

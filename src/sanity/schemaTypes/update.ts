@@ -1,6 +1,13 @@
 import { defineType, defineField } from 'sanity'
 
-import { UPDATE_KINDS, UPDATE_KIND_DESCRIPTIONS } from '@/lib/taxonomy'
+import {
+  UPDATE_KINDS,
+  UPDATE_KIND_DESCRIPTIONS,
+  MATURITY_TIERS,
+  MATURITY_TIER_LABELS,
+  MATURITY_TIER_DESCRIPTIONS,
+  RATING_SOURCES,
+} from '@/lib/taxonomy'
 
 /**
  * A creator update — a short note posted to a comic or a creator profile.
@@ -70,6 +77,30 @@ export default defineType({
       type: 'datetime',
       description: 'When it was posted; orders the reader feed. Set automatically.',
       validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: 'maturityRating',
+      title: 'Rating (Content Policy)',
+      type: 'string',
+      options: {
+        list: MATURITY_TIERS.map((value) => ({
+          title: `${MATURITY_TIER_LABELS[value]} — ${MATURITY_TIER_DESCRIPTIONS[value]}`,
+          value,
+        })),
+        layout: 'radio',
+      },
+      initialValue: 'allAges',
+      description:
+        'Gates an update that carries a Mature image. Most updates are All-Ages text; set Mature only if the attached image is.',
+      validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: 'ratingSource',
+      title: 'Rating set by',
+      type: 'string',
+      options: { list: RATING_SOURCES.map((value) => ({ title: value, value })) },
+      initialValue: 'creator',
+      readOnly: true,
     }),
   ],
   orderings: [
