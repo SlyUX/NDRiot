@@ -107,10 +107,11 @@ export function homeCreatorFacets(genres: readonly string[]): Facet[] {
  * single format says little — most make more than one thing — and collaboration
  * is the filter a reader browsing creators actually reaches for.
  */
-export function creatorFacets(genres: readonly string[]): Facet[] {
+export function creatorFacets(genres: readonly string[], regionNames: readonly string[] = []): Facet[] {
   return [
     { param: 'genre', label: 'Genre', options: genres },
     { param: 'audience', label: 'Audience', options: MATURITY_RATINGS },
+    ...(regionNames.length ? [{ param: 'region', label: 'State', options: regionNames }] : []),
     { param: 'collaborating', label: 'Open to collaboration', options: [], toggle: true },
   ]
 }
@@ -225,10 +226,15 @@ export function bookFilters(params: SearchParams) {
 }
 
 export function creatorFilters(params: SearchParams) {
+  // Map the State display name in the URL to its stored code; an unknown name
+  // drops to null — show everyone, not nobody (same as conventionFilters).
+  const regionName = one(params.region)
+  const region = regionName ? (US_STATES.find((s) => s.name === regionName)?.code ?? null) : null
   return {
     genres: allowed(many(params.genre), GENRES),
     format: allowed(many(params.format), FORMATS)?.[0] ?? null,
     audience: allowed(many(params.audience), MATURITY_RATINGS)?.[0] ?? null,
+    region,
     // A flag: present means "only those open to it". Absent means everyone,
     // not "only those who said no".
     collaborating: one(params.collaborating) ? true : null,

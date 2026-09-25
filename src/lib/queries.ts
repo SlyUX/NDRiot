@@ -118,6 +118,7 @@ export const FILTERED_CREATORS_QUERY = defineQuery(`{
     && (!defined($genres) || count(genres[@ in $genres]) > 0)
     && (!defined($format) || $format in formats)
     && (!defined($audience) || audience == $audience)
+    && (!defined($region) || place.region == $region)
     && (!defined($collaborating) || openToCollaboration == true)
     && (!defined($q) || name match $q || studio->name match $q || pt::text(bio) match $q)
   ]|order(name asc)[0...$limit]{
@@ -130,10 +131,17 @@ export const FILTERED_CREATORS_QUERY = defineQuery(`{
     && (!defined($genres) || count(genres[@ in $genres]) > 0)
     && (!defined($format) || $format in formats)
     && (!defined($audience) || audience == $audience)
+    && (!defined($region) || place.region == $region)
     && (!defined($collaborating) || openToCollaboration == true)
     && (!defined($q) || name match $q || studio->name match $q || pt::text(bio) match $q)
   ])
 }`);
+
+/** The distinct US-state codes that actually have a creator — options for the
+ *  creators "State" filter (a state nobody's in is never offered). */
+export const CREATOR_REGIONS_QUERY = defineQuery(
+  `array::unique(*[_type=="creator" && defined(slug.current) && defined(place.region)].place.region)`,
+);
 export const BOOK_QUERY =
   defineQuery(`*[_type=="book" && slug.current==$slug][0]{
   _id,title,status,genres,format,maturity,issueCount,description,"descriptionText":pt::text(description),cover,previewUrl,

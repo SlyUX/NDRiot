@@ -147,6 +147,8 @@ export const KIND_BY_HOST: [RegExp, LinkKind][] = [
   [/(^|\.)webtoons?\.com$/, "Read free"],
   [/(^|\.)tapas\.io$/, "Read free"],
   [/(^|\.)globalcomix\.com$/, "Read free"],
+  // Panels Store — DRM-free direct purchase from indie creators.
+  [/(^|\.)panels\.store$/, "Buy"],
 ];
 
 /** Suggest a link kind from a URL's host, or null when nothing matches. */

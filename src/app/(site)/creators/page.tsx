@@ -9,6 +9,7 @@ import { creatorToCard } from '@/lib/card-mappers'
 import {
   PAGE_SIZE,
   SHUFFLE_CAP,
+  conventionRegionOptions,
   creatorFacets,
   creatorFilters,
   discoverSeed,
@@ -20,7 +21,13 @@ import {
   type SearchParams,
 } from '@/lib/filters'
 import { pageMetadata } from '@/lib/page-metadata'
-import { safeFetch, CREATORS_QUERY, FILTERED_CREATORS_QUERY, GENRES_WITH_BOOKS_QUERY } from '@/lib/queries'
+import {
+  safeFetch,
+  CREATORS_QUERY,
+  CREATOR_REGIONS_QUERY,
+  FILTERED_CREATORS_QUERY,
+  GENRES_WITH_BOOKS_QUERY,
+} from '@/lib/queries'
 import { auth } from '@/auth'
 import { savedItems } from '@/sanity/reader-client'
 import { getSiteSettings } from '@/lib/site-settings'
@@ -51,13 +58,14 @@ export default async function CreatorsPage({
   // filtering keeps query order so a narrowed set doesn't reshuffle as you page.
   const seed = filtering ? null : (discoverSeed(params, 'sort', 'seed') ?? randomSeed())
 
-  const [result, genresWithBooks, settings, session] = await Promise.all([
+  const [result, genresWithBooks, creatorRegions, settings, session] = await Promise.all([
     safeFetch<Paginated<CreatorSummary>>(
       FILTERED_CREATORS_QUERY,
       { ...filters, limit: seed === null ? limit : SHUFFLE_CAP },
       { items: [], total: 0 },
     ),
     safeFetch<string[]>(GENRES_WITH_BOOKS_QUERY, {}, []),
+    safeFetch<string[]>(CREATOR_REGIONS_QUERY, {}, []),
     getSiteSettings(),
     auth(),
   ])
@@ -97,7 +105,7 @@ export default async function CreatorsPage({
           {settings.sections.creatorsHeading}
         </h1>
         <Suspense fallback={null}>
-          <FilterBar facets={creatorFacets(genreOptions(genresWithBooks))} resultCount={result.total}
+          <FilterBar facets={creatorFacets(genreOptions(genresWithBooks), conventionRegionOptions(creatorRegions))} resultCount={result.total}
             searchLabel={settings.sections.searchCreatorsLabel}
             control="select"
             collapsible

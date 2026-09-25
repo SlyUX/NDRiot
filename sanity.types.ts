@@ -1972,7 +1972,7 @@ export type FILTERED_BOOKS_QUERY_RESULT = {
 
 // Source: src/lib/queries.ts
 // Variable: FILTERED_CREATORS_QUERY
-// Query: {  "items": *[    _type=="creator"    && (!defined($genres) || count(genres[@ in $genres]) > 0)    && (!defined($format) || $format in formats)    && (!defined($audience) || audience == $audience)    && (!defined($collaborating) || openToCollaboration == true)    && (!defined($q) || name match $q || studio->name match $q || pt::text(bio) match $q)  ]|order(name asc)[0...$limit]{    _id,name,"slug":slug.current,place,photo,genres,openToCollaboration,    "bioText":pt::text(bio),    studio->{_id,name,"slug":slug.current,website,logo}  },  "total": count(*[    _type=="creator"    && (!defined($genres) || count(genres[@ in $genres]) > 0)    && (!defined($format) || $format in formats)    && (!defined($audience) || audience == $audience)    && (!defined($collaborating) || openToCollaboration == true)    && (!defined($q) || name match $q || studio->name match $q || pt::text(bio) match $q)  ])}
+// Query: {  "items": *[    _type=="creator"    && (!defined($genres) || count(genres[@ in $genres]) > 0)    && (!defined($format) || $format in formats)    && (!defined($audience) || audience == $audience)    && (!defined($region) || place.region == $region)    && (!defined($collaborating) || openToCollaboration == true)    && (!defined($q) || name match $q || studio->name match $q || pt::text(bio) match $q)  ]|order(name asc)[0...$limit]{    _id,name,"slug":slug.current,place,photo,genres,openToCollaboration,    "bioText":pt::text(bio),    studio->{_id,name,"slug":slug.current,website,logo}  },  "total": count(*[    _type=="creator"    && (!defined($genres) || count(genres[@ in $genres]) > 0)    && (!defined($format) || $format in formats)    && (!defined($audience) || audience == $audience)    && (!defined($region) || place.region == $region)    && (!defined($collaborating) || openToCollaboration == true)    && (!defined($q) || name match $q || studio->name match $q || pt::text(bio) match $q)  ])}
 export type FILTERED_CREATORS_QUERY_RESULT = {
   items: Array<{
     _id: string;
@@ -2009,6 +2009,64 @@ export type FILTERED_CREATORS_QUERY_RESULT = {
   }>;
   total: number;
 };
+
+// Source: src/lib/queries.ts
+// Variable: CREATOR_REGIONS_QUERY
+// Query: array::unique(*[_type=="creator" && defined(slug.current) && defined(place.region)].place.region)
+export type CREATOR_REGIONS_QUERY_RESULT = Array<
+  | "AK"
+  | "AL"
+  | "AR"
+  | "AZ"
+  | "CA"
+  | "CO"
+  | "CT"
+  | "DC"
+  | "DE"
+  | "FL"
+  | "GA"
+  | "HI"
+  | "IA"
+  | "ID"
+  | "IL"
+  | "IN"
+  | "KS"
+  | "KY"
+  | "LA"
+  | "MA"
+  | "MD"
+  | "ME"
+  | "MI"
+  | "MN"
+  | "MO"
+  | "MS"
+  | "MT"
+  | "NC"
+  | "ND"
+  | "NE"
+  | "NH"
+  | "NJ"
+  | "NM"
+  | "NV"
+  | "NY"
+  | "OH"
+  | "OK"
+  | "OR"
+  | "PA"
+  | "RI"
+  | "SC"
+  | "SD"
+  | "TN"
+  | "TX"
+  | "UT"
+  | "VA"
+  | "VT"
+  | "WA"
+  | "WI"
+  | "WV"
+  | "WY"
+  | null
+>;
 
 // Source: src/lib/queries.ts
 // Variable: BOOK_QUERY
@@ -4519,7 +4577,8 @@ declare module "@sanity/client" {
     '*[_type=="conventionAppearance" && creator._ref in $creatorIds && defined(venue)]\n  | order(venue->name asc){\n  _id,status,tableNumber,note,forDate,\n  "creatorId":creator._ref,\n  "venueId":venue._ref,\n  "venue":venue->{_id,name,"slug":slug.current,website,startDate,endDate,place}\n}': OWNED_APPEARANCES_QUERY_RESULT;
     '*[_type=="book"]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}': BOOKS_QUERY_RESULT;
     '{\n  "items": *[\n    _type=="book"\n    && (!defined($genres) || count(genres[@ in $genres]) > 0)\n    && (!defined($format) || format == $format)\n    && (!defined($maturity) || maturity == $maturity)\n    && (!defined($status) || status == $status)\n    && (!defined($funding) || count(links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))]) > 0)\n    && (!defined($preview) || defined(previewUrl))\n    && (!defined($q) || title match $q || creator->name match $q || shortDescription match $q || pt::text(description) match $q)\n  ]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturity,issueCount,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},\n  "total": count(*[\n    _type=="book"\n    && (!defined($genres) || count(genres[@ in $genres]) > 0)\n    && (!defined($format) || format == $format)\n    && (!defined($maturity) || maturity == $maturity)\n    && (!defined($status) || status == $status)\n    && (!defined($funding) || count(links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))]) > 0)\n    && (!defined($preview) || defined(previewUrl))\n    && (!defined($q) || title match $q || creator->name match $q || shortDescription match $q || pt::text(description) match $q)\n  ])\n}': FILTERED_BOOKS_QUERY_RESULT;
-    '{\n  "items": *[\n    _type=="creator"\n    && (!defined($genres) || count(genres[@ in $genres]) > 0)\n    && (!defined($format) || $format in formats)\n    && (!defined($audience) || audience == $audience)\n    && (!defined($collaborating) || openToCollaboration == true)\n    && (!defined($q) || name match $q || studio->name match $q || pt::text(bio) match $q)\n  ]|order(name asc)[0...$limit]{\n    _id,name,"slug":slug.current,place,photo,genres,openToCollaboration,\n    "bioText":pt::text(bio),\n    studio->{_id,name,"slug":slug.current,website,logo}\n  },\n  "total": count(*[\n    _type=="creator"\n    && (!defined($genres) || count(genres[@ in $genres]) > 0)\n    && (!defined($format) || $format in formats)\n    && (!defined($audience) || audience == $audience)\n    && (!defined($collaborating) || openToCollaboration == true)\n    && (!defined($q) || name match $q || studio->name match $q || pt::text(bio) match $q)\n  ])\n}': FILTERED_CREATORS_QUERY_RESULT;
+    '{\n  "items": *[\n    _type=="creator"\n    && (!defined($genres) || count(genres[@ in $genres]) > 0)\n    && (!defined($format) || $format in formats)\n    && (!defined($audience) || audience == $audience)\n    && (!defined($region) || place.region == $region)\n    && (!defined($collaborating) || openToCollaboration == true)\n    && (!defined($q) || name match $q || studio->name match $q || pt::text(bio) match $q)\n  ]|order(name asc)[0...$limit]{\n    _id,name,"slug":slug.current,place,photo,genres,openToCollaboration,\n    "bioText":pt::text(bio),\n    studio->{_id,name,"slug":slug.current,website,logo}\n  },\n  "total": count(*[\n    _type=="creator"\n    && (!defined($genres) || count(genres[@ in $genres]) > 0)\n    && (!defined($format) || $format in formats)\n    && (!defined($audience) || audience == $audience)\n    && (!defined($region) || place.region == $region)\n    && (!defined($collaborating) || openToCollaboration == true)\n    && (!defined($q) || name match $q || studio->name match $q || pt::text(bio) match $q)\n  ])\n}': FILTERED_CREATORS_QUERY_RESULT;
+    'array::unique(*[_type=="creator" && defined(slug.current) && defined(place.region)].place.region)': CREATOR_REGIONS_QUERY_RESULT;
     '*[_type=="book" && slug.current==$slug][0]{\n  _id,title,status,genres,format,maturity,issueCount,description,"descriptionText":pt::text(description),cover,previewUrl,\n  videos[]{title,url},\n  links[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},\n  "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,\n  "creatorId": creator._ref,\n  creator->{name,"slug":slug.current,place,photo,"bioText":pt::text(bio),studio->{name}},\n  "otherBooks": *[_type=="book" && _id != ^._id && creator._ref == ^.creator._ref]|order(title asc){\n    _id,title,"slug":slug.current,status,genres,format,maturity,cover,\n    "descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name\n  }\n}': BOOK_QUERY_RESULT;
     '{\n  "items": *[_type=="book" && $genre in genres]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},\n  "total": count(*[_type=="book" && $genre in genres])\n}': GENRE_BOOKS_QUERY_RESULT;
     '{\n  "items": *[_type=="book" && format==$format]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},\n  "total": count(*[_type=="book" && format==$format])\n}': FORMAT_BOOKS_QUERY_RESULT;
