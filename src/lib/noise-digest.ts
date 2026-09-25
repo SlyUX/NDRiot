@@ -6,8 +6,8 @@ import { savedItems } from '@/sanity/reader-client'
 import { absoluteUrl } from '@/lib/site-url'
 import {
   NOISE_LAST_SENT_QUERY,
-  NOISE_LATEST_STRIPS_QUERY,
   NOISE_NEW_BOOKS_QUERY,
+  NOISE_STRIPS_QUERY,
   NOISE_UPCOMING_CONVENTIONS_QUERY,
   NOISE_UPDATES_QUERY,
 } from '@/lib/queries'
@@ -188,10 +188,11 @@ export async function resolveWindowSince(issue: NoiseIssue): Promise<string> {
   return fallback.toISOString()
 }
 
-/** The shared Sunday Strips pool — a bounded pool to randomize each recipient's
- *  showcase from (the per-recipient pick happens at render). */
-export async function fetchSharedStrips(): Promise<NoiseStrip[]> {
-  return client.fetch(NOISE_LATEST_STRIPS_QUERY, { limit: STRIP_POOL })
+/** The shared Sunday Strips pool — strips published since the issue window, a
+ *  bounded pool to randomize each recipient's showcase from (the per-recipient
+ *  pick happens at render). Windowed so every strip shown is new this issue. */
+export async function fetchSharedStrips(since: string): Promise<NoiseStrip[]> {
+  return client.fetch(NOISE_STRIPS_QUERY, { since, limit: STRIP_POOL })
 }
 
 export interface FollowContent {

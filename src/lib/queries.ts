@@ -795,11 +795,13 @@ export const NOISE_UPCOMING_CONVENTIONS_QUERY =
   "creators":*[_type=="conventionAppearance" && venue._ref == ^._id && defined(creator->name)]{"name":creator->name,"slug":creator->slug.current}
 }`);
 
-/** The latest strips — the shared "Sunday Strips" showcase (same for every
- *  subscriber; newest first, independent of follows or the issue window).
- *  Carries image dimensions so the email can reserve each strip's height. */
-export const NOISE_LATEST_STRIPS_QUERY =
-  defineQuery(`*[_type=="strip" && defined(slug.current) && defined(publishedAt)]|order(publishedAt desc)[0...$limit]{
+/** Strips published in the issue window — the shared "Sunday Strips" showcase
+ *  (same pool for everyone; the per-recipient random pick happens at render).
+ *  Windowed by `$since` so every strip shown is genuinely new this issue, even
+ *  when the render picks ones that aren't the newest. Carries image dimensions
+ *  so the email can reserve each strip's height. */
+export const NOISE_STRIPS_QUERY =
+  defineQuery(`*[_type=="strip" && defined(slug.current) && defined(publishedAt) && dateTime(publishedAt) >= dateTime($since)]|order(publishedAt desc)[0...$limit]{
   _id,title,"slug":slug.current,caption,image,
   "dimensions":image.asset->metadata.dimensions{width,height},
   "creatorName":creator->name

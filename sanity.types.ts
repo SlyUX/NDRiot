@@ -4478,9 +4478,9 @@ export type NOISE_UPCOMING_CONVENTIONS_QUERY_RESULT = Array<{
 }>;
 
 // Source: src/lib/queries.ts
-// Variable: NOISE_LATEST_STRIPS_QUERY
-// Query: *[_type=="strip" && defined(slug.current) && defined(publishedAt)]|order(publishedAt desc)[0...$limit]{  _id,title,"slug":slug.current,caption,image,  "dimensions":image.asset->metadata.dimensions{width,height},  "creatorName":creator->name}
-export type NOISE_LATEST_STRIPS_QUERY_RESULT = Array<{
+// Variable: NOISE_STRIPS_QUERY
+// Query: *[_type=="strip" && defined(slug.current) && defined(publishedAt) && dateTime(publishedAt) >= dateTime($since)]|order(publishedAt desc)[0...$limit]{  _id,title,"slug":slug.current,caption,image,  "dimensions":image.asset->metadata.dimensions{width,height},  "creatorName":creator->name}
+export type NOISE_STRIPS_QUERY_RESULT = Array<{
   _id: string;
   title: string;
   slug: string;
@@ -4586,6 +4586,6 @@ declare module "@sanity/client" {
     '*[_type=="update" && target._ref in $ids && defined(publishedAt) && dateTime(publishedAt) >= dateTime($since)]|order(publishedAt desc)[0...$limit]{\n  _id,body,publishedAt,\n  "targetType":target->_type,\n  "targetName":coalesce(target->title,target->name),\n  "targetSlug":target->slug.current\n}': NOISE_UPDATES_QUERY_RESULT;
     '*[_type=="book" && creator._ref in $ids && defined(slug.current) && dateTime(_createdAt) >= dateTime($since)]|order(_createdAt desc)[0...$limit]{\n  _id,title,"slug":slug.current,"creatorName":creator->name\n}': NOISE_NEW_BOOKS_QUERY_RESULT;
     '*[_type=="convention" && defined(slug.current) && datesVerified == true && defined(startDate) && startDate >= $today && startDate <= $until]|order(startDate asc)[0...$limit]{\n  _id,name,"slug":slug.current,startDate,endDate,\n  "city":place.city,"region":place.region,\n  "creators":*[_type=="conventionAppearance" && venue._ref == ^._id && defined(creator->name)]{"name":creator->name,"slug":creator->slug.current}\n}': NOISE_UPCOMING_CONVENTIONS_QUERY_RESULT;
-    '*[_type=="strip" && defined(slug.current) && defined(publishedAt)]|order(publishedAt desc)[0...$limit]{\n  _id,title,"slug":slug.current,caption,image,\n  "dimensions":image.asset->metadata.dimensions{width,height},\n  "creatorName":creator->name\n}': NOISE_LATEST_STRIPS_QUERY_RESULT;
+    '*[_type=="strip" && defined(slug.current) && defined(publishedAt) && dateTime(publishedAt) >= dateTime($since)]|order(publishedAt desc)[0...$limit]{\n  _id,title,"slug":slug.current,caption,image,\n  "dimensions":image.asset->metadata.dimensions{width,height},\n  "creatorName":creator->name\n}': NOISE_STRIPS_QUERY_RESULT;
   }
 }

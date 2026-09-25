@@ -54,7 +54,7 @@ export async function GET(request: Request) {
   const settings = await getSiteSettings();
   const since = await resolveWindowSince(issue);
   const [strips, conventions] = await Promise.all([
-    fetchSharedStrips(),
+    fetchSharedStrips(since),
     fetchUpcomingConventions(),
   ]);
   const token = signUnsubscribe(asEmail);
