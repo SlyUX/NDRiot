@@ -7,6 +7,7 @@ import { structure } from "./src/sanity/structure";
 import { ResendCreatorLiveAction } from "./src/sanity/actions/resend-notification";
 import { PreviewNoiseAction } from "./src/sanity/actions/preview-noise";
 import { SendNoiseAction } from "./src/sanity/actions/send-noise";
+import { metricsTool } from "./src/sanity/tools/metrics";
 import { projectId, dataset, apiVersion } from "./src/sanity/env";
 
 /** Types that must only ever have one document. See src/sanity/structure.ts. */
@@ -21,6 +22,8 @@ export default defineConfig({
     structureTool({ structure }),
     visionTool({ defaultApiVersion: apiVersion }),
   ],
+  // Adds a top-level "Metrics" tab (userbase + content counts).
+  tools: (prev) => [...prev, metricsTool],
   document: {
     // Hides singletons from the global "create new" menu. The structure pins
     // the document ID; this stops a second one being made from the + button.
