@@ -15,14 +15,18 @@ import { apiVersion } from "../env";
  * account/ownership/follow counts from the private `ndriot_auth` dataset, read
  * via the same admin session (`withConfig`). Every count fails soft to null.
  *
- * Newsletter-subscriber count isn't shown here — it needs MailerLite's server
- * API key (not available to the browser). Check the MailerLite dashboard for it.
+ * The ND Noise subscriber count is the one figure that can't come from Sanity —
+ * it needs MailerLite's server API key. We fetch it from `/api/studio/noise-count`,
+ * forwarding this Studio session's Sanity token so that endpoint can confirm we're
+ * a project member (no separate ND Riot / Google login). If the token isn't
+ * available, it falls back to null (shown as "—").
  */
 
 interface Counts {
   creators: number | null;
   ownedProfiles: number | null;
   readers: number | null;
+  subscribers: number | null;
   total: number | null;
   over18: number | null;
   teens13to17: number | null;
@@ -105,11 +109,29 @@ function MetricsView() {
         return null;
       }
     };
+    // ND Noise subscribers come from MailerLite (server key only), via our
+    // endpoint. Forward the Studio session token so it can verify project
+    // membership; if the token isn't exposed to the browser client, skip it.
+    const subscriberCount = async (): Promise<number | null> => {
+      const token = pub.config().token;
+      if (!token) return null;
+      try {
+        const res = await fetch("/api/studio/noise-count", {
+          headers: { authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) return null;
+        const body: { ok?: boolean; subscribers?: number | null } = await res.json();
+        return body.ok ? body.subscribers ?? null : null;
+      } catch {
+        return null;
+      }
+    };
     try {
       const [
         creators,
         ownedProfiles,
         readers,
+        subscribers,
         total,
         over18,
         teens13to17,
@@ -122,6 +144,7 @@ function MetricsView() {
         one(authDb, `count(array::unique(*[_type=="ownership" && defined(email)].email))`),
         one(authDb, `count(*[_type=="ownership"])`),
         one(authDb, `count(array::unique(*[_type=="readerSave" && defined(emailHmac)].emailHmac))`),
+        subscriberCount(),
         one(authDb, `count(*[_type=="account"])`),
         one(authDb, `count(*[_type=="account" && isOver18==true])`),
         one(authDb, `count(*[_type=="account" && isOver13==true && isOver18!=true])`),
@@ -135,6 +158,7 @@ function MetricsView() {
         creators,
         ownedProfiles,
         readers,
+        subscribers,
         total,
         over18,
         teens13to17,
@@ -180,12 +204,13 @@ function MetricsView() {
           <div style={grid}>
             <Metric value={data.creators} label="Creators (claimed a profile)" />
             <Metric value={data.readers} label="Readers (following ≥1)" />
+            <Metric value={data.subscribers} label="ND Noise subscribers" />
           </div>
           <p style={{ ...lbl, marginTop: 10 }}>
             “Creators” counts distinct people who own a creator or media profile ({fmt(data.ownedProfiles)}{" "}
             profile{data.ownedProfiles === 1 ? "" : "s"} owned in total). These are derived proxies —
-            a full per-tier account census appears here once the age gate ships. Newsletter
-            subscribers live in MailerLite.
+            a full per-tier account census appears here once the age gate ships. ND Noise
+            subscribers come live from MailerLite{data.subscribers == null ? " (“—” if unavailable)" : ""}.
           </p>
 
           {typeof data.total === "number" && data.total > 0 && (
