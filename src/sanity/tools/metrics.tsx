@@ -1,35 +1,36 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import type { Tool } from "sanity";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useClient, type Tool } from "sanity";
+
+import { apiVersion } from "../env";
 
 /**
  * Studio "Metrics" tool — a userbase + content readout for tracking the site's
- * scaling. Reads the admin-gated `/api/admin/stats` route (same origin, so the
- * admin's ND Riot login cookie rides along); the private-dataset token stays on
- * the server. Styled with plain elements (@sanity/ui isn't resolvable here).
+ * scaling.
+ *
+ * Auth: it queries Sanity with the STUDIO's own authenticated client (your admin
+ * session), so it uses Studio's login rather than the separate ND Riot (Google)
+ * session — no second sign-in, no ADMIN_EMAILS. Content comes from `production`;
+ * account/ownership/follow counts from the private `ndriot_auth` dataset, read
+ * via the same admin session (`withConfig`). Every count fails soft to null.
+ *
+ * Newsletter-subscriber count isn't shown here — it needs MailerLite's server
+ * API key (not available to the browser). Check the MailerLite dashboard for it.
  */
 
-interface Stats {
-  ok: boolean;
-  generatedAt?: string;
-  accounts?: {
-    creators: number | null;
-    ownedProfiles: number | null;
-    readers: number | null;
-    subscribers: number | null;
-    total: number | null;
-    over18: number | null;
-    teens13to17: number | null;
-  };
-  content?: {
-    creatorsListed: number | null;
-    comics: number | null;
-    strips: number | null;
-    conventions: number | null;
-    media: number | null;
-  };
-  error?: string;
+interface Counts {
+  creators: number | null;
+  ownedProfiles: number | null;
+  readers: number | null;
+  total: number | null;
+  over18: number | null;
+  teens13to17: number | null;
+  creatorsListed: number | null;
+  comics: number | null;
+  strips: number | null;
+  conventions: number | null;
+  media: number | null;
 }
 
 const wrap: React.CSSProperties = {
@@ -84,34 +85,72 @@ function Metric({ value, label }: { value: number | null | undefined; label: str
 }
 
 function MetricsView() {
-  const [data, setData] = useState<Stats | null>(null);
+  const pub = useClient({ apiVersion });
+  // Same authenticated session, pointed at the private accounts dataset.
+  const authDb = useMemo(
+    () => pub.withConfig({ dataset: process.env.SANITY_STUDIO_OWNERSHIP_DATASET ?? "ndriot_auth" }),
+    [pub],
+  );
+
+  const [data, setData] = useState<Counts | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [at, setAt] = useState<string | null>(null);
 
-  // The fetch itself sets state only AFTER the await, so it's safe to call from
-  // an effect (loading already initializes to true — no synchronous set needed).
   const runFetch = useCallback(async () => {
-    try {
-      const res = await fetch("/api/admin/stats", { headers: { Accept: "application/json" } });
-      const body = (await res.json().catch(() => ({}))) as Stats;
-      if (!res.ok || !body.ok) {
-        setError(
-          body.error ||
-            (res.status === 403
-              ? "Sign in to ND Riot with your admin Google account to view metrics."
-              : `Couldn't load metrics (HTTP ${res.status}).`),
-        );
-        setData(null);
-      } else {
-        setData(body);
+    const one = async (c: typeof pub, q: string): Promise<number | null> => {
+      try {
+        return await c.fetch<number>(q);
+      } catch {
+        return null;
       }
+    };
+    try {
+      const [
+        creators,
+        ownedProfiles,
+        readers,
+        total,
+        over18,
+        teens13to17,
+        creatorsListed,
+        comics,
+        strips,
+        conventions,
+        media,
+      ] = await Promise.all([
+        one(authDb, `count(array::unique(*[_type=="ownership" && defined(email)].email))`),
+        one(authDb, `count(*[_type=="ownership"])`),
+        one(authDb, `count(array::unique(*[_type=="readerSave" && defined(emailHmac)].emailHmac))`),
+        one(authDb, `count(*[_type=="account"])`),
+        one(authDb, `count(*[_type=="account" && isOver18==true])`),
+        one(authDb, `count(*[_type=="account" && isOver13==true && isOver18!=true])`),
+        one(pub, `count(*[_type=="creator" && defined(slug.current)])`),
+        one(pub, `count(*[_type=="book" && defined(slug.current)])`),
+        one(pub, `count(*[_type=="strip" && defined(slug.current)])`),
+        one(pub, `count(*[_type=="convention" && defined(slug.current)])`),
+        one(pub, `count(*[_type=="media" && defined(slug.current)])`),
+      ]);
+      setData({
+        creators,
+        ownedProfiles,
+        readers,
+        total,
+        over18,
+        teens13to17,
+        creatorsListed,
+        comics,
+        strips,
+        conventions,
+        media,
+      });
+      setAt(new Date().toLocaleString());
     } catch {
-      setError("Request failed — are you signed in to ND Riot as an admin?");
-      setData(null);
+      setError("Couldn't load metrics.");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [authDb, pub]);
 
   const refresh = useCallback(() => {
     setLoading(true);
@@ -119,63 +158,54 @@ function MetricsView() {
     void runFetch();
   }, [runFetch]);
 
-  // Fetch on mount. runFetch only sets state after awaiting, so this is a
-  // legitimate data-fetching effect (the rule can't tell async from sync here).
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void runFetch();
   }, [runFetch]);
-
-  const a = data?.accounts;
-  const c = data?.content;
 
   return (
     <div style={wrap}>
       <h1 style={h1}>Metrics</h1>
       <p style={sub}>
         Userbase and content, for tracking how the site is scaling.
-        {data?.generatedAt ? ` As of ${new Date(data.generatedAt).toLocaleString()}.` : ""}
+        {at ? ` As of ${at}.` : ""}
       </p>
 
       {loading && <p style={sub}>Loading…</p>}
       {error && <p style={{ ...sub, color: "#c0392b" }}>{error}</p>}
 
-      {a && (
+      {data && (
         <>
           <h2 style={h2}>Accounts by type</h2>
           <div style={grid}>
-            <Metric value={a.creators} label="Creators (claimed a profile)" />
-            <Metric value={a.readers} label="Readers (following ≥1)" />
-            <Metric value={a.subscribers} label="Newsletter subscribers" />
+            <Metric value={data.creators} label="Creators (claimed a profile)" />
+            <Metric value={data.readers} label="Readers (following ≥1)" />
           </div>
           <p style={{ ...lbl, marginTop: 10 }}>
-            “Creators” counts distinct people who own a creator or media profile ({fmt(a.ownedProfiles)}{" "}
-            profile{a.ownedProfiles === 1 ? "" : "s"} owned in total). These are derived proxies — a
-            full per-tier account census appears here once the age gate ships.
+            “Creators” counts distinct people who own a creator or media profile ({fmt(data.ownedProfiles)}{" "}
+            profile{data.ownedProfiles === 1 ? "" : "s"} owned in total). These are derived proxies —
+            a full per-tier account census appears here once the age gate ships. Newsletter
+            subscribers live in MailerLite.
           </p>
 
-          {typeof a.total === "number" && a.total > 0 && (
+          {typeof data.total === "number" && data.total > 0 && (
             <>
               <h2 style={h2}>Age-gate accounts</h2>
               <div style={grid}>
-                <Metric value={a.total} label="Total accounts" />
-                <Metric value={a.over18} label="18 and over" />
-                <Metric value={a.teens13to17} label="13–17" />
+                <Metric value={data.total} label="Total accounts" />
+                <Metric value={data.over18} label="18 and over" />
+                <Metric value={data.teens13to17} label="13–17" />
               </div>
             </>
           )}
-        </>
-      )}
 
-      {c && (
-        <>
           <h2 style={h2}>Content</h2>
           <div style={grid}>
-            <Metric value={c.creatorsListed} label="Creators listed" />
-            <Metric value={c.comics} label="Comics" />
-            <Metric value={c.strips} label="Strips" />
-            <Metric value={c.conventions} label="Conventions" />
-            <Metric value={c.media} label="Media outlets" />
+            <Metric value={data.creatorsListed} label="Creators listed" />
+            <Metric value={data.comics} label="Comics" />
+            <Metric value={data.strips} label="Strips" />
+            <Metric value={data.conventions} label="Conventions" />
+            <Metric value={data.media} label="Media outlets" />
           </div>
         </>
       )}
