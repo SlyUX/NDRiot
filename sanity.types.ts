@@ -654,7 +654,7 @@ export type Strip = {
     | "Weird & Experimental"
     | "Punk & Protest"
   >;
-  maturity?: "All Ages" | "Teen" | "Teen+" | "Mature";
+  maturity?: "All Ages" | "Teen" | "Teen+";
   maturityRating: "allAges" | "teen";
   ratingSource?: "creator" | "operator";
   ratingNote?: string;
@@ -3469,7 +3469,7 @@ export type STRIPS_QUERY_RESULT = Array<{
     | "Superhero"
     | "Weird & Experimental"
   > | null;
-  maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
+  maturity: "All Ages" | "Teen" | "Teen+" | null;
   publishedAt: string | null;
   creatorName: string;
   creatorSlug: string;
@@ -3508,7 +3508,7 @@ export type FILTERED_STRIPS_QUERY_RESULT = Array<{
     | "Superhero"
     | "Weird & Experimental"
   > | null;
-  maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
+  maturity: "All Ages" | "Teen" | "Teen+" | null;
   publishedAt: string | null;
   creatorName: string;
   creatorSlug: string;
@@ -3547,7 +3547,7 @@ export type SAVED_STRIPS_QUERY_RESULT = Array<{
     | "Superhero"
     | "Weird & Experimental"
   > | null;
-  maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
+  maturity: "All Ages" | "Teen" | "Teen+" | null;
   publishedAt: string | null;
   creatorName: string;
   creatorSlug: string;
@@ -3602,7 +3602,7 @@ export type CREATOR_STRIPS_QUERY_RESULT = Array<{
     | "Superhero"
     | "Weird & Experimental"
   > | null;
-  maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
+  maturity: "All Ages" | "Teen" | "Teen+" | null;
   publishedAt: string | null;
   creatorName: string;
   creatorSlug: string;
@@ -3641,7 +3641,7 @@ export type STRIP_QUERY_RESULT = {
     | "Superhero"
     | "Weird & Experimental"
   > | null;
-  maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
+  maturity: "All Ages" | "Teen" | "Teen+" | null;
   publishedAt: string | null;
   creator: {
     name: string;
@@ -3701,7 +3701,7 @@ export type SERIES_QUERY_RESULT = {
       | "Superhero"
       | "Weird & Experimental"
     > | null;
-    maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
+    maturity: "All Ages" | "Teen" | "Teen+" | null;
     publishedAt: string | null;
     creatorName: string;
     creatorSlug: string;

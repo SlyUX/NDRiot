@@ -4,6 +4,7 @@ import {
   GENRES,
   MATURITY_DESCRIPTIONS,
   MATURITY_RATINGS,
+  RESTRICTED_RATING,
   STRIP_MATURITY_TIERS,
   MATURITY_TIER_LABELS,
   MATURITY_TIER_DESCRIPTIONS,
@@ -79,14 +80,24 @@ export default defineType({
       name: "maturity",
       title: "Maturity",
       type: "string",
+      // This is the field the reader-facing badge renders, so it must never be
+      // Mature on a strip (strips are public and cap at Teen). Mature is dropped
+      // from the list AND rejected in validation, so neither the Studio dropdown
+      // nor a hand-written CLI/API write can set it.
       options: {
-        list: MATURITY_RATINGS.map((value) => ({
+        list: MATURITY_RATINGS.filter((value) => value !== RESTRICTED_RATING).map((value) => ({
           title: `${value} — ${MATURITY_DESCRIPTIONS[value]}`,
           value,
         })),
       },
       description:
-        "Drives the same maturity handling as comic covers — a restricted strip is held behind the overlay in listings.",
+        "Drives the badge shown on the strip. Strips cap at Teen — Mature is not an option. If a page needs Mature content, list it as a book that links out instead.",
+      validation: (rule) =>
+        rule.custom((value) =>
+          value !== RESTRICTED_RATING
+            ? true
+            : "Strips cannot be Mature — list it as a book that links out instead.",
+        ),
     }),
     defineField({
       name: "maturityRating",
@@ -101,7 +112,9 @@ export default defineType({
       },
       description:
         "Strips are public — no account, no gate — so they cap at Teen. If a page needs Mature content, list it as a book that links out instead.",
-      // Enforce the cap even against API writes, not just the Studio dropdown.
+      // Guards the Studio dropdown and CLI writes (Sanity validation does NOT run
+      // on raw API writes). The creator submission path enforces the same cap
+      // itself — see STRIP_ALLOWED_RATINGS in strip-intake.ts.
       validation: (rule) =>
         rule
           .required()

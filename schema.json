@@ -3885,10 +3885,6 @@
             {
               "type": "string",
               "value": "Teen+"
-            },
-            {
-              "type": "string",
-              "value": "Mature"
             }
           ]
         },
