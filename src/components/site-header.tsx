@@ -19,7 +19,9 @@ export function SiteHeader({ children }: { children: React.ReactNode }) {
   return (
     <header
       className={cn(
-        "border-primary/40 bg-background z-50 border-b",
+        // px-6 here (not on the inner nav) so the nav's max-w-[90rem] container
+        // aligns with the page content, which pads the full-bleed outer too.
+        "border-primary/40 bg-background z-50 border-b px-6",
         sticky && "sticky top-0",
       )}
     >

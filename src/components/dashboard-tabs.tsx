@@ -70,11 +70,11 @@ export function DashboardTabs({
       {/* Desktop: the section nav is THE sticky bar on /me (the main nav scrolls
           away — see SiteHeader), so it sticks to the very top. Inner container
           aligned to the content gutter (max-w-[90rem] + px-6). */}
-      <div className="border-primary/40 bg-background sticky top-0 z-30 hidden border-b md:block">
+      <div className="border-primary/40 bg-background sticky top-0 z-30 hidden border-b px-6 md:block">
         <div
           role="tablist"
           aria-label="Dashboard"
-          className="mx-auto flex max-w-[90rem] gap-1 overflow-x-auto px-6"
+          className="mx-auto flex max-w-[90rem] gap-1 overflow-x-auto"
         >
           {panels.map((p) => {
             const Icon = ICONS[p.id] ?? LayoutDashboard;

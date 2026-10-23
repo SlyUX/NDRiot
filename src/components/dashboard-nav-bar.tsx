@@ -32,10 +32,11 @@ export function DashboardNavBar({ items }: { items: DashboardNavItem[] }) {
   return (
     // Content-width, boxed (pink border on all four edges), with a ~10px gap
     // above and below — a distinct launcher rather than a full-bleed strip.
-    <div className="mx-auto max-w-[90rem] px-6">
+    // px-6 on the outer, max-w on the inner — aligns with the page content.
+    <div className="px-6">
       <nav
         aria-label="Your dashboard"
-        className="border-primary/40 my-2.5 flex gap-1 overflow-x-auto border"
+        className="border-primary/40 mx-auto my-2.5 flex max-w-[90rem] gap-1 overflow-x-auto border"
       >
         {items.map((item) => {
           const Icon = ICONS[item.id] ?? LayoutDashboard;

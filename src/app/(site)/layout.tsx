@@ -78,10 +78,11 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
           behind content. bg-background so nothing shows through on scroll. The
           mobile drawer (absolute, top-full) anchors to this positioned header. */}
       <SiteHeader>
-        {/* px-6 gutter at every width so the nav lines up with the page content
-            and footer (no flush-to-edge on desktop). Sticky behavior lives in
-            SiteHeader — sticky everywhere except /me, where the section nav sticks. */}
-        <nav className="mx-auto flex max-w-[90rem] items-center justify-between gap-3 px-6 py-4">
+        {/* The max-w container has no px — the gutter lives on SiteHeader (the
+            full-bleed outer), matching the page content so the nav aligns at
+            every width. Sticky behavior lives in SiteHeader — sticky everywhere
+            except /me, where the section nav sticks. */}
+        <nav className="mx-auto flex max-w-[90rem] items-center justify-between gap-3 py-4">
           {/* Brand lockup: the logo, and — when signed in — the account avatar
               right beside it, sized to the logo's height so the "you're logged
               in" signal reads as part of the masthead and links to /me. */}
@@ -159,8 +160,8 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
 
       <main>{children}</main>
 
-      <footer className="border-primary/40 border-t">
-        <div className="text-muted-foreground mx-auto flex max-w-[90rem] flex-col items-center gap-8 px-6 py-8 text-center text-xs tracking-widest uppercase">
+      <footer className="border-primary/40 border-t px-6">
+        <div className="text-muted-foreground mx-auto flex max-w-[90rem] flex-col items-center gap-8 py-8 text-center text-xs tracking-widest uppercase">
           {/* Footer nav — Get Listed is the intake funnel, moved down here out of
               the header; The Riot gathers About + Contact. */}
           <nav className="flex flex-wrap justify-center gap-x-12 gap-y-6">
