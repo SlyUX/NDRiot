@@ -3,6 +3,7 @@ import { Rss } from 'lucide-react'
 
 import { Logo } from '@/components/logo'
 import { MainNav } from '@/components/main-nav'
+import { NotificationBell } from '@/components/notification-bell'
 import { SocialIcon } from '@/components/social-icon'
 import { auth, signIn } from '@/auth'
 import { genreOptions } from '@/lib/filters'
@@ -14,6 +15,7 @@ import {
 } from '@/lib/queries'
 import { creatorsOwnedBy } from '@/sanity/ownership-client'
 import { urlFor } from '@/sanity/image'
+import { notificationCount } from '@/lib/notifications'
 import { getSiteSettings } from '@/lib/site-settings'
 import { RESOURCE_CATEGORIES } from '@/lib/taxonomy'
 
@@ -63,6 +65,9 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       }
     }
   }
+  // The nav notification count — new activity from who/what the reader follows
+  // (§3: explicit follows only). Signed-out readers have no notifications.
+  const notifCount = email ? await notificationCount(email) : 0
   const s = settings.sections
 
   return (
@@ -133,6 +138,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
                 </Link>
               </div>
             )}
+            {email && <NotificationBell count={notifCount} label={s.notificationsNavLabel} />}
             {settings.discordUrl && (
               <a
                 href={settings.discordUrl}

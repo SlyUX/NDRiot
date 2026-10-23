@@ -709,6 +709,13 @@ export interface SiteSettings {
     accountNewsletterHeading: string;
     accountNewsletterBody: string;
     accountNewsletterCta: string;
+    /** Notifications — the nav bell, the /notifications page, and the strips subscription. */
+    notificationsNavLabel: string;
+    notificationsTitle: string;
+    notificationsEmpty: string;
+    notificationsNewStripsLabel: string;
+    stripsSubscribeLabel: string;
+    stripsSubscribedLabel: string;
     /** Footer nav groups + the logged-out header account links. */
     footerGetListedHeading: string;
     footerRiotHeading: string;
@@ -1527,6 +1534,12 @@ const DEFAULTS: SiteSettings = {
     accountNewsletterBody:
       "A monthly signal tuned to what you follow — creator updates, upcoming conventions, new books, and Sunday Strips. Confirm by email; unsubscribe anytime.",
     accountNewsletterCta: "Sign me up",
+    notificationsNavLabel: "Notifications",
+    notificationsTitle: "Notifications",
+    notificationsEmpty: "You’re all caught up — nothing new from who you follow.",
+    notificationsNewStripsLabel: "New strips are live — read them",
+    stripsSubscribeLabel: "Notify me about new strips",
+    stripsSubscribedLabel: "Notifying you about new strips",
     footerGetListedHeading: "Get Listed",
     footerRiotHeading: "The Riot",
     footerFeedsHeading: "RSS",

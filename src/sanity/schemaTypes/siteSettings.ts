@@ -1638,6 +1638,48 @@ export default defineType({
             'e.g. "Sign me up". After a click, the reader sees the newsletter’s confirm/​error message; no status is stored (MailerLite owns it).',
         }),
         defineField({
+          name: "notificationsNavLabel",
+          title: "Notifications — nav bell label",
+          type: "string",
+          description:
+            'Accessible label for the notification bell in the header — e.g. "Notifications". The unread count is appended for screen readers.',
+        }),
+        defineField({
+          name: "notificationsTitle",
+          title: "Notifications — page heading",
+          type: "string",
+          description: 'Heading on the /notifications page — e.g. "Notifications".',
+        }),
+        defineField({
+          name: "notificationsEmpty",
+          title: "Notifications — empty line",
+          type: "text",
+          rows: 2,
+          description:
+            "Shown when there’s nothing new from who the reader follows. A discovery nudge to browse follows it (§3).",
+        }),
+        defineField({
+          name: "notificationsNewStripsLabel",
+          title: "Notifications — new strips row",
+          type: "string",
+          description:
+            'The single "new strips are live" notification, shown to readers subscribed to strips. Links to the Strips tab — e.g. "New strips are live — read them".',
+        }),
+        defineField({
+          name: "stripsSubscribeLabel",
+          title: "Strips — subscribe button (off)",
+          type: "string",
+          description:
+            'The "notify me about new strips" control on the Strips tab, before subscribing — e.g. "Notify me about new strips".',
+        }),
+        defineField({
+          name: "stripsSubscribedLabel",
+          title: "Strips — subscribe button (on)",
+          type: "string",
+          description:
+            'Same control once subscribed — e.g. "Notifying you about new strips". Click again to turn it off.',
+        }),
+        defineField({
           name: "footerGetListedHeading",
           title: 'Footer — "Get Listed" heading',
           type: "string",

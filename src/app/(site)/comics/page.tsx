@@ -6,6 +6,7 @@ import { ContentCardGrid } from '@/components/content-card-grid'
 import { FilterBar } from '@/components/filter-bar'
 import { LoadMore } from '@/components/load-more'
 import { StripGallery } from '@/components/strip-gallery'
+import { StripsSubscribe } from '@/components/strips-subscribe'
 import { Section } from '@/components/ui/section'
 import { bookToCard } from '@/lib/card-mappers'
 import { cn } from '@/lib/utils'
@@ -36,6 +37,7 @@ import {
 } from '@/lib/queries'
 import { auth } from '@/auth'
 import { savedItems } from '@/sanity/reader-client'
+import { getReaderPrefs } from '@/sanity/reader-prefs-client'
 import { getSiteSettings, type SiteSettings } from '@/lib/site-settings'
 import type { BookSummary, Paginated, StripSummary } from '@/lib/types'
 
@@ -132,6 +134,11 @@ export default async function BooksPage({
           .filter((x) => x.itemType === 'strip')
           .map((x) => x.itemId)
       : []
+    // "Notify me about new strips" — a content-type subscription (§3: explicit,
+    // user-directed), shown to signed-in readers only.
+    const stripSubscribed = stripEmail
+      ? (await getReaderPrefs(stripEmail)).subscribeAllStrips
+      : false
     const stripSave = {
       signedIn: Boolean(stripEmail),
       savedIds: savedStripIds,
@@ -151,6 +158,15 @@ export default async function BooksPage({
             {settings.sections.stripsHeading}
           </h1>
           <TabBar active="strips" settings={settings} />
+          {stripEmail && (
+            <div className="mt-6">
+              <StripsSubscribe
+                initialSubscribed={stripSubscribed}
+                subscribeLabel={settings.sections.stripsSubscribeLabel}
+                subscribedLabel={settings.sections.stripsSubscribedLabel}
+              />
+            </div>
+          )}
           <Suspense fallback={null}>
             <FilterBar
               facets={stripFacets(

@@ -1199,6 +1199,12 @@ export type SiteSettings = {
     accountNewsletterHeading?: string;
     accountNewsletterBody?: string;
     accountNewsletterCta?: string;
+    notificationsNavLabel?: string;
+    notificationsTitle?: string;
+    notificationsEmpty?: string;
+    notificationsNewStripsLabel?: string;
+    stripsSubscribeLabel?: string;
+    stripsSubscribedLabel?: string;
     footerGetListedHeading?: string;
     footerRiotHeading?: string;
     footerFeedsHeading?: string;
@@ -2954,6 +2960,15 @@ export type UPDATES_FEED_QUERY_RESULT = Array<{
 }>;
 
 // Source: src/lib/queries.ts
+// Variable: NOTIFICATION_COUNTS_QUERY
+// Query: {  "updates": count(*[_type=="update" && target._ref in $ids && defined(publishedAt) && dateTime(publishedAt) > dateTime($since)]),  "appearances": count(*[_type=="conventionAppearance" && creator._ref in $ids && defined(creator->slug.current) && defined(venue->slug.current) && (!defined(forDate) || dateTime(forDate) > dateTime(now())) && dateTime(_createdAt) > dateTime($since)]),  "strips": count(*[_type=="strip" && defined(slug.current) && defined(publishedAt) && dateTime(publishedAt) > dateTime($since)])}
+export type NOTIFICATION_COUNTS_QUERY_RESULT = {
+  updates: number;
+  appearances: number;
+  strips: number;
+};
+
+// Source: src/lib/queries.ts
 // Variable: CREATOR_UPDATES_QUERY
 // Query: *[_type=="update" && defined(publishedAt) && (target._ref == $creatorId || target->creator._ref == $creatorId)]|order(publishedAt desc)[0...$limit]{  _id,body,kind,publishedAt,  "targetId":target._ref,  "targetType":target->_type,  "targetName":coalesce(target->title,target->name),  "targetSlug":target->slug.current,  "mentions":mentions[]->{_id,_type,"name":coalesce(name,title),"slug":slug.current,website}}
 export type CREATOR_UPDATES_QUERY_RESULT = Array<{
@@ -4599,6 +4614,7 @@ declare module "@sanity/client" {
     '*[_type=="update" && target._ref in $ids && defined(publishedAt)]|order(publishedAt desc)[0...$limit]{\n  _id,body,kind,publishedAt,\n  "targetType":target->_type,\n  "targetName":coalesce(target->title,target->name),\n  "targetSlug":target->slug.current,\n  "authorName":coalesce(target->name,target->creator->name),\n  "photo":coalesce(target->photo,target->creator->photo),\n  "mentions":mentions[]->{_id,_type,"name":coalesce(name,title),"slug":slug.current,website}\n}': RAIL_UPDATES_QUERY_RESULT;
     '*[_type=="conventionAppearance" && creator._ref in $ids && defined(creator->slug.current) && defined(venue->slug.current) && (!defined(forDate) || dateTime(forDate) > dateTime(now()))]|order(_createdAt desc)[0...$limit]{\n  _id,status,\n  "publishedAt":_createdAt,\n  "creatorId":creator._ref,\n  "creatorName":creator->name,\n  "creatorSlug":creator->slug.current,\n  "creatorPhoto":creator->photo,\n  "venue":venue->{_id,_type,name,"slug":slug.current,website}\n}': APPEARANCE_FEED_QUERY_RESULT;
     '*[_type=="update" && target._ref in $ids && defined(publishedAt)]|order(publishedAt desc)[0...$limit]{\n  _id,body,kind,publishedAt,\n  "targetId":target._ref,\n  "targetType":target->_type,\n  "targetName":coalesce(target->title,target->name),\n  "targetSlug":target->slug.current,\n  "mentions":mentions[]->{_id,_type,"name":coalesce(name,title),"slug":slug.current,website}\n}': UPDATES_FEED_QUERY_RESULT;
+    '{\n  "updates": count(*[_type=="update" && target._ref in $ids && defined(publishedAt) && dateTime(publishedAt) > dateTime($since)]),\n  "appearances": count(*[_type=="conventionAppearance" && creator._ref in $ids && defined(creator->slug.current) && defined(venue->slug.current) && (!defined(forDate) || dateTime(forDate) > dateTime(now())) && dateTime(_createdAt) > dateTime($since)]),\n  "strips": count(*[_type=="strip" && defined(slug.current) && defined(publishedAt) && dateTime(publishedAt) > dateTime($since)])\n}': NOTIFICATION_COUNTS_QUERY_RESULT;
     '*[_type=="update" && defined(publishedAt) && (target._ref == $creatorId || target->creator._ref == $creatorId)]|order(publishedAt desc)[0...$limit]{\n  _id,body,kind,publishedAt,\n  "targetId":target._ref,\n  "targetType":target->_type,\n  "targetName":coalesce(target->title,target->name),\n  "targetSlug":target->slug.current,\n  "mentions":mentions[]->{_id,_type,"name":coalesce(name,title),"slug":slug.current,website}\n}': CREATOR_UPDATES_QUERY_RESULT;
     '*[_type in ["column","interview"] && defined(slug.current) && defined(publishedAt)]|order(publishedAt desc)[0...30]{\n  _id,_type,title,"slug":slug.current,excerpt,publishedAt,\n  "authorName":author->name,"interviewerName":interviewer->name\n}': FEED_EDITORIAL_QUERY_RESULT;
     '*[_type=="book" && defined(slug.current)]|order(_createdAt desc)[0...30]{\n  _id,title,"slug":slug.current,_createdAt,\n  "descriptionText":pt::text(description),"creatorName":creator->name,genres\n}': FEED_COMICS_QUERY_RESULT;

@@ -313,6 +313,19 @@ export const UPDATES_FEED_QUERY =
 }`);
 
 /**
+ * Unread-notification counts for the signed-in reader: updates and convention
+ * appearances from the creators/comics they follow ($ids), plus new strips —
+ * each only since $since (their last-seen marker). Recency only, never ranked
+ * (§3): a notification is a follow-benefit, not a broadcast. Strips are counted
+ * for everyone; the caller ignores that number unless the reader subscribed.
+ */
+export const NOTIFICATION_COUNTS_QUERY = defineQuery(`{
+  "updates": count(*[_type=="update" && target._ref in $ids && defined(publishedAt) && dateTime(publishedAt) > dateTime($since)]),
+  "appearances": count(*[_type=="conventionAppearance" && creator._ref in $ids && defined(creator->slug.current) && defined(venue->slug.current) && (!defined(forDate) || dateTime(forDate) > dateTime(now())) && dateTime(_createdAt) > dateTime($since)]),
+  "strips": count(*[_type=="strip" && defined(slug.current) && defined(publishedAt) && dateTime(publishedAt) > dateTime($since)])
+}`);
+
+/**
  * A creator's own updates, for their public profile — posts targeting the
  * creator directly, or one of their comics. Recency only (§3). Same shape as the
  * reader feed, so it renders through the same component.
