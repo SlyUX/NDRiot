@@ -22,7 +22,9 @@ export function SiteHeader({ children }: { children: React.ReactNode }) {
         // px-6 here (not on the inner nav) so the nav's max-w-[90rem] container
         // aligns with the page content, which pads the full-bleed outer too.
         "border-primary/40 bg-background z-50 border-b px-6",
-        sticky && "sticky top-0",
+        // `relative` (not static) when not sticky, so the mobile nav drawer —
+        // positioned `absolute top-full` — still anchors to the header on /me.
+        sticky ? "sticky top-0" : "relative",
       )}
     >
       {children}
