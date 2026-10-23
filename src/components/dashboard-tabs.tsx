@@ -68,13 +68,15 @@ export function DashboardTabs({
   return (
     <div ref={wrapRef}>
       {/* Desktop: the section nav is THE sticky bar on /me (the main nav scrolls
-          away — see SiteHeader), so it sticks to the very top. Inner container
-          aligned to the content gutter (max-w-[90rem] + px-6). */}
-      <div className="border-primary/40 bg-background sticky top-0 z-30 hidden border-b px-6 md:block">
+          away). Boxed to match the home launcher — pink border on all four edges,
+          content-width, ~10px margins — but opaque (bg-background) + sticky so
+          content scrolls cleanly under the floating box. px-6 on the transparent
+          sticky outer keeps the box content-aligned. */}
+      <div className="sticky top-0 z-30 hidden px-6 md:block">
         <div
           role="tablist"
           aria-label="Dashboard"
-          className="mx-auto flex max-w-[90rem] gap-1 overflow-x-auto"
+          className="border-primary/40 bg-background mx-auto my-2.5 flex max-w-[90rem] gap-1 overflow-x-auto border"
         >
           {panels.map((p) => {
             const Icon = ICONS[p.id] ?? LayoutDashboard;
@@ -89,10 +91,10 @@ export function DashboardTabs({
                 aria-controls={`dash-panel-${p.id}`}
                 onClick={() => select(p.id)}
                 className={cn(
-                  "focus-visible:ring-ring flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-3 text-xs font-bold tracking-widest uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none",
+                  "focus-visible:ring-ring flex shrink-0 items-center gap-1.5 px-3 py-3 text-xs font-bold tracking-widest uppercase transition-colors focus-visible:ring-2 focus-visible:-outline-offset-2 focus-visible:outline-none",
                   isActive
-                    ? "border-primary text-foreground"
-                    : "text-muted-foreground hover:text-foreground border-transparent",
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 <Icon aria-hidden="true" className="size-4" />
