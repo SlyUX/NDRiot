@@ -705,19 +705,19 @@ export default async function AccountPage({
                     key={creator._id}
                     className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:text-left"
                   >
-                    <div className="relative aspect-square w-[120px] shrink-0 overflow-hidden bg-white/10">
+                    <div className="relative aspect-square w-24 shrink-0 overflow-hidden bg-white/10">
                       {creator.photo ? (
                         <Image
-                          src={urlFor(creator.photo).width(360).url()}
+                          src={urlFor(creator.photo).width(288).url()}
                           alt=""
                           fill
-                          sizes="120px"
+                          sizes="96px"
                           className="object-cover"
                         />
                       ) : (
                         <InitialsAvatar
                           name={creator.name ?? ""}
-                          className="text-4xl"
+                          className="text-3xl"
                         />
                       )}
                     </div>

@@ -66,10 +66,11 @@ export function DashboardTabs({
   }, []);
 
   return (
-    <div ref={wrapRef} className="scroll-mt-16">
-      {/* Desktop: sticky top bar, inner container aligned to the content gutter
-          (max-w-[90rem] + px-6) so it lines up with the page at every width. */}
-      <div className="border-primary/40 bg-background sticky top-16 z-30 hidden border-b md:block">
+    <div ref={wrapRef}>
+      {/* Desktop: the section nav is THE sticky bar on /me (the main nav scrolls
+          away — see SiteHeader), so it sticks to the very top. Inner container
+          aligned to the content gutter (max-w-[90rem] + px-6). */}
+      <div className="border-primary/40 bg-background sticky top-0 z-30 hidden border-b md:block">
         <div
           role="tablist"
           aria-label="Dashboard"

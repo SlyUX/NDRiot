@@ -4,6 +4,7 @@ import { Rss } from 'lucide-react'
 import { Logo } from '@/components/logo'
 import { MainNav } from '@/components/main-nav'
 import { NotificationBell } from '@/components/notification-bell'
+import { SiteHeader } from '@/components/site-header'
 import { SocialIcon } from '@/components/social-icon'
 import { auth, signIn } from '@/auth'
 import { genreOptions } from '@/lib/filters'
@@ -76,9 +77,11 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
           stacking context above the page so the dropdowns are not painted
           behind content. bg-background so nothing shows through on scroll. The
           mobile drawer (absolute, top-full) anchors to this positioned header. */}
-      <header className="border-primary/40 bg-background sticky top-0 z-50 border-b">
-        {/* px-6 on phone/tablet; flush to the edge only on desktop. */}
-        <nav className="mx-auto flex max-w-[90rem] items-center justify-between gap-3 px-6 py-4 lg:px-0">
+      <SiteHeader>
+        {/* px-6 gutter at every width so the nav lines up with the page content
+            and footer (no flush-to-edge on desktop). Sticky behavior lives in
+            SiteHeader — sticky everywhere except /me, where the section nav sticks. */}
+        <nav className="mx-auto flex max-w-[90rem] items-center justify-between gap-3 px-6 py-4">
           {/* Brand lockup: the logo, and — when signed in — the account avatar
               right beside it, sized to the logo's height so the "you're logged
               in" signal reads as part of the masthead and links to /me. */}
@@ -152,7 +155,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
             )}
           </div>
         </nav>
-      </header>
+      </SiteHeader>
 
       <main>{children}</main>
 
