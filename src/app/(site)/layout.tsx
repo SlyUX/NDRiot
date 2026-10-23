@@ -6,7 +6,9 @@ import { MainNav } from '@/components/main-nav'
 import { NotificationBell } from '@/components/notification-bell'
 import { SiteHeader } from '@/components/site-header'
 import { SocialIcon } from '@/components/social-icon'
+import { UserNav } from '@/components/user-nav'
 import { auth, signIn } from '@/auth'
+import { cn } from '@/lib/utils'
 import { genreOptions } from '@/lib/filters'
 import {
   safeFetch,
@@ -158,9 +160,30 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         </nav>
       </SiteHeader>
 
+      {/* Persistent user nav for signed-in readers — the dashboard section nav
+          as links, on every page (hides itself on /me, where the in-place tabs
+          are the nav). Desktop bar here, mobile island is fixed. */}
+      {email && (
+        <UserNav
+          items={[
+            { id: "bunker", label: s.dashboardTabBunker },
+            { id: "activity", label: s.dashboardTabActivity },
+            { id: "network", label: s.dashboardTabNetwork },
+            { id: "saved", label: s.dashboardTabSaved },
+            { id: "settings", label: s.dashboardTabSettings },
+          ]}
+        />
+      )}
+
       <main>{children}</main>
 
-      <footer className="border-primary/40 border-t px-6">
+      {/* pb clears the fixed mobile island at the bottom of the page (signed in). */}
+      <footer
+        className={cn(
+          "border-primary/40 border-t px-6",
+          email && "pb-28 md:pb-0",
+        )}
+      >
         <div className="text-muted-foreground mx-auto flex max-w-[90rem] flex-col items-center gap-8 py-8 text-center text-xs tracking-widest uppercase">
           {/* Footer nav — Get Listed is the intake funnel, moved down here out of
               the header; The Riot gathers About + Contact. */}

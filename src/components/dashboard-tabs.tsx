@@ -105,9 +105,9 @@ export function DashboardTabs({
         </div>
       </div>
 
-      {/* Panels — all mounted; inactive hidden for instant swaps. Bottom padding
-          on phones clears the floating island. */}
-      <div className="pb-28 md:pb-0">
+      {/* Panels — all mounted; inactive hidden for instant swaps. (The layout
+          footer's bottom padding clears the fixed mobile island.) */}
+      <div>
         {panels.map((p) => (
           <div
             key={p.id}

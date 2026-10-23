@@ -3,7 +3,6 @@ import { Suspense } from "react";
 import { Check } from "lucide-react";
 
 import { ContentCardGrid } from "@/components/content-card-grid";
-import { DashboardNavBar } from "@/components/dashboard-nav-bar";
 import { StripsSubscribe } from "@/components/strips-subscribe";
 import { ForCreatorsRow } from "@/components/for-creators-row";
 import { ShuffleRow } from "@/components/shuffle-row";
@@ -319,20 +318,6 @@ export default async function Home({
           websiteSchema(settings),
         )}
       />
-      {/* Signed in: the dashboard section nav replaces the welcome greeting +
-          buttons — a quick launch into /me (§2 labels). The random hero showcase
-          below stays for everyone (§3). */}
-      {email && (
-        <DashboardNavBar
-          items={[
-            { id: "bunker", label: settings.sections.dashboardTabBunker },
-            { id: "activity", label: settings.sections.dashboardTabActivity },
-            { id: "network", label: settings.sections.dashboardTabNetwork },
-            { id: "saved", label: settings.sections.dashboardTabSaved },
-            { id: "settings", label: settings.sections.dashboardTabSettings },
-          ]}
-        />
-      )}
       <Hero
         hero={settings.hero}
         heroItems={heroItems}
