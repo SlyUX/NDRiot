@@ -107,11 +107,9 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
                 />
               </Link>
             )}
-          </div>
-          <div className="flex items-center gap-3 lg:gap-5">
-            <MainNav nav={settings.nav} genres={navGenres} resourceCategories={navCategories} />
-            {/* Account, signed out only (the signed-in avatar now sits by the
-                logo): Login (starts Google sign-in) | Join (the hub). */}
+            {/* Notification bell sits to the right of the avatar, signed in only. */}
+            {email && <NotificationBell count={notifCount} label={s.notificationsNavLabel} />}
+            {/* Account, signed out only: Login (starts Google sign-in) | Join. */}
             {!avatar && (
               <div className="text-foreground/80 flex items-center gap-2 text-sm font-bold tracking-wide uppercase">
                 <form
@@ -138,7 +136,9 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
                 </Link>
               </div>
             )}
-            {email && <NotificationBell count={notifCount} label={s.notificationsNavLabel} />}
+          </div>
+          <div className="flex items-center gap-3 lg:gap-5">
+            <MainNav nav={settings.nav} genres={navGenres} resourceCategories={navCategories} />
             {settings.discordUrl && (
               <a
                 href={settings.discordUrl}

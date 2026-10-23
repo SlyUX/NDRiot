@@ -1670,14 +1670,14 @@ export default defineType({
           title: "Strips — subscribe button (off)",
           type: "string",
           description:
-            'The "notify me about new strips" control on the Strips tab, before subscribing — e.g. "Notify me about new strips".',
+            'The new-strips notification control beside the Strips heading, before subscribing — e.g. "Notify Me".',
         }),
         defineField({
           name: "stripsSubscribedLabel",
           title: "Strips — subscribe button (on)",
           type: "string",
           description:
-            'Same control once subscribed — e.g. "Notifying you about new strips". Click again to turn it off.',
+            'Same control once subscribed — e.g. "Notifying". Click again to turn it off.',
         }),
         defineField({
           name: "footerGetListedHeading",

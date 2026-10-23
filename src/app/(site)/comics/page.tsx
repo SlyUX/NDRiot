@@ -154,19 +154,19 @@ export default async function BooksPage({
     return (
       <div>
         <Section as="header" padding="md" className="pb-6">
-          <h1 className="text-3xl font-black tracking-tighter uppercase md:text-4xl">
-            {settings.sections.stripsHeading}
-          </h1>
-          <TabBar active="strips" settings={settings} />
-          {stripEmail && (
-            <div className="mt-6">
+          <div className="flex flex-wrap items-center gap-4">
+            <h1 className="text-3xl font-black tracking-tighter uppercase md:text-4xl">
+              {settings.sections.stripsHeading}
+            </h1>
+            {stripEmail && (
               <StripsSubscribe
                 initialSubscribed={stripSubscribed}
                 subscribeLabel={settings.sections.stripsSubscribeLabel}
                 subscribedLabel={settings.sections.stripsSubscribedLabel}
               />
-            </div>
-          )}
+            )}
+          </div>
+          <TabBar active="strips" settings={settings} />
           <Suspense fallback={null}>
             <FilterBar
               facets={stripFacets(

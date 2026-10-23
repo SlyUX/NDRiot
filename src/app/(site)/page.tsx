@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { Check } from "lucide-react";
 
 import { ContentCardGrid } from "@/components/content-card-grid";
+import { StripsSubscribe } from "@/components/strips-subscribe";
 import { ForCreatorsRow } from "@/components/for-creators-row";
 import { ShuffleRow } from "@/components/shuffle-row";
 import { FilterBar } from "@/components/filter-bar";
@@ -50,6 +51,7 @@ import {
 import { getSiteSettings } from "@/lib/site-settings";
 import { auth } from "@/auth";
 import { savedItems } from "@/sanity/reader-client";
+import { getReaderPrefs } from "@/sanity/reader-prefs-client";
 import { creatorsOwnedBy } from "@/sanity/ownership-client";
 import { SITE_URL } from "@/lib/site-url";
 import type {
@@ -172,12 +174,17 @@ export default async function Home({
   // The signed-in creator's profile name + slug (hero greeting + "Your Public
   // Profile" link).
   let profile: { name: string; slug: string } | null = null;
+  // Whether this reader subscribed to new-strip notifications — seeds the
+  // "Notify Me" control beside the home Strips heading.
+  let stripSubscribed = false;
   if (email) {
-    const [saves, owned] = await Promise.all([
+    const [saves, owned, prefs] = await Promise.all([
       savedItems(email),
       creatorsOwnedBy(email),
+      getReaderPrefs(email),
     ]);
     ownedCreatorIds = owned;
+    stripSubscribed = prefs.subscribeAllStrips;
     savedBookIds = new Set(
       saves.filter((s) => s.itemType === "book").map((s) => s.itemId),
     );
@@ -464,6 +471,15 @@ export default async function Home({
         {strips.length >= 3 && (
           <ContentCardGrid
             heading={settings.sections.stripsHeading}
+            titleAdornment={
+              email ? (
+                <StripsSubscribe
+                  initialSubscribed={stripSubscribed}
+                  subscribeLabel={settings.sections.stripsSubscribeLabel}
+                  subscribedLabel={settings.sections.stripsSubscribedLabel}
+                />
+              ) : undefined
+            }
             background="alt"
             cards={strips.slice(0, 8).map(stripToCard)}
             aspectRatio="cover"
