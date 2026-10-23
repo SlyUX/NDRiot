@@ -23,7 +23,10 @@ account exists, Home becomes more of a curated view, with **Discover** always
 available (a tab, and the random hero still on top). Prompt readers during
 signup and on the dashboard to follow creators, books, and **genres**.
 
-**A curated row:** "similar to other books and creators you follow."
+**A curated row — revised 2026-10-23:** NOT "similar to what you follow" (that
+was inference). Instead: **"In genres you like"** — a random, filterable set
+drawn from the genres the reader has *explicitly* followed, ordered like Home's
+discovery. An extension of Discover, scoped to chosen genres.
 
 **Stephen's conditions for when elevation is acceptable:**
 1. **No public elevation.** Nothing ranks contributors in anyone else's view.
@@ -34,12 +37,11 @@ signup and on the dashboard to follow creators, books, and **genres**.
 
 ### Open tensions (Claude's flags — to resolve before building)
 
-- **"Similar to what you follow" is inference** — the first real departure from
-  §3's "nothing is inferred." Defensible *only* if constrained to **content-based
-  similarity** (shared genre / format / creator / attributes — transparent and
-  explainable), **never** collaborative ("readers like you also…"), behavioral
-  (what you viewed/clicked), or popularity-weighted. If adopted, it's a conscious
-  **amendment to §3** and must be written into `AGENTS.md`, not drifted into.
+- **RESOLVED (2026-10-23):** the similarity row is dropped in favor of **"In
+  genres you like"** — a random, filterable set over the reader's explicitly
+  followed genres, neutral-ordered like the Home hero. Explicit signal + neutral
+  order ⇒ **no inference, no similarity scoring, no popularity, no §3
+  amendment.** The For-You home is now §3-pure end to end.
 - **Most of the "For You" home needs no inference at all.** It can be built
   entirely from *explicit* follows — creators, books, and a new **"follow a
   genre"** primitive (a saved filter; fully §3-clean, like the strips
@@ -54,6 +56,9 @@ signup and on the dashboard to follow creators, books, and **genres**.
   including the curated one, and Discover is never only-behind-a-tab. This is
   what keeps a curated home from becoming a filter bubble.
 
-**Status:** exploratory. The privacy/opt-in/reversible framing is consistent
-with the follower-data decision already made (counts are private, self-only,
-never comparative). The one genuine §3 question is the similarity row.
+**Status:** exploratory, but now §3-clean throughout (the similarity row — the
+only piece that crossed into inference — is replaced by "In genres you like").
+Privacy/opt-in/reversible framing is consistent with the follower-data decision
+(counts are private, self-only, never comparative). Build order: explicit
+"For You" home + "follow a genre" primitive first; the "In genres you like" row
+is just Discover scoped to followed genres.
