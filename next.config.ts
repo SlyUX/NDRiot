@@ -26,9 +26,18 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
-    // Sanity serves every asset from this host. Required for next/image —
+    // Images are served through img.ndriot.com — a Cloudflare Worker that fronts
+    // Sanity's CDN so every image passes through Cloudflare's cache and is hashed
+    // by the CSAM Scanning Tool (see src/sanity/image.ts + cloudflare/). The
+    // path after the host is identical to Sanity's. cdn.sanity.io stays allowed
+    // for any direct references (e.g. the Studio). Required for next/image —
     // without it, `urlFor()` URLs throw at render rather than at build.
     remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "img.ndriot.com",
+        pathname: "/images/**",
+      },
       {
         protocol: "https",
         hostname: "cdn.sanity.io",
