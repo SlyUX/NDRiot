@@ -47,13 +47,12 @@ export interface HeroProps {
   feedHeading: string;
   /** Label for the "Spin the Rack" button — CMS copy (AGENTS.md §2). */
   discoverLabel?: string;
-  /** When signed in: greets the reader and shows their own CTAs in place of the
-   *  evangelism tagline/subhead/buttons. */
-  account?: { greeting: string; ctas: Cta[] };
+  /** When signed in, the evangelism tagline/subhead/buttons are hidden — the
+   *  signed-in home shows the dashboard section nav above the hero instead. The
+   *  random showcase (§3) stays for everyone. */
+  signedIn?: boolean;
 }
 
-/** A hero call-to-action (label + path). */
-type Cta = { label: string; href: string };
 
 /**
  * Shipped artwork, used when Sanity has no hero background. The Sanity field
@@ -234,10 +233,10 @@ export function Hero({
   feedItems,
   feedHeading,
   discoverLabel,
-  account,
+  signedIn,
 }: HeroProps) {
   const hasFeature = heroItems.length > 0;
-  const ctas = account?.ctas ?? hero.ctas;
+  const ctas = hero.ctas;
   return (
     // Hand-rolled rather than <Section> so the background layers can span the
     // full bleed while the content stays at the site width.
@@ -263,45 +262,46 @@ export function Hero({
       <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black/40 via-transparent to-black/40" />
 
       <div className="mx-auto w-full max-w-[90rem]">
-        {/* Identity strip — the site's line and its calls to action, stacked so
-            the buttons left-align under the heading. Signed in, the reader's own
-            greeting + CTAs replace the outward evangelism. */}
-        <div className="flex flex-col gap-5">
-          <div className="space-y-3">
-            <h1 className="text-3xl leading-none font-black tracking-tight text-white uppercase sm:text-4xl lg:text-5xl">
-              {account ? account.greeting : hero.tagline}
-            </h1>
-            {/* Subhead — supporting copy under the H1 (blank when signed in). The
-                editor writes hero.body; until then this fallback carries the head
-                terms (graphic novels, webcomics) the H1 keeps out of its punch. */}
-            {account ? null : hero.body?.length ? (
-              <div className="max-w-xl text-sm leading-relaxed text-white/85 sm:text-base">
-                <PortableTextBody value={hero.body} />
+        {/* Identity strip — the site's line + CTAs (outward evangelism). Hidden
+            when signed in; the signed-in home shows the dashboard section nav
+            above the hero instead, so this would be redundant. */}
+        {!signedIn && (
+          <div className="flex flex-col gap-5">
+            <div className="space-y-3">
+              <h1 className="text-3xl leading-none font-black tracking-tight text-white uppercase sm:text-4xl lg:text-5xl">
+                {hero.tagline}
+              </h1>
+              {/* Subhead — the editor writes hero.body; until then this fallback
+                  carries the head terms the H1 keeps out of its punch. */}
+              {hero.body?.length ? (
+                <div className="max-w-xl text-sm leading-relaxed text-white/85 sm:text-base">
+                  <PortableTextBody value={hero.body} />
+                </div>
+              ) : (
+                <p className="max-w-xl text-sm leading-relaxed text-white/85 sm:text-base">
+                  Graphic novels, single issues, and webcomics from real indie
+                  creators — across every genre.
+                </p>
+              )}
+            </div>
+            {ctas.length > 0 && (
+              <div className="flex flex-wrap gap-3">
+                {ctas.map((cta, i) => (
+                  <Button
+                    key={cta.href}
+                    asChild
+                    size="lg"
+                    // First is the pink primary, second the white inverse.
+                    variant={i === 0 ? "default" : "inverse"}
+                    className="font-black tracking-wide uppercase"
+                  >
+                    <Link href={cta.href}>{cta.label}</Link>
+                  </Button>
+                ))}
               </div>
-            ) : (
-              <p className="max-w-xl text-sm leading-relaxed text-white/85 sm:text-base">
-                Graphic novels, single issues, and webcomics from real indie
-                creators — across every genre.
-              </p>
             )}
           </div>
-          {ctas.length > 0 && (
-            <div className="flex flex-wrap gap-3">
-              {ctas.map((cta, i) => (
-                <Button
-                  key={cta.href}
-                  asChild
-                  size="lg"
-                  // First is the pink primary, second the white inverse.
-                  variant={i === 0 ? "default" : "inverse"}
-                  className="font-black tracking-wide uppercase"
-                >
-                  <Link href={cta.href}>{cta.label}</Link>
-                </Button>
-              ))}
-            </div>
-          )}
-        </div>
+        )}
 
         {/* The split: featured book left, updates rail right (new arrivals when
             there are no updates yet). */}

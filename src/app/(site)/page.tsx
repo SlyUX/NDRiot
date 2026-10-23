@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { Check } from "lucide-react";
 
 import { ContentCardGrid } from "@/components/content-card-grid";
+import { DashboardNavBar } from "@/components/dashboard-nav-bar";
 import { StripsSubscribe } from "@/components/strips-subscribe";
 import { ForCreatorsRow } from "@/components/for-creators-row";
 import { ShuffleRow } from "@/components/shuffle-row";
@@ -40,7 +41,6 @@ import {
   FILTERED_CREATORS_QUERY,
   RAIL_UPDATES_QUERY,
   APPEARANCE_FEED_QUERY,
-  CREATOR_HERO_QUERY,
 } from "@/lib/queries";
 import { appearanceToRailItem, mergeFeed } from "@/lib/feed-mappers";
 import {
@@ -171,9 +171,6 @@ export default async function Home({
   // books they've saved, and which creators they own (no Save on your own work).
   let ownedCreatorIds: string[] = [];
   let savedBookIds = new Set<string>();
-  // The signed-in creator's profile name + slug (hero greeting + "Your Public
-  // Profile" link).
-  let profile: { name: string; slug: string } | null = null;
   // Whether this reader subscribed to new-strip notifications — seeds the
   // "Notify Me" control beside the home Strips heading.
   let stripSubscribed = false;
@@ -188,13 +185,6 @@ export default async function Home({
     savedBookIds = new Set(
       saves.filter((s) => s.itemType === "book").map((s) => s.itemId),
     );
-    if (ownedCreatorIds.length) {
-      profile = await safeFetch<{ name: string; slug: string } | null>(
-        CREATOR_HERO_QUERY,
-        { id: ownedCreatorIds[0] },
-        null,
-      );
-    }
     const savedIds = saves.map((save) => save.itemId);
     if (savedIds.length) {
       // Updates + convention appearances by followed creators, merged newest-first.
@@ -224,31 +214,6 @@ export default async function Home({
     followed: true,
   }));
   const feedHeading = settings.sections.feedMineHeading;
-  // Signed-in hero: greet by the reader's ND Riot profile first name (the name
-  // they entered), falling back to their Google account name for a plain
-  // reader; give them a Dashboard link, plus their public profile if a creator.
-  const firstName = (profile?.name ?? session?.user?.name ?? "")
-    .trim()
-    .split(/\s+/)[0];
-  const account = email
-    ? {
-        greeting: settings.hero.loggedInGreeting
-          .replace("{name}", firstName)
-          .replace(/,\s*$/, "")
-          .trim(),
-        ctas: [
-          { label: settings.hero.loggedInDashboardLabel, href: "/me" },
-          ...(profile?.slug
-            ? [
-                {
-                  label: settings.hero.loggedInProfileLabel,
-                  href: `/creators/${profile.slug}`,
-                },
-              ]
-            : []),
-        ],
-      }
-    : undefined;
   // The hero queue, tagged with this viewer's save/ownership state (§3 fairness
   // in hero-queue.ts). [0] is the server-rendered first pick; SpinnerRack cycles
   // the rest instantly and refills in the background.
@@ -354,6 +319,20 @@ export default async function Home({
           websiteSchema(settings),
         )}
       />
+      {/* Signed in: the dashboard section nav replaces the welcome greeting +
+          buttons — a quick launch into /me (§2 labels). The random hero showcase
+          below stays for everyone (§3). */}
+      {email && (
+        <DashboardNavBar
+          items={[
+            { id: "bunker", label: settings.sections.dashboardTabBunker },
+            { id: "activity", label: settings.sections.dashboardTabActivity },
+            { id: "network", label: settings.sections.dashboardTabNetwork },
+            { id: "saved", label: settings.sections.dashboardTabSaved },
+            { id: "settings", label: settings.sections.dashboardTabSettings },
+          ]}
+        />
+      )}
       <Hero
         hero={settings.hero}
         heroItems={heroItems}
@@ -362,7 +341,7 @@ export default async function Home({
         feedItems={feedItems}
         feedHeading={feedHeading}
         discoverLabel={settings.sections.spinLabel}
-        account={account}
+        signedIn={Boolean(email)}
       />
 
       {/* Newsletter band — beneath the hero on desktop; on phones the copy
