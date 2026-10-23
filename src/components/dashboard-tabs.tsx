@@ -33,12 +33,11 @@ export interface DashboardPanel {
 /**
  * The /me segmented dashboard — one panel visible at a time, swapped in place so
  * it reads as "same page, different tab" (no navigation, nothing refetched). The
- * active tab syncs to `?view=` so a panel is linkable/deep-linkable without a
- * reload. Each tab carries an icon + label and a real accessible name (§10), and
- * the bar sticks under the site nav so access stays visible while scrolling.
- *
- * Panels are server-rendered and passed as `content` (ReactNode) — all of them
- * stay in the DOM, hidden when inactive, which is what makes switching instant.
+ * active tab syncs to `?view=` for deep-linking. Two nav treatments, Instagram-
+ * style: a sticky top bar on desktop (aligned to the content gutter) and a fixed
+ * bottom island on phones — which also moves the dashboard nav away from the top,
+ * where the site nav already lives. Every tab has an icon + label + accessible
+ * name (§10). Panels all stay mounted (hidden when inactive) for instant swaps.
  */
 export function DashboardTabs({
   panels,
@@ -62,18 +61,68 @@ export function DashboardTabs({
     } catch {
       /* URL sync is a convenience; never fatal */
     }
-    // Bring the bar to just under the sticky nav so each tab starts at its top.
+    // Bring the dashboard to just under the sticky nav so each tab starts at top.
     wrapRef.current?.scrollIntoView({ block: "start" });
   }, []);
 
   return (
     <div ref={wrapRef} className="scroll-mt-16">
-      {/* Sticky tab bar. top-16 clears the sticky site nav; scroll-mt-16 above
-          keeps scrollIntoView from tucking the bar under it. */}
+      {/* Desktop: sticky top bar, inner container aligned to the content gutter
+          (max-w-[90rem] + px-6) so it lines up with the page at every width. */}
+      <div className="border-primary/40 bg-background sticky top-16 z-30 hidden border-b md:block">
+        <div
+          role="tablist"
+          aria-label="Dashboard"
+          className="mx-auto flex max-w-[90rem] gap-1 overflow-x-auto px-6"
+        >
+          {panels.map((p) => {
+            const Icon = ICONS[p.id] ?? LayoutDashboard;
+            const isActive = p.id === active;
+            return (
+              <button
+                key={p.id}
+                type="button"
+                role="tab"
+                id={`dash-tab-d-${p.id}`}
+                aria-selected={isActive}
+                aria-controls={`dash-panel-${p.id}`}
+                onClick={() => select(p.id)}
+                className={cn(
+                  "focus-visible:ring-ring flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-3 text-xs font-bold tracking-widest uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none",
+                  isActive
+                    ? "border-primary text-foreground"
+                    : "text-muted-foreground hover:text-foreground border-transparent",
+                )}
+              >
+                <Icon aria-hidden="true" className="size-4" />
+                {p.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Panels — all mounted; inactive hidden for instant swaps. Bottom padding
+          on phones clears the floating island. */}
+      <div className="pb-28 md:pb-0">
+        {panels.map((p) => (
+          <div
+            key={p.id}
+            role="tabpanel"
+            id={`dash-panel-${p.id}`}
+            hidden={p.id !== active}
+          >
+            {p.content}
+          </div>
+        ))}
+      </div>
+
+      {/* Phones: fixed bottom island (square — the punk read, §9). Detached from
+          the edges (inset-x-3 / bottom-3) so it reads as a floating island. */}
       <div
         role="tablist"
         aria-label="Dashboard"
-        className="border-primary/40 bg-background sticky top-16 z-30 flex gap-1 overflow-x-auto border-b px-4 sm:px-6"
+        className="border-primary/40 bg-background fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 border shadow-[0_2px_20px_rgba(0,0,0,0.6)] md:hidden"
       >
         {panels.map((p) => {
           const Icon = ICONS[p.id] ?? LayoutDashboard;
@@ -83,35 +132,21 @@ export function DashboardTabs({
               key={p.id}
               type="button"
               role="tab"
-              id={`dash-tab-${p.id}`}
+              id={`dash-tab-m-${p.id}`}
               aria-selected={isActive}
               aria-controls={`dash-panel-${p.id}`}
               onClick={() => select(p.id)}
               className={cn(
-                "focus-visible:ring-ring flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-3 text-xs font-bold tracking-widest uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none",
-                isActive
-                  ? "border-primary text-foreground"
-                  : "text-muted-foreground hover:text-foreground border-transparent",
+                "focus-visible:ring-ring flex flex-col items-center gap-1 py-2.5 text-[10px] font-bold uppercase leading-none transition-colors focus-visible:ring-2 focus-visible:-outline-offset-2 focus-visible:outline-none",
+                isActive ? "text-primary" : "text-muted-foreground",
               )}
             >
-              <Icon aria-hidden="true" className="size-4" />
+              <Icon aria-hidden="true" className="size-5" />
               {p.label}
             </button>
           );
         })}
       </div>
-
-      {panels.map((p) => (
-        <div
-          key={p.id}
-          role="tabpanel"
-          id={`dash-panel-${p.id}`}
-          aria-labelledby={`dash-tab-${p.id}`}
-          hidden={p.id !== active}
-        >
-          {p.content}
-        </div>
-      ))}
     </div>
   );
 }

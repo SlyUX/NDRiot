@@ -7672,6 +7672,13 @@
               },
               "optional": true
             },
+            "accountViewProfileLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "footerGetListedHeading": {
               "type": "objectAttribute",
               "value": {

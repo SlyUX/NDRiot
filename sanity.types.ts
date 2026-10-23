@@ -1213,6 +1213,7 @@ export type SiteSettings = {
     dashboardTabSettings?: string;
     accountFollowersLabel?: string;
     accountSettingsHeading?: string;
+    accountViewProfileLabel?: string;
     footerGetListedHeading?: string;
     footerRiotHeading?: string;
     footerFeedsHeading?: string;

@@ -1731,6 +1731,12 @@ export default defineType({
           description: 'Heading over the account/sign-out block in the Settings tab — e.g. "Account".',
         }),
         defineField({
+          name: "accountViewProfileLabel",
+          title: "Dashboard — view public profile button",
+          type: "string",
+          description: 'Button in the Bunker identity header that opens the creator\'s public profile — e.g. "View Profile". Replaces the old Profile/Dashboard toggle.',
+        }),
+        defineField({
           name: "footerGetListedHeading",
           title: 'Footer — "Get Listed" heading',
           type: "string",

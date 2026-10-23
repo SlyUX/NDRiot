@@ -729,6 +729,7 @@ export interface SiteSettings {
     dashboardTabSettings: string;
     accountFollowersLabel: string;
     accountSettingsHeading: string;
+    accountViewProfileLabel: string;
     /** Footer nav groups + the logged-out header account links. */
     footerGetListedHeading: string;
     footerRiotHeading: string;
@@ -1562,6 +1563,7 @@ const DEFAULTS: SiteSettings = {
     dashboardTabSettings: "Settings",
     accountFollowersLabel: "followers",
     accountSettingsHeading: "Account",
+    accountViewProfileLabel: "View Profile",
     footerGetListedHeading: "Get Listed",
     footerRiotHeading: "The Riot",
     footerFeedsHeading: "RSS",

@@ -13,7 +13,6 @@ import { EventDialog } from "@/components/event-dialog";
 import { EventsManager } from "@/components/events-manager";
 import { InitialsAvatar } from "@/components/initials-avatar";
 import { NewsletterOptIn } from "@/components/newsletter-opt-in";
-import { OwnerTabs } from "@/components/owner-tabs";
 import { SavedItemRow } from "@/components/saved-item-row";
 import { SectionHeading } from "@/components/section-heading";
 import { TabbedPanel, type PanelTab } from "@/components/tabbed-panel";
@@ -664,148 +663,145 @@ export default async function AccountPage({
     label: s.dashboardTabBunker,
     content: (
       <>
-        <Section
-          padding="none"
-          background={isCreator ? "dashboard" : "charcoal"}
-          className="px-6 py-6"
-        >
-          <div>
-            {/* The identity band below is the creator's visible header, so the
-                page h1 stays for a11y (§10) but is hidden for them; a plain
-                reader still sees it. */}
-            <h1
-              className={
-                isCreator
-                  ? "sr-only"
-                  : "text-2xl font-black tracking-tighter uppercase sm:text-4xl"
-              }
-            >
-              {isCreator ? s.accountUserCreatorHeading : s.accountUserHeading}
-            </h1>
-            {!isCreator && (
-              <>
-                {session.user?.name && (
-                  <p className="text-foreground mt-2 font-bold">
-                    {session.user.name}
-                  </p>
-                )}
-                <p className="text-muted-foreground text-sm">{email}</p>
-              </>
-            )}
-          </div>
+        <Section padding="none" background="card" className="px-6 py-8">
+          {/* The identity header below is the creator's visible header, so the
+              page h1 stays for a11y (§10) but is hidden for them; a plain reader
+              still sees it. The band is near-black (--card) with white text. */}
+          <h1
+            className={
+              isCreator
+                ? "sr-only"
+                : "text-2xl font-black tracking-tighter uppercase sm:text-4xl"
+            }
+          >
+            {isCreator ? s.accountUserCreatorHeading : s.accountUserHeading}
+          </h1>
+          {!isCreator && (
+            <div className="text-center sm:text-left">
+              {session.user?.name && (
+                <p className="text-foreground mt-2 font-bold">
+                  {session.user.name}
+                </p>
+              )}
+              <p className="text-muted-foreground text-sm">{email}</p>
+            </div>
+          )}
 
           {isCreator && (
-            // One row on desktop: the creator block sized to its content, Your
-            // Comics filling the rest; they stack on phones.
-            <div className="mt-2 lg:flex lg:items-start lg:gap-8">
-              <div className="lg:w-80 lg:shrink-0">
-                <div className="space-y-4">
-                  {ownedCreators.map((creator) => {
-                    const sub =
-                      creator.studio?.name ?? formatPlace(creator.place);
-                    // Join month + year, for the "Rioting since" tenure line.
-                    const joined = creator.joinedAt
-                      ? new Date(creator.joinedAt).toLocaleDateString("en-US", {
-                          month: "long",
-                          year: "numeric",
-                        })
-                      : null;
-                    return (
-                      <div key={creator._id} className="space-y-3">
-                        <div className="flex gap-3 sm:gap-4">
-                          {/* Avatar sized to the Your Comics covers beside it (105px). */}
-                          <div className="relative aspect-square w-[105px] shrink-0 overflow-hidden bg-black/10">
-                            {creator.photo ? (
-                              <Image
-                                src={urlFor(creator.photo).width(320).url()}
-                                alt=""
-                                fill
-                                sizes="105px"
-                                className="object-cover"
-                              />
-                            ) : (
-                              <InitialsAvatar
-                                name={creator.name ?? ""}
-                                className="text-3xl"
-                              />
-                            )}
-                          </div>
-                          <div className="flex min-w-0 flex-1 flex-col">
-                            <p className="truncate font-bold text-black">
-                              {creator.name}
-                            </p>
-                            {sub && (
-                              <p className="truncate text-sm text-black/70">
-                                {sub}
-                              </p>
-                            )}
-                            {joined && (
-                              <p className="truncate text-xs text-black/60">
-                                {s.accountRiotingSince.replace("{date}", joined)}
-                              </p>
-                            )}
-                            {/* Private follower count — self-knowledge, never a
-                                scoreboard (§3). Shown once, under the first profile. */}
-                            {creator._id === ownedCreatorIds[0] && (
-                              <p className="truncate text-xs text-black">
-                                <span className="font-bold">
-                                  {followers.toLocaleString("en-US")}
-                                </span>{" "}
-                                <span className="text-black/70">
-                                  {s.accountFollowersLabel}
-                                </span>
-                              </p>
-                            )}
-                          </div>
+            <>
+              {/* Instagram-style identity header: centered on phones, a row on
+                  desktop. Comics/strips sit full-width below it. */}
+              {ownedCreators.map((creator) => {
+                const sub = creator.studio?.name ?? formatPlace(creator.place);
+                // Join month + year, for the "Rioting since" tenure line.
+                const joined = creator.joinedAt
+                  ? new Date(creator.joinedAt).toLocaleDateString("en-US", {
+                      month: "long",
+                      year: "numeric",
+                    })
+                  : null;
+                return (
+                  <div
+                    key={creator._id}
+                    className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:text-left"
+                  >
+                    <div className="relative aspect-square w-[120px] shrink-0 overflow-hidden bg-white/10">
+                      {creator.photo ? (
+                        <Image
+                          src={urlFor(creator.photo).width(360).url()}
+                          alt=""
+                          fill
+                          sizes="120px"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <InitialsAvatar
+                          name={creator.name ?? ""}
+                          className="text-4xl"
+                        />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-foreground text-lg font-bold">
+                        {creator.name}
+                      </p>
+                      {sub && (
+                        <p className="text-muted-foreground text-sm">{sub}</p>
+                      )}
+                      {joined && (
+                        <p className="text-muted-foreground text-xs">
+                          {s.accountRiotingSince.replace("{date}", joined)}
+                        </p>
+                      )}
+                      {/* Private follower count — self-knowledge, never a
+                          scoreboard (§3). Shown once, under the first profile. */}
+                      {creator._id === ownedCreatorIds[0] && (
+                        <p className="text-xs">
+                          <span className="text-foreground font-bold">
+                            {followers.toLocaleString("en-US")}
+                          </span>{" "}
+                          <span className="text-muted-foreground">
+                            {s.accountFollowersLabel}
+                          </span>
+                        </p>
+                      )}
+                      {/* Actions — Post an Update / add an Event / view the
+                          public profile (replaces the old Profile↔Dashboard tab). */}
+                      {composerTargets.length > 0 && (
+                        <div className="mt-3 flex flex-wrap justify-center gap-2 sm:justify-start">
+                          <PostUpdateDialog
+                            targets={composerTargets}
+                            kinds={UPDATE_KINDS}
+                            mentions={mentionOptions}
+                            labels={composerLabelsFrom(s)}
+                            trigger={
+                              <Button
+                                variant="inverse"
+                                size="sm"
+                                className="font-black tracking-wide uppercase"
+                              >
+                                <Plus aria-hidden="true" className="size-4" />
+                                {s.accountAddUpdateLabel}
+                              </Button>
+                            }
+                          />
+                          <EventDialog
+                            creators={eventFormCreators}
+                            conventions={eventConventions}
+                            labels={eventFormLabels}
+                            trigger={
+                              <Button
+                                variant="inverse"
+                                size="sm"
+                                className="font-black tracking-wide uppercase"
+                              >
+                                <Plus aria-hidden="true" className="size-4" />
+                                {s.accountAddEventLabel}
+                              </Button>
+                            }
+                          />
+                          {creator.slug && (
+                            <Button
+                              asChild
+                              variant="outline"
+                              size="sm"
+                              className="font-black tracking-wide uppercase"
+                            >
+                              <Link href={`/creators/${creator.slug}`}>
+                                {s.accountViewProfileLabel}
+                              </Link>
+                            </Button>
+                          )}
                         </div>
-                        {/* The card's actions — Post an Update / add an Event,
-                            each filling half the width. */}
-                        {composerTargets.length > 0 && (
-                          <div className="flex gap-2">
-                            <PostUpdateDialog
-                              targets={composerTargets}
-                              kinds={UPDATE_KINDS}
-                              mentions={mentionOptions}
-                              labels={composerLabelsFrom(s)}
-                              trigger={
-                                <Button
-                                  variant="inverse"
-                                  size="sm"
-                                  className="flex-1 font-black tracking-wide uppercase"
-                                >
-                                  <Plus aria-hidden="true" className="size-4" />
-                                  {s.accountAddUpdateLabel}
-                                </Button>
-                              }
-                            />
-                            <EventDialog
-                              creators={eventFormCreators}
-                              conventions={eventConventions}
-                              labels={eventFormLabels}
-                              trigger={
-                                <Button
-                                  variant="inverse"
-                                  size="sm"
-                                  className="flex-1 font-black tracking-wide uppercase"
-                                >
-                                  <Plus aria-hidden="true" className="size-4" />
-                                  {s.accountAddEventLabel}
-                                </Button>
-                              }
-                            />
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
 
-              {/* Comics ↔ Strips as tabs so neither rail overwhelms the other;
-                  each tab carries its own add button beneath. */}
-              <div className="mt-6 min-w-0 lg:mt-0 lg:flex-1">
+              {/* Comics ↔ Strips as tabs, full-width below the identity header. */}
+              <div className="mt-8">
                 <TabbedPanel
-                  tone="onColor"
                   tabs={[
                     {
                       id: "comics",
@@ -860,7 +856,7 @@ export default async function AccountPage({
                   ]}
                 />
               </div>
-            </div>
+            </>
           )}
         </Section>
 
@@ -889,7 +885,7 @@ export default async function AccountPage({
         {/* Your Media — owners of an outlet (creator or not). Plain feed rows. */}
         {ownedMedia.length > 0 && (
           <Section padding="md">
-            <SectionHeading as="h2" size="sm" tone="dashboard">
+            <SectionHeading as="h2" size="sm">
               {s.accountMediaHeading}
             </SectionHeading>
             <ul className={FEED_GRID}>
@@ -1048,16 +1044,6 @@ export default async function AccountPage({
 
   return (
     <div>
-      {/* Owner-only tab bar — the same Profile ↔ Dashboard flip that sits atop
-          the public profile; here Dashboard is active. */}
-      {isCreator && ownedCreators[0]?.slug && (
-        <OwnerTabs
-          active="dashboard"
-          profileHref={`/creators/${ownedCreators[0].slug}`}
-          profileLabel={s.profileTabLabel}
-          dashboardLabel={s.dashboardTabLabel}
-        />
-      )}
       <DashboardTabs panels={panels} initial={view} />
     </div>
   );
