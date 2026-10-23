@@ -720,6 +720,15 @@ export interface SiteSettings {
     notificationsNewStripsLabel: string;
     stripsSubscribeLabel: string;
     stripsSubscribedLabel: string;
+    /** Dashboard (/me) segmented tabs, the private follower count, and the
+     *  Settings tab's account heading. */
+    dashboardTabBunker: string;
+    dashboardTabActivity: string;
+    dashboardTabNetwork: string;
+    dashboardTabSaved: string;
+    dashboardTabSettings: string;
+    accountFollowersLabel: string;
+    accountSettingsHeading: string;
     /** Footer nav groups + the logged-out header account links. */
     footerGetListedHeading: string;
     footerRiotHeading: string;
@@ -1546,6 +1555,13 @@ const DEFAULTS: SiteSettings = {
     notificationsNewStripsLabel: "New strips are live — read them",
     stripsSubscribeLabel: "Notify Me",
     stripsSubscribedLabel: "Notifying",
+    dashboardTabBunker: "Bunker",
+    dashboardTabActivity: "Activity",
+    dashboardTabNetwork: "Network",
+    dashboardTabSaved: "Saved",
+    dashboardTabSettings: "Settings",
+    accountFollowersLabel: "followers",
+    accountSettingsHeading: "Account",
     footerGetListedHeading: "Get Listed",
     footerRiotHeading: "The Riot",
     footerFeedsHeading: "RSS",

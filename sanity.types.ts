@@ -1206,6 +1206,13 @@ export type SiteSettings = {
     notificationsNewStripsLabel?: string;
     stripsSubscribeLabel?: string;
     stripsSubscribedLabel?: string;
+    dashboardTabBunker?: string;
+    dashboardTabActivity?: string;
+    dashboardTabNetwork?: string;
+    dashboardTabSaved?: string;
+    dashboardTabSettings?: string;
+    accountFollowersLabel?: string;
+    accountSettingsHeading?: string;
     footerGetListedHeading?: string;
     footerRiotHeading?: string;
     footerFeedsHeading?: string;

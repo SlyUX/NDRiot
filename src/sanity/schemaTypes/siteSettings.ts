@@ -1687,6 +1687,50 @@ export default defineType({
             'Same control once subscribed — e.g. "Notifying". Click again to turn it off.',
         }),
         defineField({
+          name: "dashboardTabBunker",
+          title: "Dashboard tab — Bunker (your home)",
+          type: "string",
+          description:
+            'First dashboard tab (/me): the creator\'s private home — identity, their comics/strips, follower count. "Bunker" is the ND Riot term.',
+        }),
+        defineField({
+          name: "dashboardTabActivity",
+          title: "Dashboard tab — Activity",
+          type: "string",
+          description: "Your posted updates + the feed from who you follow.",
+        }),
+        defineField({
+          name: "dashboardTabNetwork",
+          title: "Dashboard tab — Network",
+          type: "string",
+          description: "Cosigns, followed creators, and collaboration requests.",
+        }),
+        defineField({
+          name: "dashboardTabSaved",
+          title: "Dashboard tab — Saved",
+          type: "string",
+          description: "The reader's saved comics and strips.",
+        }),
+        defineField({
+          name: "dashboardTabSettings",
+          title: "Dashboard tab — Settings",
+          type: "string",
+          description: "Account details, sign out, and the newsletter opt-in.",
+        }),
+        defineField({
+          name: "accountFollowersLabel",
+          title: "Dashboard — follower count label",
+          type: "string",
+          description:
+            'Rendered after the number on the creator\'s own dashboard — e.g. "followers" → "12 followers". Private to the creator, never public, never ranked (§3).',
+        }),
+        defineField({
+          name: "accountSettingsHeading",
+          title: "Dashboard — Settings account heading",
+          type: "string",
+          description: 'Heading over the account/sign-out block in the Settings tab — e.g. "Account".',
+        }),
+        defineField({
           name: "footerGetListedHeading",
           title: 'Footer — "Get Listed" heading',
           type: "string",

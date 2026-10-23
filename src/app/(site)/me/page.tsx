@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
-import { AlternatingSections } from "@/components/alternating-sections";
+import { DashboardTabs, type DashboardPanel } from "@/components/dashboard-tabs";
 import { SignInButton, SignOutButton } from "@/components/auth-controls";
 import {
   CollabRequests,
@@ -62,7 +62,7 @@ import { getSiteSettings } from "@/lib/site-settings";
 import { ownedDocIds } from "@/sanity/ownership-client";
 import { mutualCosignIds } from "@/sanity/cosign-client";
 import { incomingRequests, sentRequests } from "@/sanity/collab-client";
-import { savedItems } from "@/sanity/reader-client";
+import { followerCount, savedItems } from "@/sanity/reader-client";
 import { urlFor } from "@/sanity/image";
 import type {
   BookSummary,
@@ -105,8 +105,16 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function AccountPage() {
-  const [settings, session] = await Promise.all([getSiteSettings(), auth()]);
+export default async function AccountPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ view?: string }>;
+}) {
+  const [settings, session, { view }] = await Promise.all([
+    getSiteSettings(),
+    auth(),
+    searchParams,
+  ]);
   const s = settings.sections;
   const email = session?.user?.email;
 
@@ -220,10 +228,6 @@ export default async function AccountPage() {
   );
 
   const isCreator = ownedCreators.length > 0;
-  const hasSaves =
-    savedBooks.length > 0 ||
-    savedCreators.length > 0 ||
-    savedStrips.length > 0;
   // Hide the ND Noise opt-in from anyone already subscribed (MailerLite live).
   const newsletterSubscribed = await isSubscribedToNewsletter(email);
   // The creator's Cosigns — the creators they mutually follow (each follows the
@@ -232,6 +236,9 @@ export default async function AccountPage() {
   const cosigns = cosignIds.length
     ? await safeFetch<CreatorSummary[]>(SAVED_CREATORS_QUERY, { ids: cosignIds }, [])
     : [];
+  // The creator's own private follower count (§3: self-knowledge, not a
+  // scoreboard — private, aggregate, never comparative, never public).
+  const followers = isCreator ? await followerCount(ownedCreatorIds) : 0;
 
   // The creators' existing (published) series — the strip composer's dropdown,
   // filtered per creator at render. Drafts a creator just started show up once
@@ -644,73 +651,53 @@ export default async function AccountPage() {
     });
   }
 
-  return (
-    <div>
-      {/* Owner-only tab bar — the same Profile ↔ Dashboard flip that sits atop
-          the public profile; here Dashboard is active. */}
-      {isCreator && ownedCreators[0]?.slug && (
-        <OwnerTabs
-          active="dashboard"
-          profileHref={`/creators/${ownedCreators[0].slug}`}
-          profileLabel={s.profileTabLabel}
-          dashboardLabel={s.dashboardTabLabel}
-        />
-      )}
-      {/* The top user/creator zone keeps its own band (creator-pink / charcoal),
-          so it's the one section that sits out the alternating rhythm below —
-          AlternatingSections leaves any section with an explicit background
-          alone. Everything after it alternates --background / --surface-alt (§9). */}
-      <AlternatingSections>
-        {/* Profile — a creator gets the personalization-teal zone holding their
-            identity beside their comics; a plain reader gets the charcoal band
-            with just their details. Teal is a black-text surface (§9). */}
-        {/* A tight 24px band — the identity leads, no oversized md padding. */}
+  // ---------------------------------------------------- dashboard panels
+  // Segmented: one visible at a time (DashboardTabs swaps them in place). Bunker,
+  // Saved, and Settings always show; Activity/Network appear when they have
+  // content. The col1/2/3 TabbedPanels are reused verbatim, just regrouped.
+  const panels: DashboardPanel[] = [];
+
+  // BUNKER — the creator's private home: identity, their comics/strips, the
+  // private follower count, and events. A plain reader gets their account card.
+  panels.push({
+    id: "bunker",
+    label: s.dashboardTabBunker,
+    content: (
+      <>
         <Section
           padding="none"
           background={isCreator ? "dashboard" : "charcoal"}
           className="px-6 py-6"
         >
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              {/* A creator's identity band below is the visible header, so the
-                  page h1 stays for a11y (§10) but is hidden for them; a plain
-                  reader still sees it. */}
-              <h1
-                className={
-                  isCreator
-                    ? "sr-only"
-                    : "text-2xl font-black tracking-tighter uppercase sm:text-4xl"
-                }
-              >
-                {isCreator ? s.accountUserCreatorHeading : s.accountUserHeading}
-              </h1>
-              {/* Name + email only for a plain reader — a creator's identity is
-                the profile block below, so these would just be noise. */}
-              {!isCreator && (
-                <>
-                  {session.user?.name && (
-                    <p className="text-foreground mt-2 font-bold">
-                      {session.user.name}
-                    </p>
-                  )}
-                  <p className="text-muted-foreground text-sm">{email}</p>
-                </>
-              )}
-            </div>
-            {/* A creator's Sign Out moves into their card below (beneath the
-                tenure line); a plain reader keeps it here. */}
+          <div>
+            {/* The identity band below is the creator's visible header, so the
+                page h1 stays for a11y (§10) but is hidden for them; a plain
+                reader still sees it. */}
+            <h1
+              className={
+                isCreator
+                  ? "sr-only"
+                  : "text-2xl font-black tracking-tighter uppercase sm:text-4xl"
+              }
+            >
+              {isCreator ? s.accountUserCreatorHeading : s.accountUserHeading}
+            </h1>
             {!isCreator && (
-              <SignOutButton
-                label={settings.creatorIntake.signOutLabel}
-                redirectTo="/"
-              />
+              <>
+                {session.user?.name && (
+                  <p className="text-foreground mt-2 font-bold">
+                    {session.user.name}
+                  </p>
+                )}
+                <p className="text-muted-foreground text-sm">{email}</p>
+              </>
             )}
           </div>
 
           {isCreator && (
             // One row on desktop: the creator block sized to its content, Your
             // Comics filling the rest; they stack on phones.
-            <div className="lg:flex lg:items-start lg:gap-8">
+            <div className="mt-2 lg:flex lg:items-start lg:gap-8">
               <div className="lg:w-80 lg:shrink-0">
                 <div className="space-y-4">
                   {ownedCreators.map((creator) => {
@@ -757,12 +744,18 @@ export default async function AccountPage() {
                                 {s.accountRiotingSince.replace("{date}", joined)}
                               </p>
                             )}
-                            {/* Sign Out sits at the bottom of the identity block. */}
-                            <SignOutButton
-                              label={settings.creatorIntake.signOutLabel}
-                              redirectTo="/"
-                              className="mt-auto self-start pt-2 text-black/70 hover:text-black"
-                            />
+                            {/* Private follower count — self-knowledge, never a
+                                scoreboard (§3). Shown once, under the first profile. */}
+                            {creator._id === ownedCreatorIds[0] && (
+                              <p className="truncate text-xs text-black">
+                                <span className="font-bold">
+                                  {followers.toLocaleString("en-US")}
+                                </span>{" "}
+                                <span className="text-black/70">
+                                  {s.accountFollowersLabel}
+                                </span>
+                              </p>
+                            )}
                           </div>
                         </div>
                         {/* The card's actions — Post an Update / add an Event,
@@ -871,34 +864,25 @@ export default async function AccountPage() {
           )}
         </Section>
 
-        {/* Your events + Collaboration requests, side by side (creators only).
-            Events = convention appearances; Collab = incoming (respond with a
-            canned preset) + sent (status). */}
+        {/* Your events — convention appearances (creators only). */}
         {isCreator && (
           <Section padding="md">
-            <div className="grid gap-8 lg:grid-cols-2">
-              <EventsManager
-                current={ownedAppearances}
-                labels={{
-                  heading: s.accountEventsHeading,
-                  empty: s.accountEventsEmpty,
-                  tablePrefix: s.tableLabel,
-                  tbaLabel: s.eventDateTba,
-                  removeLabel: s.accountRemoveLabel,
-                  editLabel: s.accountEventEditHeading,
-                }}
-                editForm={
-                  composerTargets.length > 0
-                    ? { creators: eventFormCreators, labels: eventFormLabels }
-                    : undefined
-                }
-              />
-              <CollabRequests
-                incoming={incomingCollab}
-                sent={sentCollab}
-                copy={settings.collab}
-              />
-            </div>
+            <EventsManager
+              current={ownedAppearances}
+              labels={{
+                heading: s.accountEventsHeading,
+                empty: s.accountEventsEmpty,
+                tablePrefix: s.tableLabel,
+                tbaLabel: s.eventDateTba,
+                removeLabel: s.accountRemoveLabel,
+                editLabel: s.accountEventEditHeading,
+              }}
+              editForm={
+                composerTargets.length > 0
+                  ? { creators: eventFormCreators, labels: eventFormLabels }
+                  : undefined
+              }
+            />
           </Section>
         )}
 
@@ -910,7 +894,7 @@ export default async function AccountPage() {
             </SectionHeading>
             <ul className={FEED_GRID}>
               {ownedMedia.map((outlet) => {
-                const view = outlet.slug ? `/media/${outlet.slug}` : null;
+                const mediaHref = outlet.slug ? `/media/${outlet.slug}` : null;
                 return (
                   <li
                     key={outlet._id}
@@ -927,9 +911,9 @@ export default async function AccountPage() {
                         />
                       )}
                     </div>
-                    {view ? (
+                    {mediaHref ? (
                       <Link
-                        href={view}
+                        href={mediaHref}
                         className="hover:text-primary min-w-0 flex-1 truncate text-sm font-bold transition-colors"
                       >
                         {outlet.name}
@@ -947,9 +931,9 @@ export default async function AccountPage() {
                           {s.accountEditLabel}
                         </Link>
                       </Button>
-                      {view && (
+                      {mediaHref && (
                         <Button asChild variant="outline" size="sm">
-                          <Link href={view}>{s.accountViewMediaLabel}</Link>
+                          <Link href={mediaHref}>{s.accountViewMediaLabel}</Link>
                         </Button>
                       )}
                     </div>
@@ -959,31 +943,56 @@ export default async function AccountPage() {
             </ul>
           </Section>
         )}
+      </>
+    ),
+  });
 
-        {/* First tabbed row: [Your Updates | Your Feed] and [Saved Comics |
-            Saved Strips]. Each column flips its panels in place. */}
-        {(col1Tabs.length > 0 || col2Tabs.length > 0) && (
-          <Section padding="md">
-            <div className="grid gap-8 lg:grid-cols-2">
-              {col1Tabs.length > 0 && <TabbedPanel tabs={col1Tabs} />}
-              {col2Tabs.length > 0 && <TabbedPanel tabs={col2Tabs} />}
+  // ACTIVITY — your posted updates + the feed from who you follow.
+  if (col1Tabs.length > 0) {
+    panels.push({
+      id: "activity",
+      label: s.dashboardTabActivity,
+      content: (
+        <Section padding="md">
+          <TabbedPanel tabs={col1Tabs} />
+        </Section>
+      ),
+    });
+  }
+
+  // NETWORK — cosigns + followed creators, plus the creator's collab requests.
+  if (col3Tabs.length > 0 || isCreator) {
+    panels.push({
+      id: "network",
+      label: s.dashboardTabNetwork,
+      content: (
+        <Section padding="md">
+          {col3Tabs.length > 0 && <TabbedPanel tabs={col3Tabs} />}
+          {isCreator && (
+            <div className={col3Tabs.length > 0 ? "mt-10" : ""}>
+              <CollabRequests
+                incoming={incomingCollab}
+                sent={sentCollab}
+                copy={settings.collab}
+              />
             </div>
-          </Section>
-        )}
+          )}
+        </Section>
+      ),
+    });
+  }
 
-        {/* Second tabbed row: [Cosigns | Followed Creators] in the first half;
-            the second half is intentionally empty for now. */}
-        {col3Tabs.length > 0 && (
-          <Section padding="md">
-            <div className="grid gap-8 lg:grid-cols-2">
-              <TabbedPanel tabs={col3Tabs} />
-            </div>
-          </Section>
-        )}
-
-        {!hasSaves && (
+  // SAVED — saved comics + strips, or the §3 discovery prompt when empty.
+  panels.push({
+    id: "saved",
+    label: s.dashboardTabSaved,
+    content: (
+      <Section padding="md">
+        {col2Tabs.length > 0 ? (
+          <TabbedPanel tabs={col2Tabs} />
+        ) : (
           // An empty shelf is a discovery moment, not a dead end (§3).
-          <Section padding="md" maxWidth="3xl">
+          <div className="max-w-prose">
             <p className="text-muted-foreground text-sm">
               {settings.empty.saved}
             </p>
@@ -993,13 +1002,37 @@ export default async function AccountPage() {
             >
               {settings.home.viewAllLabel} →
             </Link>
-          </Section>
+          </div>
         )}
+      </Section>
+    ),
+  });
 
+  // SETTINGS — account, sign out, and the monthly-email opt-in.
+  panels.push({
+    id: "settings",
+    label: s.dashboardTabSettings,
+    content: (
+      <Section padding="md" maxWidth="3xl">
+        <div className="space-y-2">
+          <SectionHeading as="h2" size="sm">
+            {s.accountSettingsHeading}
+          </SectionHeading>
+          {session.user?.name && (
+            <p className="text-foreground font-bold">{session.user.name}</p>
+          )}
+          <p className="text-muted-foreground text-sm">{email}</p>
+          <div className="pt-1">
+            <SignOutButton
+              label={settings.creatorIntake.signOutLabel}
+              redirectTo="/"
+            />
+          </div>
+        </div>
         {/* Monthly-email opt-in — explicit only (§3), and only for people who
             aren't already subscribed (MailerLite is the source of truth). */}
         {!newsletterSubscribed && (
-          <Section padding="md">
+          <div className="mt-10">
             <NewsletterOptIn
               heading={s.accountNewsletterHeading}
               body={s.accountNewsletterBody}
@@ -1007,9 +1040,25 @@ export default async function AccountPage() {
               successLabel={settings.newsletter.successMessage}
               errorLabel={settings.newsletter.errorMessage}
             />
-          </Section>
+          </div>
         )}
-      </AlternatingSections>
+      </Section>
+    ),
+  });
+
+  return (
+    <div>
+      {/* Owner-only tab bar — the same Profile ↔ Dashboard flip that sits atop
+          the public profile; here Dashboard is active. */}
+      {isCreator && ownedCreators[0]?.slug && (
+        <OwnerTabs
+          active="dashboard"
+          profileHref={`/creators/${ownedCreators[0].slug}`}
+          profileLabel={s.profileTabLabel}
+          dashboardLabel={s.dashboardTabLabel}
+        />
+      )}
+      <DashboardTabs panels={panels} initial={view} />
     </div>
   );
 }

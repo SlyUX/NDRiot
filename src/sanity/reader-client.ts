@@ -63,6 +63,30 @@ export async function savedItems(email: string): Promise<SavedItem[]> {
   }
 }
 
+/**
+ * How many distinct readers follow (have saved) these creator profiles — the
+ * creator's own private follower count for their dashboard.
+ *
+ * AGENTS.md §3: this is self-knowledge, never a scoreboard. It is shown ONLY to
+ * the creator, about themselves, as an aggregate — never comparative, never
+ * public, and it never orders anyone in a reader-facing view. Counts distinct
+ * `emailHmac`, so it can't be read back to individual followers.
+ */
+export async function followerCount(creatorIds: string[]): Promise<number> {
+  if (!creatorIds.length) return 0
+  try {
+    return (
+      (await client().fetch<number>(
+        `count(array::unique(*[_type=="readerSave" && itemType=="creator" && itemId in $ids].emailHmac))`,
+        { ids: creatorIds },
+      )) ?? 0
+    )
+  } catch (cause) {
+    console.error('[reader] followerCount failed', cause)
+    return 0
+  }
+}
+
 /** Whether this reader has saved this item. Fail-soft to false. */
 export async function isSaved(email: string, itemId: string): Promise<boolean> {
   const owner = normalizeEmail(email)
