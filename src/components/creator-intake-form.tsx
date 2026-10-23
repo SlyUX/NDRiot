@@ -504,6 +504,7 @@ export function CreatorIntakeForm({
               <p className="text-destructive text-xs">{imageErrors.photo}</p>
             )}
             <p className={hintClass}>{copy.photoHint}</p>
+            <p className={hintClass}>{reviewNotice.csamUploadNotice}</p>
           </div>
 
           <div className="space-y-1.5">

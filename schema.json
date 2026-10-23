@@ -6047,6 +6047,13 @@
                 "type": "string"
               },
               "optional": true
+            },
+            "csamUploadNotice": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
             }
           }
         },

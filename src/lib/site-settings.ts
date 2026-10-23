@@ -306,6 +306,10 @@ export type ReviewNoticeSettings = {
   /** The apparent-minor rule, shown on the book + strip submission forms near
    *  the rating — the one rule creators must read before uploading. */
   apparentMinorRule: string;
+  /** CSAM scanning disclosure, shown at every image-upload step (cover, avatar,
+   *  strip page, media logo). Scanning runs via Cloudflare once images route
+   *  through img.ndriot.com — so only show it while that's live. */
+  csamUploadNotice: string;
 };
 
 /**
@@ -1252,6 +1256,8 @@ const DEFAULTS: SiteSettings = {
       "A real person reviews every submission before it goes live. That pause protects you and everyone else here — it keeps ND Riot safe, properly credited, and free of anything that shouldn’t sit next to your name. We’re a very small volunteer team, so reviews happen as fast as real people can get to them. Thank you for your patience while we look yours over.",
     apparentMinorRule:
       "One rule with no exceptions: no nudity, partial nudity, or sexualized depiction of any character who appears to be under 18 — whatever the character’s stated age. A canonical age doesn’t change how a drawing reads. This one isn’t appealable, and we’d rather tell you now than take your work down later.",
+    csamUploadNotice:
+      "Uploaded images are checked against known child sexual abuse material. This runs for everyone, every time, and it’s a condition of hosting here.",
   },
   mediaIntake: {
     heading: "List your outlet",

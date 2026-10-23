@@ -496,6 +496,13 @@ export default defineType({
           rows: 4,
           description: "Shown near the rating on the comic + strip submission forms — the one rule creators must read before uploading. Not appealable.",
         }),
+        defineField({
+          name: "csamUploadNotice",
+          title: "CSAM scanning notice (all image uploads)",
+          type: "text",
+          rows: 3,
+          description: "Shown at every image-upload step (cover, avatar, strip page, media logo). A plain disclosure that uploads are hash-checked for known CSAM — state it, don't dramatize it. Only accurate while Cloudflare scanning is live (images routed through img.ndriot.com).",
+        }),
       ],
     }),
 

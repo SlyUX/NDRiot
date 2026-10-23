@@ -977,6 +977,7 @@ export type SiteSettings = {
     title?: string;
     body?: string;
     apparentMinorRule?: string;
+    csamUploadNotice?: string;
   };
   collab?: {
     requestButtonLabel?: string;

@@ -671,6 +671,7 @@ export function BookIntakeForm({
             />
             {imageError && <p className="text-destructive text-xs">{imageError}</p>}
             <p className={hintClass}>{copy.coverHint}</p>
+            <p className={hintClass}>{reviewNotice.csamUploadNotice}</p>
             <label className="mt-2 flex items-start gap-2 text-sm">
               <input
                 type="checkbox"

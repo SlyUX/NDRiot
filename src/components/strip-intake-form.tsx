@@ -212,6 +212,7 @@ export function StripIntakeForm({
           {imageError && <p className="text-destructive text-xs">{imageError}</p>}
           {errors.image && <p className="text-destructive text-xs">{errors.image}</p>}
           <p className={hintClass}>{copy.imageHint}</p>
+          <p className={hintClass}>{reviewNotice.csamUploadNotice}</p>
         </div>
 
         <div className="space-y-1.5">
