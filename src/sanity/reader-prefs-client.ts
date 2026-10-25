@@ -39,9 +39,19 @@ export interface ReaderPrefs {
   subscribeAllStrips: boolean
   /** ISO timestamp; `null` until a baseline is established. */
   notificationsSeenAt: string | null
+  /**
+   * The Rag submission "period" (the oldest-open issue's id) this reader has
+   * dismissed the home banner for. When a new period begins the id changes and
+   * the banner returns — no manual reset. `null` = never dismissed.
+   */
+  ragBannerDismissedPeriod: string | null
 }
 
-const EMPTY: ReaderPrefs = { subscribeAllStrips: false, notificationsSeenAt: null }
+const EMPTY: ReaderPrefs = {
+  subscribeAllStrips: false,
+  notificationsSeenAt: null,
+  ragBannerDismissedPeriod: null,
+}
 
 const prefsId = (email: string) => `readerPrefs.${emailHmac(email)}`
 
@@ -62,7 +72,7 @@ export async function getReaderPrefs(email: string): Promise<ReaderPrefs> {
   if (!owner) return EMPTY
   try {
     const doc = await client().fetch<ReaderPrefs | null>(
-      `*[_id==$id][0]{"subscribeAllStrips":coalesce(subscribeAllStrips,false),notificationsSeenAt}`,
+      `*[_id==$id][0]{"subscribeAllStrips":coalesce(subscribeAllStrips,false),notificationsSeenAt,"ragBannerDismissedPeriod":coalesce(ragBannerDismissedPeriod,null)}`,
       { id: prefsId(owner) },
     )
     return doc ?? EMPTY
@@ -88,7 +98,11 @@ export async function ensureSeenBaseline(email: string): Promise<ReaderPrefs> {
   } catch (cause) {
     console.error('[reader-prefs] baseline init failed', cause)
   }
-  return { subscribeAllStrips: current.subscribeAllStrips, notificationsSeenAt: now }
+  return {
+    subscribeAllStrips: current.subscribeAllStrips,
+    notificationsSeenAt: now,
+    ragBannerDismissedPeriod: current.ragBannerDismissedPeriod,
+  }
 }
 
 /** Set (or clear) the "notify me about new strips" subscription. Returns the new state. */
@@ -103,6 +117,19 @@ export async function setStripSubscription(email: string, enabled: boolean): Pro
   } catch (cause) {
     console.error('[reader-prefs] setStripSubscription failed', cause)
     return false
+  }
+}
+
+/** Remember that this reader dismissed the Rag banner for the given period. */
+export async function dismissRagBanner(email: string, periodId: string): Promise<void> {
+  const owner = normalizeEmail(email)
+  if (!owner || !periodId) return
+  const now = new Date().toISOString()
+  try {
+    await client().createIfNotExists(seed(owner, now))
+    await client().patch(prefsId(owner)).set({ ragBannerDismissedPeriod: periodId }).commit()
+  } catch (cause) {
+    console.error('[reader-prefs] dismissRagBanner failed', cause)
   }
 }
 

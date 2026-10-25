@@ -5,6 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import {
   Bookmark,
   LayoutDashboard,
+  Send,
   SlidersHorizontal,
   Users,
   type LucideIcon,
@@ -16,11 +17,17 @@ const ICONS: Record<string, LucideIcon> = {
   network: Users,
   saved: Bookmark,
   settings: SlidersHorizontal,
+  submit: Send,
 };
 
 export interface UserNavItem {
   id: string;
   label: string;
+  /** An explicit destination (e.g. the Rag submit item → /magazine/<slug>).
+   *  Without it the item links to the dashboard view /me?view=<id>. */
+  href?: string;
+  /** A small second line under the label (e.g. "Submit"). */
+  sublabel?: string;
 }
 
 /**
@@ -78,11 +85,16 @@ export function UserNav({
   };
 
   const tab = (item: UserNavItem, variant: "bar" | "island") => {
-    const active = currentView === item.id;
+    const href = item.href ?? hrefFor(item.id);
+    // An href item (the Rag submit shortcut) is active when its path matches;
+    // a dashboard item is active when its ?view= is the current one.
+    const active = item.href
+      ? pathname === item.href.split("?")[0]
+      : currentView === item.id;
     return (
       <Link
         key={item.id}
-        href={hrefFor(item.id)}
+        href={href}
         aria-current={active ? "page" : undefined}
         className={cn(
           "focus-visible:ring-ring flex flex-col items-center gap-1 text-[10px] font-bold tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:-outline-offset-2 focus-visible:outline-none",
@@ -91,7 +103,12 @@ export function UserNav({
         )}
       >
         {icon(item.id, active)}
-        {item.label}
+        <span className="line-clamp-2 max-w-[7rem] text-center leading-tight">
+          {item.label}
+        </span>
+        {item.sublabel && (
+          <span className="text-[9px] tracking-widest opacity-80">{item.sublabel}</span>
+        )}
       </Link>
     );
   };
@@ -115,7 +132,10 @@ export function UserNav({
           clears rounded device corners (esp. iOS). */}
       <nav
         aria-label="Your dashboard"
-        className="border-primary/40 bg-background fixed inset-x-3 bottom-3 z-40 grid grid-cols-4 rounded-full border px-2 shadow-[0_2px_20px_rgba(0,0,0,0.6)] md:hidden"
+        className={cn(
+          "border-primary/40 bg-background fixed inset-x-3 bottom-3 z-40 grid rounded-full border px-2 shadow-[0_2px_20px_rgba(0,0,0,0.6)] md:hidden",
+          items.length >= 5 ? "grid-cols-5" : "grid-cols-4",
+        )}
       >
         {items.map((item) => tab(item, "island"))}
       </nav>

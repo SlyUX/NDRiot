@@ -14,7 +14,9 @@ import {
   GENRES_WITH_BOOKS_QUERY,
   RESOURCE_CATEGORIES_WITH_CONTENT_QUERY,
   CREATOR_HERO_QUERY,
+  RAG_OPEN_SUBMISSIONS_QUERY,
 } from '@/lib/queries'
+import type { RagOpenSubmission } from '@/lib/types'
 import { creatorsOwnedBy } from '@/sanity/ownership-client'
 import { urlFor } from '@/sanity/image'
 import { getSiteSettings } from '@/lib/site-settings'
@@ -39,12 +41,14 @@ const SOCIAL_LINK =
  * with negative margins before.
  */
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const [settings, genresWithBooks, resourceCategories, session] = await Promise.all([
-    getSiteSettings(),
-    safeFetch<string[]>(GENRES_WITH_BOOKS_QUERY, {}, []),
-    safeFetch<string[]>(RESOURCE_CATEGORIES_WITH_CONTENT_QUERY, {}, []),
-    auth(),
-  ])
+  const [settings, genresWithBooks, resourceCategories, session, openRagIssues] =
+    await Promise.all([
+      getSiteSettings(),
+      safeFetch<string[]>(GENRES_WITH_BOOKS_QUERY, {}, []),
+      safeFetch<string[]>(RESOURCE_CATEGORIES_WITH_CONTENT_QUERY, {}, []),
+      auth(),
+      safeFetch<RagOpenSubmission[]>(RAG_OPEN_SUBMISSIONS_QUERY, {}, []),
+    ])
   const navGenres = genreOptions(genresWithBooks)
   // Only categories that have content, in taxonomy order — so nav links never
   // point at an empty category.
@@ -54,9 +58,11 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   // uploaded), so the masthead reflects their identity here rather than Google's.
   // Plain readers (no profile) keep their Google account image.
   let avatar = session?.user?.image ?? null
+  let isCreator = false
   const email = session?.user?.email
   if (email) {
     const owned = await creatorsOwnedBy(email)
+    isCreator = owned.length > 0
     if (owned.length) {
       const profile = await safeFetch<{
         photo: Parameters<typeof urlFor>[0] | null
@@ -67,6 +73,11 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
     }
   }
   const s = settings.sections
+
+  // The Rag submit shortcut (5th user-nav item) — only for signed-in creators,
+  // only while an issue is accepting submissions, pointing at the OLDEST open
+  // issue (the one the home banner also targets).
+  const submitIssue = isCreator ? (openRagIssues[0] ?? null) : null
 
   return (
     <>
@@ -149,6 +160,16 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
             { id: "network", label: s.dashboardTabNetwork },
             { id: "saved", label: s.dashboardTabSaved },
             { id: "settings", label: s.dashboardTabSettings },
+            ...(submitIssue
+              ? [
+                  {
+                    id: "submit",
+                    label: submitIssue.title ?? s.ragPageTitle,
+                    sublabel: s.navSubmitSublabel,
+                    href: `/magazine/${submitIssue.slug}`,
+                  },
+                ]
+              : []),
           ]}
         />
       )}

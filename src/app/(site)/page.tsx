@@ -40,8 +40,12 @@ import {
   FILTERED_CREATORS_QUERY,
   RAIL_UPDATES_QUERY,
   APPEARANCE_FEED_QUERY,
+  RAG_OPEN_SUBMISSIONS_QUERY,
 } from "@/lib/queries";
+import { RagSubmissionBanner } from "@/components/rag-submission-banner";
 import { appearanceToRailItem, mergeFeed } from "@/lib/feed-mappers";
+import { fillTokens } from "@/lib/notify-email";
+import { ragIssueLabel } from "@/lib/rag";
 import {
   pickHeroBooks,
   annotateHeroItems,
@@ -62,6 +66,7 @@ import type {
   Paginated,
   RailFeedItem,
   RailUpdate,
+  RagOpenSubmission,
 } from "@/lib/types";
 
 /** How many updates the hero rail holds before scrolling. */
@@ -173,14 +178,33 @@ export default async function Home({
   // Whether this reader subscribed to new-strip notifications — seeds the
   // "Notify Me" control beside the home Strips heading.
   let stripSubscribed = false;
+  // The creator-only "submissions open" banner, when an issue is accepting them
+  // and this reader hasn't dismissed it for the current period (§3: an explicit
+  // creator-status benefit, not inference — teal, not pink).
+  let ragBanner: { text: string; href: string; periodId: string } | null = null;
   if (email) {
-    const [saves, owned, prefs] = await Promise.all([
+    const [saves, owned, prefs, openRag] = await Promise.all([
       savedItems(email),
       creatorsOwnedBy(email),
       getReaderPrefs(email),
+      safeFetch<RagOpenSubmission[]>(RAG_OPEN_SUBMISSIONS_QUERY, {}, []),
     ]);
     ownedCreatorIds = owned;
     stripSubscribed = prefs.subscribeAllStrips;
+    const oldestOpen = openRag[0] ?? null;
+    if (
+      owned.length > 0 &&
+      oldestOpen &&
+      prefs.ragBannerDismissedPeriod !== oldestOpen._id
+    ) {
+      ragBanner = {
+        text: fillTokens(settings.sections.ragBannerText, {
+          issue: ragIssueLabel(oldestOpen.issueNumber, oldestOpen.title),
+        }),
+        href: `/magazine/${oldestOpen.slug}`,
+        periodId: oldestOpen._id,
+      };
+    }
     savedBookIds = new Set(
       saves.filter((s) => s.itemType === "book").map((s) => s.itemId),
     );
@@ -312,6 +336,14 @@ export default async function Home({
 
   return (
     <div>
+      {ragBanner && (
+        <RagSubmissionBanner
+          text={ragBanner.text}
+          href={ragBanner.href}
+          periodId={ragBanner.periodId}
+          dismissLabel="Dismiss"
+        />
+      )}
       <JsonLd
         data={jsonLdGraph(
           organizationSchema(settings),
