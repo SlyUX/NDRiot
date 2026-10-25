@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, type ReactNode } from 'react'
-import { Plus } from 'lucide-react'
+import { useState } from 'react'
+import { Pencil, Plus } from 'lucide-react'
 
 import {
   StripIntakeForm,
@@ -39,7 +39,7 @@ export function StripComposer({
   series,
   className,
   initial,
-  trigger,
+  editTriggerLabel,
 }: {
   copy: StripIntakeSettings
   common: CreatorIntakeSettings
@@ -50,15 +50,29 @@ export function StripComposer({
   className?: string
   /** Prefilled values → the dialog opens in edit mode. */
   initial?: StripIntakeInitial
-  /** A custom trigger (e.g. the edit chip); defaults to the "+ STRIP" button. */
-  trigger?: ReactNode
+  /**
+   * When set, renders the icon-only edit chip (aria-label = this) instead of
+   * the default "+ STRIP" button. Built here, inside this client component, on
+   * purpose: a Server Component must not hand a built element to
+   * `<DialogTrigger asChild>` (Radix Slot) — it intermittently fails to slot
+   * across the RSC boundary (radix-ui#4150).
+   */
+  editTriggerLabel?: string
 }) {
   const [open, setOpen] = useState(false)
   const editing = Boolean(initial)
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {trigger ?? (
+        {editTriggerLabel ? (
+          <button
+            type="button"
+            aria-label={editTriggerLabel}
+            className="focus-visible:ring-ring inline-flex bg-black/70 p-1.5 text-white transition-colors hover:text-white/70 focus-visible:ring-2 focus-visible:-outline-offset-2 focus-visible:outline-none"
+          >
+            <Pencil aria-hidden="true" className="size-3.5" />
+          </button>
+        ) : (
           <Button
             variant="inverse"
             size="sm"

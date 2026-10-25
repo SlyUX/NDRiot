@@ -282,17 +282,8 @@ export default async function ConventionPage({
                 postingLabel: settings.sections.accountPostingLabel,
                 postedLabel: settings.sections.accountEventPosted,
               }}
-              trigger={
-                <Button
-                  size="lg"
-                  variant="inverse"
-                  className="font-black tracking-wide uppercase"
-                >
-                  {allAttending
-                    ? settings.sections.conventionManageAttendingLabel
-                    : settings.sections.conventionAttendingLabel}
-                </Button>
-              }
+              triggerSize="lg"
+              triggerIcon={false}
             />
           )}
         </div>

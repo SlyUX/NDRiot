@@ -15,12 +15,20 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 /**
  * The add/edit-appearance form in a modal. Its trigger varies by context — the
  * dashboard's "Add an Event", a per-event "Edit", or a convention page's "I'm
  * Attending" (which locks the convention). Controlled so a successful save
  * closes it; the list refreshes from the server action's revalidate.
+ *
+ * The label-button trigger is built HERE, inside this client component, via the
+ * `trigger*` props. A Server Component must NOT pass a built element — a
+ * Server-built element handed to `<DialogTrigger asChild>` (Radix Slot)
+ * intermittently throws "failed to slot onto its children" across the RSC
+ * boundary (radix-ui#4150). The `trigger` element prop remains only for
+ * client-rendered callers (e.g. the icon-only edit chip in EventsManager).
  */
 export function EventDialog({
   creators,
@@ -29,6 +37,10 @@ export function EventDialog({
   lockedConvention,
   existingByCreator,
   trigger,
+  triggerLabel,
+  fullWidthTrigger = false,
+  triggerSize,
+  triggerIcon = true,
 }: {
   creators: { id: string; name: string }[];
   conventions?: { id: string; name: string }[];
@@ -38,8 +50,17 @@ export function EventDialog({
     string,
     { status: string; tableNumber: string | null; note: string | null }
   >;
-  /** The clickable element (asChild). Defaults to the "+ Add an Event" button. */
+  /** A CLIENT-built element (asChild) — e.g. EventsManager's edit chip. Server
+      callers must use the `trigger*` props below instead (radix-ui#4150). */
   trigger?: ReactNode;
+  /** Trigger button label. Defaults to the dialog heading. */
+  triggerLabel?: string;
+  /** Stretch the trigger full-width (the dashboard Events tab). */
+  fullWidthTrigger?: boolean;
+  /** Larger trigger (a convention page's "I'm Attending"). */
+  triggerSize?: "lg";
+  /** Show the leading "+" icon. Default true; off for the attending button. */
+  triggerIcon?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   return (
@@ -48,10 +69,14 @@ export function EventDialog({
         {trigger ?? (
           <Button
             variant="inverse"
-            className="font-black tracking-wide uppercase"
+            size={triggerSize}
+            className={cn(
+              "font-black tracking-wide uppercase",
+              fullWidthTrigger && "w-full",
+            )}
           >
-            <Plus aria-hidden="true" className="size-4" />
-            {labels.addHeading}
+            {triggerIcon && <Plus aria-hidden="true" className="size-4" />}
+            {triggerLabel ?? labels.addHeading}
           </Button>
         )}
       </DialogTrigger>

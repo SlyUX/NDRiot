@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import { Plus } from 'lucide-react'
 
 import {
@@ -11,37 +11,51 @@ import {
 } from '@/components/update-composer'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { cn } from '@/lib/utils'
 
 /**
  * The "Post an Update" flow as a modal — the trigger sits under the creator's
  * profile block, and the composer (which is unchanged) opens in a dialog. The
  * dialog's accessible title reuses the composer's heading (visually hidden here,
  * since the composer shows its own).
+ *
+ * The trigger button is built HERE, inside this client component, on purpose:
+ * passing a Server-Component-built element into `<DialogTrigger asChild>`
+ * (Radix Slot) intermittently throws "failed to slot onto its children" during
+ * RSC streaming — the element arrives as a Flight lazy reference Slot can't read
+ * (radix-ui#4150). Callers pass plain props (label, width) instead of an element.
  */
 export function PostUpdateDialog({
   targets,
   kinds,
   mentions,
   labels,
-  trigger,
+  triggerLabel,
+  fullWidthTrigger = false,
 }: {
   targets: ComposerTarget[]
   kinds: readonly string[]
   mentions: MentionOption[]
   labels: ComposerLabels
-  /** A custom trigger; defaults to the "+ {heading}" button. */
-  trigger?: ReactNode
+  /** Trigger button label. Defaults to the composer heading. */
+  triggerLabel?: string
+  /** Stretch the trigger full-width (the dashboard Activity tab). */
+  fullWidthTrigger?: boolean
 }) {
   const [open, setOpen] = useState(false)
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {trigger ?? (
-          <Button variant="inverse" className="font-black tracking-wide uppercase">
-            <Plus aria-hidden="true" className="size-4" />
-            {labels.heading}
-          </Button>
-        )}
+        <Button
+          variant="inverse"
+          className={cn(
+            'font-black tracking-wide uppercase',
+            fullWidthTrigger && 'w-full',
+          )}
+        >
+          <Plus aria-hidden="true" className="size-4" />
+          {triggerLabel ?? labels.heading}
+        </Button>
       </DialogTrigger>
       <DialogContent className="max-w-xl">
         <DialogTitle className="sr-only">{labels.heading}</DialogTitle>

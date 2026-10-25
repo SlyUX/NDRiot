@@ -16,7 +16,7 @@ import { NewsletterOptIn } from "@/components/newsletter-opt-in";
 import { SavedItemRow } from "@/components/saved-item-row";
 import { SectionHeading } from "@/components/section-heading";
 import { TabbedPanel, type PanelTab } from "@/components/tabbed-panel";
-import { Plus, Pencil, Handshake } from "lucide-react";
+import { Plus, Handshake } from "lucide-react";
 import { StripComposer } from "@/components/strip-composer";
 import {
   type ComposerTarget,
@@ -359,15 +359,7 @@ export default async function AccountPage({
             seriesId: strip.seriesId ?? null,
             imageUrl: urlFor(strip.image).width(600).url(),
           }}
-          trigger={
-            <button
-              type="button"
-              aria-label={`${s.accountEditLabel} — ${strip.title}`}
-              className="focus-visible:ring-ring inline-flex bg-black/70 p-1.5 text-white transition-colors hover:text-white/70 focus-visible:ring-2 focus-visible:-outline-offset-2 focus-visible:outline-none"
-            >
-              <Pencil aria-hidden="true" className="size-3.5" />
-            </button>
-          }
+          editTriggerLabel={`${s.accountEditLabel} — ${strip.title}`}
         />
       ),
     }));
@@ -656,15 +648,8 @@ export default async function AccountPage({
                 creators={eventFormCreators}
                 conventions={eventConventions}
                 labels={eventFormLabels}
-                trigger={
-                  <Button
-                    variant="inverse"
-                    className="w-full font-black tracking-wide uppercase"
-                  >
-                    <Plus aria-hidden="true" className="size-4" />
-                    {s.accountAddEventLabel}
-                  </Button>
-                }
+                triggerLabel={s.accountAddEventLabel}
+                fullWidthTrigger
               />
             )}
             <EventsManager
@@ -744,15 +729,8 @@ export default async function AccountPage({
                 kinds={UPDATE_KINDS}
                 mentions={mentionOptions}
                 labels={composerLabelsFrom(s)}
-                trigger={
-                  <Button
-                    variant="inverse"
-                    className="w-full font-black tracking-wide uppercase"
-                  >
-                    <Plus aria-hidden="true" className="size-4" />
-                    {s.accountAddUpdateLabel}
-                  </Button>
-                }
+                triggerLabel={s.accountAddUpdateLabel}
+                fullWidthTrigger
               />
             )}
             <UpdateFeed
@@ -794,7 +772,12 @@ export default async function AccountPage({
   const cosignsCount = cosignIds.length;
 
   const bunkerView = (
-    <Section padding="md" maxWidth="3xl">
+    <Section
+      padding="md"
+      maxWidth="3xl"
+      className="view-enter"
+      innerClassName="mx-0"
+    >
       {/* The identity header is the creator's visible header, so the page h1
           stays for a11y (§10) but is hidden for them; a plain reader sees it. */}
       <h1
@@ -894,7 +877,12 @@ export default async function AccountPage({
   );
 
   const networkView = (
-    <Section padding="md">
+    <Section
+      padding="md"
+      maxWidth="3xl"
+      className="view-enter"
+      innerClassName="mx-0"
+    >
       {col3Tabs.length > 0 && <TabbedPanel tabs={col3Tabs} />}
       {isCreator && (
         <div className={col3Tabs.length > 0 ? "mt-10" : ""}>
@@ -909,7 +897,12 @@ export default async function AccountPage({
   );
 
   const savedView = (
-    <Section padding="md">
+    <Section
+      padding="md"
+      maxWidth="3xl"
+      className="view-enter"
+      innerClassName="mx-0"
+    >
       {col2Tabs.length > 0 ? (
         <TabbedPanel tabs={col2Tabs} />
       ) : (
@@ -928,7 +921,12 @@ export default async function AccountPage({
   );
 
   const settingsView = (
-    <Section padding="md" maxWidth="3xl">
+    <Section
+      padding="md"
+      maxWidth="3xl"
+      className="view-enter"
+      innerClassName="mx-0"
+    >
       <div className="space-y-3">
         <SectionHeading as="h2" size="sm">
           {s.accountSettingsHeading}
