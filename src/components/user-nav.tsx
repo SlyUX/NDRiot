@@ -126,7 +126,7 @@ export function UserNav({
       <div className="hidden px-6 md:block">
         <nav
           aria-label="Your dashboard"
-          className="mx-auto flex max-w-[90rem] items-end justify-start gap-1 py-1"
+          className="mx-auto flex max-w-[90rem] items-end justify-center gap-1 py-1"
         >
           {items.map((item) => tab(item, "bar"))}
         </nav>
