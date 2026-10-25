@@ -91,12 +91,12 @@ export function UserNav({
 
   return (
     <>
-      {/* Desktop: boxed, rounded launcher beneath the main nav. px-6 outer /
-          max-w inner aligns with content. */}
+      {/* Desktop: a plain icon-top tab row beneath the main nav (no box/border/
+          extra margin). px-6 outer / max-w inner aligns with content. */}
       <div className="hidden px-6 md:block">
         <nav
           aria-label="Your dashboard"
-          className="border-primary/40 mx-auto my-2.5 flex max-w-[90rem] justify-center gap-2 rounded-full border px-2 py-1 sm:justify-start"
+          className="mx-auto flex max-w-[90rem] justify-center gap-2 py-1 sm:justify-start"
         >
           {items.map((item) => tab(item, "bar"))}
         </nav>

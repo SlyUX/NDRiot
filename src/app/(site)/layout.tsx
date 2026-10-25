@@ -3,7 +3,6 @@ import { Rss } from 'lucide-react'
 
 import { Logo } from '@/components/logo'
 import { MainNav } from '@/components/main-nav'
-import { NotificationBell } from '@/components/notification-bell'
 import { SiteHeader } from '@/components/site-header'
 import { SocialIcon } from '@/components/social-icon'
 import { UserNav } from '@/components/user-nav'
@@ -18,7 +17,6 @@ import {
 } from '@/lib/queries'
 import { creatorsOwnedBy } from '@/sanity/ownership-client'
 import { urlFor } from '@/sanity/image'
-import { notificationCount } from '@/lib/notifications'
 import { getSiteSettings } from '@/lib/site-settings'
 import { RESOURCE_CATEGORIES } from '@/lib/taxonomy'
 
@@ -68,9 +66,6 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       }
     }
   }
-  // The nav notification count — new activity from who/what the reader follows
-  // (§3: explicit follows only). Signed-out readers have no notifications.
-  const notifCount = email ? await notificationCount(email) : 0
   const s = settings.sections
 
   return (
@@ -85,9 +80,9 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
             every width. Sticky behavior lives in SiteHeader — sticky everywhere
             except /me, where the section nav sticks. */}
         <nav className="mx-auto flex max-w-[90rem] items-center justify-between gap-3 py-4">
-          {/* Brand lockup: the logo, and — when signed in — the account avatar
-              right beside it, sized to the logo's height so the "you're logged
-              in" signal reads as part of the masthead and links to /me. */}
+          {/* Brand lockup: the logo, plus Login | Join when signed out. Signed-in
+              account access now lives in the user nav (the Bunker tab's avatar),
+              so the avatar + bell were removed from the masthead. */}
           <div className="flex items-center gap-3">
             <Link
               href="/"
@@ -98,25 +93,8 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
                   would make a screen reader announce the brand twice. */}
               <Logo size="nav" alt="" priority />
             </Link>
-            {avatar && (
-              <Link
-                href="/me"
-                aria-label={s.accountTitle}
-                className="focus-visible:ring-ring block focus-visible:ring-2 focus-visible:outline-none"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={avatar}
-                  alt=""
-                  referrerPolicy="no-referrer"
-                  className="border-primary/50 size-8 border object-cover sm:size-9"
-                />
-              </Link>
-            )}
-            {/* Notification bell sits to the right of the avatar, signed in only. */}
-            {email && <NotificationBell count={notifCount} label={s.notificationsNavLabel} />}
             {/* Account, signed out only: Login (starts Google sign-in) | Join. */}
-            {!avatar && (
+            {!email && (
               <div className="text-foreground/80 flex items-center gap-2 text-sm font-bold tracking-wide uppercase">
                 <form
                   action={async () => {
