@@ -64,11 +64,13 @@ export function UserNav({ items }: { items: UserNavItem[] }) {
         </nav>
       </div>
 
-      {/* Phones: fixed bottom island (square — the punk read, §9), detached from
-          the edges so it floats, like the dashboard's. */}
+      {/* Phones: fixed bottom island. Fully rounded (rounded-full) — the one
+          sanctioned exception to the square §9 standard, so the bar doesn't
+          collide with rounded device corners (esp. iOS) that cut into a square
+          island. px-2 keeps the end tabs clear of the pill's caps. */}
       <nav
         aria-label="Your dashboard"
-        className="border-primary/40 bg-background fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 border shadow-[0_2px_20px_rgba(0,0,0,0.6)] md:hidden"
+        className="border-primary/40 bg-background fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 rounded-full border px-2 shadow-[0_2px_20px_rgba(0,0,0,0.6)] md:hidden"
       >
         {items.map((item) => {
           const Icon = ICONS[item.id] ?? LayoutDashboard;

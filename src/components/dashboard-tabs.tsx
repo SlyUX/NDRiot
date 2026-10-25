@@ -120,12 +120,13 @@ export function DashboardTabs({
         ))}
       </div>
 
-      {/* Phones: fixed bottom island (square — the punk read, §9). Detached from
-          the edges (inset-x-3 / bottom-3) so it reads as a floating island. */}
+      {/* Phones: fixed bottom island. Fully rounded (rounded-full) — the one
+          sanctioned exception to the square §9 standard, so it clears rounded
+          device corners (esp. iOS). px-2 keeps the end tabs off the pill caps. */}
       <div
         role="tablist"
         aria-label="Dashboard"
-        className="border-primary/40 bg-background fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 border shadow-[0_2px_20px_rgba(0,0,0,0.6)] md:hidden"
+        className="border-primary/40 bg-background fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 rounded-full border px-2 shadow-[0_2px_20px_rgba(0,0,0,0.6)] md:hidden"
       >
         {panels.map((p) => {
           const Icon = ICONS[p.id] ?? LayoutDashboard;
