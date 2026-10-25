@@ -227,17 +227,21 @@ export default async function AccountPage({
   );
 
   const isCreator = ownedCreators.length > 0;
-  // Hide the ND Noise opt-in from anyone already subscribed (MailerLite live).
-  const newsletterSubscribed = await isSubscribedToNewsletter(email);
-  // The creator's Cosigns — the creators they mutually follow (each follows the
-  // other), derived from the save store, resolved to cards for the Cosigns tab.
+  // Only the Settings view shows the opt-in, so only it pays the (external,
+  // blocking) MailerLite call. Elsewhere it's hidden anyway.
+  const newsletterSubscribed =
+    view === "settings" ? await isSubscribedToNewsletter(email) : true;
+  // Cosigns — creators you mutually follow. The COUNT (cosignIds) feeds the
+  // Bunker stat row; the resolved cards are only needed in the Network view.
   const cosignIds = isCreator ? await mutualCosignIds(ownedCreatorIds[0]) : [];
-  const cosigns = cosignIds.length
-    ? await safeFetch<CreatorSummary[]>(SAVED_CREATORS_QUERY, { ids: cosignIds }, [])
-    : [];
+  const cosigns =
+    view === "network" && cosignIds.length
+      ? await safeFetch<CreatorSummary[]>(SAVED_CREATORS_QUERY, { ids: cosignIds }, [])
+      : [];
   // The creator's own private follower count (§3: self-knowledge, not a
-  // scoreboard — private, aggregate, never comparative, never public).
-  const followers = isCreator ? await followerCount(ownedCreatorIds) : 0;
+  // scoreboard) — shown only in the Bunker header.
+  const followers =
+    isCreator && view === "bunker" ? await followerCount(ownedCreatorIds) : 0;
 
   // The creators' existing (published) series — the strip composer's dropdown,
   // filtered per creator at render. Drafts a creator just started show up once
@@ -389,7 +393,7 @@ export default async function AccountPage({
   let mentionOptions: MentionOption[] = [];
   let eventConventions: { id: string; name: string }[] = [];
   let ownedAppearances: OwnedAppearance[] = [];
-  if (composerTargets.length > 0) {
+  if (composerTargets.length > 0 && view === "bunker") {
     const [allCreators, allBooks, allConventions, allMedia, appearances] =
       await Promise.all([
         safeFetch<CreatorSummary[]>(CREATORS_QUERY, {}, []),
@@ -787,7 +791,7 @@ export default async function AccountPage({
   }
 
   const followsCount = followIds.length;
-  const cosignsCount = cosigns.length;
+  const cosignsCount = cosignIds.length;
 
   const bunkerView = (
     <Section padding="md" maxWidth="3xl">
