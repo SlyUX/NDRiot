@@ -567,14 +567,24 @@ export const RAG_LATEST_QUERY =
   toc,
   contributors[]{_key,section,role,customName,"creatorName":creator->name,"creatorSlug":creator->slug.current}
 }`);
-// A single issue page.
+// A single issue page. `acceptingSubmissions` is computed server-side from the
+// Studio-controlled window (toggle + optional from/until dates), the same
+// date-window shape as buyLinks' `expired` above — so the page shows the submit
+// form while open and the issue's normal content once closed.
 export const RAG_ISSUE_QUERY =
   defineQuery(`*[_type=="ragIssue" && slug.current==$slug][0]{
   _id,title,issueNumber,publishedAt,description,cover,"pdfUrl":pdfFile.asset->url,
+  "acceptingSubmissions": submissionsOpen == true && (!defined(submissionsFrom) || dateTime(submissionsFrom + "T00:00:00Z") <= dateTime(now())) && (!defined(submissionsUntil) || dateTime(submissionsUntil + "T23:59:59Z") >= dateTime(now())),
   buyLinks[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},
   toc,
   contributors[]{_key,section,role,customName,"creatorName":creator->name,"creatorSlug":creator->slug.current}
 }`);
+
+// Issues currently accepting submissions, OLDEST first (lowest issue number) —
+// [0] is the one the home banner + the 5th nav item link to, and its _id is the
+// "period" key the banner's dismissal is remembered against.
+export const RAG_OPEN_SUBMISSIONS_QUERY =
+  defineQuery(`*[_type=="ragIssue" && defined(slug.current) && submissionsOpen == true && (!defined(submissionsFrom) || dateTime(submissionsFrom + "T00:00:00Z") <= dateTime(now())) && (!defined(submissionsUntil) || dateTime(submissionsUntil + "T23:59:59Z") >= dateTime(now()))]|order(issueNumber asc){_id,title,issueNumber,"slug":slug.current}`);
 
 /**
  * IDs only, for the hero's random pick.

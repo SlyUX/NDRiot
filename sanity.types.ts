@@ -349,6 +349,34 @@ export type NoiseIssue = {
   sentAt?: string;
 };
 
+export type RagSubmission = {
+  _id: string;
+  _type: "ragSubmission";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  status: "new" | "accepted" | "resubmit" | "declined";
+  decisionNote?: string;
+  issueTitle?: string;
+  issueNumber?: number;
+  issueId?: string;
+  issueSlug?: string;
+  creatorName?: string;
+  creatorSlug?: string;
+  creatorId?: string;
+  submitterName?: string;
+  submitterEmail?: string;
+  pitch?: string;
+  pageCount?: number;
+  workSampleImages?: Array<
+    {
+      _key: string;
+    } & ImageWithAlt
+  >;
+  workSampleLink?: string;
+  submittedAt?: string;
+};
+
 export type SanityFileAssetReference = {
   _ref: string;
   _type: "reference";
@@ -410,6 +438,9 @@ export type RagIssue = {
     _key: string;
   }>;
   publishedAt?: string;
+  submissionsOpen?: boolean;
+  submissionsFrom?: string;
+  submissionsUntil?: string;
 };
 
 export type Ally = {
@@ -1677,6 +1708,7 @@ export type AllSanitySchemaTypes =
   | MediaReference
   | Update
   | NoiseIssue
+  | RagSubmission
   | SanityFileAssetReference
   | RagIssue
   | Ally
@@ -3917,7 +3949,7 @@ export type RAG_LATEST_QUERY_RESULT = {
 
 // Source: src/lib/queries.ts
 // Variable: RAG_ISSUE_QUERY
-// Query: *[_type=="ragIssue" && slug.current==$slug][0]{  _id,title,issueNumber,publishedAt,description,cover,"pdfUrl":pdfFile.asset->url,  buyLinks[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},  toc,  contributors[]{_key,section,role,customName,"creatorName":creator->name,"creatorSlug":creator->slug.current}}
+// Query: *[_type=="ragIssue" && slug.current==$slug][0]{  _id,title,issueNumber,publishedAt,description,cover,"pdfUrl":pdfFile.asset->url,  "acceptingSubmissions": submissionsOpen == true && (!defined(submissionsFrom) || dateTime(submissionsFrom + "T00:00:00Z") <= dateTime(now())) && (!defined(submissionsUntil) || dateTime(submissionsUntil + "T23:59:59Z") >= dateTime(now())),  buyLinks[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},  toc,  contributors[]{_key,section,role,customName,"creatorName":creator->name,"creatorSlug":creator->slug.current}}
 export type RAG_ISSUE_QUERY_RESULT = {
   _id: string;
   title: string;
@@ -3926,6 +3958,7 @@ export type RAG_ISSUE_QUERY_RESULT = {
   description: string | null;
   cover: ImageWithAlt;
   pdfUrl: string | null;
+  acceptingSubmissions: boolean | false | null;
   buyLinks: Array<{
     kind: "Back" | "Buy" | "Read free" | "Support";
     label: string | null;
@@ -3966,6 +3999,16 @@ export type RAG_ISSUE_QUERY_RESULT = {
     creatorSlug: string | null;
   }> | null;
 } | null;
+
+// Source: src/lib/queries.ts
+// Variable: RAG_OPEN_SUBMISSIONS_QUERY
+// Query: *[_type=="ragIssue" && defined(slug.current) && submissionsOpen == true && (!defined(submissionsFrom) || dateTime(submissionsFrom + "T00:00:00Z") <= dateTime(now())) && (!defined(submissionsUntil) || dateTime(submissionsUntil + "T23:59:59Z") >= dateTime(now()))]|order(issueNumber asc){_id,title,issueNumber,"slug":slug.current}
+export type RAG_OPEN_SUBMISSIONS_QUERY_RESULT = Array<{
+  _id: string;
+  title: string;
+  issueNumber: number;
+  slug: string;
+}>;
 
 // Source: src/lib/queries.ts
 // Variable: BOOK_IDS_QUERY
@@ -4668,7 +4711,8 @@ declare module "@sanity/client" {
     '*[_type=="creator" && _id in $creatorIds]{\n  _id,name,\n  "appearance": *[_type=="conventionAppearance" && creator._ref==^._id && venue._ref==$conId][0]{status,tableNumber,note},\n  "rating": *[_type=="venueRating" && creator._ref==^._id && target._ref==$conId][0]{benefits,celebrityFocused,tableCost,note}\n}': CON_RATING_CONTEXT_QUERY_RESULT;
     '*[_type=="ragIssue" && defined(slug.current)]|order(issueNumber desc){_id,title,issueNumber,"slug":slug.current,cover,publishedAt}': RAG_ISSUES_QUERY_RESULT;
     '*[_type=="ragIssue" && defined(slug.current)]|order(issueNumber desc)[0]{\n  _id,title,issueNumber,publishedAt,description,cover,"pdfUrl":pdfFile.asset->url,\n  buyLinks[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},\n  toc,\n  contributors[]{_key,section,role,customName,"creatorName":creator->name,"creatorSlug":creator->slug.current}\n}': RAG_LATEST_QUERY_RESULT;
-    '*[_type=="ragIssue" && slug.current==$slug][0]{\n  _id,title,issueNumber,publishedAt,description,cover,"pdfUrl":pdfFile.asset->url,\n  buyLinks[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},\n  toc,\n  contributors[]{_key,section,role,customName,"creatorName":creator->name,"creatorSlug":creator->slug.current}\n}': RAG_ISSUE_QUERY_RESULT;
+    '*[_type=="ragIssue" && slug.current==$slug][0]{\n  _id,title,issueNumber,publishedAt,description,cover,"pdfUrl":pdfFile.asset->url,\n  "acceptingSubmissions": submissionsOpen == true && (!defined(submissionsFrom) || dateTime(submissionsFrom + "T00:00:00Z") <= dateTime(now())) && (!defined(submissionsUntil) || dateTime(submissionsUntil + "T23:59:59Z") >= dateTime(now())),\n  buyLinks[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},\n  toc,\n  contributors[]{_key,section,role,customName,"creatorName":creator->name,"creatorSlug":creator->slug.current}\n}': RAG_ISSUE_QUERY_RESULT;
+    '*[_type=="ragIssue" && defined(slug.current) && submissionsOpen == true && (!defined(submissionsFrom) || dateTime(submissionsFrom + "T00:00:00Z") <= dateTime(now())) && (!defined(submissionsUntil) || dateTime(submissionsUntil + "T23:59:59Z") >= dateTime(now()))]|order(issueNumber asc){_id,title,issueNumber,"slug":slug.current}': RAG_OPEN_SUBMISSIONS_QUERY_RESULT;
     '*[_type=="book" && defined(slug.current)]._id': BOOK_IDS_QUERY_RESULT;
     '*[_type=="book" && _id in $ids]{\n  _id,title,"slug":slug.current,status,genres,format,maturity,cover,shortDescription,\n  "descriptionText": pt::text(description),\n  "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,\n  "creatorName":creator->name,"creatorId":creator._ref\n}': HERO_BOOKS_QUERY_RESULT;
     '{\n  "books": *[_type=="book" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "creators": *[_type=="creator" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "columns": *[_type=="column" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "interviews": *[_type=="interview" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "resources": *[_type=="resource" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "allies": *[_type=="ally" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "strips": *[_type=="strip" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "series": *[_type=="stripSeries" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "ragIssues": *[_type=="ragIssue" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "genres": array::unique(*[_type=="book" && defined(genres)].genres[]),\n  "formats": array::unique(*[_type=="book" && defined(format)].format)\n}': SITEMAP_QUERY_RESULT;

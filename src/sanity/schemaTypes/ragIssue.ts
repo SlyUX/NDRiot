@@ -15,6 +15,15 @@ export default defineType({
   name: 'ragIssue',
   title: 'Rag issue',
   type: 'document',
+  fieldsets: [
+    {
+      name: 'submissions',
+      title: 'Submissions',
+      description:
+        'Open this issue to creator submissions. While open, creators see a submit form on this issue’s page, a home banner, and a nav shortcut; once closed (toggle off or past the close date) those disappear and the issue’s normal content shows.',
+      options: { collapsible: true, collapsed: true },
+    },
+  ],
   fields: [
     defineField({
       name: 'title',
@@ -127,6 +136,29 @@ export default defineType({
       title: 'Published',
       type: 'datetime',
       description: 'The issue date, shown on the page.',
+    }),
+    defineField({
+      name: 'submissionsOpen',
+      title: 'Submissions open',
+      type: 'boolean',
+      fieldset: 'submissions',
+      initialValue: false,
+      description:
+        'Turn on to accept creator submissions for this issue. The dates below (optional) narrow the window; with no dates, it stays open until you turn this off.',
+    }),
+    defineField({
+      name: 'submissionsFrom',
+      title: 'Open from',
+      type: 'date',
+      fieldset: 'submissions',
+      description: 'Optional. Submissions open at the start of this day. Leave blank to open as soon as the toggle is on.',
+    }),
+    defineField({
+      name: 'submissionsUntil',
+      title: 'Close after',
+      type: 'date',
+      fieldset: 'submissions',
+      description: 'Optional. Submissions close at the end of this day. Leave blank to stay open until you turn the toggle off.',
     }),
   ],
   preview: {

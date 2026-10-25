@@ -1,5 +1,7 @@
 import 'server-only'
 
+import type { SanityClient } from 'next-sanity'
+
 import { getWriteClient } from '@/sanity/write-client'
 
 // 8MB is generous for a cover or avatar and bounds resource abuse; the floor
@@ -23,8 +25,16 @@ export type UploadResult = { assetId: string } | { error: string }
  * is a hint a client can bypass, so it is never trusted. Non-fatal by contract:
  * the caller treats an `{ error }` as "skip the image and note it", so one bad
  * upload never sinks an otherwise-good submission.
+ *
+ * `client` defaults to the production write client; pass a different one (e.g.
+ * the private submission client) to store the asset in that dataset instead —
+ * assets live per-dataset, so a doc in `ndriot_auth` needs its images there too.
  */
-export async function uploadImageFile(file: File, filename: string): Promise<UploadResult> {
+export async function uploadImageFile(
+  file: File,
+  filename: string,
+  client: SanityClient = getWriteClient(),
+): Promise<UploadResult> {
   if (!file || typeof file.arrayBuffer !== 'function' || file.size === 0) {
     return { error: 'no file supplied' }
   }
@@ -37,7 +47,7 @@ export async function uploadImageFile(file: File, filename: string): Promise<Upl
   }
 
   try {
-    const asset = await getWriteClient().assets.upload('image', file, { filename })
+    const asset = await client.assets.upload('image', file, { filename })
     return { assetId: asset._id }
   } catch (cause) {
     console.error('[intake] image upload failed', cause)
