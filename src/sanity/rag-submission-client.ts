@@ -33,6 +33,7 @@ export function getSubmissionClient(): SanityClient {
 export interface RagSubmissionDecision {
   _id: string
   status: string
+  /** The reviewer's optional note, typed on the document (liveEdit) before deciding. */
   decisionNote: string | null
   submitterEmail: string | null
   submitterName: string | null
@@ -58,13 +59,7 @@ export async function getSubmissionForDecision(
   }
 }
 
-/** Record the review outcome (and the note that was sent) after the reply email. */
-export async function setSubmissionStatus(
-  id: string,
-  status: string,
-  note?: string,
-): Promise<void> {
-  const patch: Record<string, string> = { status }
-  if (note) patch.decisionNote = note
-  await getSubmissionClient().patch(id).set(patch).commit()
+/** Record the review outcome after the reply email is sent (liveEdit: no draft). */
+export async function setSubmissionStatus(id: string, status: string): Promise<void> {
+  await getSubmissionClient().patch(id).set({ status }).commit()
 }

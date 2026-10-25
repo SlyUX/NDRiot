@@ -5,13 +5,14 @@ import type { DocumentActionComponent } from "sanity";
 
 /**
  * Studio document actions for Rag submissions (Submissions workspace): Accept /
- * Resubmit / Decline. Each opens a small dialog with an optional personal note,
- * then posts to the admin-gated `/api/admin/rag-submission/decide` route, which
- * sends the matching templated reply (with the note) and records the status.
+ * Resubmit / Decline. The reviewer types an optional line in the submission's
+ * "Decision note" field (liveEdit, so it saves immediately); each action reads
+ * that note off the document, shows it for confirmation, then posts to the
+ * admin-gated `/api/admin/rag-submission/decide` route, which sends the matching
+ * templated reply and records the status.
  *
- * Same approach as the creator "resend" action — plain elements (not @sanity/ui,
- * which isn't resolvable here), same-origin fetch so the admin login cookie rides
- * along.
+ * Plain elements (not @sanity/ui, which isn't resolvable here); same-origin
+ * fetch so the admin login cookie rides along.
  */
 
 type Decision = "accepted" | "resubmit" | "declined";
@@ -24,16 +25,15 @@ const wrap: React.CSSProperties = {
   maxWidth: 480,
 };
 const para: React.CSSProperties = { margin: 0, fontSize: 13, lineHeight: 1.5 };
-const area: React.CSSProperties = {
-  padding: "9px 11px",
+const muted: React.CSSProperties = { ...para, color: "#6b6b6b" };
+const notePreview: React.CSSProperties = {
+  margin: 0,
+  padding: "10px 12px",
   fontSize: 13,
-  border: "1px solid #b0b0b0",
+  lineHeight: 1.5,
+  whiteSpace: "pre-wrap",
+  background: "#f3f3f3",
   borderRadius: 3,
-  width: "100%",
-  boxSizing: "border-box",
-  minHeight: 80,
-  resize: "vertical",
-  fontFamily: "inherit",
 };
 const row: React.CSSProperties = { display: "flex", alignItems: "center", gap: 12 };
 const btn: React.CSSProperties = {
@@ -52,9 +52,11 @@ function makeAction(
   blurb: string,
 ): DocumentActionComponent {
   const Action: DocumentActionComponent = (props) => {
-    const { id } = props;
+    const { id, published, draft } = props;
+    const doc = (published ?? draft) as Record<string, unknown> | null;
+    const note = String((doc?.decisionNote as string | undefined) ?? "").trim();
+
     const [open, setOpen] = useState(false);
-    const [note, setNote] = useState("");
     const [sending, setSending] = useState(false);
     const [result, setResult] = useState<{ ok: boolean; msg: string } | null>(null);
 
@@ -65,7 +67,7 @@ function makeAction(
         const res = await fetch("/api/admin/rag-submission/decide", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id, decision, note: note.trim() || undefined }),
+          body: JSON.stringify({ id, decision }),
         });
         const data = (await res.json().catch(() => ({}))) as {
           ok?: boolean;
@@ -90,7 +92,6 @@ function makeAction(
     return {
       label,
       onHandle: () => {
-        setNote("");
         setResult(null);
         setOpen(true);
       },
@@ -101,12 +102,17 @@ function makeAction(
         content: (
           <div style={wrap}>
             <p style={para}>{blurb}</p>
-            <textarea
-              placeholder="Optional note added to the email…"
-              value={note}
-              onChange={(e) => setNote(e.currentTarget.value)}
-              style={area}
-            />
+            {note ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <p style={{ ...muted, fontWeight: 600 }}>Your note (included in the email):</p>
+                <p style={notePreview}>{note}</p>
+              </div>
+            ) : (
+              <p style={muted}>
+                No decision note — the reply sends without a personal line. To add one,
+                close this, type in the “Decision note” field, then try again.
+              </p>
+            )}
             <div style={row}>
               <button type="button" onClick={send} disabled={sending} style={btn}>
                 {sending ? "Sending…" : "Send reply"}
@@ -128,15 +134,15 @@ function makeAction(
 export const AcceptRagAction = makeAction(
   "accepted",
   "Accept — send congratulations",
-  "Emails the submitter the “congratulations” template for this issue. Add an optional note below; it’s included in the email.",
+  "Emails the submitter the “congratulations” template for this issue.",
 );
 export const ResubmitRagAction = makeAction(
   "resubmit",
   "Resubmit — ask for another take",
-  "Emails the submitter the “please submit again” template. Add an optional note below; it’s included in the email.",
+  "Emails the submitter the “please submit again” template.",
 );
 export const DeclineRagAction = makeAction(
   "declined",
   "Decline — not this time",
-  "Emails the submitter the “not this time” template. Add an optional note below; it’s included in the email.",
+  "Emails the submitter the “not this time” template.",
 );

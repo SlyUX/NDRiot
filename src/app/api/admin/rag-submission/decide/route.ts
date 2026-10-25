@@ -45,7 +45,6 @@ export async function POST(request: Request) {
   const b = (body ?? {}) as Record<string, unknown>;
   const id = String(b.id ?? "").replace(/^drafts\./, "");
   const decision = String(b.decision ?? "") as Decision;
-  const note = String(b.note ?? "").trim();
 
   if (!id) {
     return Response.json({ ok: false, error: "Missing submission id." }, { status: 400 });
@@ -69,6 +68,8 @@ export async function POST(request: Request) {
   const template = DECISIONS[decision];
   const issue = ragIssueLabel(submission.issueNumber, submission.issueTitle);
   const name = submission.submitterName || submission.creatorName || "there";
+  // The optional personal line, typed on the document (liveEdit) before deciding.
+  const note = (submission.decisionNote ?? "").trim();
 
   const sent = await sendEmail({
     to: submission.submitterEmail,
@@ -83,9 +84,9 @@ export async function POST(request: Request) {
     );
   }
 
-  // Record the outcome + the note that was sent.
+  // Record the outcome (the note is already on the document via liveEdit).
   try {
-    await setSubmissionStatus(id, decision, note || undefined);
+    await setSubmissionStatus(id, decision);
   } catch (cause) {
     console.error("[rag-decision] status update failed", cause);
   }

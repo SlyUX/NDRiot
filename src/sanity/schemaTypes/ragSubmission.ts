@@ -18,8 +18,10 @@ export default defineType({
   name: 'ragSubmission',
   title: 'Rag submission',
   type: 'document',
-  // Capture-time identity is recorded by the form, not edited by reviewers.
-  readOnly: false,
+  // A review record, not draft→publish content: edits (the decision note, status)
+  // save immediately, so there's no draft/publish limbo and the decision actions
+  // read the live note straight off the document.
+  liveEdit: true,
   fields: [
     defineField({
       name: 'status',
@@ -40,12 +42,11 @@ export default defineType({
     }),
     defineField({
       name: 'decisionNote',
-      title: 'Decision note',
+      title: 'Decision note (optional)',
       type: 'text',
       rows: 3,
-      readOnly: true,
       description:
-        'The optional personal line sent with the reply. You type it in the Accept / Resubmit / Decline dialog; it’s recorded here after sending.',
+        'An optional personal line included in the reply email. Type it here before you click Accept / Resubmit / Decline — it’s sent in the {note} slot of the template.',
     }),
     defineField({
       name: 'issueTitle',
