@@ -266,6 +266,58 @@ export default defineType({
           rows: 8,
         }),
         defineField({
+          name: "ragThanksSubject",
+          title: "Rag submission received — subject",
+          type: "string",
+          description: "Auto-reply when a creator submits. Tokens: {name}, {issue}.",
+        }),
+        defineField({
+          name: "ragThanksBody",
+          title: "Rag submission received — body",
+          type: "text",
+          rows: 8,
+          description: "Tokens: {name} (their name), {issue} (the issue title).",
+        }),
+        defineField({
+          name: "ragAcceptedSubject",
+          title: "Rag — accepted — subject",
+          type: "string",
+          description: "Sent by the Accept action. Tokens: {name}, {issue}.",
+        }),
+        defineField({
+          name: "ragAcceptedBody",
+          title: "Rag — accepted — body",
+          type: "text",
+          rows: 8,
+          description: "Tokens: {name}, {issue}, {note} (your optional decision note).",
+        }),
+        defineField({
+          name: "ragResubmitSubject",
+          title: "Rag — please submit again — subject",
+          type: "string",
+          description: "Sent by the Resubmit action. Tokens: {name}, {issue}.",
+        }),
+        defineField({
+          name: "ragResubmitBody",
+          title: "Rag — please submit again — body",
+          type: "text",
+          rows: 8,
+          description: "Tokens: {name}, {issue}, {note}.",
+        }),
+        defineField({
+          name: "ragDeclinedSubject",
+          title: "Rag — not this time — subject",
+          type: "string",
+          description: "Sent by the Decline action. Tokens: {name}, {issue}.",
+        }),
+        defineField({
+          name: "ragDeclinedBody",
+          title: "Rag — not this time — body",
+          type: "text",
+          rows: 8,
+          description: "Tokens: {name}, {issue}, {note}.",
+        }),
+        defineField({
           name: "bookSubmitSubject",
           title: "Comic submitted — subject",
           type: "string",
@@ -1174,6 +1226,98 @@ export default defineType({
           type: "string",
           description:
             'Over the row of other issues on an issue page — e.g. "Other issues".',
+        }),
+        defineField({
+          name: "ragSubmitHeading",
+          title: "Rag submit — heading",
+          type: "string",
+          description:
+            'Heading over the submission form on an open issue’s page — e.g. "Submit to this issue".',
+        }),
+        defineField({
+          name: "ragSubmitIntro",
+          title: "Rag submit — intro",
+          type: "text",
+          rows: 3,
+          description: "A line or two under the heading explaining who can submit and what to send.",
+        }),
+        defineField({
+          name: "ragSubmitIssueLabel",
+          title: "Rag submit — issue field label",
+          type: "string",
+          description: 'e.g. "Which issue".',
+        }),
+        defineField({
+          name: "ragSubmitPitchLabel",
+          title: "Rag submit — pitch field label",
+          type: "string",
+          description: 'e.g. "What do you have in mind?".',
+        }),
+        defineField({
+          name: "ragSubmitPitchHelp",
+          title: "Rag submit — pitch help text",
+          type: "string",
+          description: 'e.g. "Up to 750 words.".',
+        }),
+        defineField({
+          name: "ragSubmitPagesLabel",
+          title: "Rag submit — page-count field label",
+          type: "string",
+          description: 'e.g. "How many pages?" (1–12).',
+        }),
+        defineField({
+          name: "ragSubmitSamplesLabel",
+          title: "Rag submit — work-samples field label",
+          type: "string",
+          description: 'e.g. "Examples of your work".',
+        }),
+        defineField({
+          name: "ragSubmitSamplesHelp",
+          title: "Rag submit — work-samples help text",
+          type: "text",
+          rows: 2,
+          description:
+            "Explains they can upload images or paste a link, and that it’s optional if they already have comics/strips with previews on the site.",
+        }),
+        defineField({
+          name: "ragSubmitLinkLabel",
+          title: "Rag submit — work-link field label",
+          type: "string",
+          description: 'e.g. "Or a link (Google Drive, Dropbox, portfolio…)".',
+        }),
+        defineField({
+          name: "ragSubmitButton",
+          title: "Rag submit — submit button",
+          type: "string",
+          description: 'e.g. "Send submission".',
+        }),
+        defineField({
+          name: "ragSubmitSuccess",
+          title: "Rag submit — success message",
+          type: "text",
+          rows: 2,
+          description: "Shown in place of the form after a successful submission.",
+        }),
+        defineField({
+          name: "ragSubmitNote",
+          title: "Rag submit — note for non-creators",
+          type: "text",
+          rows: 2,
+          description:
+            "Shown on an open issue’s page to readers who aren’t signed-in ND Riot creators (submissions are creator-only).",
+        }),
+        defineField({
+          name: "ragBannerText",
+          title: "Rag submit — home banner text",
+          type: "string",
+          description:
+            'The creator-only home banner when submissions are open. Use {issue} for the issue title — e.g. "Submissions open for {issue}!".',
+        }),
+        defineField({
+          name: "navSubmitSublabel",
+          title: "Rag submit — nav item sublabel",
+          type: "string",
+          description: 'The small word under the issue title in the user nav — e.g. "Submit".',
         }),
         defineField({
           name: "genreBooksHeading",

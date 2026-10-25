@@ -480,6 +480,14 @@ export type NotificationsSettings = {
   creatorSubmitBody: string;
   creatorPublishedSubject: string;
   creatorPublishedBody: string;
+  ragThanksSubject: string;
+  ragThanksBody: string;
+  ragAcceptedSubject: string;
+  ragAcceptedBody: string;
+  ragResubmitSubject: string;
+  ragResubmitBody: string;
+  ragDeclinedSubject: string;
+  ragDeclinedBody: string;
   bookSubmitSubject: string;
   bookSubmitBody: string;
   stripSubmitSubject: string;
@@ -624,6 +632,20 @@ export interface SiteSettings {
     ragTocHeading: string;
     ragContributorsHeading: string;
     ragOtherHeading: string;
+    ragSubmitHeading: string;
+    ragSubmitIntro: string;
+    ragSubmitIssueLabel: string;
+    ragSubmitPitchLabel: string;
+    ragSubmitPitchHelp: string;
+    ragSubmitPagesLabel: string;
+    ragSubmitSamplesLabel: string;
+    ragSubmitSamplesHelp: string;
+    ragSubmitLinkLabel: string;
+    ragSubmitButton: string;
+    ragSubmitSuccess: string;
+    ragSubmitNote: string;
+    ragBannerText: string;
+    navSubmitSublabel: string;
     genreBooksHeading: string;
     genreCreatorsHeading: string;
     everythingElseHeading: string;
@@ -896,6 +918,41 @@ const DEFAULTS: SiteSettings = {
       "",
       "You can now add your comics: {booksLink}",
       "",
+      "— ND Riot",
+    ].join("\n"),
+    ragThanksSubject: "We got your ND Riot Rag submission",
+    ragThanksBody: [
+      "Hi {name},",
+      "",
+      "Thanks for submitting to {issue}. We’ve got it, and we’ll be in touch once we’ve had a look.",
+      "",
+      "— ND Riot",
+    ].join("\n"),
+    ragAcceptedSubject: "Your ND Riot Rag submission — congratulations!",
+    ragAcceptedBody: [
+      "Hi {name},",
+      "",
+      "Great news — we’d love to include your work in {issue}. We’ll follow up with the details and next steps.",
+      "",
+      "{note}",
+      "— ND Riot",
+    ].join("\n"),
+    ragResubmitSubject: "Your ND Riot Rag submission — one more pass",
+    ragResubmitBody: [
+      "Hi {name},",
+      "",
+      "Thanks for submitting to {issue}. We’d like to see another take before we decide — please feel free to submit again.",
+      "",
+      "{note}",
+      "— ND Riot",
+    ].join("\n"),
+    ragDeclinedSubject: "Your ND Riot Rag submission",
+    ragDeclinedBody: [
+      "Hi {name},",
+      "",
+      "Thanks for submitting to {issue}. It’s not the right fit for this issue, but we’d genuinely welcome your work on a future one.",
+      "",
+      "{note}",
       "— ND Riot",
     ].join("\n"),
     bookSubmitSubject: "We received your comic submission",
@@ -1480,6 +1537,24 @@ const DEFAULTS: SiteSettings = {
     ragTocHeading: "In this issue",
     ragContributorsHeading: "Contributors",
     ragOtherHeading: "Other issues",
+    ragSubmitHeading: "Submit to this issue",
+    ragSubmitIntro:
+      "ND Riot creators can pitch work for this issue while submissions are open. Tell us what you have in mind and show us a little of your work.",
+    ragSubmitIssueLabel: "Which issue",
+    ragSubmitPitchLabel: "What do you have in mind?",
+    ragSubmitPitchHelp: "Up to 750 words.",
+    ragSubmitPagesLabel: "How many pages?",
+    ragSubmitSamplesLabel: "Examples of your work",
+    ragSubmitSamplesHelp:
+      "Upload a few images or paste a link (Google Drive, Dropbox, a portfolio). Optional if you already have comics or strips with previews on ND Riot.",
+    ragSubmitLinkLabel: "Or a link to your work",
+    ragSubmitButton: "Send submission",
+    ragSubmitSuccess:
+      "Thanks — we’ve got your submission and we’ll be in touch. Watch your inbox.",
+    ragSubmitNote:
+      "Submissions are open to ND Riot creators. Sign in with your creator account to submit.",
+    ragBannerText: "Submissions are open for {issue}!",
+    navSubmitSublabel: "Submit",
     genreBooksHeading: "Comics",
     genreCreatorsHeading: "Comic Creators working in this genre",
     everythingElseHeading: "While you are here",

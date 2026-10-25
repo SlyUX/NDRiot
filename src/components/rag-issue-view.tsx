@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Download } from 'lucide-react'
@@ -24,6 +25,7 @@ export function RagIssueView({
   issue,
   labels,
   headingAs = 'h2',
+  submission,
 }: {
   issue: RagIssueDetail
   labels: {
@@ -34,6 +36,12 @@ export function RagIssueView({
     contributorsHeading: string
   }
   headingAs?: 'h1' | 'h2'
+  /**
+   * When submissions are open, the issue isn't published yet — there's no PDF,
+   * buy links, ToC, or contributors. In that case this slot (the submission
+   * form) takes the right column's place, and contributors are hidden.
+   */
+  submission?: ReactNode
 }) {
   const date = formatDate(issue.publishedAt)
   // Sub-sections sit one level below the issue title, wherever it lands.
@@ -69,6 +77,8 @@ export function RagIssueView({
         </div>
 
         <div className="min-w-0 flex-1 space-y-4">
+          {submission ?? (
+          <>
           {issue.pdfUrl && (
             <div className="flex flex-wrap gap-3">
               {/* Read in an on-demand pdf.js reader (loads only when opened). */}
@@ -94,12 +104,15 @@ export function RagIssueView({
               <PortableTextBody value={issue.toc} />
             </div>
           ) : null}
+          </>
+          )}
         </div>
       </div>
 
       {/* Contributors masthead — full width beneath. Each is a creator (linked to
-          their profile) or a typed name, with their section and role. */}
-      {issue.contributors?.length ? (
+          their profile) or a typed name, with their section and role. Hidden
+          while submissions are open (the issue isn't assembled yet). */}
+      {!submission && issue.contributors?.length ? (
         <section>
           <SectionHeading as={subAs} size="sm">
             {labels.contributorsHeading}

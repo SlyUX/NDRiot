@@ -67,6 +67,13 @@ export function toPortableText(text: string): PortableTextBlock[] {
 export const isYes = (value: string | null | undefined): boolean =>
   /^yes\b/i.test((value ?? '').trim())
 
+/** Word count (whitespace-separated). The codebase otherwise caps by characters;
+ *  the Rag pitch is specified as a word limit, so count words here. */
+export function countWords(value: string | null | undefined): number {
+  const trimmed = (value ?? '').trim()
+  return trimmed ? trimmed.split(/\s+/).length : 0
+}
+
 /**
  * Normalise and match an answer against a canonical taxonomy list.
  *

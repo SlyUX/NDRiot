@@ -585,6 +585,12 @@ export const RAG_ISSUE_QUERY =
 // "period" key the banner's dismissal is remembered against.
 export const RAG_OPEN_SUBMISSIONS_QUERY =
   defineQuery(`*[_type=="ragIssue" && defined(slug.current) && submissionsOpen == true && (!defined(submissionsFrom) || dateTime(submissionsFrom + "T00:00:00Z") <= dateTime(now())) && (!defined(submissionsUntil) || dateTime(submissionsUntil + "T23:59:59Z") >= dateTime(now()))]|order(issueNumber asc){_id,title,issueNumber,"slug":slug.current}`);
+// Does this creator already have comics/strips with a preview image on the site?
+// If so, the submission form's work samples are optional (we can already see
+// their work); if not, a sample (upload or link) is required.
+export const RAG_CREATOR_PREVIEW_COUNT_QUERY = defineQuery(
+  `count(*[_type in ["book","strip"] && creator._ref==$id && (defined(cover) || defined(image))])`,
+);
 
 /**
  * IDs only, for the hero's random pick.
