@@ -25,15 +25,17 @@ const wrap: React.CSSProperties = {
   maxWidth: 480,
 };
 const para: React.CSSProperties = { margin: 0, fontSize: 13, lineHeight: 1.5 };
-const muted: React.CSSProperties = { ...para, color: "#6b6b6b" };
+const muted: React.CSSProperties = { ...para, opacity: 0.7 };
+// No fixed background/color — the Studio runs light or dark, so inherit the
+// theme's text color and mark the quote with a border instead (a light-grey box
+// made the inherited light text nearly invisible in dark mode).
 const notePreview: React.CSSProperties = {
   margin: 0,
-  padding: "10px 12px",
+  paddingLeft: 12,
   fontSize: 13,
   lineHeight: 1.5,
   whiteSpace: "pre-wrap",
-  background: "#f3f3f3",
-  borderRadius: 3,
+  borderLeft: "3px solid #8a8a8a",
 };
 const row: React.CSSProperties = { display: "flex", alignItems: "center", gap: 12 };
 const btn: React.CSSProperties = {

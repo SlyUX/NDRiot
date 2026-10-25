@@ -29,9 +29,23 @@ type Decision = keyof typeof DECISIONS;
 
 export async function POST(request: Request) {
   const session = await auth();
-  if (!isAdminEmail(session?.user?.email)) {
+  const adminEmail = session?.user?.email;
+  if (!adminEmail) {
     return Response.json(
-      { ok: false, error: "Admin sign-in required." },
+      {
+        ok: false,
+        error:
+          "Not signed in to the ND Riot app. The Studio login is separate — open ndriot.com, sign in with your admin Google account, then try again.",
+      },
+      { status: 403 },
+    );
+  }
+  if (!isAdminEmail(adminEmail)) {
+    return Response.json(
+      {
+        ok: false,
+        error: `Signed in as ${adminEmail}, which isn’t in ADMIN_EMAILS. Add it (and restart the server, since env is read at startup) if it should be an admin.`,
+      },
       { status: 403 },
     );
   }
