@@ -40,10 +40,12 @@ export default defineType({
     }),
     defineField({
       name: 'decisionNote',
-      title: 'Decision note (optional)',
+      title: 'Decision note',
       type: 'text',
       rows: 3,
-      description: 'An optional personal line added to the reply email when you Accept / Resubmit / Decline.',
+      readOnly: true,
+      description:
+        'The optional personal line sent with the reply. You type it in the Accept / Resubmit / Decline dialog; it’s recorded here after sending.',
     }),
     defineField({
       name: 'issueTitle',

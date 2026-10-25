@@ -11,6 +11,9 @@ import type { StructureResolver } from 'sanity/structure'
  * the global create menu.
  */
 const SINGLETONS = ['siteSettings']
+// Lives in the private `ndriot_auth` dataset and is reviewed in the Submissions
+// workspace — never shown or created here in the production workspace.
+const HIDDEN = [...SINGLETONS, 'ragSubmission']
 
 export const structure: StructureResolver = (S) =>
   S.list()
@@ -26,6 +29,6 @@ export const structure: StructureResolver = (S) =>
       S.divider(),
       ...S.documentTypeListItems().filter((item) => {
         const id = item.getId()
-        return id ? !SINGLETONS.includes(id) : true
+        return id ? !HIDDEN.includes(id) : true
       }),
     ])

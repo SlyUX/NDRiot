@@ -58,7 +58,13 @@ export async function getSubmissionForDecision(
   }
 }
 
-/** Record the review outcome after the reply email is sent. */
-export async function setSubmissionStatus(id: string, status: string): Promise<void> {
-  await getSubmissionClient().patch(id).set({ status }).commit()
+/** Record the review outcome (and the note that was sent) after the reply email. */
+export async function setSubmissionStatus(
+  id: string,
+  status: string,
+  note?: string,
+): Promise<void> {
+  const patch: Record<string, string> = { status }
+  if (note) patch.decisionNote = note
+  await getSubmissionClient().patch(id).set(patch).commit()
 }
