@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
-  Activity,
   Bookmark,
   LayoutDashboard,
   SlidersHorizontal,
@@ -14,8 +13,6 @@ import {
 import { cn } from "@/lib/utils";
 
 const ICONS: Record<string, LucideIcon> = {
-  bunker: LayoutDashboard,
-  activity: Activity,
   network: Users,
   saved: Bookmark,
   settings: SlidersHorizontal,
@@ -27,66 +24,91 @@ export interface UserNavItem {
 }
 
 /**
- * The persistent "user nav" for signed-in readers — the dashboard's section nav
- * as LINKS into /me?view=<id>, shown on every page so ND Riot reads as a hybrid
- * of mobile app + informational site. Desktop: a boxed bar tucked beneath the
- * main (website) nav, static (the main nav is the sticky one here). Mobile: a
- * fixed bottom island, like the dashboard.
+ * The persistent "user nav" for signed-in readers — links into the dashboard
+ * (/me?view=<id>), on every page: a hybrid of mobile app + informational site.
+ * Desktop: a boxed, rounded bar tucked beneath the main nav. Mobile: a fixed
+ * rounded island. Icon-on-top / text-beneath; the Bunker tab's icon is the
+ * reader's avatar. Round corners + avatar are the app layer's visual voice (§9).
  *
- * Hidden on /me itself — there the dashboard's own in-place tabs (DashboardTabs)
- * are the nav, so this would double it up.
+ * Active-aware: on /me the current ?view is highlighted in pink; elsewhere
+ * nothing is active (you're on the website, not inside a section).
  */
-export function UserNav({ items }: { items: UserNavItem[] }) {
+export function UserNav({
+  items,
+  avatarUrl,
+}: {
+  items: UserNavItem[];
+  avatarUrl?: string | null;
+}) {
   const pathname = usePathname();
-  if (pathname === "/me") return null;
+  const searchParams = useSearchParams();
+  const onMe = pathname === "/me";
+  const currentView = onMe ? (searchParams.get("view") ?? "bunker") : null;
 
-  const linkClass =
-    "text-muted-foreground hover:text-foreground focus-visible:ring-ring flex shrink-0 items-center gap-1.5 px-3 py-3 text-xs font-bold tracking-widest uppercase transition-colors focus-visible:ring-2 focus-visible:-outline-offset-2 focus-visible:outline-none";
+  const hrefFor = (id: string) => (id === "bunker" ? "/me" : `/me?view=${id}`);
+
+  const icon = (id: string, active: boolean) => {
+    if (id === "bunker" && avatarUrl) {
+      return (
+        <span
+          className={cn(
+            "relative block size-6 shrink-0 overflow-hidden rounded-full",
+            active && "ring-primary ring-2",
+          )}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={avatarUrl}
+            alt=""
+            referrerPolicy="no-referrer"
+            className="size-full object-cover"
+          />
+        </span>
+      );
+    }
+    const Icon = ICONS[id] ?? LayoutDashboard;
+    return <Icon aria-hidden="true" className="size-5" />;
+  };
+
+  const tab = (item: UserNavItem, variant: "bar" | "island") => {
+    const active = currentView === item.id;
+    return (
+      <Link
+        key={item.id}
+        href={hrefFor(item.id)}
+        aria-current={active ? "page" : undefined}
+        className={cn(
+          "focus-visible:ring-ring flex flex-col items-center gap-1 text-[10px] font-bold tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:-outline-offset-2 focus-visible:outline-none",
+          variant === "bar" ? "flex-1 px-3 py-2.5" : "py-2.5 leading-none",
+          active ? "text-primary" : "text-muted-foreground hover:text-foreground",
+        )}
+      >
+        {icon(item.id, active)}
+        {item.label}
+      </Link>
+    );
+  };
 
   return (
     <>
-      {/* Desktop: boxed launcher beneath the main nav. px-6 on the outer /
-          max-w on the inner so it aligns with the page content. */}
+      {/* Desktop: boxed, rounded launcher beneath the main nav. px-6 outer /
+          max-w inner aligns with content. */}
       <div className="hidden px-6 md:block">
         <nav
           aria-label="Your dashboard"
-          className="border-primary/40 mx-auto my-2.5 flex max-w-[90rem] gap-1 overflow-x-auto border"
+          className="border-primary/40 mx-auto my-2.5 flex max-w-[90rem] justify-center gap-2 rounded-full border px-2 py-1 sm:justify-start"
         >
-          {items.map((item) => {
-            const Icon = ICONS[item.id] ?? LayoutDashboard;
-            return (
-              <Link key={item.id} href={`/me?view=${item.id}`} className={linkClass}>
-                <Icon aria-hidden="true" className="size-4" />
-                {item.label}
-              </Link>
-            );
-          })}
+          {items.map((item) => tab(item, "bar"))}
         </nav>
       </div>
 
-      {/* Phones: fixed bottom island. Fully rounded (rounded-full) — the one
-          sanctioned exception to the square §9 standard, so the bar doesn't
-          collide with rounded device corners (esp. iOS) that cut into a square
-          island. px-2 keeps the end tabs clear of the pill's caps. */}
+      {/* Phones: fixed rounded island, detached from the edges so it floats and
+          clears rounded device corners (esp. iOS). */}
       <nav
         aria-label="Your dashboard"
-        className="border-primary/40 bg-background fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 rounded-full border px-2 shadow-[0_2px_20px_rgba(0,0,0,0.6)] md:hidden"
+        className="border-primary/40 bg-background fixed inset-x-3 bottom-3 z-40 grid grid-cols-4 rounded-full border px-2 shadow-[0_2px_20px_rgba(0,0,0,0.6)] md:hidden"
       >
-        {items.map((item) => {
-          const Icon = ICONS[item.id] ?? LayoutDashboard;
-          return (
-            <Link
-              key={item.id}
-              href={`/me?view=${item.id}`}
-              className={cn(
-                "text-muted-foreground hover:text-foreground focus-visible:ring-ring flex flex-col items-center gap-1 py-2.5 text-[10px] font-bold leading-none uppercase transition-colors focus-visible:ring-2 focus-visible:-outline-offset-2 focus-visible:outline-none",
-              )}
-            >
-              <Icon aria-hidden="true" className="size-5" />
-              {item.label}
-            </Link>
-          );
-        })}
+        {items.map((item) => tab(item, "island"))}
       </nav>
     </>
   );

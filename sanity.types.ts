@@ -1214,6 +1214,14 @@ export type SiteSettings = {
     accountFollowersLabel?: string;
     accountSettingsHeading?: string;
     accountViewProfileLabel?: string;
+    accountEditProfileLabel?: string;
+    accountFollowsLabel?: string;
+    accountCosignsLabel?: string;
+    bunkerTabFeed?: string;
+    bunkerTabEvents?: string;
+    bunkerTabComics?: string;
+    bunkerTabActivity?: string;
+    bunkerTabProfile?: string;
     footerGetListedHeading?: string;
     footerRiotHeading?: string;
     footerFeedsHeading?: string;

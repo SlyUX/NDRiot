@@ -728,8 +728,17 @@ export interface SiteSettings {
     dashboardTabSaved: string;
     dashboardTabSettings: string;
     accountFollowersLabel: string;
+    accountFollowsLabel: string;
+    accountCosignsLabel: string;
     accountSettingsHeading: string;
     accountViewProfileLabel: string;
+    accountEditProfileLabel: string;
+    /** Bunker sub-tabs (/me) — icon-top tabs inside the Bunker view. */
+    bunkerTabFeed: string;
+    bunkerTabEvents: string;
+    bunkerTabComics: string;
+    bunkerTabActivity: string;
+    bunkerTabProfile: string;
     /** Footer nav groups + the logged-out header account links. */
     footerGetListedHeading: string;
     footerRiotHeading: string;
@@ -1562,8 +1571,16 @@ const DEFAULTS: SiteSettings = {
     dashboardTabSaved: "Saved",
     dashboardTabSettings: "Settings",
     accountFollowersLabel: "followers",
+    accountFollowsLabel: "follows",
+    accountCosignsLabel: "cosigns",
     accountSettingsHeading: "Account",
     accountViewProfileLabel: "View Profile",
+    accountEditProfileLabel: "Edit Profile",
+    bunkerTabFeed: "Feed",
+    bunkerTabEvents: "Events",
+    bunkerTabComics: "Comics",
+    bunkerTabActivity: "Activity",
+    bunkerTabProfile: "Profile",
     footerGetListedHeading: "Get Listed",
     footerRiotHeading: "The Riot",
     footerFeedsHeading: "RSS",

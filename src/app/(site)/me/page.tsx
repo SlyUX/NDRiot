@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
-import { DashboardTabs, type DashboardPanel } from "@/components/dashboard-tabs";
+import { BunkerTabs, type BunkerTab } from "@/components/bunker-tabs";
 import { SignInButton, SignOutButton } from "@/components/auth-controls";
 import {
   CollabRequests,
@@ -460,33 +460,6 @@ export default async function AccountPage({
   const tileGrid =
     "grid grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))] gap-3";
 
-  const col1Tabs: PanelTab[] = [];
-  if (isCreator) {
-    col1Tabs.push({
-      id: "updates",
-      label: s.accountMyUpdatesHeading,
-      content: (
-        <div id="your-updates" className="scroll-mt-24">
-          <UpdateFeed
-            emptyLabel={s.accountMyUpdatesEmpty}
-            updates={myUpdates}
-            owner={updateOwnerConfig(s, mentionOptions)}
-            scrollCap
-          />
-        </div>
-      ),
-    });
-  }
-  if (followIds.length > 0) {
-    col1Tabs.push({
-      id: "feed",
-      label: s.accountFeedHeading,
-      content: (
-        <UpdateFeed emptyLabel={s.accountFeedEmpty} updates={updates} scrollCap />
-      ),
-    });
-  }
-
   // Column two — the reader's own saved work: Saved Comics leads (default tab),
   // then Saved Strips. Both are removable saves.
   const col2Tabs: PanelTab[] = [];
@@ -650,219 +623,46 @@ export default async function AccountPage({
     });
   }
 
-  // ---------------------------------------------------- dashboard panels
-  // Segmented: one visible at a time (DashboardTabs swaps them in place). Bunker,
-  // Saved, and Settings always show; Activity/Network appear when they have
-  // content. The col1/2/3 TabbedPanels are reused verbatim, just regrouped.
-  const panels: DashboardPanel[] = [];
+  // ----------------------------------------------------------------- views
+  // The user-nav island picks the view (?view=); /me renders one. Bunker is the
+  // default — identity header + icon-top sub-tabs; the col2/col3 TabbedPanels are
+  // reused for Saved and Network.
 
-  // BUNKER — the creator's private home: identity, their comics/strips, the
-  // private follower count, and events. A plain reader gets their account card.
-  panels.push({
-    id: "bunker",
-    label: s.dashboardTabBunker,
-    content: (
-      <>
-        <Section padding="none" background="card" className="px-6 py-8">
-          {/* The identity header below is the creator's visible header, so the
-              page h1 stays for a11y (§10) but is hidden for them; a plain reader
-              still sees it. The band is near-black (--card) with white text. */}
-          <h1
-            className={
-              isCreator
-                ? "sr-only"
-                : "text-2xl font-black tracking-tighter uppercase sm:text-4xl"
-            }
-          >
-            {isCreator ? s.accountUserCreatorHeading : s.accountUserHeading}
-          </h1>
-          {!isCreator && (
-            <div className="text-center sm:text-left">
-              {session.user?.name && (
-                <p className="text-foreground mt-2 font-bold">
-                  {session.user.name}
-                </p>
-              )}
-              <p className="text-muted-foreground text-sm">{email}</p>
-            </div>
-          )}
-
-          {isCreator && (
-            <>
-              {/* Instagram-style identity header: centered on phones, a row on
-                  desktop. Comics/strips sit full-width below it. */}
-              {ownedCreators.map((creator) => {
-                const sub = creator.studio?.name ?? formatPlace(creator.place);
-                // Join month + year, for the "Rioting since" tenure line.
-                const joined = creator.joinedAt
-                  ? new Date(creator.joinedAt).toLocaleDateString("en-US", {
-                      month: "long",
-                      year: "numeric",
-                    })
-                  : null;
-                return (
-                  <div
-                    key={creator._id}
-                    className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:text-left"
+  // Bunker sub-tabs: Feed · Events · Comics · Activity · Profile. Feed shows for
+  // everyone (updates from who you follow); the rest are creator surfaces, and
+  // the +Update/+Event/+Comic/+Strip actions live inside their own tab now.
+  const bunkerTabs: BunkerTab[] = [
+    {
+      id: "feed",
+      label: s.bunkerTabFeed,
+      content: (
+        <UpdateFeed emptyLabel={s.accountFeedEmpty} updates={updates} scrollCap />
+      ),
+    },
+  ];
+  if (isCreator) {
+    bunkerTabs.push(
+      {
+        id: "events",
+        label: s.bunkerTabEvents,
+        content: (
+          <div className="space-y-5">
+            {composerTargets.length > 0 && (
+              <EventDialog
+                creators={eventFormCreators}
+                conventions={eventConventions}
+                labels={eventFormLabels}
+                trigger={
+                  <Button
+                    variant="inverse"
+                    className="w-full font-black tracking-wide uppercase"
                   >
-                    <div className="relative aspect-square w-24 shrink-0 overflow-hidden bg-white/10">
-                      {creator.photo ? (
-                        <Image
-                          src={urlFor(creator.photo).width(288).url()}
-                          alt=""
-                          fill
-                          sizes="96px"
-                          className="object-cover"
-                        />
-                      ) : (
-                        <InitialsAvatar
-                          name={creator.name ?? ""}
-                          className="text-3xl"
-                        />
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-foreground text-lg font-bold">
-                        {creator.name}
-                      </p>
-                      {sub && (
-                        <p className="text-muted-foreground text-sm">{sub}</p>
-                      )}
-                      {joined && (
-                        <p className="text-muted-foreground text-xs">
-                          {s.accountRiotingSince.replace("{date}", joined)}
-                        </p>
-                      )}
-                      {/* Private follower count — self-knowledge, never a
-                          scoreboard (§3). Shown once, under the first profile. */}
-                      {creator._id === ownedCreatorIds[0] && (
-                        <p className="text-xs">
-                          <span className="text-foreground font-bold">
-                            {followers.toLocaleString("en-US")}
-                          </span>{" "}
-                          <span className="text-muted-foreground">
-                            {s.accountFollowersLabel}
-                          </span>
-                        </p>
-                      )}
-                      {/* Actions — Post an Update / add an Event / view the
-                          public profile (replaces the old Profile↔Dashboard tab). */}
-                      {composerTargets.length > 0 && (
-                        <div className="mt-3 flex flex-wrap justify-center gap-2 sm:justify-start">
-                          <PostUpdateDialog
-                            targets={composerTargets}
-                            kinds={UPDATE_KINDS}
-                            mentions={mentionOptions}
-                            labels={composerLabelsFrom(s)}
-                            trigger={
-                              <Button
-                                variant="inverse"
-                                size="sm"
-                                className="font-black tracking-wide uppercase"
-                              >
-                                <Plus aria-hidden="true" className="size-4" />
-                                {s.accountAddUpdateLabel}
-                              </Button>
-                            }
-                          />
-                          <EventDialog
-                            creators={eventFormCreators}
-                            conventions={eventConventions}
-                            labels={eventFormLabels}
-                            trigger={
-                              <Button
-                                variant="inverse"
-                                size="sm"
-                                className="font-black tracking-wide uppercase"
-                              >
-                                <Plus aria-hidden="true" className="size-4" />
-                                {s.accountAddEventLabel}
-                              </Button>
-                            }
-                          />
-                          {creator.slug && (
-                            <Button
-                              asChild
-                              variant="outline"
-                              size="sm"
-                              className="font-black tracking-wide uppercase"
-                            >
-                              <Link href={`/creators/${creator.slug}`}>
-                                {s.accountViewProfileLabel}
-                              </Link>
-                            </Button>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-
-              {/* Comics ↔ Strips as tabs, full-width below the identity header. */}
-              <div className="mt-8">
-                <TabbedPanel
-                  tabs={[
-                    {
-                      id: "comics",
-                      label: settings.sections.booksHeading,
-                      content: (
-                        <div>
-                          <YourComics
-                            books={yourComicsBooks}
-                            strips={[]}
-                            heading={s.accountComicsHeading}
-                            editLabel={s.accountEditLabel}
-                          />
-                          <div className="mt-3">
-                            <Button
-                              asChild
-                              variant="inverse"
-                              size="sm"
-                              className="font-black tracking-wide uppercase"
-                            >
-                              <Link href="/join/comics">
-                                <Plus aria-hidden="true" className="size-4" />
-                                {s.accountAddBookLabel}
-                              </Link>
-                            </Button>
-                          </div>
-                        </div>
-                      ),
-                    },
-                    {
-                      id: "strips",
-                      label: settings.sections.stripsHeading,
-                      content: (
-                        <div>
-                          <YourComics
-                            books={[]}
-                            strips={yourStrips}
-                            heading={settings.sections.stripsHeading}
-                            editLabel={s.accountEditLabel}
-                          />
-                          <div className="mt-3">
-                            <StripComposer
-                              copy={settings.stripIntake}
-                              common={settings.creatorIntake}
-                              reviewNotice={settings.reviewNotice}
-                              creator={stripComposerCreator}
-                              series={stripComposerSeries}
-                            />
-                          </div>
-                        </div>
-                      ),
-                    },
-                  ]}
-                />
-              </div>
-            </>
-          )}
-        </Section>
-
-        {/* Your events — convention appearances (creators only). */}
-        {isCreator && (
-          <Section padding="md">
+                    <Plus aria-hidden="true" className="size-4" />
+                    {s.accountAddEventLabel}
+                  </Button>
+                }
+              />
+            )}
             <EventsManager
               current={ownedAppearances}
               labels={{
@@ -879,172 +679,364 @@ export default async function AccountPage({
                   : undefined
               }
             />
-          </Section>
-        )}
-
-        {/* Your Media — owners of an outlet (creator or not). Plain feed rows. */}
-        {ownedMedia.length > 0 && (
-          <Section padding="md">
-            <SectionHeading as="h2" size="sm">
-              {s.accountMediaHeading}
-            </SectionHeading>
-            <ul className={FEED_GRID}>
-              {ownedMedia.map((outlet) => {
-                const mediaHref = outlet.slug ? `/media/${outlet.slug}` : null;
-                return (
-                  <li
-                    key={outlet._id}
-                    className="border-border flex items-center gap-3 border-b py-3"
-                  >
-                    <div className="bg-background relative aspect-square w-9 shrink-0 overflow-hidden">
-                      {outlet.logo && (
-                        <Image
-                          src={urlFor(outlet.logo).width(72).url()}
-                          alt=""
-                          fill
-                          sizes="36px"
-                          className="object-contain"
-                        />
-                      )}
-                    </div>
-                    {mediaHref ? (
-                      <Link
-                        href={mediaHref}
-                        className="hover:text-primary min-w-0 flex-1 truncate text-sm font-bold transition-colors"
-                      >
-                        {outlet.name}
-                      </Link>
-                    ) : (
-                      <span className="min-w-0 flex-1 truncate text-sm font-bold">
-                        {outlet.name}
-                      </span>
-                    )}
-                    <div className="flex shrink-0 gap-2">
-                      <Button asChild variant="outline" size="sm">
-                        <Link
-                          href={`/join/media?editing=${encodeURIComponent(outlet._id)}`}
-                        >
-                          {s.accountEditLabel}
-                        </Link>
-                      </Button>
-                      {mediaHref && (
-                        <Button asChild variant="outline" size="sm">
-                          <Link href={mediaHref}>{s.accountViewMediaLabel}</Link>
-                        </Button>
-                      )}
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </Section>
-        )}
-      </>
-    ),
-  });
-
-  // ACTIVITY — your posted updates + the feed from who you follow.
-  if (col1Tabs.length > 0) {
-    panels.push({
-      id: "activity",
-      label: s.dashboardTabActivity,
-      content: (
-        <Section padding="md">
-          <TabbedPanel tabs={col1Tabs} />
-        </Section>
-      ),
-    });
-  }
-
-  // NETWORK — cosigns + followed creators, plus the creator's collab requests.
-  if (col3Tabs.length > 0 || isCreator) {
-    panels.push({
-      id: "network",
-      label: s.dashboardTabNetwork,
-      content: (
-        <Section padding="md">
-          {col3Tabs.length > 0 && <TabbedPanel tabs={col3Tabs} />}
-          {isCreator && (
-            <div className={col3Tabs.length > 0 ? "mt-10" : ""}>
-              <CollabRequests
-                incoming={incomingCollab}
-                sent={sentCollab}
-                copy={settings.collab}
+          </div>
+        ),
+      },
+      {
+        id: "comics",
+        label: s.bunkerTabComics,
+        content: (
+          <div className="space-y-8">
+            <div className="space-y-3">
+              <SectionHeading as="h3" size="sm">
+                {settings.sections.booksHeading}
+              </SectionHeading>
+              <Button
+                asChild
+                variant="inverse"
+                className="w-full font-black tracking-wide uppercase"
+              >
+                <Link href="/join/comics">
+                  <Plus aria-hidden="true" className="size-4" />
+                  {s.accountAddBookLabel}
+                </Link>
+              </Button>
+              <YourComics
+                books={yourComicsBooks}
+                strips={[]}
+                heading={s.accountComicsHeading}
+                editLabel={s.accountEditLabel}
               />
             </div>
-          )}
-        </Section>
-      ),
-    });
+            <div className="space-y-3">
+              <SectionHeading as="h3" size="sm">
+                {settings.sections.stripsHeading}
+              </SectionHeading>
+              <StripComposer
+                copy={settings.stripIntake}
+                common={settings.creatorIntake}
+                reviewNotice={settings.reviewNotice}
+                creator={stripComposerCreator}
+                series={stripComposerSeries}
+              />
+              <YourComics
+                books={[]}
+                strips={yourStrips}
+                heading={settings.sections.stripsHeading}
+                editLabel={s.accountEditLabel}
+              />
+            </div>
+          </div>
+        ),
+      },
+      {
+        id: "activity",
+        label: s.bunkerTabActivity,
+        content: (
+          <div className="space-y-5">
+            {composerTargets.length > 0 && (
+              <PostUpdateDialog
+                targets={composerTargets}
+                kinds={UPDATE_KINDS}
+                mentions={mentionOptions}
+                labels={composerLabelsFrom(s)}
+                trigger={
+                  <Button
+                    variant="inverse"
+                    className="w-full font-black tracking-wide uppercase"
+                  >
+                    <Plus aria-hidden="true" className="size-4" />
+                    {s.accountAddUpdateLabel}
+                  </Button>
+                }
+              />
+            )}
+            <UpdateFeed
+              emptyLabel={s.accountMyUpdatesEmpty}
+              updates={myUpdates}
+              owner={updateOwnerConfig(s, mentionOptions)}
+              scrollCap
+            />
+          </div>
+        ),
+      },
+      {
+        id: "profile",
+        label: s.bunkerTabProfile,
+        content: (
+          <div className="max-w-prose space-y-3">
+            {ownedCreators[0]?.slug && (
+              <Button
+                asChild
+                variant="inverse"
+                className="font-black tracking-wide uppercase"
+              >
+                <Link href={`/creators/${ownedCreators[0].slug}`}>
+                  {s.accountViewProfileLabel}
+                </Link>
+              </Button>
+            )}
+            {/* A full in-Bunker preview is a follow-up; editing lives in Settings. */}
+            <p className="text-muted-foreground text-sm">
+              {s.accountEditProfileLabel} → {s.dashboardTabSettings}.
+            </p>
+          </div>
+        ),
+      },
+    );
   }
 
-  // SAVED — saved comics + strips, or the §3 discovery prompt when empty.
-  panels.push({
-    id: "saved",
-    label: s.dashboardTabSaved,
-    content: (
-      <Section padding="md">
-        {col2Tabs.length > 0 ? (
-          <TabbedPanel tabs={col2Tabs} />
-        ) : (
-          // An empty shelf is a discovery moment, not a dead end (§3).
-          <div className="max-w-prose">
-            <p className="text-muted-foreground text-sm">
-              {settings.empty.saved}
-            </p>
-            <Link
-              href="/comics"
-              className="text-primary hover:text-primary focus-visible:ring-ring mt-4 inline-block text-sm font-black tracking-widest uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none"
-            >
-              {settings.home.viewAllLabel} →
-            </Link>
-          </div>
-        )}
-      </Section>
-    ),
-  });
+  const followsCount = followIds.length;
+  const cosignsCount = cosigns.length;
 
-  // SETTINGS — account, sign out, and the monthly-email opt-in.
-  panels.push({
-    id: "settings",
-    label: s.dashboardTabSettings,
-    content: (
-      <Section padding="md" maxWidth="3xl">
-        <div className="space-y-2">
-          <SectionHeading as="h2" size="sm">
-            {s.accountSettingsHeading}
-          </SectionHeading>
+  const bunkerView = (
+    <Section padding="md" maxWidth="3xl">
+      {/* The identity header is the creator's visible header, so the page h1
+          stays for a11y (§10) but is hidden for them; a plain reader sees it. */}
+      <h1
+        className={
+          isCreator
+            ? "sr-only"
+            : "text-2xl font-black tracking-tighter uppercase sm:text-4xl"
+        }
+      >
+        {isCreator ? s.accountUserCreatorHeading : s.accountUserHeading}
+      </h1>
+
+      {!isCreator ? (
+        <div>
           {session.user?.name && (
-            <p className="text-foreground font-bold">{session.user.name}</p>
+            <p className="text-foreground mt-2 font-bold">{session.user.name}</p>
           )}
           <p className="text-muted-foreground text-sm">{email}</p>
-          <div className="pt-1">
-            <SignOutButton
-              label={settings.creatorIntake.signOutLabel}
-              redirectTo="/"
-            />
-          </div>
         </div>
-        {/* Monthly-email opt-in — explicit only (§3), and only for people who
-            aren't already subscribed (MailerLite is the source of truth). */}
-        {!newsletterSubscribed && (
-          <div className="mt-10">
-            <NewsletterOptIn
-              heading={s.accountNewsletterHeading}
-              body={s.accountNewsletterBody}
-              cta={s.accountNewsletterCta}
-              successLabel={settings.newsletter.successMessage}
-              errorLabel={settings.newsletter.errorMessage}
-            />
+      ) : (
+        ownedCreators[0] && (
+          <div>
+            <div className="flex items-center gap-4">
+              {/* Round avatar — the app layer's visual voice (§9). */}
+              <div className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-full bg-white/10">
+                {ownedCreators[0].photo ? (
+                  <Image
+                    src={urlFor(ownedCreators[0].photo).width(288).url()}
+                    alt=""
+                    fill
+                    sizes="96px"
+                    className="object-cover"
+                  />
+                ) : (
+                  <InitialsAvatar
+                    name={ownedCreators[0].name ?? ""}
+                    className="text-3xl"
+                  />
+                )}
+              </div>
+              <div className="min-w-0">
+                <p className="text-foreground text-2xl font-black tracking-tight">
+                  {ownedCreators[0].name}
+                </p>
+                {(ownedCreators[0].studio?.name ??
+                  formatPlace(ownedCreators[0].place)) && (
+                  <p className="text-muted-foreground">
+                    {ownedCreators[0].studio?.name ??
+                      formatPlace(ownedCreators[0].place)}
+                  </p>
+                )}
+              </div>
+            </div>
+            {/* Your own numbers — self-knowledge, never a scoreboard (§3).
+                Followers is a count only (follows are stored hashed, so there's
+                no who-follows-you list to open); follows + cosigns → Network. */}
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-sm">
+              <span>
+                <span className="text-foreground font-bold">
+                  {followers.toLocaleString("en-US")}
+                </span>{" "}
+                <span className="text-muted-foreground">
+                  {s.accountFollowersLabel}
+                </span>
+              </span>
+              <Link
+                href="/me?view=network"
+                className="hover:text-primary underline underline-offset-2"
+              >
+                <span className="text-foreground font-bold">
+                  {followsCount.toLocaleString("en-US")}
+                </span>{" "}
+                <span className="text-muted-foreground">
+                  {s.accountFollowsLabel}
+                </span>
+              </Link>
+              <Link
+                href="/me?view=network"
+                className="hover:text-primary underline underline-offset-2"
+              >
+                <span className="text-foreground font-bold">
+                  {cosignsCount.toLocaleString("en-US")}
+                </span>{" "}
+                <span className="text-muted-foreground">
+                  {s.accountCosignsLabel}
+                </span>
+              </Link>
+            </div>
           </div>
-        )}
-      </Section>
-    ),
-  });
+        )
+      )}
 
-  return (
-    <div>
-      <DashboardTabs panels={panels} initial={view} />
-    </div>
+      <div className="mt-6">
+        <BunkerTabs tabs={bunkerTabs} />
+      </div>
+    </Section>
   );
+
+  const networkView = (
+    <Section padding="md">
+      {col3Tabs.length > 0 && <TabbedPanel tabs={col3Tabs} />}
+      {isCreator && (
+        <div className={col3Tabs.length > 0 ? "mt-10" : ""}>
+          <CollabRequests
+            incoming={incomingCollab}
+            sent={sentCollab}
+            copy={settings.collab}
+          />
+        </div>
+      )}
+    </Section>
+  );
+
+  const savedView = (
+    <Section padding="md">
+      {col2Tabs.length > 0 ? (
+        <TabbedPanel tabs={col2Tabs} />
+      ) : (
+        // An empty shelf is a discovery moment, not a dead end (§3).
+        <div className="max-w-prose">
+          <p className="text-muted-foreground text-sm">{settings.empty.saved}</p>
+          <Link
+            href="/comics"
+            className="text-primary hover:text-primary focus-visible:ring-ring mt-4 inline-block text-sm font-black tracking-widest uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none"
+          >
+            {settings.home.viewAllLabel} →
+          </Link>
+        </div>
+      )}
+    </Section>
+  );
+
+  const settingsView = (
+    <Section padding="md" maxWidth="3xl">
+      <div className="space-y-3">
+        <SectionHeading as="h2" size="sm">
+          {s.accountSettingsHeading}
+        </SectionHeading>
+        {session.user?.name && (
+          <p className="text-foreground font-bold">{session.user.name}</p>
+        )}
+        <p className="text-muted-foreground text-sm">{email}</p>
+        <div className="flex flex-wrap gap-2 pt-1">
+          {isCreator && ownedCreators[0] && (
+            <Button
+              asChild
+              variant="inverse"
+              size="sm"
+              className="font-black tracking-wide uppercase"
+            >
+              <Link
+                href={`/join/creators?editing=${encodeURIComponent(ownedCreators[0]._id)}`}
+              >
+                {s.accountEditProfileLabel}
+              </Link>
+            </Button>
+          )}
+          <SignOutButton
+            label={settings.creatorIntake.signOutLabel}
+            redirectTo="/"
+          />
+        </div>
+      </div>
+
+      {/* Your Media — owners of an outlet manage it here. */}
+      {ownedMedia.length > 0 && (
+        <div className="mt-10">
+          <SectionHeading as="h2" size="sm">
+            {s.accountMediaHeading}
+          </SectionHeading>
+          <ul className={FEED_GRID}>
+            {ownedMedia.map((outlet) => {
+              const mediaHref = outlet.slug ? `/media/${outlet.slug}` : null;
+              return (
+                <li
+                  key={outlet._id}
+                  className="border-border flex items-center gap-3 border-b py-3"
+                >
+                  <div className="bg-background relative aspect-square w-9 shrink-0 overflow-hidden">
+                    {outlet.logo && (
+                      <Image
+                        src={urlFor(outlet.logo).width(72).url()}
+                        alt=""
+                        fill
+                        sizes="36px"
+                        className="object-contain"
+                      />
+                    )}
+                  </div>
+                  {mediaHref ? (
+                    <Link
+                      href={mediaHref}
+                      className="hover:text-primary min-w-0 flex-1 truncate text-sm font-bold transition-colors"
+                    >
+                      {outlet.name}
+                    </Link>
+                  ) : (
+                    <span className="min-w-0 flex-1 truncate text-sm font-bold">
+                      {outlet.name}
+                    </span>
+                  )}
+                  <div className="flex shrink-0 gap-2">
+                    <Button asChild variant="outline" size="sm">
+                      <Link
+                        href={`/join/media?editing=${encodeURIComponent(outlet._id)}`}
+                      >
+                        {s.accountEditLabel}
+                      </Link>
+                    </Button>
+                    {mediaHref && (
+                      <Button asChild variant="outline" size="sm">
+                        <Link href={mediaHref}>{s.accountViewMediaLabel}</Link>
+                      </Button>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+
+      {/* Monthly-email opt-in — explicit only (§3), and only for people who
+          aren't already subscribed (MailerLite is the source of truth). */}
+      {!newsletterSubscribed && (
+        <div className="mt-10">
+          <NewsletterOptIn
+            heading={s.accountNewsletterHeading}
+            body={s.accountNewsletterBody}
+            cta={s.accountNewsletterCta}
+            successLabel={settings.newsletter.successMessage}
+            errorLabel={settings.newsletter.errorMessage}
+          />
+        </div>
+      )}
+    </Section>
+  );
+
+  const viewContent =
+    view === "network"
+      ? networkView
+      : view === "saved"
+        ? savedView
+        : view === "settings"
+          ? settingsView
+          : bunkerView;
+
+  return <div>{viewContent}</div>;
 }

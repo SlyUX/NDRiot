@@ -165,9 +165,9 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
           are the nav). Desktop bar here, mobile island is fixed. */}
       {email && (
         <UserNav
+          avatarUrl={avatar}
           items={[
             { id: "bunker", label: s.dashboardTabBunker },
-            { id: "activity", label: s.dashboardTabActivity },
             { id: "network", label: s.dashboardTabNetwork },
             { id: "saved", label: s.dashboardTabSaved },
             { id: "settings", label: s.dashboardTabSettings },
