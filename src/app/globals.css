@@ -250,3 +250,23 @@
 .shuffle-slide {
   animation: shuffle-slide 320ms ease-out;
 }
+
+/* Dashboard (/me) view transition — each User Section fades and rises in when
+   navigated to, so every section has the same app-like page transition (not
+   just the Bunker, which previously only appeared to transition because it was
+   the slow view that briefly showed the loading skeleton). translateY only, so
+   nothing can overflow the viewport. The global reduced-motion reset above
+   collapses it to instant (§10). */
+@keyframes view-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.view-enter {
+  animation: view-enter 260ms ease-out;
+}

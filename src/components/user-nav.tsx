@@ -86,8 +86,8 @@ export function UserNav({
         aria-current={active ? "page" : undefined}
         className={cn(
           "focus-visible:ring-ring flex flex-col items-center gap-1 text-[10px] font-bold tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:-outline-offset-2 focus-visible:outline-none",
-          variant === "bar" ? "flex-1 px-3 py-2.5" : "py-2.5 leading-none",
-          active ? "text-primary" : "text-muted-foreground hover:text-foreground",
+          variant === "bar" ? "px-3 py-2.5" : "py-2.5 leading-none",
+          active ? "text-primary" : "text-muted-foreground hover:text-primary",
         )}
       >
         {icon(item.id, active)}
@@ -99,11 +99,13 @@ export function UserNav({
   return (
     <>
       {/* Desktop: a plain icon-top tab row beneath the main nav (no box/border/
-          extra margin). px-6 outer / max-w inner aligns with content. */}
+          extra margin). px-6 outer / max-w inner aligns with content. Left-
+          aligned and natural width — the tabs sit together at the left gutter
+          rather than stretching across the full width. */}
       <div className="hidden px-6 md:block">
         <nav
           aria-label="Your dashboard"
-          className="mx-auto flex max-w-[90rem] justify-center gap-2 py-1 sm:justify-start"
+          className="mx-auto flex max-w-[90rem] justify-start gap-1 py-1"
         >
           {items.map((item) => tab(item, "bar"))}
         </nav>
