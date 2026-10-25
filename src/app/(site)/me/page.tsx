@@ -134,7 +134,18 @@ export default async function AccountPage({
     );
   }
 
-  const saves = await savedItems(email);
+  // The dashboard renders one view at a time, so each fetch below is gated to the
+  // view(s) that use it — switching sections only pays for that section's data
+  // (this is what keeps view→view fast; the Bunker landing view pays the most).
+  // `v` treats the default (bare /me, no ?view=) as the Bunker.
+  const v = view ?? "bunker";
+
+  // Cheap id lookups, in parallel (saves → the feed's follow ids + the saved
+  // shelves; owned docs → isCreator and per-type lookups).
+  const [saves, ownedIds] = await Promise.all([
+    savedItems(email),
+    ownedDocIds(email),
+  ]);
   const bookIds = saves
     .filter((x) => x.itemType === "book")
     .map((x) => x.itemId);
@@ -147,7 +158,6 @@ export default async function AccountPage({
 
   // Owned docs resolve to their type first, so comics can be looked up by the
   // creator ids they belong to and media by their own ids.
-  const ownedIds = await ownedDocIds(email);
   const ownedDocs = ownedIds.length
     ? await safeFetch<OwnedDoc[]>(OWNED_DOCS_QUERY, { ids: ownedIds }, [])
     : [];
@@ -157,6 +167,10 @@ export default async function AccountPage({
   const ownedMediaIds = ownedDocs
     .filter((d) => d._type === "media")
     .map((d) => d._id);
+  // Owning a creator doc is enough to know they're a creator — no extra fetch
+  // (the full ownedCreators objects are pulled only for views that render them).
+  const isCreator = ownedCreatorIds.length > 0;
+  const myCreatorId = ownedCreatorIds[0];
 
   // The reader's update feed — everything they saved is a follow (§3). Newest
   // first, capped; recency only, never ranked.
@@ -171,51 +185,65 @@ export default async function AccountPage({
     ownedMedia,
     feedPosts,
     feedAppearances,
+    cosignIds,
+    ownedSeries,
+    collabIncoming,
+    collabSent,
+    myStripsRaw,
   ] = await Promise.all([
-    bookIds.length
+    // Saved view: the reader's saved comics + strips.
+    v === "saved" && bookIds.length
       ? safeFetch<BookSummary[]>(SAVED_BOOKS_QUERY, { ids: bookIds }, [])
       : Promise.resolve<BookSummary[]>([]),
-    creatorIds.length
-      ? safeFetch<CreatorSummary[]>(
-          SAVED_CREATORS_QUERY,
-          { ids: creatorIds },
-          [],
-        )
+    // Network view: creators the reader follows ("Followed Creators").
+    v === "network" && creatorIds.length
+      ? safeFetch<CreatorSummary[]>(SAVED_CREATORS_QUERY, { ids: creatorIds }, [])
       : Promise.resolve<CreatorSummary[]>([]),
-    stripIds.length
+    v === "saved" && stripIds.length
       ? safeFetch<StripSummary[]>(SAVED_STRIPS_QUERY, { ids: stripIds }, [])
       : Promise.resolve<StripSummary[]>([]),
-    ownedCreatorIds.length
-      ? safeFetch<CreatorSummary[]>(
-          SAVED_CREATORS_QUERY,
-          { ids: ownedCreatorIds },
-          [],
-        )
+    // The reader's own creator profiles — the Bunker header + Settings edit link.
+    (v === "bunker" || v === "settings") && ownedCreatorIds.length
+      ? safeFetch<CreatorSummary[]>(SAVED_CREATORS_QUERY, { ids: ownedCreatorIds }, [])
       : Promise.resolve<CreatorSummary[]>([]),
-    ownedCreatorIds.length
-      ? safeFetch<BookSummary[]>(
-          OWNED_BOOKS_QUERY,
-          { ids: ownedCreatorIds },
-          [],
-        )
+    // Bunker Comics tab: the creator's own comics.
+    v === "bunker" && ownedCreatorIds.length
+      ? safeFetch<BookSummary[]>(OWNED_BOOKS_QUERY, { ids: ownedCreatorIds }, [])
       : Promise.resolve<BookSummary[]>([]),
-    ownedMediaIds.length
+    // Settings "Your Media".
+    v === "settings" && ownedMediaIds.length
       ? safeFetch<MediaSummary[]>(OWNED_MEDIA_QUERY, { ids: ownedMediaIds }, [])
       : Promise.resolve<MediaSummary[]>([]),
-    followIds.length
-      ? safeFetch<UpdateFeedItem[]>(
-          UPDATES_FEED_QUERY,
-          { ids: followIds, limit: 30 },
-          [],
-        )
+    // Bunker Feed tab: followed creators' updates + their appearances.
+    v === "bunker" && followIds.length
+      ? safeFetch<UpdateFeedItem[]>(UPDATES_FEED_QUERY, { ids: followIds, limit: 30 }, [])
       : Promise.resolve<UpdateFeedItem[]>([]),
-    followIds.length
-      ? safeFetch<AppearanceFeedRow[]>(
-          APPEARANCE_FEED_QUERY,
-          { ids: followIds, limit: 30 },
-          [],
-        )
+    v === "bunker" && followIds.length
+      ? safeFetch<AppearanceFeedRow[]>(APPEARANCE_FEED_QUERY, { ids: followIds, limit: 30 }, [])
       : Promise.resolve<AppearanceFeedRow[]>([]),
+    // Cosigns (mutual follows): the Bunker stat count + the Network cosign cards.
+    (v === "bunker" || v === "network") && isCreator
+      ? mutualCosignIds(myCreatorId)
+      : Promise.resolve<string[]>([]),
+    // Bunker Comics tab: the strip composer's series dropdown.
+    v === "bunker" && ownedCreatorIds.length
+      ? safeFetch<
+          { _id: string; title: string | null; creatorId: string | null }[]
+        >(INTAKE_OWNED_SERIES_QUERY, { ids: ownedCreatorIds }, [])
+      : Promise.resolve<
+          { _id: string; title: string | null; creatorId: string | null }[]
+        >([]),
+    // Network view: incoming + sent collaboration requests.
+    v === "network" && isCreator
+      ? incomingRequests(myCreatorId)
+      : Promise.resolve([] as Awaited<ReturnType<typeof incomingRequests>>),
+    v === "network" && isCreator
+      ? sentRequests(myCreatorId)
+      : Promise.resolve([] as Awaited<ReturnType<typeof sentRequests>>),
+    // Bunker Comics tab: the creator's strips.
+    v === "bunker" && ownedCreatorIds.length
+      ? safeFetch<StripSummary[]>(CREATOR_STRIPS_QUERY, { id: myCreatorId }, [])
+      : Promise.resolve<StripSummary[]>([]),
   ]);
 
   // Your Feed = followed creators' updates + their convention appearances,
@@ -226,72 +254,49 @@ export default async function AccountPage({
     30,
   );
 
-  const isCreator = ownedCreators.length > 0;
-  // Only the Settings view shows the opt-in, so only it pays the (external,
-  // blocking) MailerLite call. Elsewhere it's hidden anyway.
+  // Settings-only (external, blocking MailerLite call); Network-only cosign
+  // cards; Bunker-only follower count (§3: self-knowledge, not a scoreboard).
   const newsletterSubscribed =
-    view === "settings" ? await isSubscribedToNewsletter(email) : true;
-  // Cosigns — creators you mutually follow. The COUNT (cosignIds) feeds the
-  // Bunker stat row; the resolved cards are only needed in the Network view.
-  const cosignIds = isCreator ? await mutualCosignIds(ownedCreatorIds[0]) : [];
+    v === "settings" ? await isSubscribedToNewsletter(email) : true;
   const cosigns =
-    view === "network" && cosignIds.length
+    v === "network" && cosignIds.length
       ? await safeFetch<CreatorSummary[]>(SAVED_CREATORS_QUERY, { ids: cosignIds }, [])
       : [];
-  // The creator's own private follower count (§3: self-knowledge, not a
-  // scoreboard) — shown only in the Bunker header.
   const followers =
-    isCreator && view === "bunker" ? await followerCount(ownedCreatorIds) : 0;
-
-  // The creators' existing (published) series — the strip composer's dropdown,
-  // filtered per creator at render. Drafts a creator just started show up once
-  // published; the composer's "new series" field covers the interim.
-  const ownedSeries = ownedCreatorIds.length
-    ? await safeFetch<{ _id: string; title: string | null; creatorId: string | null }[]>(
-        INTAKE_OWNED_SERIES_QUERY,
-        { ids: ownedCreatorIds },
-        [],
-      )
-    : [];
+    v === "bunker" && isCreator ? await followerCount(ownedCreatorIds) : 0;
 
   // Collaboration requests — incoming (respond) + sent (status). Creator-only;
   // the private request docs resolve to public identities via COLLAB_CREATORS_QUERY.
-  let incomingCollab: IncomingCollab[] = [];
-  let sentCollab: SentCollab[] = [];
-  if (isCreator) {
-    const myCreatorId = ownedCreatorIds[0];
-    const [incoming, sent] = await Promise.all([
-      incomingRequests(myCreatorId),
-      sentRequests(myCreatorId),
-    ]);
-    const otherIds = [
-      ...new Set([
-        ...incoming.map((r) => r.fromId),
-        ...sent.map((r) => r.toId),
-      ]),
-    ];
-    const others = otherIds.length
-      ? await safeFetch<
-          { _id: string; name: string | null; slug: string | null }[]
-        >(COLLAB_CREATORS_QUERY, { ids: otherIds }, [])
-      : [];
-    const byId = new Map(others.map((c) => [c._id, c]));
-    incomingCollab = incoming.map((r) => ({
-      fromId: r.fromId,
-      name: byId.get(r.fromId)?.name ?? "A creator",
-      slug: byId.get(r.fromId)?.slug ?? null,
-      genre: r.genre,
-      status: r.status,
-      response: r.response,
-    }));
-    sentCollab = sent.map((r) => ({
-      name: byId.get(r.toId)?.name ?? "A creator",
-      slug: byId.get(r.toId)?.slug ?? null,
-      genre: r.genre,
-      status: r.status,
-      response: r.response,
-    }));
-  }
+  // Collaboration requests (Network view). The raw incoming/sent were fetched in
+  // the batch above (empty off the Network view); resolve each other party's
+  // public identity, then shape the view models.
+  const collabOtherIds = [
+    ...new Set([
+      ...collabIncoming.map((r) => r.fromId),
+      ...collabSent.map((r) => r.toId),
+    ]),
+  ];
+  const collabOthers = collabOtherIds.length
+    ? await safeFetch<
+        { _id: string; name: string | null; slug: string | null }[]
+      >(COLLAB_CREATORS_QUERY, { ids: collabOtherIds }, [])
+    : [];
+  const collabById = new Map(collabOthers.map((c) => [c._id, c]));
+  const incomingCollab: IncomingCollab[] = collabIncoming.map((r) => ({
+    fromId: r.fromId,
+    name: collabById.get(r.fromId)?.name ?? "A creator",
+    slug: collabById.get(r.fromId)?.slug ?? null,
+    genre: r.genre,
+    status: r.status,
+    response: r.response,
+  }));
+  const sentCollab: SentCollab[] = collabSent.map((r) => ({
+    name: collabById.get(r.toId)?.name ?? "A creator",
+    slug: collabById.get(r.toId)?.slug ?? null,
+    genre: r.genre,
+    status: r.status,
+    response: r.response,
+  }));
 
   // Your Updates — the creator's own posts (updates targeting a creator or comic
   // they own), for the dashboard. Owner-editable, same as on the profile.
@@ -299,13 +304,14 @@ export default async function AccountPage({
     ...ownedCreatorIds,
     ...ownedBooks.map((book) => book._id),
   ];
-  const myUpdates = ownedTargetIds.length
-    ? await safeFetch<UpdateFeedItem[]>(
-        UPDATES_FEED_QUERY,
-        { ids: ownedTargetIds, limit: 30 },
-        [],
-      )
-    : [];
+  const myUpdates =
+    v === "bunker" && ownedTargetIds.length
+      ? await safeFetch<UpdateFeedItem[]>(
+          UPDATES_FEED_QUERY,
+          { ids: ownedTargetIds, limit: 30 },
+          [],
+        )
+      : [];
 
   // Precomputed for the Your Comics rail (a client component takes plain data).
   const yourComicsBooks: YourComicsBook[] = ownedBooks.map((book) => ({
@@ -325,15 +331,7 @@ export default async function AccountPage({
   const stripComposerSeries = ownedSeries
     .filter((se) => se.creatorId === ownedCreatorIds[0])
     .map((se) => ({ _id: se._id, title: se.title ?? "Untitled series" }));
-  const yourStrips: YourComicsStrip[] = (
-    ownedCreatorIds.length
-      ? await safeFetch<StripSummary[]>(
-          CREATOR_STRIPS_QUERY,
-          { id: ownedCreatorIds[0] },
-          [],
-        )
-      : []
-  )
+  const yourStrips: YourComicsStrip[] = myStripsRaw
     .filter((strip) => strip.slug)
     .map((strip) => ({
       id: strip._id,
@@ -385,7 +383,7 @@ export default async function AccountPage({
   let mentionOptions: MentionOption[] = [];
   let eventConventions: { id: string; name: string }[] = [];
   let ownedAppearances: OwnedAppearance[] = [];
-  if (composerTargets.length > 0 && view === "bunker") {
+  if (composerTargets.length > 0 && v === "bunker") {
     const [allCreators, allBooks, allConventions, allMedia, appearances] =
       await Promise.all([
         safeFetch<CreatorSummary[]>(CREATORS_QUERY, {}, []),
@@ -775,8 +773,7 @@ export default async function AccountPage({
     <Section
       padding="md"
       maxWidth="3xl"
-      className="view-enter"
-      innerClassName="mx-0"
+      innerClassName="mx-0 view-enter"
     >
       {/* The identity header is the creator's visible header, so the page h1
           stays for a11y (§10) but is hidden for them; a plain reader sees it. */}
@@ -880,8 +877,7 @@ export default async function AccountPage({
     <Section
       padding="md"
       maxWidth="3xl"
-      className="view-enter"
-      innerClassName="mx-0"
+      innerClassName="mx-0 view-enter"
     >
       {col3Tabs.length > 0 && <TabbedPanel tabs={col3Tabs} />}
       {isCreator && (
@@ -900,8 +896,7 @@ export default async function AccountPage({
     <Section
       padding="md"
       maxWidth="3xl"
-      className="view-enter"
-      innerClassName="mx-0"
+      innerClassName="mx-0 view-enter"
     >
       {col2Tabs.length > 0 ? (
         <TabbedPanel tabs={col2Tabs} />
@@ -924,8 +919,7 @@ export default async function AccountPage({
     <Section
       padding="md"
       maxWidth="3xl"
-      className="view-enter"
-      innerClassName="mx-0"
+      innerClassName="mx-0 view-enter"
     >
       <div className="space-y-3">
         <SectionHeading as="h2" size="sm">
@@ -1040,5 +1034,8 @@ export default async function AccountPage({
           ? settingsView
           : bunkerView;
 
-  return <div>{viewContent}</div>;
+  // Key by view so switching sections remounts the wrapper — React otherwise
+  // updates the <Section> in place (same type/position), and a CSS enter
+  // animation only plays on mount, so the transition wouldn't replay view→view.
+  return <div key={view ?? "bunker"}>{viewContent}</div>;
 }
