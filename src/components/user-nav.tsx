@@ -45,7 +45,14 @@ export function UserNav({
   const onMe = pathname === "/me";
   const currentView = onMe ? (searchParams.get("view") ?? "bunker") : null;
 
-  const hrefFor = (id: string) => (id === "bunker" ? "/me" : `/me?view=${id}`);
+  // Every tab uses a single canonical ?view= URL — Bunker included (/me?view=bunker,
+  // not a bare /me). The bare /me and /me?view=bunker are the SAME view, and giving
+  // Bunker the bare form made the two representations oscillate: the App Router
+  // ping-ponged RSC fetches between /me and /me?view=bunker on a Bunker click
+  // (visible as a request storm that stalled navigation). One canonical href per
+  // view fixes it. Bare /me still renders Bunker (entry via the logo / sign-in),
+  // and currentView below treats it as Bunker so the tab still highlights there.
+  const hrefFor = (id: string) => `/me?view=${id}`;
 
   const icon = (id: string, active: boolean) => {
     if (id === "bunker" && avatarUrl) {
