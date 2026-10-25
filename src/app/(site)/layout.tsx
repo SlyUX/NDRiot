@@ -164,8 +164,12 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
               ? [
                   {
                     id: "submit",
-                    label: submitIssue.title ?? s.ragPageTitle,
-                    sublabel: s.navSubmitSublabel,
+                    // The issue number is the "icon"; "Submit" is the label.
+                    iconText:
+                      submitIssue.issueNumber != null
+                        ? String(submitIssue.issueNumber).padStart(3, "0")
+                        : "★",
+                    label: s.navSubmitSublabel,
                     href: `/magazine/${submitIssue.slug}`,
                   },
                 ]
