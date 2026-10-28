@@ -4150,13 +4150,14 @@ export type SPINNER_BOOK_PICKER_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: SPINNER_BOOK_QUERY
-// Query: *[_type=="book" && _id==$id][0]{  _id,title,"slug":slug.current,cover,maturityRating,  "creatorId":creator._ref,creator->{name,"slug":slug.current}}
+// Query: *[_type=="book" && _id==$id][0]{  _id,title,"slug":slug.current,cover,maturityRating,  "descriptionText":pt::text(description),  "creatorId":creator._ref,creator->{name,"slug":slug.current}}
 export type SPINNER_BOOK_QUERY_RESULT = {
   _id: string;
   title: string;
   slug: string;
   cover: ImageWithAlt | null;
   maturityRating: "allAges" | "mature" | "teen";
+  descriptionText: string;
   creatorId: string;
   creator: {
     name: string;
@@ -4869,7 +4870,7 @@ declare module "@sanity/client" {
     '*[_type=="ragIssue" && defined(slug.current) && submissionsOpen == true && (!defined(submissionsFrom) || dateTime(submissionsFrom + "T00:00:00Z") <= dateTime(now())) && (!defined(submissionsUntil) || dateTime(submissionsUntil + "T23:59:59Z") >= dateTime(now()))]|order(issueNumber asc){_id,title,issueNumber,"slug":slug.current}': RAG_OPEN_SUBMISSIONS_QUERY_RESULT;
     'count(*[_type in ["book","strip"] && creator._ref==$id && (defined(cover) || defined(image))])': RAG_CREATOR_PREVIEW_COUNT_QUERY_RESULT;
     '*[_type=="book" && defined(slug.current)]|order(title asc){\n  _id,title,"slug":slug.current,cover,maturityRating,\n  "creatorId":creator._ref,creator->{name,"slug":slug.current}\n}': SPINNER_BOOK_PICKER_QUERY_RESULT;
-    '*[_type=="book" && _id==$id][0]{\n  _id,title,"slug":slug.current,cover,maturityRating,\n  "creatorId":creator._ref,creator->{name,"slug":slug.current}\n}': SPINNER_BOOK_QUERY_RESULT;
+    '*[_type=="book" && _id==$id][0]{\n  _id,title,"slug":slug.current,cover,maturityRating,\n  "descriptionText":pt::text(description),\n  "creatorId":creator._ref,creator->{name,"slug":slug.current}\n}': SPINNER_BOOK_QUERY_RESULT;
     '*[_type=="book" && defined(slug.current)]._id': BOOK_IDS_QUERY_RESULT;
     '*[_type=="book" && _id in $ids]{\n  _id,title,"slug":slug.current,status,genres,format,maturity,cover,shortDescription,\n  "descriptionText": pt::text(description),\n  "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,\n  "creatorName":creator->name,"creatorId":creator._ref\n}': HERO_BOOKS_QUERY_RESULT;
     '{\n  "books": *[_type=="book" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "creators": *[_type=="creator" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "columns": *[_type=="column" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "interviews": *[_type=="interview" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "resources": *[_type=="resource" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "allies": *[_type=="ally" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "strips": *[_type=="strip" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "series": *[_type=="stripSeries" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "ragIssues": *[_type=="ragIssue" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "genres": array::unique(*[_type=="book" && defined(genres)].genres[]),\n  "formats": array::unique(*[_type=="book" && defined(format)].format)\n}': SITEMAP_QUERY_RESULT;

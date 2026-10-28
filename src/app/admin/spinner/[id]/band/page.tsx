@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import QRCode from "qrcode";
@@ -12,12 +13,24 @@ import { getStore } from "@/sanity/spinner-store-client";
 
 export const dynamic = "force-dynamic";
 
+async function qrSvg(url: string): Promise<string> {
+  return QRCode.toString(url, {
+    type: "svg",
+    margin: 0,
+    errorCorrectionLevel: "M",
+    color: { dark: "#000000", light: "#ffffff" },
+  });
+}
+
 /**
- * Seller Info Band — the customer-facing slip that goes in a bag-and-board behind
- * each comic. 2" tall × 8.5" wide, 5 per US Letter sheet, PURE BLACK ON WHITE:
- * ND Riot logo | maturity | creator-profile QR | price. Live book data is
- * re-read here (authoritative maturity + slug); price comes from the store's
- * rack item. Print from the browser (the toolbar is screen-only).
+ * Printed slip for a book on a spinner rack — TWO pages per copy, one band per
+ * sheet (so it slips behind the comic without covering the cover):
+ *  1. The Seller Info Band (2" tall, full width, at the top): ND Riot logo |
+ *     maturity | creator-profile QR | price.
+ *  2. A book-info page: title, author, description, and a QR to the book on
+ *     ndriot.com.
+ * Pure black on white. Live book data is re-read here (authoritative). `qty`
+ * repeats the whole two-page set.
  */
 export default async function SellerInfoBandPage({
   params,
@@ -37,23 +50,21 @@ export default async function SellerInfoBandPage({
   if (!store || !book) notFound();
 
   const item = store.rack?.find((r) => r.bookId === bookId);
-  const qty = Math.min(200, Math.max(1, Number.parseInt(qtyRaw ?? "5", 10) || 5));
+  const qty = Math.min(200, Math.max(1, Number.parseInt(qtyRaw ?? "1", 10) || 1));
 
   const maturity =
     book.maturityRating && book.maturityRating in MATURITY_TIER_LABELS
       ? MATURITY_TIER_LABELS[book.maturityRating as MaturityTier]
       : "";
-  const creatorSlug = book.creator?.slug ?? null;
-  const profileUrl = creatorSlug ? absoluteUrl(`/creators/${creatorSlug}`) : null;
-  const qrSvg = profileUrl
-    ? await QRCode.toString(profileUrl, {
-        type: "svg",
-        margin: 0,
-        errorCorrectionLevel: "M",
-        color: { dark: "#000000", light: "#ffffff" },
-      })
-    : null;
   const priceLabel = item?.price != null ? money(item.price) : "$—";
+  const author = book.creator?.name ?? "";
+  const description = book.descriptionText ?? "";
+
+  // Band QR → the creator's profile; info-page QR → the book's page.
+  const creatorSlug = book.creator?.slug ?? null;
+  const bookSlug = book.slug ?? null;
+  const creatorQr = creatorSlug ? await qrSvg(absoluteUrl(`/creators/${creatorSlug}`)) : null;
+  const bookQr = bookSlug ? await qrSvg(absoluteUrl(`/comics/${bookSlug}`)) : null;
 
   const css = `
     @page { size: letter; margin: 0; }
@@ -61,18 +72,31 @@ export default async function SellerInfoBandPage({
       .no-print { display: none !important; }
       html, body { background: #fff !important; }
     }
-    .sheet { width: 8.5in; margin: 0 auto; background: #fff; }
+    .sheets { background: #777; }
+    @media print { .sheets { background: #fff; } }
+    .page {
+      width: 8.5in; height: 11in; background: #fff; color: #000;
+      box-sizing: border-box; page-break-after: always; break-after: page;
+      margin: 0 auto 0.25in; overflow: hidden;
+    }
+    @media print { .page { margin: 0; } }
+    .page:last-child { page-break-after: auto; break-after: auto; }
     .band {
-      width: 8.5in; height: 2in; background: #fff; color: #000;
-      box-sizing: border-box; border-bottom: 1px dashed #999;
-      break-inside: avoid; display: flex; align-items: center;
-      justify-content: space-between; gap: 0.3in; padding: 0 0.5in;
+      width: 8.5in; height: 2in; box-sizing: border-box; display: flex;
+      align-items: center; justify-content: space-between; gap: 0.3in;
+      padding: 0 0.5in; border-bottom: 1px solid #000;
     }
     .band .logo { height: 1.05in; width: auto; filter: brightness(0); }
     .band .maturity { font-weight: 900; font-size: 26px; letter-spacing: 0.02em; text-transform: uppercase; }
     .band .qr { height: 1.55in; width: 1.55in; }
-    .band .qr svg { width: 100%; height: 100%; display: block; }
     .band .price { font-weight: 900; font-size: 42px; }
+    .info { padding: 1in 1.25in; max-width: 7in; }
+    .info h1 { font-size: 40px; font-weight: 900; line-height: 1.05; margin: 0 0 6px; }
+    .info .author { font-size: 20px; margin: 0 0 20px; }
+    .info .desc { font-size: 15px; line-height: 1.6; margin: 0 0 28px; white-space: pre-wrap; }
+    .info .infoqr { height: 2in; width: 2in; }
+    .info .qrlabel { font-size: 12px; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.12em; }
+    .qr svg, .infoqr svg { width: 100%; height: 100%; display: block; }
   `;
 
   return (
@@ -85,32 +109,49 @@ export default async function SellerInfoBandPage({
             ← Back to store
           </Link>
           <p className="mt-1">
-            <span className="font-bold">{qty}</span> bands · {book.title} · {priceLabel}
-            {!maturity && <span className="text-destructive"> · ⚠ no maturity on this book</span>}
-            {!qrSvg && <span className="text-destructive"> · ⚠ no creator slug for the QR</span>}
-            {item?.price == null && <span className="text-destructive"> · ⚠ set a price on the rack first</span>}
+            <span className="font-bold">{qty}</span> × (band + info) · {book.title} · {priceLabel}
+            {!maturity && <span className="text-destructive"> · ⚠ no maturity</span>}
+            {!creatorQr && <span className="text-destructive"> · ⚠ no creator QR</span>}
+            {!bookQr && <span className="text-destructive"> · ⚠ no book QR</span>}
+            {item?.price == null && <span className="text-destructive"> · ⚠ set a price first</span>}
           </p>
         </div>
-        <PrintButton label="Print bands" />
+        <PrintButton label="Print slips" />
       </div>
 
-      <div className="sheet">
+      <div className="sheets">
         {Array.from({ length: qty }).map((_, i) => (
-          <div className="band" key={i}>
-            {/* 1. Logo (forced black) */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/nd-riot-logo.svg" alt="ND Riot" className="logo" />
-            {/* 2. Maturity */}
-            <div className="maturity">{maturity}</div>
-            {/* 3. Creator profile QR */}
-            {qrSvg ? (
-              <div className="qr" dangerouslySetInnerHTML={{ __html: qrSvg }} />
-            ) : (
-              <div className="qr" />
-            )}
-            {/* 4. Price */}
-            <div className="price">{priceLabel}</div>
-          </div>
+          <Fragment key={i}>
+            {/* Page 1 — the band, one per sheet, at the top */}
+            <div className="page">
+              <div className="band">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/nd-riot-logo.svg" alt="ND Riot" className="logo" />
+                <div className="maturity">{maturity}</div>
+                {creatorQr ? (
+                  <div className="qr" dangerouslySetInnerHTML={{ __html: creatorQr }} />
+                ) : (
+                  <div className="qr" />
+                )}
+                <div className="price">{priceLabel}</div>
+              </div>
+            </div>
+
+            {/* Page 2 — book info column */}
+            <div className="page">
+              <div className="info">
+                <h1>{book.title}</h1>
+                {author && <p className="author">by {author}</p>}
+                {description && <p className="desc">{description}</p>}
+                {bookQr && (
+                  <>
+                    <div className="infoqr" dangerouslySetInnerHTML={{ __html: bookQr }} />
+                    <p className="qrlabel">Find it on ndriot.com</p>
+                  </>
+                )}
+              </div>
+            </div>
+          </Fragment>
         ))}
       </div>
     </div>

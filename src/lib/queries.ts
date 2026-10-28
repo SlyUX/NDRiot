@@ -605,6 +605,7 @@ export const SPINNER_BOOK_PICKER_QUERY =
 export const SPINNER_BOOK_QUERY =
   defineQuery(`*[_type=="book" && _id==$id][0]{
   _id,title,"slug":slug.current,cover,maturityRating,
+  "descriptionText":pt::text(description),
   "creatorId":creator._ref,creator->{name,"slug":slug.current}
 }`);
 

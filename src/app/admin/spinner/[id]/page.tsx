@@ -166,10 +166,10 @@ export default async function SpinnerStorePage({
                       <input type="hidden" name="book" value={item.bookId} />
                       <div>
                         <label className={label}>Qty</label>
-                        <input name="qty" type="number" min={1} max={200} defaultValue={5} className={`${field} w-20`} />
+                        <input name="qty" type="number" min={1} max={200} defaultValue={1} className={`${field} w-20`} />
                       </div>
                       <button type="submit" className="border-primary text-primary border px-3 py-1.5 text-xs font-black tracking-widest uppercase">
-                        Print bands
+                        Print slips
                       </button>
                     </form>
                     <form action={removeRackItem}>
