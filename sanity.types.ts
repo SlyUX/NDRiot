@@ -4151,12 +4151,13 @@ export type SPINNER_BOOK_PICKER_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: SPINNER_BOOK_QUERY
-// Query: *[_type=="book" && _id==$id][0]{  _id,title,"slug":slug.current,cover,maturityRating,  "descriptionText":pt::text(description),  "creatorId":creator._ref,creator->{name,"slug":slug.current}}
+// Query: *[_type=="book" && _id==$id][0]{  _id,title,"slug":slug.current,cover,maturity,maturityRating,  "descriptionText":pt::text(description),  "creatorId":creator._ref,creator->{name,"slug":slug.current}}
 export type SPINNER_BOOK_QUERY_RESULT = {
   _id: string;
   title: string;
   slug: string;
   cover: ImageWithAlt | null;
+  maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
   maturityRating: "allAges" | "mature" | "teen" | null;
   descriptionText: string;
   creatorId: string;
@@ -4894,7 +4895,7 @@ declare module "@sanity/client" {
     '*[_type=="ragIssue" && defined(slug.current) && submissionsOpen == true && (!defined(submissionsFrom) || dateTime(submissionsFrom + "T00:00:00Z") <= dateTime(now())) && (!defined(submissionsUntil) || dateTime(submissionsUntil + "T23:59:59Z") >= dateTime(now()))]|order(issueNumber asc){_id,title,issueNumber,"slug":slug.current}': RAG_OPEN_SUBMISSIONS_QUERY_RESULT;
     'count(*[_type in ["book","strip"] && creator._ref==$id && (defined(cover) || defined(image))])': RAG_CREATOR_PREVIEW_COUNT_QUERY_RESULT;
     '*[_type=="book" && defined(slug.current)]|order(title asc){\n  _id,title,"slug":slug.current,cover,maturityRating,\n  "creatorId":creator._ref,creator->{name,"slug":slug.current}\n}': SPINNER_BOOK_PICKER_QUERY_RESULT;
-    '*[_type=="book" && _id==$id][0]{\n  _id,title,"slug":slug.current,cover,maturityRating,\n  "descriptionText":pt::text(description),\n  "creatorId":creator._ref,creator->{name,"slug":slug.current}\n}': SPINNER_BOOK_QUERY_RESULT;
+    '*[_type=="book" && _id==$id][0]{\n  _id,title,"slug":slug.current,cover,maturity,maturityRating,\n  "descriptionText":pt::text(description),\n  "creatorId":creator._ref,creator->{name,"slug":slug.current}\n}': SPINNER_BOOK_QUERY_RESULT;
     '*[_type=="ragIssue" && defined(slug.current)]|order(issueNumber desc){\n  _id,title,issueNumber,"slug":slug.current,cover\n}': SPINNER_RAG_PICKER_QUERY_RESULT;
     '*[_type=="ragIssue" && _id==$id][0]{\n  _id,title,issueNumber,"slug":slug.current,cover,\n  "descriptionText":description\n}': SPINNER_RAG_QUERY_RESULT;
     '*[_type=="book" && defined(slug.current)]._id': BOOK_IDS_QUERY_RESULT;

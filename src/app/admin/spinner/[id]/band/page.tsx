@@ -7,7 +7,13 @@ import { PrintButton } from "@/components/print-button";
 import { safeFetch, SPINNER_BOOK_QUERY, SPINNER_RAG_QUERY } from "@/lib/queries";
 import { money } from "@/lib/spinner";
 import { absoluteUrl } from "@/lib/site-url";
-import { MATURITY_TIER_LABELS, type MaturityTier } from "@/lib/taxonomy";
+import {
+  LEGACY_MATURITY_TO_TIER,
+  MATURITY_TIERS,
+  MATURITY_TIER_LABELS,
+  type MaturityRating,
+  type MaturityTier,
+} from "@/lib/taxonomy";
 import type { SpinnerBook, SpinnerRag } from "@/lib/types";
 import { getStore } from "@/sanity/spinner-store-client";
 
@@ -75,12 +81,27 @@ export default async function SellerInfoBandPage({
   const priceLabel = item?.price != null ? money(item.price) : "$—";
 
   // Center band slot: the comic's maturity badge; a Rag always reads "Mature"
-  // (every ND Riot Rag carries mature content).
-  const maturity =
-    book?.maturityRating && book.maturityRating in MATURITY_TIER_LABELS
-      ? MATURITY_TIER_LABELS[book.maturityRating as MaturityTier]
-      : "";
-  const centerLabel = kind === "rag" ? MATURITY_TIER_LABELS.mature : maturity;
+  // (every ND Riot Rag carries mature content). A comic's tier is the MORE
+  // RESTRICTIVE of its content-policy rating and its (legacy) audience rating —
+  // the two fields can drift (e.g. audience edited to Mature while the tier
+  // stayed teen), and a shelf tag must never under-label. Collapses once the two
+  // fields are merged into one.
+  const bookTier = (): MaturityTier | null => {
+    const tiers: MaturityTier[] = [];
+    if (book?.maturityRating && book.maturityRating in MATURITY_TIER_LABELS) {
+      tiers.push(book.maturityRating as MaturityTier);
+    }
+    if (book?.maturity && book.maturity in LEGACY_MATURITY_TO_TIER) {
+      tiers.push(LEGACY_MATURITY_TO_TIER[book.maturity as MaturityRating]);
+    }
+    if (tiers.length === 0) return null;
+    return tiers.reduce((a, c) =>
+      MATURITY_TIERS.indexOf(c) > MATURITY_TIERS.indexOf(a) ? c : a,
+    );
+  };
+  const tier = kind === "rag" ? "mature" : bookTier();
+  const maturity = tier ? MATURITY_TIER_LABELS[tier] : "";
+  const centerLabel = maturity;
 
   // QR targets. Comic: band → creator profile, info → book page. Rag: both →
   // the issue page (there's no creator profile to link).
