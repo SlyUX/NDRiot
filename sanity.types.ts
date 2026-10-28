@@ -408,6 +408,7 @@ export type SpinnerStore = {
     | "WI"
     | "WY";
   storeName: string;
+  slug?: string;
   status?: "active" | "ended";
   contactName?: string;
   contactEmail?: string;
@@ -1203,6 +1204,12 @@ export type SiteSettings = {
     booksHeading?: string;
     stripsHeading?: string;
     seriesPartOfLabel?: string;
+    rackHeading?: string;
+    rackInStock?: string;
+    rackOutOfStock?: string;
+    rackCountedPrefix?: string;
+    rackShelfHeading?: string;
+    rackPageIntro?: string;
     creatorsHeading?: string;
     booksDescription?: string;
     creatorsDescription?: string;

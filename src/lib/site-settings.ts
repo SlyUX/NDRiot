@@ -560,6 +560,17 @@ export interface SiteSettings {
     stripsHeading: string;
     /** Prefix on a strip's link to its series ("Part of {series}"). */
     seriesPartOfLabel: string;
+    /** Spinner rack — the block on a comic page listing racks that carry it. */
+    rackHeading: string;
+    /** Stock label; "{n}" is replaced with the count ("{n} in stock"). */
+    rackInStock: string;
+    rackOutOfStock: string;
+    /** Precedes the last-count date ("counted" → "counted Oct 26"). */
+    rackCountedPrefix: string;
+    /** The public rack page's shelf heading ("On this rack"). */
+    rackShelfHeading: string;
+    /** The public rack page's intro line. */
+    rackPageIntro: string;
     /** Meta descriptions for the listing pages — SEO copy, §2. */
     booksDescription: string;
     creatorsDescription: string;
@@ -1471,6 +1482,13 @@ const DEFAULTS: SiteSettings = {
     creatorsHeading: "Comic Creators",
     stripsHeading: "Strips",
     seriesPartOfLabel: "Part of",
+    rackHeading: "Find this comic on a spinner rack",
+    rackInStock: "{n} in stock",
+    rackOutOfStock: "Out of stock",
+    rackCountedPrefix: "counted",
+    rackShelfHeading: "On this rack",
+    rackPageIntro:
+      "Indie comics on the ND Riot spinner rack at this store — buy them in person, right now.",
     booksDescription:
       "Browse independent comics on ND Riot — graphic novels, single issues, and webcomics from real indie creators, across every genre. Filter by genre, format, and audience.",
     creatorsDescription:

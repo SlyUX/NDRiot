@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ExternalLink } from "lucide-react";
 
@@ -30,6 +31,8 @@ import { formatPlace } from "@/lib/place";
 import { pageMetadata } from "@/lib/page-metadata";
 import { safeFetch, BOOK_QUERY } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
+import { rackStockLine, storeTitle } from "@/lib/spinner";
+import { racksForBook } from "@/sanity/spinner-public-client";
 import { absoluteUrl } from "@/lib/site-url";
 import {
   breadcrumbSchema,
@@ -75,6 +78,10 @@ export default async function BookPage({
   ]);
 
   if (!book) notFound();
+
+  // Which physical ND Riot racks carry this comic (active stores only). Reads a
+  // narrow, safe projection of the private store doc — never financials.
+  const racks = await racksForBook(book._id);
 
   const email = session?.user?.email;
   // A creator can't save their own comic — hide the button on a book whose
@@ -303,6 +310,37 @@ export default async function BookPage({
             )}
           </div>
         </Section>
+
+        {racks.length > 0 && (
+          <Section padding="md">
+            <SectionHeading as="h2" size="sm">
+              {settings.sections.rackHeading}
+            </SectionHeading>
+            {/* Square keylines, house style — a row per rack linking to its
+              public shelf, with exact count + as-of date. */}
+            <ul className="divide-border border-border mt-4 divide-y border-y">
+              {racks.map((rack) => (
+                <li key={rack.slug}>
+                  <Link
+                    href={`/racks/${rack.slug}`}
+                    className="group flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-3"
+                  >
+                    <span className="group-hover:text-primary font-bold tracking-tight">
+                      {storeTitle(rack)}
+                    </span>
+                    <span className="text-muted-foreground text-sm">
+                      {rackStockLine(
+                        rack.lastCount,
+                        rack.lastCountDate,
+                        settings.sections,
+                      )}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </Section>
+        )}
 
         {!!book.otherBooks?.length && (
           <ContentCardGrid

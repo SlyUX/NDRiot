@@ -5,16 +5,23 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
 import { isAdminEmail } from "@/lib/admin";
+import { slugify } from "@/lib/intake/mapping";
 import { safeFetch, SPINNER_BOOK_QUERY, SPINNER_RAG_QUERY } from "@/lib/queries";
 import type { SpinnerBook, SpinnerRag } from "@/lib/types";
 import {
   addRackItem,
   createStore as createStoreDoc,
+  getStore,
   patchStoreMeta,
   recordPayout as recordPayoutDoc,
   removeRackItem as removeRackItemDoc,
   updateRackItem as updateRackItemDoc,
 } from "@/sanity/spinner-store-client";
+
+/** The public /racks/[slug] key for a store — deterministic from its identity. */
+function storeSlug(state: string, storeName: string): string {
+  return slugify(`${state} ${storeName}`);
+}
 
 /**
  * Admin-only server actions for the spinner-rack tool (/admin/spinner). The
@@ -48,6 +55,7 @@ export async function createStore(fd: FormData): Promise<void> {
   const id = await createStoreDoc({
     state,
     storeName,
+    slug: storeSlug(state, storeName),
     storeCutPercent: num(fd, "storeCutPercent"),
     ndRiotCutPercent: num(fd, "ndRiotCutPercent") ?? 0,
   });
@@ -70,6 +78,12 @@ export async function updateStoreMeta(fd: FormData): Promise<void> {
   const ndCut = num(fd, "ndRiotCutPercent");
   if (storeCut !== undefined) fields.storeCutPercent = storeCut;
   if (ndCut !== undefined) fields.ndRiotCutPercent = ndCut;
+  // Backfill the public slug for a store created before slugs existed (state +
+  // storeName aren't editable here, so a slug once set never needs to change).
+  const existing = await getStore(id);
+  if (existing && !existing.slug && existing.state && existing.storeName) {
+    fields.slug = storeSlug(existing.state, existing.storeName);
+  }
   await patchStoreMeta(id, fields);
   revalidatePath(`/admin/spinner/${id}`);
 }

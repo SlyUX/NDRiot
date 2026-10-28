@@ -64,6 +64,7 @@ export async function getStore(id: string): Promise<SpinnerStoreDoc | null> {
 export async function createStore(fields: {
   state: string
   storeName: string
+  slug?: string
   storeCutPercent?: number
   ndRiotCutPercent?: number
 }): Promise<string> {
@@ -84,11 +85,19 @@ export async function patchStoreMeta(
   await client().patch(id).set(fields).commit()
 }
 
-/** Append a book to the rack. Caller supplies the denormalized book/creator. */
+/**
+ * Append a book to the rack. Caller supplies the denormalized book/creator.
+ * Idempotent on bookId — a title already on the rack is a no-op, so a stale
+ * picker (or a double submit) can't duplicate a row.
+ */
 export async function addRackItem(
   id: string,
   item: Omit<RackItem, '_key' | '_type'>,
 ): Promise<void> {
+  if (item.bookId) {
+    const store = await getStore(id)
+    if (store?.rack?.some((r) => r.bookId === item.bookId)) return
+  }
   const member = { _key: randomUUID(), _type: 'rackItem', ...item }
   await client()
     .patch(id)

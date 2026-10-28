@@ -42,6 +42,14 @@ export default defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
+      name: 'slug',
+      title: 'Public URL key',
+      type: 'string',
+      readOnly: true,
+      description:
+        'The /racks/… address for this store’s public shelf page. Set automatically from the state + store name; managed by the admin tool, not edited here.',
+    }),
+    defineField({
       name: 'status',
       title: 'Status',
       type: 'string',

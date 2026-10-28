@@ -864,6 +864,48 @@ export default defineType({
             'Prefix on a strip\'s link to the series it belongs to — e.g. "Part of" → "Part of Retails".',
         }),
         defineField({
+          name: "rackHeading",
+          title: "Spinner rack — comic-page heading",
+          type: "string",
+          description:
+            'Heads the block on a comic\'s page that lists the physical ND Riot spinner racks carrying it — e.g. "Find this comic on a spinner rack".',
+        }),
+        defineField({
+          name: "rackInStock",
+          title: "Spinner rack — in-stock label",
+          type: "string",
+          description:
+            'Stock count on a rack. Use {n} for the number — e.g. "{n} in stock" → "3 in stock".',
+        }),
+        defineField({
+          name: "rackOutOfStock",
+          title: "Spinner rack — out-of-stock label",
+          type: "string",
+          description: 'Shown when a rack\'s current count is 0 — e.g. "Out of stock".',
+        }),
+        defineField({
+          name: "rackCountedPrefix",
+          title: "Spinner rack — “counted” prefix",
+          type: "string",
+          description:
+            'Precedes the last-inventory date — e.g. "counted" → "counted Oct 26". Sets the expectation that stock is as-of that date.',
+        }),
+        defineField({
+          name: "rackShelfHeading",
+          title: "Spinner rack page — shelf heading",
+          type: "string",
+          description:
+            'Heads the list of comics on a store\'s public rack page — e.g. "On this rack".',
+        }),
+        defineField({
+          name: "rackPageIntro",
+          title: "Spinner rack page — intro line",
+          type: "text",
+          rows: 2,
+          description:
+            "One line under the store name on a public rack page — what the rack is.",
+        }),
+        defineField({
           name: "creatorsHeading",
           title: "Creators page title",
           type: "string",

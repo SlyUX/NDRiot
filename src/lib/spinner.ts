@@ -1,4 +1,30 @@
+import { formatDate } from "@/lib/card-mappers";
 import type { SpinnerStoreDoc, SpinnerRackItem } from "@/lib/types";
+
+/** Copy for the public stock line — the three reader-facing strings it needs. */
+export interface RackStockCopy {
+  rackInStock: string; // "{n} in stock"
+  rackOutOfStock: string; // "Out of stock"
+  rackCountedPrefix: string; // "counted"
+}
+
+/**
+ * The public stock line for a rack item: exact count + as-of date, e.g.
+ * "3 in stock · counted Oct 26, 2026" (or "Out of stock · counted …" at 0).
+ * The date is appended only when known; it frames the count as of that day so a
+ * stale number doesn't read as live.
+ */
+export function rackStockLine(
+  lastCount: number | null | undefined,
+  lastCountDate: string | null | undefined,
+  copy: RackStockCopy,
+): string {
+  const count = lastCount ?? 0;
+  const stock =
+    count > 0 ? copy.rackInStock.replace("{n}", String(count)) : copy.rackOutOfStock;
+  const date = formatDate(lastCountDate);
+  return date ? `${stock} · ${copy.rackCountedPrefix} ${date}` : stock;
+}
 
 /** "State — Store Name" (the store's display title). */
 export function storeTitle(store: {
