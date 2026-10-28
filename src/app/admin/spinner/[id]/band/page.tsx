@@ -118,9 +118,12 @@ export default async function SellerInfoBandPage({
       align-items: center; justify-content: space-between; gap: 0.3in;
       padding: 0 0.5in; border-bottom: 1px solid #000;
     }
-    .band .logo { height: 0.8in; width: auto; filter: brightness(0); }
+    /* No brightness(0): a CSS filter forces the SVG to rasterize at screen DPI
+       (pixelated in print). Left as the native vector — pink on a color
+       printer, gray on B&W — so it stays crisp at any resolution. */
+    .band .logo { height: 0.8in; width: auto; }
     .band .maturity { font-weight: 900; font-size: 24px; letter-spacing: 0.02em; text-transform: uppercase; }
-    .band .qr { height: 1.2in; width: 1.2in; }
+    .band .qr { height: 0.6in; width: 0.6in; }
     .band .price { font-weight: 900; font-size: 40px; }
     .info { padding: 1in 0.75in; }
     .info h1 { font-size: 40px; font-weight: 900; line-height: 1.05; margin: 0 0 6px; }
