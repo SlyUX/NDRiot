@@ -9,10 +9,11 @@ import type { NextRequest } from 'next/server'
  *
  * In Next 16 this file is "Proxy", the renamed Middleware (same behaviour).
  *
- * Two exclusions:
+ * Exclusions (case is meaningful):
  *  - /categories/<genre> — genres are the raw taxonomy strings ("Horror",
  *    "Sci-Fi"), so their case is meaningful; lowercasing would empty the page.
  *  - /studio — Sanity owns its own routing there; we don't touch it.
+ *  - /admin — admin routes carry case-sensitive Sanity document ids.
  *
  * Book and creator slugs are always lowercase kebab-case, so lowercasing a
  * mis-typed slug only ever corrects it.
@@ -24,6 +25,9 @@ export function proxy(request: NextRequest) {
   if (pathname === lower) return
   if (lower.startsWith('/categories/')) return
   if (lower.startsWith('/studio')) return
+  // Admin routes carry case-sensitive Sanity document ids (e.g.
+  // /admin/spinner/o707ps9laZZPX9ruit6X5r) — lowercasing them 404s the lookup.
+  if (lower.startsWith('/admin')) return
 
   const url = request.nextUrl.clone()
   url.pathname = lower
