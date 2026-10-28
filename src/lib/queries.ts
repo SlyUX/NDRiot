@@ -592,6 +592,22 @@ export const RAG_CREATOR_PREVIEW_COUNT_QUERY = defineQuery(
   `count(*[_type in ["book","strip"] && creator._ref==$id && (defined(cover) || defined(image))])`,
 );
 
+// ---- Spinner Rack (admin) ----
+// Books for the "add to rack" picker — id + the fields denormalized onto a
+// store's rack item and printed on the Seller Info Band (maturity, creator slug).
+export const SPINNER_BOOK_PICKER_QUERY =
+  defineQuery(`*[_type=="book" && defined(slug.current)]|order(title asc){
+  _id,title,"slug":slug.current,cover,maturityRating,
+  "creatorId":creator._ref,creator->{name,"slug":slug.current}
+}`);
+// One book by id — the authoritative read used when adding to a rack and when
+// printing bands (so the band always shows current maturity + creator slug).
+export const SPINNER_BOOK_QUERY =
+  defineQuery(`*[_type=="book" && _id==$id][0]{
+  _id,title,"slug":slug.current,cover,maturityRating,
+  "creatorId":creator._ref,creator->{name,"slug":slug.current}
+}`);
+
 /**
  * IDs only, for the hero's random pick.
  *

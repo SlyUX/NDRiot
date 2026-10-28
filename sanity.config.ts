@@ -18,8 +18,8 @@ import { projectId, dataset, apiVersion } from "./src/sanity/env";
 
 /** Types that must only ever have one document. See src/sanity/structure.ts. */
 const SINGLETONS = ["siteSettings"];
-/** Submissions live in their own workspace; never created in production. */
-const PRODUCTION_HIDDEN = [...SINGLETONS, "ragSubmission"];
+/** Private-dataset types live in their own workspace; never created in production. */
+const PRODUCTION_HIDDEN = [...SINGLETONS, "ragSubmission", "spinnerStore"];
 
 /** The private dataset holding Rag submissions (same default as the server clients). */
 const SUBMISSIONS_DATASET =

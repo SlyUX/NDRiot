@@ -10,6 +10,7 @@ import resource from "./resource";
 import ally from "./ally";
 import ragIssue from "./ragIssue";
 import ragSubmission from "./ragSubmission";
+import spinnerStore from "./spinnerStore";
 import noiseIssue from "./noiseIssue";
 import update from "./update";
 import convention from "./convention";
@@ -39,6 +40,7 @@ export const schemaTypes = [
   ally,
   ragIssue,
   ragSubmission,
+  spinnerStore,
   noiseIssue,
   update,
   convention,
