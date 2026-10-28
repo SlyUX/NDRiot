@@ -50,7 +50,11 @@ export async function listStores(): Promise<SpinnerStoreDoc[]> {
 
 export async function getStore(id: string): Promise<SpinnerStoreDoc | null> {
   try {
-    return (await client().fetch<SpinnerStoreDoc | null>(`*[_id==$id][0]`, { id })) ?? null
+    // getDocument (direct, strongly consistent) rather than a GROQ query — right
+    // after create()/patch() the query index lags a beat, so `*[_id==$id]` can
+    // miss a just-written store and 404 the redirect. A direct id read doesn't.
+    const doc = await client().getDocument(id)
+    return (doc as SpinnerStoreDoc | undefined) ?? null
   } catch (cause) {
     console.error('[spinner] getStore failed', cause)
     return null
