@@ -780,7 +780,6 @@ export type Strip = {
     | "Weird & Experimental"
     | "Punk & Protest"
   >;
-  maturity?: "All Ages" | "Teen" | "Teen+";
   maturityRating: "allAges" | "teen";
   ratingSource?: "creator" | "operator";
   ratingNote?: string;
@@ -835,7 +834,6 @@ export type Book = {
     | "Minicomic"
     | "Zine"
     | "Webcomic";
-  maturity?: "All Ages" | "Teen" | "Teen+" | "Mature";
   maturityRating?: "allAges" | "teen" | "mature";
   coverIsMature?: boolean;
   ratingSource?: "creator" | "operator";
@@ -1894,7 +1892,7 @@ export type CREATORS_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: CREATOR_QUERY
-// Query: *[_type=="creator" && slug.current==$slug][0]{  _id,name,place,website,feedUrl,bio,"bioText":pt::text(bio),photo,socials,openToCollaboration,genres,formats,audience,  works[]{label,url},  studio->{_id,name,"slug":slug.current,website,logo},  organizations[]->{_id,name,"slug":slug.current,website,logo},  "books": *[_type=="book" && references(^._id)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}}
+// Query: *[_type=="creator" && slug.current==$slug][0]{  _id,name,place,website,feedUrl,bio,"bioText":pt::text(bio),photo,socials,openToCollaboration,genres,formats,audience,  works[]{label,url},  studio->{_id,name,"slug":slug.current,website,logo},  organizations[]->{_id,name,"slug":slug.current,website,logo},  "books": *[_type=="book" && references(^._id)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturityRating,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}}
 export type CREATOR_QUERY_RESULT = {
   _id: string;
   name: string;
@@ -2005,7 +2003,7 @@ export type CREATOR_QUERY_RESULT = {
       | "Webcomic"
       | "Zine"
       | null;
-    maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
+    maturityRating: "allAges" | "mature" | "teen" | null;
     cover: ImageWithAlt | null;
     descriptionText: string;
     fundingUrl: string | null;
@@ -2057,7 +2055,7 @@ export type OWNED_APPEARANCES_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: BOOKS_QUERY
-// Query: *[_type=="book"]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}
+// Query: *[_type=="book"]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturityRating,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}
 export type BOOKS_QUERY_RESULT = Array<{
   _id: string;
   title: string;
@@ -2090,7 +2088,7 @@ export type BOOKS_QUERY_RESULT = Array<{
     | "Webcomic"
     | "Zine"
     | null;
-  maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
+  maturityRating: "allAges" | "mature" | "teen" | null;
   cover: ImageWithAlt | null;
   descriptionText: string;
   fundingUrl: string | null;
@@ -2099,7 +2097,7 @@ export type BOOKS_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: FILTERED_BOOKS_QUERY
-// Query: {  "items": *[    _type=="book"    && (!defined($genres) || count(genres[@ in $genres]) > 0)    && (!defined($format) || format == $format)    && (!defined($maturity) || maturity == $maturity)    && (!defined($status) || status == $status)    && (!defined($funding) || count(links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))]) > 0)    && (!defined($preview) || defined(previewUrl))    && (!defined($q) || title match $q || creator->name match $q || shortDescription match $q || pt::text(description) match $q)  ]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturity,issueCount,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},  "total": count(*[    _type=="book"    && (!defined($genres) || count(genres[@ in $genres]) > 0)    && (!defined($format) || format == $format)    && (!defined($maturity) || maturity == $maturity)    && (!defined($status) || status == $status)    && (!defined($funding) || count(links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))]) > 0)    && (!defined($preview) || defined(previewUrl))    && (!defined($q) || title match $q || creator->name match $q || shortDescription match $q || pt::text(description) match $q)  ])}
+// Query: {  "items": *[    _type=="book"    && (!defined($genres) || count(genres[@ in $genres]) > 0)    && (!defined($format) || format == $format)    && (!defined($maturityRating) || maturityRating == $maturityRating)    && (!defined($status) || status == $status)    && (!defined($funding) || count(links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))]) > 0)    && (!defined($preview) || defined(previewUrl))    && (!defined($q) || title match $q || creator->name match $q || shortDescription match $q || pt::text(description) match $q)  ]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturityRating,issueCount,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},  "total": count(*[    _type=="book"    && (!defined($genres) || count(genres[@ in $genres]) > 0)    && (!defined($format) || format == $format)    && (!defined($maturityRating) || maturityRating == $maturityRating)    && (!defined($status) || status == $status)    && (!defined($funding) || count(links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))]) > 0)    && (!defined($preview) || defined(previewUrl))    && (!defined($q) || title match $q || creator->name match $q || shortDescription match $q || pt::text(description) match $q)  ])}
 export type FILTERED_BOOKS_QUERY_RESULT = {
   items: Array<{
     _id: string;
@@ -2133,7 +2131,7 @@ export type FILTERED_BOOKS_QUERY_RESULT = {
       | "Webcomic"
       | "Zine"
       | null;
-    maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
+    maturityRating: "allAges" | "mature" | "teen" | null;
     issueCount: number | null;
     cover: ImageWithAlt | null;
     descriptionText: string;
@@ -2243,7 +2241,7 @@ export type CREATOR_REGIONS_QUERY_RESULT = Array<
 
 // Source: src/lib/queries.ts
 // Variable: BOOK_QUERY
-// Query: *[_type=="book" && slug.current==$slug][0]{  _id,title,status,genres,format,maturity,issueCount,description,"descriptionText":pt::text(description),cover,previewUrl,  videos[]{title,url},  links[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},  "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,  "creatorId": creator._ref,  creator->{name,"slug":slug.current,place,photo,"bioText":pt::text(bio),studio->{name}},  "otherBooks": *[_type=="book" && _id != ^._id && creator._ref == ^.creator._ref]|order(title asc){    _id,title,"slug":slug.current,status,genres,format,maturity,cover,    "descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name  }}
+// Query: *[_type=="book" && slug.current==$slug][0]{  _id,title,status,genres,format,maturityRating,issueCount,description,"descriptionText":pt::text(description),cover,previewUrl,  videos[]{title,url},  links[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},  "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,  "creatorId": creator._ref,  creator->{name,"slug":slug.current,place,photo,"bioText":pt::text(bio),studio->{name}},  "otherBooks": *[_type=="book" && _id != ^._id && creator._ref == ^.creator._ref]|order(title asc){    _id,title,"slug":slug.current,status,genres,format,maturityRating,cover,    "descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name  }}
 export type BOOK_QUERY_RESULT = {
   _id: string;
   title: string;
@@ -2275,7 +2273,7 @@ export type BOOK_QUERY_RESULT = {
     | "Webcomic"
     | "Zine"
     | null;
-  maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
+  maturityRating: "allAges" | "mature" | "teen" | null;
   issueCount: number | null;
   description: Array<{
     children?: Array<{
@@ -2353,7 +2351,7 @@ export type BOOK_QUERY_RESULT = {
       | "Webcomic"
       | "Zine"
       | null;
-    maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
+    maturityRating: "allAges" | "mature" | "teen" | null;
     cover: ImageWithAlt | null;
     descriptionText: string;
     fundingUrl: string | null;
@@ -2363,7 +2361,7 @@ export type BOOK_QUERY_RESULT = {
 
 // Source: src/lib/queries.ts
 // Variable: GENRE_BOOKS_QUERY
-// Query: {  "items": *[_type=="book" && $genre in genres]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},  "total": count(*[_type=="book" && $genre in genres])}
+// Query: {  "items": *[_type=="book" && $genre in genres]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturityRating,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},  "total": count(*[_type=="book" && $genre in genres])}
 export type GENRE_BOOKS_QUERY_RESULT = {
   items: Array<{
     _id: string;
@@ -2397,7 +2395,7 @@ export type GENRE_BOOKS_QUERY_RESULT = {
       | "Webcomic"
       | "Zine"
       | null;
-    maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
+    maturityRating: "allAges" | "mature" | "teen" | null;
     cover: ImageWithAlt | null;
     descriptionText: string;
     fundingUrl: string | null;
@@ -2408,7 +2406,7 @@ export type GENRE_BOOKS_QUERY_RESULT = {
 
 // Source: src/lib/queries.ts
 // Variable: FORMAT_BOOKS_QUERY
-// Query: {  "items": *[_type=="book" && format==$format]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},  "total": count(*[_type=="book" && format==$format])}
+// Query: {  "items": *[_type=="book" && format==$format]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturityRating,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},  "total": count(*[_type=="book" && format==$format])}
 export type FORMAT_BOOKS_QUERY_RESULT = {
   items: Array<{
     _id: string;
@@ -2442,7 +2440,7 @@ export type FORMAT_BOOKS_QUERY_RESULT = {
       | "Webcomic"
       | "Zine"
       | null;
-    maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
+    maturityRating: "allAges" | "mature" | "teen" | null;
     cover: ImageWithAlt | null;
     descriptionText: string;
     fundingUrl: string | null;
@@ -2708,7 +2706,7 @@ export type HOME_NEW_QUERY_RESULT = Array<
 
 // Source: src/lib/queries.ts
 // Variable: SAVED_BOOKS_QUERY
-// Query: *[_type=="book" && _id in $ids && defined(slug.current)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}
+// Query: *[_type=="book" && _id in $ids && defined(slug.current)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturityRating,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}
 export type SAVED_BOOKS_QUERY_RESULT = Array<{
   _id: string;
   title: string;
@@ -2741,7 +2739,7 @@ export type SAVED_BOOKS_QUERY_RESULT = Array<{
     | "Webcomic"
     | "Zine"
     | null;
-  maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
+  maturityRating: "allAges" | "mature" | "teen" | null;
   cover: ImageWithAlt | null;
   descriptionText: string;
   fundingUrl: string | null;
@@ -2934,7 +2932,7 @@ export type OWNED_DOCS_QUERY_RESULT = Array<
 
 // Source: src/lib/queries.ts
 // Variable: OWNED_BOOKS_QUERY
-// Query: *[_type=="book" && creator._ref in $ids && defined(slug.current)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}
+// Query: *[_type=="book" && creator._ref in $ids && defined(slug.current)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturityRating,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}
 export type OWNED_BOOKS_QUERY_RESULT = Array<{
   _id: string;
   title: string;
@@ -2967,7 +2965,7 @@ export type OWNED_BOOKS_QUERY_RESULT = Array<{
     | "Webcomic"
     | "Zine"
     | null;
-  maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
+  maturityRating: "allAges" | "mature" | "teen" | null;
   cover: ImageWithAlt | null;
   descriptionText: string;
   fundingUrl: string | null;
@@ -3623,7 +3621,7 @@ export type ALLY_QUERY_RESULT = {
 
 // Source: src/lib/queries.ts
 // Variable: STRIPS_QUERY
-// Query: *[_type=="strip" && defined(slug.current)]|order(publishedAt desc)[0...8]{_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}
+// Query: *[_type=="strip" && defined(slug.current)]|order(publishedAt desc)[0...8]{_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturityRating,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}
 export type STRIPS_QUERY_RESULT = Array<{
   _id: string;
   title: string;
@@ -3651,7 +3649,7 @@ export type STRIPS_QUERY_RESULT = Array<{
     | "Superhero"
     | "Weird & Experimental"
   > | null;
-  maturity: "All Ages" | "Teen" | "Teen+" | null;
+  maturityRating: "allAges" | "teen";
   publishedAt: string | null;
   creatorName: string;
   creatorSlug: string;
@@ -3662,7 +3660,7 @@ export type STRIPS_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: FILTERED_STRIPS_QUERY
-// Query: *[_type=="strip" && defined(slug.current)    && (!defined($seriesSlug) || series->slug.current==$seriesSlug)    && (!defined($creatorSlug) || creator->slug.current==$creatorSlug)    && (!defined($q) || title match $q)  ]|order(publishedAt desc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}
+// Query: *[_type=="strip" && defined(slug.current)    && (!defined($seriesSlug) || series->slug.current==$seriesSlug)    && (!defined($creatorSlug) || creator->slug.current==$creatorSlug)    && (!defined($q) || title match $q)  ]|order(publishedAt desc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturityRating,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}
 export type FILTERED_STRIPS_QUERY_RESULT = Array<{
   _id: string;
   title: string;
@@ -3690,7 +3688,7 @@ export type FILTERED_STRIPS_QUERY_RESULT = Array<{
     | "Superhero"
     | "Weird & Experimental"
   > | null;
-  maturity: "All Ages" | "Teen" | "Teen+" | null;
+  maturityRating: "allAges" | "teen";
   publishedAt: string | null;
   creatorName: string;
   creatorSlug: string;
@@ -3701,7 +3699,7 @@ export type FILTERED_STRIPS_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: SAVED_STRIPS_QUERY
-// Query: *[_type=="strip" && _id in $ids && defined(slug.current)]|order(publishedAt desc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}
+// Query: *[_type=="strip" && _id in $ids && defined(slug.current)]|order(publishedAt desc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturityRating,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}
 export type SAVED_STRIPS_QUERY_RESULT = Array<{
   _id: string;
   title: string;
@@ -3729,7 +3727,7 @@ export type SAVED_STRIPS_QUERY_RESULT = Array<{
     | "Superhero"
     | "Weird & Experimental"
   > | null;
-  maturity: "All Ages" | "Teen" | "Teen+" | null;
+  maturityRating: "allAges" | "teen";
   publishedAt: string | null;
   creatorName: string;
   creatorSlug: string;
@@ -3756,7 +3754,7 @@ export type STRIP_CREATOR_OPTIONS_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: CREATOR_STRIPS_QUERY
-// Query: *[_type=="strip" && creator._ref==$id && defined(slug.current)]|order(publishedAt desc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}
+// Query: *[_type=="strip" && creator._ref==$id && defined(slug.current)]|order(publishedAt desc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturityRating,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}
 export type CREATOR_STRIPS_QUERY_RESULT = Array<{
   _id: string;
   title: string;
@@ -3784,7 +3782,7 @@ export type CREATOR_STRIPS_QUERY_RESULT = Array<{
     | "Superhero"
     | "Weird & Experimental"
   > | null;
-  maturity: "All Ages" | "Teen" | "Teen+" | null;
+  maturityRating: "allAges" | "teen";
   publishedAt: string | null;
   creatorName: string;
   creatorSlug: string;
@@ -3795,7 +3793,7 @@ export type CREATOR_STRIPS_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: STRIP_QUERY
-// Query: *[_type=="strip" && slug.current==$slug][0]{_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,creator->{name,"slug":slug.current,photo},"series":series->{title,"slug":slug.current},    "prevInSeries": *[_type=="strip" && defined(^.series._ref) && series._ref==^.series._ref && publishedAt < ^.publishedAt && defined(slug.current)]|order(publishedAt desc)[0]{title,"slug":slug.current},    "nextInSeries": *[_type=="strip" && defined(^.series._ref) && series._ref==^.series._ref && publishedAt > ^.publishedAt && defined(slug.current)]|order(publishedAt asc)[0]{title,"slug":slug.current}}
+// Query: *[_type=="strip" && slug.current==$slug][0]{_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturityRating,publishedAt,creator->{name,"slug":slug.current,photo},"series":series->{title,"slug":slug.current},    "prevInSeries": *[_type=="strip" && defined(^.series._ref) && series._ref==^.series._ref && publishedAt < ^.publishedAt && defined(slug.current)]|order(publishedAt desc)[0]{title,"slug":slug.current},    "nextInSeries": *[_type=="strip" && defined(^.series._ref) && series._ref==^.series._ref && publishedAt > ^.publishedAt && defined(slug.current)]|order(publishedAt asc)[0]{title,"slug":slug.current}}
 export type STRIP_QUERY_RESULT = {
   _id: string;
   title: string;
@@ -3823,7 +3821,7 @@ export type STRIP_QUERY_RESULT = {
     | "Superhero"
     | "Weird & Experimental"
   > | null;
-  maturity: "All Ages" | "Teen" | "Teen+" | null;
+  maturityRating: "allAges" | "teen";
   publishedAt: string | null;
   creator: {
     name: string;
@@ -3846,7 +3844,7 @@ export type STRIP_QUERY_RESULT = {
 
 // Source: src/lib/queries.ts
 // Variable: SERIES_QUERY
-// Query: *[_type=="stripSeries" && slug.current==$slug][0]{    _id,title,description,"slug":slug.current,    creator->{name,"slug":slug.current},    "strips": *[_type=="strip" && references(^._id) && defined(slug.current)]|order(publishedAt asc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}  }
+// Query: *[_type=="stripSeries" && slug.current==$slug][0]{    _id,title,description,"slug":slug.current,    creator->{name,"slug":slug.current},    "strips": *[_type=="strip" && references(^._id) && defined(slug.current)]|order(publishedAt asc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturityRating,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}  }
 export type SERIES_QUERY_RESULT = {
   _id: string;
   title: string;
@@ -3883,7 +3881,7 @@ export type SERIES_QUERY_RESULT = {
       | "Superhero"
       | "Weird & Experimental"
     > | null;
-    maturity: "All Ages" | "Teen" | "Teen+" | null;
+    maturityRating: "allAges" | "teen";
     publishedAt: string | null;
     creatorName: string;
     creatorSlug: string;
@@ -4151,13 +4149,12 @@ export type SPINNER_BOOK_PICKER_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: SPINNER_BOOK_QUERY
-// Query: *[_type=="book" && _id==$id][0]{  _id,title,"slug":slug.current,cover,maturity,maturityRating,  "descriptionText":pt::text(description),  "creatorId":creator._ref,creator->{name,"slug":slug.current}}
+// Query: *[_type=="book" && _id==$id][0]{  _id,title,"slug":slug.current,cover,maturityRating,  "descriptionText":pt::text(description),  "creatorId":creator._ref,creator->{name,"slug":slug.current}}
 export type SPINNER_BOOK_QUERY_RESULT = {
   _id: string;
   title: string;
   slug: string;
   cover: ImageWithAlt | null;
-  maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
   maturityRating: "allAges" | "mature" | "teen" | null;
   descriptionText: string;
   creatorId: string;
@@ -4197,7 +4194,7 @@ export type BOOK_IDS_QUERY_RESULT = Array<string>;
 
 // Source: src/lib/queries.ts
 // Variable: HERO_BOOKS_QUERY
-// Query: *[_type=="book" && _id in $ids]{  _id,title,"slug":slug.current,status,genres,format,maturity,cover,shortDescription,  "descriptionText": pt::text(description),  "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,  "creatorName":creator->name,"creatorId":creator._ref}
+// Query: *[_type=="book" && _id in $ids]{  _id,title,"slug":slug.current,status,genres,format,maturityRating,cover,shortDescription,  "descriptionText": pt::text(description),  "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,  "creatorName":creator->name,"creatorId":creator._ref}
 export type HERO_BOOKS_QUERY_RESULT = Array<{
   _id: string;
   title: string;
@@ -4230,7 +4227,7 @@ export type HERO_BOOKS_QUERY_RESULT = Array<{
     | "Webcomic"
     | "Zine"
     | null;
-  maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
+  maturityRating: "allAges" | "mature" | "teen" | null;
   cover: ImageWithAlt | null;
   shortDescription: string | null;
   descriptionText: string;
@@ -4432,7 +4429,7 @@ export type INTAKE_OWNED_BOOKS_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: INTAKE_BOOK_EDIT_QUERY
-// Query: *[_type=="book" && _id==$id][0]{  _id,title,"slug":slug.current,  "creatorId":creator._ref,  genres,format,maturity,maturityRating,coverIsMature,status,issueCount,  shortDescription,  "descriptionText":pt::text(description),  cover,"coverAlt":cover.alt,  previewUrl,  links[]{kind,label,url,endDate},  videos[]{title,url}}
+// Query: *[_type=="book" && _id==$id][0]{  _id,title,"slug":slug.current,  "creatorId":creator._ref,  genres,format,maturityRating,coverIsMature,status,issueCount,  shortDescription,  "descriptionText":pt::text(description),  cover,"coverAlt":cover.alt,  previewUrl,  links[]{kind,label,url,endDate},  videos[]{title,url}}
 export type INTAKE_BOOK_EDIT_QUERY_RESULT = {
   _id: string;
   title: string;
@@ -4465,7 +4462,6 @@ export type INTAKE_BOOK_EDIT_QUERY_RESULT = {
     | "Webcomic"
     | "Zine"
     | null;
-  maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
   maturityRating: "allAges" | "mature" | "teen" | null;
   coverIsMature: boolean | null;
   status: "Complete" | "Ongoing" | "Upcoming" | null;
@@ -4827,16 +4823,16 @@ import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
     '*[_type=="creator"]|order(name asc){_id,name,"slug":slug.current,place,photo,genres,openToCollaboration,"joinedAt":_createdAt,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}': CREATORS_QUERY_RESULT;
-    '*[_type=="creator" && slug.current==$slug][0]{\n  _id,name,place,website,feedUrl,bio,"bioText":pt::text(bio),photo,socials,openToCollaboration,genres,formats,audience,\n  works[]{label,url},\n  studio->{_id,name,"slug":slug.current,website,logo},\n  organizations[]->{_id,name,"slug":slug.current,website,logo},\n  "books": *[_type=="book" && references(^._id)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}\n}': CREATOR_QUERY_RESULT;
+    '*[_type=="creator" && slug.current==$slug][0]{\n  _id,name,place,website,feedUrl,bio,"bioText":pt::text(bio),photo,socials,openToCollaboration,genres,formats,audience,\n  works[]{label,url},\n  studio->{_id,name,"slug":slug.current,website,logo},\n  organizations[]->{_id,name,"slug":slug.current,website,logo},\n  "books": *[_type=="book" && references(^._id)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturityRating,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}\n}': CREATOR_QUERY_RESULT;
     '*[_type=="conventionAppearance" && creator._ref==$creatorId && defined(venue)]{\n  _id,status,tableNumber,note,forDate,\n  "venue":venue->{_id,name,"slug":slug.current,website,startDate,endDate,place}\n}': CREATOR_APPEARANCES_QUERY_RESULT;
     '*[_type=="conventionAppearance" && creator._ref in $creatorIds && defined(venue)]\n  | order(venue->name asc){\n  _id,status,tableNumber,note,forDate,\n  "creatorId":creator._ref,\n  "venueId":venue._ref,\n  "venue":venue->{_id,name,"slug":slug.current,website,startDate,endDate,place}\n}': OWNED_APPEARANCES_QUERY_RESULT;
-    '*[_type=="book"]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}': BOOKS_QUERY_RESULT;
-    '{\n  "items": *[\n    _type=="book"\n    && (!defined($genres) || count(genres[@ in $genres]) > 0)\n    && (!defined($format) || format == $format)\n    && (!defined($maturity) || maturity == $maturity)\n    && (!defined($status) || status == $status)\n    && (!defined($funding) || count(links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))]) > 0)\n    && (!defined($preview) || defined(previewUrl))\n    && (!defined($q) || title match $q || creator->name match $q || shortDescription match $q || pt::text(description) match $q)\n  ]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturity,issueCount,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},\n  "total": count(*[\n    _type=="book"\n    && (!defined($genres) || count(genres[@ in $genres]) > 0)\n    && (!defined($format) || format == $format)\n    && (!defined($maturity) || maturity == $maturity)\n    && (!defined($status) || status == $status)\n    && (!defined($funding) || count(links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))]) > 0)\n    && (!defined($preview) || defined(previewUrl))\n    && (!defined($q) || title match $q || creator->name match $q || shortDescription match $q || pt::text(description) match $q)\n  ])\n}': FILTERED_BOOKS_QUERY_RESULT;
+    '*[_type=="book"]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturityRating,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}': BOOKS_QUERY_RESULT;
+    '{\n  "items": *[\n    _type=="book"\n    && (!defined($genres) || count(genres[@ in $genres]) > 0)\n    && (!defined($format) || format == $format)\n    && (!defined($maturityRating) || maturityRating == $maturityRating)\n    && (!defined($status) || status == $status)\n    && (!defined($funding) || count(links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))]) > 0)\n    && (!defined($preview) || defined(previewUrl))\n    && (!defined($q) || title match $q || creator->name match $q || shortDescription match $q || pt::text(description) match $q)\n  ]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturityRating,issueCount,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},\n  "total": count(*[\n    _type=="book"\n    && (!defined($genres) || count(genres[@ in $genres]) > 0)\n    && (!defined($format) || format == $format)\n    && (!defined($maturityRating) || maturityRating == $maturityRating)\n    && (!defined($status) || status == $status)\n    && (!defined($funding) || count(links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))]) > 0)\n    && (!defined($preview) || defined(previewUrl))\n    && (!defined($q) || title match $q || creator->name match $q || shortDescription match $q || pt::text(description) match $q)\n  ])\n}': FILTERED_BOOKS_QUERY_RESULT;
     '{\n  "items": *[\n    _type=="creator"\n    && (!defined($genres) || count(genres[@ in $genres]) > 0)\n    && (!defined($format) || $format in formats)\n    && (!defined($audience) || audience == $audience)\n    && (!defined($region) || place.region == $region)\n    && (!defined($collaborating) || openToCollaboration == true)\n    && (!defined($q) || name match $q || studio->name match $q || pt::text(bio) match $q)\n  ]|order(name asc)[0...$limit]{\n    _id,name,"slug":slug.current,place,photo,genres,openToCollaboration,\n    "bioText":pt::text(bio),\n    studio->{_id,name,"slug":slug.current,website,logo}\n  },\n  "total": count(*[\n    _type=="creator"\n    && (!defined($genres) || count(genres[@ in $genres]) > 0)\n    && (!defined($format) || $format in formats)\n    && (!defined($audience) || audience == $audience)\n    && (!defined($region) || place.region == $region)\n    && (!defined($collaborating) || openToCollaboration == true)\n    && (!defined($q) || name match $q || studio->name match $q || pt::text(bio) match $q)\n  ])\n}': FILTERED_CREATORS_QUERY_RESULT;
     'array::unique(*[_type=="creator" && defined(slug.current) && defined(place.region)].place.region)': CREATOR_REGIONS_QUERY_RESULT;
-    '*[_type=="book" && slug.current==$slug][0]{\n  _id,title,status,genres,format,maturity,issueCount,description,"descriptionText":pt::text(description),cover,previewUrl,\n  videos[]{title,url},\n  links[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},\n  "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,\n  "creatorId": creator._ref,\n  creator->{name,"slug":slug.current,place,photo,"bioText":pt::text(bio),studio->{name}},\n  "otherBooks": *[_type=="book" && _id != ^._id && creator._ref == ^.creator._ref]|order(title asc){\n    _id,title,"slug":slug.current,status,genres,format,maturity,cover,\n    "descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name\n  }\n}': BOOK_QUERY_RESULT;
-    '{\n  "items": *[_type=="book" && $genre in genres]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},\n  "total": count(*[_type=="book" && $genre in genres])\n}': GENRE_BOOKS_QUERY_RESULT;
-    '{\n  "items": *[_type=="book" && format==$format]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},\n  "total": count(*[_type=="book" && format==$format])\n}': FORMAT_BOOKS_QUERY_RESULT;
+    '*[_type=="book" && slug.current==$slug][0]{\n  _id,title,status,genres,format,maturityRating,issueCount,description,"descriptionText":pt::text(description),cover,previewUrl,\n  videos[]{title,url},\n  links[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},\n  "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,\n  "creatorId": creator._ref,\n  creator->{name,"slug":slug.current,place,photo,"bioText":pt::text(bio),studio->{name}},\n  "otherBooks": *[_type=="book" && _id != ^._id && creator._ref == ^.creator._ref]|order(title asc){\n    _id,title,"slug":slug.current,status,genres,format,maturityRating,cover,\n    "descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name\n  }\n}': BOOK_QUERY_RESULT;
+    '{\n  "items": *[_type=="book" && $genre in genres]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturityRating,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},\n  "total": count(*[_type=="book" && $genre in genres])\n}': GENRE_BOOKS_QUERY_RESULT;
+    '{\n  "items": *[_type=="book" && format==$format]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturityRating,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},\n  "total": count(*[_type=="book" && format==$format])\n}': FORMAT_BOOKS_QUERY_RESULT;
     '*[_type=="hubPage" && kind==$kind && value==$value][0]{\n  intro, seoTitle, seoDescription\n}': HUB_PAGE_QUERY_RESULT;
     'array::unique(*[_type=="book" && defined(genres)].genres[])': GENRES_WITH_BOOKS_QUERY_RESULT;
     '*[_type=="column"]|order(publishedAt desc){_id,title,"slug":slug.current,excerpt,cover,thumbnail,publishedAt,"authorName":author->name}': COLUMNS_QUERY_RESULT;
@@ -4845,11 +4841,11 @@ declare module "@sanity/client" {
     '*[_type=="interview" && slug.current==$slug][0]{_id,title,excerpt,body,publishedAt,cover,"interviewerName":interviewer->name,"subjectName":subject->name,"interviewer":interviewer->{name,"slug":slug.current,place,photo,"bioText":pt::text(bio),studio->{name}}}': INTERVIEW_QUERY_RESULT;
     '*[_type in ["column","interview"] && defined(slug.current)]|order(publishedAt desc)[0...8]{\n  _id,_type,title,"slug":slug.current,excerpt,cover,thumbnail,publishedAt,\n  "authorName":author->name,\n  "subjectName":subject->name\n}': HOME_EDITORIAL_QUERY_RESULT;
     '*[_type in ["book","creator"] && defined(slug.current)]|order(_createdAt desc)[0...4]{\n  _id,_type,"slug":slug.current,genres,\n  title,"creatorName":creator->name,"descriptionText":pt::text(description),\n  name,"bioText":pt::text(bio)\n}': HOME_NEW_QUERY_RESULT;
-    '*[_type=="book" && _id in $ids && defined(slug.current)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}': SAVED_BOOKS_QUERY_RESULT;
+    '*[_type=="book" && _id in $ids && defined(slug.current)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturityRating,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}': SAVED_BOOKS_QUERY_RESULT;
     '*[_type=="creator" && _id==$id][0]{name,"slug":slug.current,photo,"region":place.region}': CREATOR_HERO_QUERY_RESULT;
     '*[_type=="creator" && _id in $ids && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,place,photo,genres,openToCollaboration,"joinedAt":_createdAt,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}': SAVED_CREATORS_QUERY_RESULT;
     '*[_id in $ids && defined(slug.current)]{_id,_type,name,"slug":slug.current}|order(name asc)': OWNED_DOCS_QUERY_RESULT;
-    '*[_type=="book" && creator._ref in $ids && defined(slug.current)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}': OWNED_BOOKS_QUERY_RESULT;
+    '*[_type=="book" && creator._ref in $ids && defined(slug.current)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturityRating,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}': OWNED_BOOKS_QUERY_RESULT;
     '*[_type=="media" && _id in $ids && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,kinds,logo,about,genresCovered}': OWNED_MEDIA_QUERY_RESULT;
     '*[_type=="update" && target._ref in $ids && defined(publishedAt)]|order(publishedAt desc)[0...$limit]{\n  _id,body,kind,publishedAt,\n  "targetType":target->_type,\n  "targetName":coalesce(target->title,target->name),\n  "targetSlug":target->slug.current,\n  "authorName":coalesce(target->name,target->creator->name),\n  "photo":coalesce(target->photo,target->creator->photo),\n  "mentions":mentions[]->{_id,_type,"name":coalesce(name,title),"slug":slug.current,website}\n}': RAIL_UPDATES_QUERY_RESULT;
     '*[_type=="conventionAppearance" && creator._ref in $ids && defined(creator->slug.current) && defined(venue->slug.current) && (!defined(forDate) || dateTime(forDate) > dateTime(now()))]|order(_createdAt desc)[0...$limit]{\n  _id,status,\n  "publishedAt":_createdAt,\n  "creatorId":creator._ref,\n  "creatorName":creator->name,\n  "creatorSlug":creator->slug.current,\n  "creatorPhoto":creator->photo,\n  "venue":venue->{_id,_type,name,"slug":slug.current,website}\n}': APPEARANCE_FEED_QUERY_RESULT;
@@ -4874,14 +4870,14 @@ declare module "@sanity/client" {
     '*[_type=="creator" && _id in $ids]{_id,name,"slug":slug.current}': COLLAB_CREATORS_QUERY_RESULT;
     '*[_type=="ally" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,offering,logo,about}': ALLIES_QUERY_RESULT;
     '*[_type=="ally" && slug.current==$slug][0]{_id,name,"slug":slug.current,url,offering,logo,about}': ALLY_QUERY_RESULT;
-    '*[_type=="strip" && defined(slug.current)]|order(publishedAt desc)[0...8]{_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}': STRIPS_QUERY_RESULT;
-    '*[_type=="strip" && defined(slug.current)\n    && (!defined($seriesSlug) || series->slug.current==$seriesSlug)\n    && (!defined($creatorSlug) || creator->slug.current==$creatorSlug)\n    && (!defined($q) || title match $q)\n  ]|order(publishedAt desc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}': FILTERED_STRIPS_QUERY_RESULT;
-    '*[_type=="strip" && _id in $ids && defined(slug.current)]|order(publishedAt desc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}': SAVED_STRIPS_QUERY_RESULT;
+    '*[_type=="strip" && defined(slug.current)]|order(publishedAt desc)[0...8]{_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturityRating,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}': STRIPS_QUERY_RESULT;
+    '*[_type=="strip" && defined(slug.current)\n    && (!defined($seriesSlug) || series->slug.current==$seriesSlug)\n    && (!defined($creatorSlug) || creator->slug.current==$creatorSlug)\n    && (!defined($q) || title match $q)\n  ]|order(publishedAt desc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturityRating,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}': FILTERED_STRIPS_QUERY_RESULT;
+    '*[_type=="strip" && _id in $ids && defined(slug.current)]|order(publishedAt desc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturityRating,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}': SAVED_STRIPS_QUERY_RESULT;
     '*[_type=="stripSeries" && defined(slug.current) && count(*[_type=="strip" && references(^._id) && defined(slug.current)])>0]|order(title asc){title,"slug":slug.current}': STRIP_SERIES_OPTIONS_QUERY_RESULT;
     '*[_type=="creator" && defined(slug.current) && count(*[_type=="strip" && creator._ref==^._id && defined(slug.current)])>0]|order(name asc){name,"slug":slug.current}': STRIP_CREATOR_OPTIONS_QUERY_RESULT;
-    '*[_type=="strip" && creator._ref==$id && defined(slug.current)]|order(publishedAt desc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}': CREATOR_STRIPS_QUERY_RESULT;
-    '*[_type=="strip" && slug.current==$slug][0]{_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,creator->{name,"slug":slug.current,photo},"series":series->{title,"slug":slug.current},\n    "prevInSeries": *[_type=="strip" && defined(^.series._ref) && series._ref==^.series._ref && publishedAt < ^.publishedAt && defined(slug.current)]|order(publishedAt desc)[0]{title,"slug":slug.current},\n    "nextInSeries": *[_type=="strip" && defined(^.series._ref) && series._ref==^.series._ref && publishedAt > ^.publishedAt && defined(slug.current)]|order(publishedAt asc)[0]{title,"slug":slug.current}}': STRIP_QUERY_RESULT;
-    '*[_type=="stripSeries" && slug.current==$slug][0]{\n    _id,title,description,"slug":slug.current,\n    creator->{name,"slug":slug.current},\n    "strips": *[_type=="strip" && references(^._id) && defined(slug.current)]|order(publishedAt asc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}\n  }': SERIES_QUERY_RESULT;
+    '*[_type=="strip" && creator._ref==$id && defined(slug.current)]|order(publishedAt desc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturityRating,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}': CREATOR_STRIPS_QUERY_RESULT;
+    '*[_type=="strip" && slug.current==$slug][0]{_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturityRating,publishedAt,creator->{name,"slug":slug.current,photo},"series":series->{title,"slug":slug.current},\n    "prevInSeries": *[_type=="strip" && defined(^.series._ref) && series._ref==^.series._ref && publishedAt < ^.publishedAt && defined(slug.current)]|order(publishedAt desc)[0]{title,"slug":slug.current},\n    "nextInSeries": *[_type=="strip" && defined(^.series._ref) && series._ref==^.series._ref && publishedAt > ^.publishedAt && defined(slug.current)]|order(publishedAt asc)[0]{title,"slug":slug.current}}': STRIP_QUERY_RESULT;
+    '*[_type=="stripSeries" && slug.current==$slug][0]{\n    _id,title,description,"slug":slug.current,\n    creator->{name,"slug":slug.current},\n    "strips": *[_type=="strip" && references(^._id) && defined(slug.current)]|order(publishedAt asc){_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturityRating,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}\n  }': SERIES_QUERY_RESULT;
     '*[_type=="stripSeries" && creator._ref in $ids && defined(slug.current)]|order(title asc){_id,title,"creatorId":creator._ref}': INTAKE_OWNED_SERIES_QUERY_RESULT;
     '*[_type=="stripSeries"]{_id,"slug":slug.current,"creatorId":creator._ref}': INTAKE_SERIES_IDS_QUERY_RESULT;
     '{\n  "creators": count(*[_type=="creator" && defined(slug.current)]),\n  "comics": count(*[_type=="book" && defined(slug.current)]),\n  "media": count(*[_type=="media" && defined(slug.current)]),\n  "conventions": count(*[_type=="convention" && defined(slug.current)]),\n  "allies": count(*[_type=="ally" && defined(slug.current)]),\n  "resources": count(*[_type=="resource" && defined(slug.current)])\n}': AI_STATS_QUERY_RESULT;
@@ -4895,11 +4891,11 @@ declare module "@sanity/client" {
     '*[_type=="ragIssue" && defined(slug.current) && submissionsOpen == true && (!defined(submissionsFrom) || dateTime(submissionsFrom + "T00:00:00Z") <= dateTime(now())) && (!defined(submissionsUntil) || dateTime(submissionsUntil + "T23:59:59Z") >= dateTime(now()))]|order(issueNumber asc){_id,title,issueNumber,"slug":slug.current}': RAG_OPEN_SUBMISSIONS_QUERY_RESULT;
     'count(*[_type in ["book","strip"] && creator._ref==$id && (defined(cover) || defined(image))])': RAG_CREATOR_PREVIEW_COUNT_QUERY_RESULT;
     '*[_type=="book" && defined(slug.current)]|order(title asc){\n  _id,title,"slug":slug.current,cover,maturityRating,\n  "creatorId":creator._ref,creator->{name,"slug":slug.current}\n}': SPINNER_BOOK_PICKER_QUERY_RESULT;
-    '*[_type=="book" && _id==$id][0]{\n  _id,title,"slug":slug.current,cover,maturity,maturityRating,\n  "descriptionText":pt::text(description),\n  "creatorId":creator._ref,creator->{name,"slug":slug.current}\n}': SPINNER_BOOK_QUERY_RESULT;
+    '*[_type=="book" && _id==$id][0]{\n  _id,title,"slug":slug.current,cover,maturityRating,\n  "descriptionText":pt::text(description),\n  "creatorId":creator._ref,creator->{name,"slug":slug.current}\n}': SPINNER_BOOK_QUERY_RESULT;
     '*[_type=="ragIssue" && defined(slug.current)]|order(issueNumber desc){\n  _id,title,issueNumber,"slug":slug.current,cover\n}': SPINNER_RAG_PICKER_QUERY_RESULT;
     '*[_type=="ragIssue" && _id==$id][0]{\n  _id,title,issueNumber,"slug":slug.current,cover,\n  "descriptionText":description\n}': SPINNER_RAG_QUERY_RESULT;
     '*[_type=="book" && defined(slug.current)]._id': BOOK_IDS_QUERY_RESULT;
-    '*[_type=="book" && _id in $ids]{\n  _id,title,"slug":slug.current,status,genres,format,maturity,cover,shortDescription,\n  "descriptionText": pt::text(description),\n  "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,\n  "creatorName":creator->name,"creatorId":creator._ref\n}': HERO_BOOKS_QUERY_RESULT;
+    '*[_type=="book" && _id in $ids]{\n  _id,title,"slug":slug.current,status,genres,format,maturityRating,cover,shortDescription,\n  "descriptionText": pt::text(description),\n  "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,\n  "creatorName":creator->name,"creatorId":creator._ref\n}': HERO_BOOKS_QUERY_RESULT;
     '{\n  "books": *[_type=="book" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "creators": *[_type=="creator" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "columns": *[_type=="column" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "interviews": *[_type=="interview" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "resources": *[_type=="resource" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "allies": *[_type=="ally" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "strips": *[_type=="strip" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "series": *[_type=="stripSeries" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "ragIssues": *[_type=="ragIssue" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "genres": array::unique(*[_type=="book" && defined(genres)].genres[]),\n  "formats": array::unique(*[_type=="book" && defined(format)].format)\n}': SITEMAP_QUERY_RESULT;
     '*[_type=="organization" && defined(name)]|order(name asc){_id,name}': INTAKE_ORGANIZATIONS_QUERY_RESULT;
     '*[_type=="creator" && defined(studio)].studio._ref': INTAKE_STUDIO_ORG_IDS_QUERY_RESULT;
@@ -4910,7 +4906,7 @@ declare module "@sanity/client" {
     '*[_type=="book"]._id': INTAKE_BOOK_IDS_QUERY_RESULT;
     '*[_type=="strip"]._id': INTAKE_STRIP_IDS_QUERY_RESULT;
     '*[_type=="book" && creator._ref in $ids && defined(slug.current)]|order(title asc){\n    _id,title,"creatorName":creator->name\n  }': INTAKE_OWNED_BOOKS_QUERY_RESULT;
-    '*[_type=="book" && _id==$id][0]{\n  _id,title,"slug":slug.current,\n  "creatorId":creator._ref,\n  genres,format,maturity,maturityRating,coverIsMature,status,issueCount,\n  shortDescription,\n  "descriptionText":pt::text(description),\n  cover,"coverAlt":cover.alt,\n  previewUrl,\n  links[]{kind,label,url,endDate},\n  videos[]{title,url}\n}': INTAKE_BOOK_EDIT_QUERY_RESULT;
+    '*[_type=="book" && _id==$id][0]{\n  _id,title,"slug":slug.current,\n  "creatorId":creator._ref,\n  genres,format,maturityRating,coverIsMature,status,issueCount,\n  shortDescription,\n  "descriptionText":pt::text(description),\n  cover,"coverAlt":cover.alt,\n  previewUrl,\n  links[]{kind,label,url,endDate},\n  videos[]{title,url}\n}': INTAKE_BOOK_EDIT_QUERY_RESULT;
     '*[_type=="media" && defined(slug.current)]|order(name asc){\n    _id,name,"slug":slug.current,kinds,logo,about,genresCovered\n  }': MEDIA_QUERY_RESULT;
     '*[_type=="media" && slug.current==$slug][0]{\n  _id,name,kinds,logo,about,genresCovered,pitchInfo,feedUrl,feedConsent,\n  links[]{label,url}\n}': MEDIA_DETAIL_QUERY_RESULT;
     '*[_type=="media"]._id': INTAKE_MEDIA_IDS_QUERY_RESULT;

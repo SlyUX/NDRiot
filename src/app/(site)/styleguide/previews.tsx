@@ -39,7 +39,7 @@ const sampleCard: ContentCardProps = {
   eyebrow: 'Ada Verne',
   genres: ['Sci-Fi', 'Horror'],
   format: 'Zine',
-  maturity: 'Mature',
+  maturity: 'mature',
   summary: 'A grifter wakes up in a bunker eight years after the apocalypse that never happened.',
   date: '12 Mar 2026',
 }

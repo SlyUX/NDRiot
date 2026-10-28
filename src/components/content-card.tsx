@@ -6,8 +6,8 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { urlFor } from '@/sanity/image'
 import { cn, externalHref } from '@/lib/utils'
-import { RESTRICTED_RATING } from '@/lib/taxonomy'
-import type { BookFormat, Genre, MaturityRating, SanityImage } from '@/lib/types'
+import { GATED_TIER, MATURITY_TIER_LABELS, type MaturityTier } from '@/lib/taxonomy'
+import type { BookFormat, Genre, SanityImage } from '@/lib/types'
 import type { SavedItemType } from '@/sanity/reader-client'
 
 /**
@@ -71,7 +71,7 @@ export interface ContentCardProps {
   /** How it was made. Rendered as an unlinked badge beside the genres. */
   format?: BookFormat | null
   /** Overlaid on the thumbnail — see MaturityOverlay. */
-  maturity?: MaturityRating | null
+  maturity?: MaturityTier | null
   /**
    * A live crowdfunding campaign URL. When set, a "Currently Funding" badge
    * links to it from the cover's top-left (opposite the maturity badge).
@@ -123,8 +123,8 @@ export interface ContentCardProps {
  * near-opaque background surface (white text, ~20:1). A translucent badge
  * would be unreadable over a light cover.
  */
-export function MaturityOverlay({ maturity }: { maturity: MaturityRating }) {
-  const restricted = maturity === RESTRICTED_RATING
+export function MaturityOverlay({ maturity }: { maturity: MaturityTier }) {
+  const restricted = maturity === GATED_TIER
 
   return (
     <Badge
@@ -143,7 +143,7 @@ export function MaturityOverlay({ maturity }: { maturity: MaturityRating }) {
         !restricted && 'bg-background/90 text-foreground border-white/25 backdrop-blur-sm',
       )}
     >
-      {maturity}
+      {MATURITY_TIER_LABELS[maturity]}
     </Badge>
   )
 }

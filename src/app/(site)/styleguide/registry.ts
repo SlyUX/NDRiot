@@ -339,7 +339,7 @@ export const componentEntries: ComponentEntry[] = [
       { name: 'format', type: 'BookFormat', description: 'Outline badge beside the genres.' },
       {
         name: 'maturity',
-        type: 'MaturityRating',
+        type: 'MaturityTier',
         description:
           'Overlays the thumbnail, top right. Mature gets solid pink; the rest get an opaque dark surface so they stay legible over any cover art.',
       },

@@ -36,7 +36,7 @@ import {
   comicSchema,
   jsonLdGraph,
 } from "@/lib/structured-data";
-import { RESTRICTED_RATING } from "@/lib/taxonomy";
+import { GATED_TIER, MATURITY_TIER_LABELS } from "@/lib/taxonomy";
 import type { BookDetail } from "@/lib/types";
 import { truncate } from "@/lib/utils";
 import { urlFor } from "@/sanity/image";
@@ -204,7 +204,7 @@ export default async function BookPage({
               <h1 className="text-3xl font-black tracking-tighter uppercase">
                 {book.title}
               </h1>
-              {(book.status || book.format || book.maturity) && (
+              {(book.status || book.format || book.maturityRating) && (
                 <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
                   {(book.status || book.format || book.issueCount) && (
                     <p className="text-muted-foreground text-xs tracking-widest uppercase">
@@ -219,19 +219,19 @@ export default async function BookPage({
                         .join(" · ")}
                     </p>
                   )}
-                  {book.maturity && (
+                  {book.maturityRating && (
                     // Mature gets the solid pink treatment; the gentler ratings
                     // sit back as outlines. A reader deciding whether to click
                     // should not have to hunt for the one that matters.
                     <Badge
                       variant={
-                        book.maturity === RESTRICTED_RATING
+                        book.maturityRating === GATED_TIER
                           ? "default"
                           : "outline"
                       }
                       className="text-[10px] tracking-wider uppercase"
                     >
-                      {book.maturity}
+                      {MATURITY_TIER_LABELS[book.maturityRating]}
                     </Badge>
                   )}
                 </div>

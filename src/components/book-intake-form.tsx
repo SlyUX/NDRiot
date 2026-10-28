@@ -67,7 +67,6 @@ export interface BookIntakeInitial {
   creatorId: string | null
   genres: string[]
   format: string
-  maturity: string
   maturityRating: string
   coverIsMature: boolean
   status: string
@@ -531,7 +530,6 @@ export function BookIntakeForm({
                     type="radio"
                     name="maturityRating"
                     value={m}
-                    required
                     defaultChecked={initial?.maturityRating === m}
                     className="mt-0.5 size-4 accent-[var(--primary)]"
                   />

@@ -297,9 +297,6 @@ export const MATURITY_DESCRIPTIONS: Record<MaturityRating, string> = {
   Mature: "18+. Nudity, explicit content, graphic violence.",
 };
 
-/** The rating that most needs surfacing to readers before they click. */
-export const RESTRICTED_RATING: MaturityRating = "Mature";
-
 /* ------------------------------------------------- maturity tiers (v2 gate)
  * The Content Policy collapses the four legacy labels into THREE gated tiers.
  * These power the new `maturityRating` field and the age gate. The legacy
@@ -331,22 +328,6 @@ export const GATED_TIER: MaturityTier = "mature";
 
 export const RATING_SOURCES = ["creator", "operator"] as const;
 export type RatingSource = (typeof RATING_SOURCES)[number];
-
-/** Map a legacy four-tier label onto a v2 tier (for the backfill + fallback). */
-export const LEGACY_MATURITY_TO_TIER: Record<MaturityRating, MaturityTier> = {
-  "All Ages": "allAges",
-  Teen: "teen",
-  "Teen+": "teen",
-  Mature: "mature",
-};
-
-/** Map a v2 tier back onto a legacy label — so intake keeps populating the old
- *  `maturity` field (still read by cards/filters) until consumers migrate. */
-export const TIER_TO_LEGACY_MATURITY: Record<MaturityTier, MaturityRating> = {
-  allAges: "All Ages",
-  teen: "Teen",
-  mature: "Mature",
-};
 
 /* --------------------------------------------------------------- socials */
 

@@ -2,9 +2,6 @@ import { defineType, defineField } from "sanity";
 
 import {
   GENRES,
-  MATURITY_DESCRIPTIONS,
-  MATURITY_RATINGS,
-  RESTRICTED_RATING,
   STRIP_MATURITY_TIERS,
   MATURITY_TIER_LABELS,
   MATURITY_TIER_DESCRIPTIONS,
@@ -77,31 +74,8 @@ export default defineType({
       validation: (rule) => rule.max(3).unique(),
     }),
     defineField({
-      name: "maturity",
-      title: "Maturity",
-      type: "string",
-      // This is the field the reader-facing badge renders, so it must never be
-      // Mature on a strip (strips are public and cap at Teen). Mature is dropped
-      // from the list AND rejected in validation, so neither the Studio dropdown
-      // nor a hand-written CLI/API write can set it.
-      options: {
-        list: MATURITY_RATINGS.filter((value) => value !== RESTRICTED_RATING).map((value) => ({
-          title: `${value} — ${MATURITY_DESCRIPTIONS[value]}`,
-          value,
-        })),
-      },
-      description:
-        "Drives the badge shown on the strip. Strips cap at Teen — Mature is not an option. If a page needs Mature content, list it as a book that links out instead.",
-      validation: (rule) =>
-        rule.custom((value) =>
-          value !== RESTRICTED_RATING
-            ? true
-            : "Strips cannot be Mature — list it as a book that links out instead.",
-        ),
-    }),
-    defineField({
       name: "maturityRating",
-      title: "Rating (Content Policy)",
+      title: "Maturity",
       type: "string",
       options: {
         list: STRIP_MATURITY_TIERS.map((value) => ({

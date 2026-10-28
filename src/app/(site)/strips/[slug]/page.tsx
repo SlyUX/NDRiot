@@ -66,7 +66,7 @@ export default async function StripPage({
           width: strip.dimensions?.width ?? null,
           height: strip.dimensions?.height ?? null,
           caption: strip.caption,
-          maturity: strip.maturity,
+          maturity: strip.maturityRating,
           genres: strip.genres,
           creatorName: strip.creator?.name ?? null,
           creatorSlug: strip.creator?.slug ?? null,

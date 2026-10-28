@@ -353,7 +353,7 @@ export default async function AccountPage({
             caption: strip.caption ?? "",
             imageAlt: strip.image?.alt ?? "",
             genre: strip.genres?.[0] ?? "",
-            maturity: strip.maturity ?? "",
+            maturity: strip.maturityRating ?? "",
             seriesId: strip.seriesId ?? null,
             imageUrl: urlFor(strip.image).width(600).url(),
           }}

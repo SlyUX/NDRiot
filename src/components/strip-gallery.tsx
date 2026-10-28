@@ -159,7 +159,7 @@ export function StripGallery({
                     width: selected.dimensions?.width ?? null,
                     height: selected.dimensions?.height ?? null,
                     caption: selected.caption,
-                    maturity: selected.maturity,
+                    maturity: selected.maturityRating,
                     genres: selected.genres,
                     creatorName: selected.creatorName,
                     creatorSlug: selected.creatorSlug,

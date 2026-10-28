@@ -4,8 +4,6 @@ import {
   FORMATS,
   FORMAT_DESCRIPTIONS,
   GENRES,
-  MATURITY_DESCRIPTIONS,
-  MATURITY_RATINGS,
   MATURITY_TIERS,
   MATURITY_TIER_LABELS,
   MATURITY_TIER_DESCRIPTIONS,
@@ -65,22 +63,8 @@ export default defineType({
       description: 'How it was made and published.',
     }),
     defineField({
-      name: 'maturity',
-      title: 'Audience',
-      type: 'string',
-      options: {
-        list: MATURITY_RATINGS.map((value) => ({
-          title: `${value} — ${MATURITY_DESCRIPTIONS[value]}`,
-          value,
-        })),
-        layout: 'radio',
-      },
-      description:
-        'Who it is for. Comics have no ratings board — creators self-rate, and these tiers match the DC/Image system most publishers use. Leave blank if genuinely unsure; a wrong rating is worse than none.',
-    }),
-    defineField({
       name: 'maturityRating',
-      title: 'Rating (Content Policy)',
+      title: 'Maturity',
       type: 'string',
       options: {
         list: MATURITY_TIERS.map((value) => ({
@@ -89,20 +73,13 @@ export default defineType({
         })),
         layout: 'radio',
       },
-      // Only relevant when there's on-site readable content to gate — i.e. a
-      // preview PDF. Without one, nothing is read here (the reader buys it
-      // elsewhere) and the cover is covered by "Cover is Mature" below, so the
-      // field is hidden. A Strip, read in full on-site, always carries a rating.
-      hidden: ({ document }) => !document?.previewUrl,
+      // Informational on a Comic: we don't host the book, so this rating does
+      // NOT restrict it from being listed — the cover is gated separately by
+      // "Cover is Mature" below. It only becomes an 18+ gate where we host
+      // readable content: a Preview PDF, or an admin Free Download. Optional
+      // (a comic can list without it); shown on the listing and on retail slips.
       description:
-        'Only needed when this comic has a Preview PDF (below) — that preview is the on-site reading the gate applies to. (Whether the cover is mature is captured separately.) Mature = non-sexual nudity, graphic violence/gore, or adult themes — never sexual content, which is prohibited. Rate the preview as a reader meets it: if one page is Mature, it’s Mature.',
-      validation: (rule) =>
-        rule.custom((value, context) => {
-          if (context.document?.previewUrl && !value) {
-            return 'This comic has a Preview PDF — choose the rating that covers it.'
-          }
-          return true
-        }),
+        'The comic’s content rating — shown on its listing and on retail shelf slips. Informational: it does not stop a comic from being listed (the cover is gated separately by “Cover is Mature”). It becomes an 18+ gate only where we host readable content — a Preview PDF or an admin Free Download. Mature = non-sexual nudity, graphic violence/gore, or adult themes — never sexual content, which is prohibited.',
     }),
     defineField({
       name: 'coverIsMature',

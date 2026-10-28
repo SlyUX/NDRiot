@@ -41,7 +41,7 @@ export const CREATOR_QUERY =
   works[]{label,url},
   studio->{_id,name,"slug":slug.current,website,logo},
   organizations[]->{_id,name,"slug":slug.current,website,logo},
-  "books": *[_type=="book" && references(^._id)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}
+  "books": *[_type=="book" && references(^._id)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturityRating,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}
 }`);
 // A creator's convention appearances (separate docs), venue resolved — for the
 // profile Events row. The caller filters to upcoming by forDate/venue dates.
@@ -63,7 +63,7 @@ export const OWNED_APPEARANCES_QUERY =
 }`);
 
 export const BOOKS_QUERY = defineQuery(
-  `*[_type=="book"]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}`,
+  `*[_type=="book"]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturityRating,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}`,
 );
 
 /**
@@ -87,17 +87,17 @@ export const FILTERED_BOOKS_QUERY = defineQuery(`{
     _type=="book"
     && (!defined($genres) || count(genres[@ in $genres]) > 0)
     && (!defined($format) || format == $format)
-    && (!defined($maturity) || maturity == $maturity)
+    && (!defined($maturityRating) || maturityRating == $maturityRating)
     && (!defined($status) || status == $status)
     && (!defined($funding) || count(links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))]) > 0)
     && (!defined($preview) || defined(previewUrl))
     && (!defined($q) || title match $q || creator->name match $q || shortDescription match $q || pt::text(description) match $q)
-  ]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturity,issueCount,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},
+  ]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturityRating,issueCount,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},
   "total": count(*[
     _type=="book"
     && (!defined($genres) || count(genres[@ in $genres]) > 0)
     && (!defined($format) || format == $format)
-    && (!defined($maturity) || maturity == $maturity)
+    && (!defined($maturityRating) || maturityRating == $maturityRating)
     && (!defined($status) || status == $status)
     && (!defined($funding) || count(links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))]) > 0)
     && (!defined($preview) || defined(previewUrl))
@@ -144,25 +144,25 @@ export const CREATOR_REGIONS_QUERY = defineQuery(
 );
 export const BOOK_QUERY =
   defineQuery(`*[_type=="book" && slug.current==$slug][0]{
-  _id,title,status,genres,format,maturity,issueCount,description,"descriptionText":pt::text(description),cover,previewUrl,
+  _id,title,status,genres,format,maturityRating,issueCount,description,"descriptionText":pt::text(description),cover,previewUrl,
   videos[]{title,url},
   links[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},
   "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,
   "creatorId": creator._ref,
   creator->{name,"slug":slug.current,place,photo,"bioText":pt::text(bio),studio->{name}},
   "otherBooks": *[_type=="book" && _id != ^._id && creator._ref == ^.creator._ref]|order(title asc){
-    _id,title,"slug":slug.current,status,genres,format,maturity,cover,
+    _id,title,"slug":slug.current,status,genres,format,maturityRating,cover,
     "descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name
   }
 }`);
 export const GENRE_BOOKS_QUERY = defineQuery(`{
-  "items": *[_type=="book" && $genre in genres]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},
+  "items": *[_type=="book" && $genre in genres]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturityRating,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},
   "total": count(*[_type=="book" && $genre in genres])
 }`);
 
 /** Comics of one format, for the /formats/[format] hub. Alphabetical, neutral. */
 export const FORMAT_BOOKS_QUERY = defineQuery(`{
-  "items": *[_type=="book" && format==$format]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},
+  "items": *[_type=="book" && format==$format]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturityRating,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},
   "total": count(*[_type=="book" && format==$format])
 }`);
 
@@ -231,7 +231,7 @@ export const HOME_NEW_QUERY =
  * projections as BOOKS_QUERY / CREATORS_QUERY so the cards match everywhere.
  */
 export const SAVED_BOOKS_QUERY = defineQuery(
-  `*[_type=="book" && _id in $ids && defined(slug.current)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}`,
+  `*[_type=="book" && _id in $ids && defined(slug.current)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturityRating,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}`,
 );
 
 /** A creator's display name + public slug, by id — for the signed-in hero
@@ -251,7 +251,7 @@ export const OWNED_DOCS_QUERY = defineQuery(
 
 /** An owner's comics — books whose creator is one they own ($ids = creator ids). */
 export const OWNED_BOOKS_QUERY = defineQuery(
-  `*[_type=="book" && creator._ref in $ids && defined(slug.current)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturity,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}`,
+  `*[_type=="book" && creator._ref in $ids && defined(slug.current)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturityRating,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}`,
 );
 
 /** An owner's media outlets, by id. */
@@ -455,7 +455,7 @@ export const ALLY_QUERY = defineQuery(
 // Enough to render a strip inline in the gallery (image at natural aspect,
 // caption, series) without a second fetch — the whole point of the same-page
 // expand. `seriesId` groups a series' installments for prev/next.
-const STRIP_CARD = `_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current`;
+const STRIP_CARD = `_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturityRating,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current`;
 // The home Strips row (the only caller) — newest first, capped to a rowful so
 // the fetch stays bounded as the strip catalog grows. The full Strips browse is
 // FILTERED_STRIPS_QUERY on /comics?tab=strips.
@@ -491,7 +491,7 @@ export const CREATOR_STRIPS_QUERY = defineQuery(
 // One strip, to read — with the page image's real dimensions so it renders at
 // its natural aspect, whatever shape the creator drew.
 export const STRIP_QUERY = defineQuery(
-  `*[_type=="strip" && slug.current==$slug][0]{_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturity,publishedAt,creator->{name,"slug":slug.current,photo},"series":series->{title,"slug":slug.current},
+  `*[_type=="strip" && slug.current==$slug][0]{_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturityRating,publishedAt,creator->{name,"slug":slug.current,photo},"series":series->{title,"slug":slug.current},
     "prevInSeries": *[_type=="strip" && defined(^.series._ref) && series._ref==^.series._ref && publishedAt < ^.publishedAt && defined(slug.current)]|order(publishedAt desc)[0]{title,"slug":slug.current},
     "nextInSeries": *[_type=="strip" && defined(^.series._ref) && series._ref==^.series._ref && publishedAt > ^.publishedAt && defined(slug.current)]|order(publishedAt asc)[0]{title,"slug":slug.current}}`,
 );
@@ -604,7 +604,7 @@ export const SPINNER_BOOK_PICKER_QUERY =
 // printing bands (so the band always shows current maturity + creator slug).
 export const SPINNER_BOOK_QUERY =
   defineQuery(`*[_type=="book" && _id==$id][0]{
-  _id,title,"slug":slug.current,cover,maturity,maturityRating,
+  _id,title,"slug":slug.current,cover,maturityRating,
   "descriptionText":pt::text(description),
   "creatorId":creator._ref,creator->{name,"slug":slug.current}
 }`);
@@ -635,7 +635,7 @@ export const BOOK_IDS_QUERY = defineQuery(
 
 /** The books the hero landed on, in full. */
 export const HERO_BOOKS_QUERY = defineQuery(`*[_type=="book" && _id in $ids]{
-  _id,title,"slug":slug.current,status,genres,format,maturity,cover,shortDescription,
+  _id,title,"slug":slug.current,status,genres,format,maturityRating,cover,shortDescription,
   "descriptionText": pt::text(description),
   "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,
   "creatorName":creator->name,"creatorId":creator._ref
@@ -759,7 +759,7 @@ export const INTAKE_BOOK_EDIT_QUERY =
   defineQuery(`*[_type=="book" && _id==$id][0]{
   _id,title,"slug":slug.current,
   "creatorId":creator._ref,
-  genres,format,maturity,maturityRating,coverIsMature,status,issueCount,
+  genres,format,maturityRating,coverIsMature,status,issueCount,
   shortDescription,
   "descriptionText":pt::text(description),
   cover,"coverAlt":cover.alt,

@@ -64,7 +64,7 @@ export function bookToCard(book: BookSummary): ContentCardProps {
     eyebrow: book.creatorName,
     genres: book.genres,
     format: book.format,
-    maturity: book.maturity,
+    maturity: book.maturityRating,
     fundingUrl: book.fundingUrl,
     // Shown on hover over the cover (desktop) — the opening of the description.
     hoverText: truncate(book.descriptionText, 200),
@@ -126,7 +126,7 @@ export function stripToCard(strip: StripSummary): ContentCardProps {
     imageAlt: "",
     eyebrow: strip.creatorName ?? undefined,
     genres: strip.genres,
-    maturity: strip.maturity,
+    maturity: strip.maturityRating,
     aspectRatio: "cover",
   };
 }

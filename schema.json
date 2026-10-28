@@ -4591,27 +4591,6 @@
         },
         "optional": true
       },
-      "maturity": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "union",
-          "of": [
-            {
-              "type": "string",
-              "value": "All Ages"
-            },
-            {
-              "type": "string",
-              "value": "Teen"
-            },
-            {
-              "type": "string",
-              "value": "Teen+"
-            }
-          ]
-        },
-        "optional": true
-      },
       "maturityRating": {
         "type": "objectAttribute",
         "value": {
@@ -4903,31 +4882,6 @@
             {
               "type": "string",
               "value": "Webcomic"
-            }
-          ]
-        },
-        "optional": true
-      },
-      "maturity": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "union",
-          "of": [
-            {
-              "type": "string",
-              "value": "All Ages"
-            },
-            {
-              "type": "string",
-              "value": "Teen"
-            },
-            {
-              "type": "string",
-              "value": "Teen+"
-            },
-            {
-              "type": "string",
-              "value": "Mature"
             }
           ]
         },

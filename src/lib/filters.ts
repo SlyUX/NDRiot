@@ -1,5 +1,26 @@
 import type { Facet } from '@/components/filter-bar'
-import { FORMATS, GENRES, MATURITY_RATINGS, US_STATES } from '@/lib/taxonomy'
+import {
+  FORMATS,
+  GENRES,
+  MATURITY_RATINGS,
+  MATURITY_TIERS,
+  MATURITY_TIER_LABELS,
+  US_STATES,
+  type MaturityTier,
+} from '@/lib/taxonomy'
+
+/**
+ * The book "Audience" facet lists the three maturity tiers by their labels
+ * ("All-Ages" / "Teen" / "Mature"); the stored field is the tier code, so the
+ * filter maps the picked label back to its code — like the State facet maps a
+ * name to its code. (Creators keep their own `audience` field + legacy list.)
+ */
+const MATURITY_FILTER_OPTIONS = MATURITY_TIERS.map((t) => MATURITY_TIER_LABELS[t])
+
+function tierFromLabel(label: string | null): MaturityTier | null {
+  if (!label) return null
+  return MATURITY_TIERS.find((t) => MATURITY_TIER_LABELS[t] === label) ?? null
+}
 
 /**
  * Turning URL search params into GROQ parameters.
@@ -61,7 +82,7 @@ export function bookFacets(genres: readonly string[]): Facet[] {
   return [
     { param: 'genre', label: 'Genre', options: genres },
     { param: 'format', label: 'Format', options: FORMATS },
-    { param: 'audience', label: 'Audience', options: MATURITY_RATINGS },
+    { param: 'audience', label: 'Audience', options: MATURITY_FILTER_OPTIONS },
     { param: 'status', label: 'Status', options: ['Ongoing', 'Complete', 'Upcoming'] },
     // "Sample before you buy" — books that carry a free preview PDF.
     { param: 'preview', label: 'Has preview', options: [], toggle: true, tone: 'inverse' },
@@ -87,7 +108,7 @@ export function homeBookFacets(genres: readonly string[]): Facet[] {
   return [
     { param: 'genre', label: 'Genre', options: genres },
     { param: 'format', label: 'Format', options: FORMATS },
-    { param: 'audience', label: 'Audience', options: MATURITY_RATINGS },
+    { param: 'audience', label: 'Audience', options: MATURITY_FILTER_OPTIONS },
     { param: 'funding', label: 'Now funding', options: [], toggle: true, tone: 'funding' },
     { param: 'preview', label: 'Has preview', options: [], toggle: true, tone: 'inverse' },
   ]
@@ -214,7 +235,8 @@ export function bookFilters(params: SearchParams) {
   return {
     genres: allowed(many(params.genre), GENRES),
     format: allowed(many(params.format), FORMATS)?.[0] ?? null,
-    maturity: allowed(many(params.audience), MATURITY_RATINGS)?.[0] ?? null,
+    // The facet carries tier LABELS; the query filters by the tier CODE.
+    maturityRating: tierFromLabel(one(params.audience)),
     status: allowed(many(params.status), ['Ongoing', 'Complete', 'Upcoming'])?.[0] ?? null,
     // A flag: present means "only books with a live campaign". Absent means
     // every book, not "only books that are not funding".

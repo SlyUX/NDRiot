@@ -5,10 +5,8 @@ import {
   FORMATS,
   LINK_KINDS,
   MATURITY_TIERS,
-  TIER_TO_LEGACY_MATURITY,
   SINGLE_VOLUME_FORMATS,
   STATUSES,
-  type MaturityTier,
 } from '@/lib/taxonomy'
 import { honeypotTripped, rateLimited, submittedTooFast } from '@/lib/intake/anti-spam'
 import {
@@ -175,9 +173,9 @@ export async function submitBook(
     single: true,
   }).matched[0]
   const coverIsMature = String(formData.get('coverIsMature') ?? '') === 'yes'
-  if (!maturityRating) {
-    return { status: 'error', fieldErrors: { maturityRating: 'Please choose a rating.' }, values }
-  }
+  // Maturity is optional on a comic (informational — see the schema): we don't
+  // host the book, so it gates nothing by itself. Public display of a mature
+  // cover is handled by `coverIsMature`.
   const status = matchTaxonomy(String(formData.get('status') ?? ''), STATUSES, { single: true }).matched[0]
 
   // Issue count only for a serialised format, and only a positive integer.
@@ -226,11 +224,10 @@ export async function submitBook(
   }
   if (genres.length) fields.genres = genres
   if (format) fields.format = format
-  fields.maturityRating = maturityRating
-  fields.ratingSource = 'creator'
-  // Keep the legacy `maturity` field populated (still read by cards/filters)
-  // until consumers migrate in Phase 6.
-  fields.maturity = TIER_TO_LEGACY_MATURITY[maturityRating as MaturityTier]
+  if (maturityRating) {
+    fields.maturityRating = maturityRating
+    fields.ratingSource = 'creator'
+  }
   fields.coverIsMature = coverIsMature
   if (status) fields.status = status
   if (issueCount !== undefined) fields.issueCount = issueCount

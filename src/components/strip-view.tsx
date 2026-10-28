@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { GenreBadge } from "@/components/genre-badge";
 import { Badge } from "@/components/ui/badge";
 import { urlFor } from "@/sanity/image";
+import { MATURITY_TIER_LABELS, type MaturityTier } from "@/lib/taxonomy";
 import type { Genre, SanityImage } from "@/lib/types";
 
 /**
@@ -27,7 +28,7 @@ export interface StripViewData {
   width: number | null;
   height: number | null;
   caption: string | null;
-  maturity: string | null;
+  maturity: MaturityTier | null;
   genres: string[] | null;
   creatorName: string | null;
   creatorSlug: string | null;
@@ -140,7 +141,7 @@ export function StripView({
             variant="outline"
             className="border-primary/60 text-primary px-2 py-0.5 text-[10px] tracking-widest uppercase"
           >
-            {strip.maturity}
+            {MATURITY_TIER_LABELS[strip.maturity]}
           </Badge>
         )}
         {action && <span className="ml-auto">{action}</span>}
