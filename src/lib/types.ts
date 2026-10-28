@@ -19,6 +19,8 @@ import type {
   RAG_OPEN_SUBMISSIONS_QUERY_RESULT,
   SPINNER_BOOK_PICKER_QUERY_RESULT,
   SPINNER_BOOK_QUERY_RESULT,
+  SPINNER_RAG_PICKER_QUERY_RESULT,
+  SPINNER_RAG_QUERY_RESULT,
   SpinnerStore,
   CONVENTIONS_QUERY_RESULT,
   CONVENTIONS_IN_STATE_QUERY_RESULT,
@@ -78,6 +80,8 @@ export type SpinnerRackItem = NonNullable<SpinnerStore["rack"]>[number];
 export type SpinnerPayout = NonNullable<SpinnerStore["payouts"]>[number];
 export type SpinnerBookPick = SPINNER_BOOK_PICKER_QUERY_RESULT[number];
 export type SpinnerBook = NonNullable<SPINNER_BOOK_QUERY_RESULT>;
+export type SpinnerRagPick = SPINNER_RAG_PICKER_QUERY_RESULT[number];
+export type SpinnerRag = NonNullable<SPINNER_RAG_QUERY_RESULT>;
 
 export type ConventionSummary = CONVENTIONS_QUERY_RESULT[number];
 /** The lean projection behind the convention page's right rail (same shape for

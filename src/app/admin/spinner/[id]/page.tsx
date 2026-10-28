@@ -7,10 +7,14 @@ import {
   updateRackItem,
   updateStoreMeta,
 } from "@/app/actions/spinner";
-import { SpinnerBookPicker } from "@/components/spinner-book-picker";
-import { safeFetch, SPINNER_BOOK_PICKER_QUERY } from "@/lib/queries";
+import { SpinnerRackPicker } from "@/components/spinner-rack-picker";
+import {
+  safeFetch,
+  SPINNER_BOOK_PICKER_QUERY,
+  SPINNER_RAG_PICKER_QUERY,
+} from "@/lib/queries";
 import { computeEarnings, creatorShare, money, storeTitle } from "@/lib/spinner";
-import type { SpinnerBookPick } from "@/lib/types";
+import type { SpinnerBookPick, SpinnerRagPick } from "@/lib/types";
 import { getStore } from "@/sanity/spinner-store-client";
 
 export const dynamic = "force-dynamic";
@@ -29,11 +33,23 @@ export default async function SpinnerStorePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [store, pickerBooks] = await Promise.all([
+  const [store, pickerBooks, pickerRags] = await Promise.all([
     getStore(id),
     safeFetch<SpinnerBookPick[]>(SPINNER_BOOK_PICKER_QUERY, {}, []),
+    safeFetch<SpinnerRagPick[]>(SPINNER_RAG_PICKER_QUERY, {}, []),
   ]);
   if (!store) notFound();
+
+  const bookPicks = pickerBooks.map((b) => ({
+    _id: b._id,
+    title: b.title,
+    subtitle: b.creator?.name ?? null,
+  }));
+  const ragPicks = pickerRags.map((r) => ({
+    _id: r._id,
+    title: r.title,
+    subtitle: r.issueNumber ? `Issue ${r.issueNumber}` : null,
+  }));
 
   const earnings = computeEarnings(store);
   const sharePct = Math.round(creatorShare(store) * 100);
@@ -97,10 +113,16 @@ export default async function SpinnerStorePage({
         </form>
       </section>
 
-      {/* Add a book */}
+      {/* Add a comic */}
       <section className="max-w-2xl">
-        <h2 className="text-primary mb-3 text-sm font-black tracking-widest uppercase">Add a book to the rack</h2>
-        <SpinnerBookPicker storeId={store._id} books={pickerBooks} />
+        <h2 className="text-primary mb-3 text-sm font-black tracking-widest uppercase">Add a comic to the rack</h2>
+        <SpinnerRackPicker storeId={store._id} kind="book" items={bookPicks} />
+      </section>
+
+      {/* Add a Rag issue */}
+      <section className="max-w-2xl">
+        <h2 className="text-primary mb-3 text-sm font-black tracking-widest uppercase">Add a Rag issue to the rack</h2>
+        <SpinnerRackPicker storeId={store._id} kind="rag" items={ragPicks} />
       </section>
 
       {/* Rack + earnings, grouped by creator */}

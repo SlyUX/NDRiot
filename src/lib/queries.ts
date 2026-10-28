@@ -608,6 +608,19 @@ export const SPINNER_BOOK_QUERY =
   "descriptionText":pt::text(description),
   "creatorId":creator._ref,creator->{name,"slug":slug.current}
 }`);
+// ND Riot Rag issues for the "add to rack" picker. A Rag has no single creator
+// or maturity rating — it's a compilation — so the band treats it differently.
+export const SPINNER_RAG_PICKER_QUERY =
+  defineQuery(`*[_type=="ragIssue" && defined(slug.current)]|order(issueNumber desc){
+  _id,title,issueNumber,"slug":slug.current,cover
+}`);
+// One Rag issue by id — authoritative read for add-to-rack and band printing.
+// `description` is a plain text field (not portable text), so no pt::text().
+export const SPINNER_RAG_QUERY =
+  defineQuery(`*[_type=="ragIssue" && _id==$id][0]{
+  _id,title,issueNumber,"slug":slug.current,cover,
+  "descriptionText":description
+}`);
 
 /**
  * IDs only, for the hero's random pick.

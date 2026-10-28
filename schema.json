@@ -2207,6 +2207,23 @@
           "of": {
             "type": "object",
             "attributes": {
+              "kind": {
+                "type": "objectAttribute",
+                "value": {
+                  "type": "union",
+                  "of": [
+                    {
+                      "type": "string",
+                      "value": "book"
+                    },
+                    {
+                      "type": "string",
+                      "value": "rag"
+                    }
+                  ]
+                },
+                "optional": true
+              },
               "bookId": {
                 "type": "objectAttribute",
                 "value": {
@@ -4935,7 +4952,7 @@
             }
           ]
         },
-        "optional": false
+        "optional": true
       },
       "coverIsMature": {
         "type": "objectAttribute",

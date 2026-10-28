@@ -105,18 +105,32 @@ export default defineType({
     }),
     defineField({
       name: 'rack',
-      title: 'Books on the rack',
+      title: 'On the rack',
       type: 'array',
       description:
-        'Managed from /admin/spinner. Each book’s price is the per-store sell price (editable); earnings use it.',
+        'Managed from /admin/spinner. Each item’s price is the per-store sell price (editable); earnings use it. Items are comics or ND Riot Rag issues.',
       of: [
         defineArrayMember({
           type: 'object',
           name: 'rackItem',
           fields: [
-            defineField({ name: 'bookId', title: 'Book id', type: 'string', readOnly: true }),
-            defineField({ name: 'bookTitle', title: 'Book', type: 'string', readOnly: true }),
-            defineField({ name: 'bookSlug', title: 'Book slug', type: 'string', readOnly: true }),
+            defineField({
+              name: 'kind',
+              title: 'Kind',
+              type: 'string',
+              description: 'Comic (a book) or an ND Riot Rag issue. Older items with no value are comics.',
+              options: {
+                list: [
+                  { title: 'Comic', value: 'book' },
+                  { title: 'Rag issue', value: 'rag' },
+                ],
+              },
+              initialValue: 'book',
+              readOnly: true,
+            }),
+            defineField({ name: 'bookId', title: 'Item id', type: 'string', readOnly: true }),
+            defineField({ name: 'bookTitle', title: 'Title', type: 'string', readOnly: true }),
+            defineField({ name: 'bookSlug', title: 'Slug', type: 'string', readOnly: true }),
             defineField({ name: 'creatorId', title: 'Creator id', type: 'string', readOnly: true }),
             defineField({ name: 'creatorName', title: 'Creator', type: 'string', readOnly: true }),
             defineField({ name: 'creatorSlug', title: 'Creator slug', type: 'string', readOnly: true }),
@@ -140,9 +154,9 @@ export default defineType({
             defineField({ name: 'shrink', title: 'Shrink', type: 'number', validation: (r) => r.min(0) }),
           ],
           preview: {
-            select: { title: 'bookTitle', creatorName: 'creatorName', price: 'price', sold: 'sold' },
-            prepare: ({ title, creatorName, price, sold }) => ({
-              title: title || 'Book',
+            select: { title: 'bookTitle', creatorName: 'creatorName', price: 'price', sold: 'sold', kind: 'kind' },
+            prepare: ({ title, creatorName, price, sold, kind }) => ({
+              title: title || (kind === 'rag' ? 'Rag issue' : 'Comic'),
               subtitle: [creatorName, price != null ? `$${price}` : null, sold != null ? `${sold} sold` : null]
                 .filter(Boolean)
                 .join(' · '),

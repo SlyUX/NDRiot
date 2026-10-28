@@ -5,8 +5,8 @@ import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
 import { isAdminEmail } from "@/lib/admin";
-import { safeFetch, SPINNER_BOOK_QUERY } from "@/lib/queries";
-import type { SpinnerBook } from "@/lib/types";
+import { safeFetch, SPINNER_BOOK_QUERY, SPINNER_RAG_QUERY } from "@/lib/queries";
+import type { SpinnerBook, SpinnerRag } from "@/lib/types";
 import {
   addRackItem,
   createStore as createStoreDoc,
@@ -82,12 +82,44 @@ export async function addBookToRack(storeId: string, bookId: string): Promise<vo
   const book = await safeFetch<SpinnerBook | null>(SPINNER_BOOK_QUERY, { id: bookId }, null);
   if (!book) throw new Error("Book not found.");
   await addRackItem(storeId, {
+    kind: "book",
     bookId: book._id,
     bookTitle: book.title ?? undefined,
     bookSlug: book.slug ?? undefined,
     creatorId: book.creatorId ?? undefined,
     creatorName: book.creator?.name ?? undefined,
     creatorSlug: book.creator?.slug ?? undefined,
+    price: undefined,
+    lastCount: undefined,
+    lastCountDate: undefined,
+    sold: 0,
+    shrink: 0,
+  });
+  revalidatePath(`/admin/spinner/${storeId}`);
+}
+
+// Pseudo-creator bucket for Rag sales: a Rag is a compilation with no single
+// creator, so its proceeds roll up under ND Riot itself (one bucket across all
+// issues, one payout line). Stable id so earnings + payouts stay keyed to it.
+const RAG_CREATOR_ID = "nd-riot-rag";
+const RAG_CREATOR_NAME = "ND Riot Rag";
+
+export async function addRagToRack(storeId: string, ragId: string): Promise<void> {
+  await requireAdmin();
+  if (!storeId || !ragId) throw new Error("Missing store or Rag issue.");
+  // Authoritative read — the band re-reads live too, but denormalize now so the
+  // rack list and earnings have a title/slug without another fetch.
+  const rag = await safeFetch<SpinnerRag | null>(SPINNER_RAG_QUERY, { id: ragId }, null);
+  if (!rag) throw new Error("Rag issue not found.");
+  const title = rag.issueNumber ? `Issue ${rag.issueNumber}: ${rag.title ?? ""}`.trim() : rag.title;
+  await addRackItem(storeId, {
+    kind: "rag",
+    bookId: rag._id,
+    bookTitle: title ?? undefined,
+    bookSlug: rag.slug ?? undefined,
+    creatorId: RAG_CREATOR_ID,
+    creatorName: RAG_CREATOR_NAME,
+    creatorSlug: undefined, // a Rag has no creator profile
     price: undefined,
     lastCount: undefined,
     lastCountDate: undefined,

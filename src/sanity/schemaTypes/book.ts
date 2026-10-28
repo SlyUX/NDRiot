@@ -89,9 +89,20 @@ export default defineType({
         })),
         layout: 'radio',
       },
+      // Only relevant when there's on-site readable content to gate — i.e. a
+      // preview PDF. Without one, nothing is read here (the reader buys it
+      // elsewhere) and the cover is covered by "Cover is Mature" below, so the
+      // field is hidden. A Strip, read in full on-site, always carries a rating.
+      hidden: ({ document }) => !document?.previewUrl,
       description:
-        'The gated rating. Mature = non-sexual nudity, graphic violence/gore, or adult themes — never sexual content, which is prohibited. Rate the work as a reader meets it: if one page is Mature, the book is Mature.',
-      validation: (rule) => rule.required(),
+        'Only needed when this comic has a Preview PDF (below) — that preview is the on-site reading the gate applies to. (Whether the cover is mature is captured separately.) Mature = non-sexual nudity, graphic violence/gore, or adult themes — never sexual content, which is prohibited. Rate the preview as a reader meets it: if one page is Mature, it’s Mature.',
+      validation: (rule) =>
+        rule.custom((value, context) => {
+          if (context.document?.previewUrl && !value) {
+            return 'This comic has a Preview PDF — choose the rating that covers it.'
+          }
+          return true
+        }),
     }),
     defineField({
       name: 'coverIsMature',

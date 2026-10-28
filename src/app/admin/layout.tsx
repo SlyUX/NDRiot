@@ -22,7 +22,7 @@ export default async function AdminLayout({
 
   return (
     <div className="bg-background text-foreground min-h-screen">
-      <header className="border-primary/40 border-b px-6 py-3">
+      <header className="border-primary/40 border-b px-6 py-3 print:hidden">
         <div className="mx-auto flex max-w-[70rem] items-center justify-between gap-4">
           <Link
             href="/admin/spinner"
@@ -33,7 +33,9 @@ export default async function AdminLayout({
           <span className="text-muted-foreground text-xs">{session?.user?.email}</span>
         </div>
       </header>
-      <main className="mx-auto max-w-[70rem] px-6 py-8">{children}</main>
+      <main className="mx-auto max-w-[70rem] px-6 py-8 print:mx-0 print:max-w-none print:p-0">
+        {children}
+      </main>
     </div>
   );
 }

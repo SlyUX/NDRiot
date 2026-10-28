@@ -417,6 +417,7 @@ export type SpinnerStore = {
   storeCutPercent?: number;
   ndRiotCutPercent?: number;
   rack?: Array<{
+    kind?: "book" | "rag";
     bookId?: string;
     bookTitle?: string;
     bookSlug?: string;
@@ -835,7 +836,7 @@ export type Book = {
     | "Zine"
     | "Webcomic";
   maturity?: "All Ages" | "Teen" | "Teen+" | "Mature";
-  maturityRating: "allAges" | "teen" | "mature";
+  maturityRating?: "allAges" | "teen" | "mature";
   coverIsMature?: boolean;
   ratingSource?: "creator" | "operator";
   ratingNote?: string;
@@ -4140,7 +4141,7 @@ export type SPINNER_BOOK_PICKER_QUERY_RESULT = Array<{
   title: string;
   slug: string;
   cover: ImageWithAlt | null;
-  maturityRating: "allAges" | "mature" | "teen";
+  maturityRating: "allAges" | "mature" | "teen" | null;
   creatorId: string;
   creator: {
     name: string;
@@ -4156,13 +4157,36 @@ export type SPINNER_BOOK_QUERY_RESULT = {
   title: string;
   slug: string;
   cover: ImageWithAlt | null;
-  maturityRating: "allAges" | "mature" | "teen";
+  maturityRating: "allAges" | "mature" | "teen" | null;
   descriptionText: string;
   creatorId: string;
   creator: {
     name: string;
     slug: string;
   };
+} | null;
+
+// Source: src/lib/queries.ts
+// Variable: SPINNER_RAG_PICKER_QUERY
+// Query: *[_type=="ragIssue" && defined(slug.current)]|order(issueNumber desc){  _id,title,issueNumber,"slug":slug.current,cover}
+export type SPINNER_RAG_PICKER_QUERY_RESULT = Array<{
+  _id: string;
+  title: string;
+  issueNumber: number;
+  slug: string;
+  cover: ImageWithAlt;
+}>;
+
+// Source: src/lib/queries.ts
+// Variable: SPINNER_RAG_QUERY
+// Query: *[_type=="ragIssue" && _id==$id][0]{  _id,title,issueNumber,"slug":slug.current,cover,  "descriptionText":description}
+export type SPINNER_RAG_QUERY_RESULT = {
+  _id: string;
+  title: string;
+  issueNumber: number;
+  slug: string;
+  cover: ImageWithAlt;
+  descriptionText: string | null;
 } | null;
 
 // Source: src/lib/queries.ts
@@ -4441,7 +4465,7 @@ export type INTAKE_BOOK_EDIT_QUERY_RESULT = {
     | "Zine"
     | null;
   maturity: "All Ages" | "Mature" | "Teen" | "Teen+" | null;
-  maturityRating: "allAges" | "mature" | "teen";
+  maturityRating: "allAges" | "mature" | "teen" | null;
   coverIsMature: boolean | null;
   status: "Complete" | "Ongoing" | "Upcoming" | null;
   issueCount: number | null;
@@ -4871,6 +4895,8 @@ declare module "@sanity/client" {
     'count(*[_type in ["book","strip"] && creator._ref==$id && (defined(cover) || defined(image))])': RAG_CREATOR_PREVIEW_COUNT_QUERY_RESULT;
     '*[_type=="book" && defined(slug.current)]|order(title asc){\n  _id,title,"slug":slug.current,cover,maturityRating,\n  "creatorId":creator._ref,creator->{name,"slug":slug.current}\n}': SPINNER_BOOK_PICKER_QUERY_RESULT;
     '*[_type=="book" && _id==$id][0]{\n  _id,title,"slug":slug.current,cover,maturityRating,\n  "descriptionText":pt::text(description),\n  "creatorId":creator._ref,creator->{name,"slug":slug.current}\n}': SPINNER_BOOK_QUERY_RESULT;
+    '*[_type=="ragIssue" && defined(slug.current)]|order(issueNumber desc){\n  _id,title,issueNumber,"slug":slug.current,cover\n}': SPINNER_RAG_PICKER_QUERY_RESULT;
+    '*[_type=="ragIssue" && _id==$id][0]{\n  _id,title,issueNumber,"slug":slug.current,cover,\n  "descriptionText":description\n}': SPINNER_RAG_QUERY_RESULT;
     '*[_type=="book" && defined(slug.current)]._id': BOOK_IDS_QUERY_RESULT;
     '*[_type=="book" && _id in $ids]{\n  _id,title,"slug":slug.current,status,genres,format,maturity,cover,shortDescription,\n  "descriptionText": pt::text(description),\n  "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,\n  "creatorName":creator->name,"creatorId":creator._ref\n}': HERO_BOOKS_QUERY_RESULT;
     '{\n  "books": *[_type=="book" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "creators": *[_type=="creator" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "columns": *[_type=="column" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "interviews": *[_type=="interview" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "downloads": *[_type=="freeDownload" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "resources": *[_type=="resource" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "allies": *[_type=="ally" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "strips": *[_type=="strip" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "series": *[_type=="stripSeries" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "ragIssues": *[_type=="ragIssue" && defined(slug.current)]{"slug":slug.current,_updatedAt},\n  "genres": array::unique(*[_type=="book" && defined(genres)].genres[]),\n  "formats": array::unique(*[_type=="book" && defined(format)].format)\n}': SITEMAP_QUERY_RESULT;
