@@ -11,9 +11,11 @@ import type { StructureResolver } from 'sanity/structure'
  * the global create menu.
  */
 const SINGLETONS = ['siteSettings']
-// Lives in the private `ndriot_auth` dataset and is reviewed in the Submissions
-// workspace — never shown or created here in the production workspace.
-const HIDDEN = [...SINGLETONS, 'ragSubmission']
+// Live in the private `ndriot_auth` dataset and are managed in the Operations
+// workspace — never shown or created here in the production workspace. (Without
+// spinnerStore here, production auto-lists it as an always-empty item, since the
+// stores are in the other dataset.)
+const HIDDEN = [...SINGLETONS, 'ragSubmission', 'spinnerStore']
 
 export const structure: StructureResolver = (S) =>
   S.list()

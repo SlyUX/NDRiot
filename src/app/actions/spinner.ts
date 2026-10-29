@@ -15,6 +15,7 @@ import {
   patchStoreMeta,
   recordPayout as recordPayoutDoc,
   removeRackItem as removeRackItemDoc,
+  removeRackItems as removeRackItemsDoc,
   updateRackItem as updateRackItemDoc,
 } from "@/sanity/spinner-store-client";
 
@@ -172,6 +173,17 @@ export async function removeRackItem(fd: FormData): Promise<void> {
   if (!id || !key) throw new Error("Missing store or item.");
   await removeRackItemDoc(id, key);
   revalidatePath(`/admin/spinner/${id}`);
+}
+
+/** Bulk "Remove selected" — called directly from the client table (not a form). */
+export async function removeRackItems(
+  storeId: string,
+  keys: string[],
+): Promise<void> {
+  await requireAdmin();
+  if (!storeId || keys.length === 0) return;
+  await removeRackItemsDoc(storeId, keys);
+  revalidatePath(`/admin/spinner/${storeId}`);
 }
 
 export async function recordPayout(fd: FormData): Promise<void> {

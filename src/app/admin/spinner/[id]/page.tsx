@@ -1,14 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { recordPayout, updateStoreMeta } from "@/app/actions/spinner";
 import {
-  recordPayout,
-  removeRackItem,
-  updateRackItem,
-  updateStoreMeta,
-} from "@/app/actions/spinner";
-import { SpinnerPrintSelection } from "@/components/spinner-print-selection";
-import { SpinnerRackPicker } from "@/components/spinner-rack-picker";
+  SpinnerRackTable,
+  type RackTableRow,
+} from "@/components/spinner-rack-table";
+import { SpinnerStoreTabs } from "@/components/spinner-store-tabs";
 import {
   safeFetch,
   SPINNER_BOOK_PICKER_QUERY,
@@ -30,13 +28,6 @@ const field =
 const label = "text-muted-foreground mb-0.5 block text-[10px] tracking-widest uppercase";
 const btn =
   "bg-primary text-primary-foreground px-3 py-1.5 text-xs font-black tracking-widest uppercase";
-const btnGhost =
-  "text-muted-foreground hover:text-destructive text-[10px] font-black tracking-widest uppercase";
-
-// Shared grid template so the header row and every rack row line up as a table.
-// Title | Author | Maturity | Price | Stock | Sold. Flat on mobile (stacks).
-const rowGrid =
-  "grid grid-cols-[1fr_auto] gap-x-3 sm:grid-cols-[minmax(0,2fr)_minmax(0,1.3fr)_4.5rem_4.5rem_3.5rem_3.5rem]";
 
 /** The maturity label for a rack item: Rags are always Mature; a comic's rating
  *  is looked up from the picker read (already fetched), not stored on the item. */
@@ -92,15 +83,84 @@ export default async function SpinnerStorePage({
   const earnings = computeEarnings(store);
   const sharePct = Math.round(creatorShare(store) * 100);
 
-  // Flat rack, sorted by author then title — no per-creator headings (those
-  // "fluffed" the page: most creators have only 1–3 books).
-  const rack = (store.rack ?? []).slice().sort((a, b) => {
-    const byAuthor = (a.creatorName ?? "").localeCompare(b.creatorName ?? "");
-    return byAuthor !== 0
-      ? byAuthor
-      : (a.bookTitle ?? "").localeCompare(b.bookTitle ?? "");
-  });
-  const totalSold = rack.reduce((n, item) => n + (item.sold ?? 0), 0);
+  // Flat rack, sorted by author then title — the table carries author as a
+  // column rather than a per-creator heading.
+  const rows: RackTableRow[] = (store.rack ?? [])
+    .filter((i) => i.bookId)
+    .slice()
+    .sort((a, b) => {
+      const byAuthor = (a.creatorName ?? "").localeCompare(b.creatorName ?? "");
+      return byAuthor !== 0
+        ? byAuthor
+        : (a.bookTitle ?? "").localeCompare(b.bookTitle ?? "");
+    })
+    .map((i) => ({
+      key: i._key,
+      bookId: i.bookId as string,
+      kind: i.kind === "rag" ? "rag" : "book",
+      title: i.bookTitle ?? "Untitled",
+      author: i.creatorName ?? "",
+      maturityLabel: maturityLabel(i, maturityByBookId),
+      price: i.price ?? null,
+      lastCount: i.lastCount ?? null,
+      lastCountDate: i.lastCountDate ?? null,
+      sold: i.sold ?? null,
+      shrink: i.shrink ?? null,
+      priceNote: i.priceNote ?? null,
+    }));
+
+  const totalSold = rows.reduce((n, r) => n + (r.sold ?? 0), 0);
+
+  // Earnings & payouts panel — a collapsed disclosure per creator, handed to the
+  // tabs as a server-rendered node (so recordPayout stays a server action).
+  const earningsPanel = (
+    <div className="space-y-2">
+      {earnings.length === 0 ? (
+        <p className="text-muted-foreground text-sm">Nothing to pay out yet.</p>
+      ) : (
+        <div className="border border-white/10">
+          {earnings.map((c) => (
+            <details key={c.creatorId} className="border-b border-white/10 last:border-b-0">
+              <summary className="marker:text-muted-foreground flex cursor-pointer flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-3 py-2.5 text-sm hover:bg-white/5">
+                <span className="font-bold">{c.creatorName}</span>
+                <span className="text-muted-foreground text-xs tracking-wide uppercase">
+                  owed{" "}
+                  <span className={c.outstanding > 0.005 ? "text-funding font-bold" : "text-foreground"}>
+                    {money(c.outstanding)}
+                  </span>
+                </span>
+              </summary>
+              <div className="space-y-4 bg-white/[0.02] px-3 pt-2 pb-4">
+                <p className="text-muted-foreground text-xs tracking-wide uppercase">
+                  {c.soldUnits} sold · gross {money(c.gross)} · expected{" "}
+                  <span className="text-foreground font-bold">{money(c.expected)}</span> · paid{" "}
+                  {money(c.paidTotal)}
+                </p>
+                <form action={recordPayout} className="flex flex-wrap items-end gap-2">
+                  <input type="hidden" name="storeId" value={store._id} />
+                  <input type="hidden" name="creatorId" value={c.creatorId} />
+                  <input type="hidden" name="creatorName" value={c.creatorName} />
+                  <div>
+                    <label className={label}>Paid to date $</label>
+                    <input name="paidTotal" type="number" step="0.01" min={0} defaultValue={c.paidTotal || ""} className={`${field} w-28`} />
+                  </div>
+                  <div>
+                    <label className={label}>Last paid</label>
+                    <input name="lastPaidDate" type="date" className={field} />
+                  </div>
+                  <div className="min-w-[8rem] flex-1">
+                    <label className={label}>Notes</label>
+                    <input name="notes" type="text" className={field} />
+                  </div>
+                  <button type="submit" className={btn}>Record payment</button>
+                </form>
+              </div>
+            </details>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div className="space-y-10">
@@ -161,190 +221,25 @@ export default async function SpinnerStorePage({
         </form>
       </section>
 
-      {/* The rack — a compact table; each row expands to its management edits. */}
+      {/* The rack + earnings, as tabs */}
       <section className="space-y-3">
         <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-          <h2 className="text-primary text-sm font-black tracking-widest uppercase">The rack</h2>
+          <h2 className="text-primary text-sm font-black tracking-widest uppercase">Inventory</h2>
           <p className="text-muted-foreground text-xs tracking-wide uppercase">
-            {rack.length} {rack.length === 1 ? "title" : "titles"} · {totalSold} sold
+            {rows.length} {rows.length === 1 ? "title" : "titles"} · {totalSold} sold
           </p>
         </div>
-
-        {rack.length === 0 ? (
-          <p className="text-muted-foreground text-sm">No books on the rack yet.</p>
-        ) : (
-          <div className="border border-white/10">
-            {/* Column header (sm+ only) */}
-            <div
-              className={`${rowGrid} text-muted-foreground border-b border-white/10 px-2 py-1.5 text-[10px] tracking-widest uppercase`}
-            >
-              <span>Title</span>
-              <span className="hidden sm:block">Author</span>
-              <span className="hidden text-right sm:block">Rating</span>
-              <span className="hidden text-right sm:block">Price</span>
-              <span className="hidden text-right sm:block">Stock</span>
-              <span className="hidden text-right sm:block">Sold</span>
-            </div>
-
-            {rack.map((item) => (
-              <details key={item._key} className="border-b border-white/10 last:border-b-0">
-                <summary className={`${rowGrid} marker:text-muted-foreground cursor-pointer items-center px-2 py-2 text-sm hover:bg-white/5`}>
-                  <span className="min-w-0 truncate font-semibold">
-                    {item.bookTitle}
-                    {item.kind === "rag" && (
-                      <span className="text-muted-foreground ml-2 text-[10px] tracking-widest uppercase">Rag</span>
-                    )}
-                  </span>
-                  <span className="text-muted-foreground hidden min-w-0 truncate text-xs sm:block">
-                    {item.creatorName}
-                  </span>
-                  <span className="hidden text-right text-[10px] tracking-wider uppercase sm:block">
-                    {maturityLabel(item, maturityByBookId)}
-                  </span>
-                  <span className="hidden text-right tabular-nums sm:block">
-                    {item.price != null ? money(item.price) : "—"}
-                  </span>
-                  <span className="hidden text-right tabular-nums sm:block">
-                    {item.lastCount ?? "—"}
-                  </span>
-                  <span className="text-muted-foreground text-right tabular-nums sm:text-foreground">
-                    {item.sold ?? 0}
-                  </span>
-                </summary>
-
-                <div className="space-y-3 bg-white/[0.02] px-3 pt-3 pb-4">
-                  {/* Inventory + price edit */}
-                  <form action={updateRackItem} className="grid grid-cols-2 gap-2 sm:grid-cols-6">
-                    <input type="hidden" name="storeId" value={store._id} />
-                    <input type="hidden" name="key" value={item._key} />
-                    <div>
-                      <label className={label}>Price $</label>
-                      <input name="price" type="number" step="0.01" min={0} defaultValue={item.price ?? ""} className={field} />
-                    </div>
-                    <div>
-                      <label className={label}>Last count</label>
-                      <input name="lastCount" type="number" min={0} defaultValue={item.lastCount ?? ""} className={field} />
-                    </div>
-                    <div>
-                      <label className={label}>Count date</label>
-                      <input name="lastCountDate" type="date" defaultValue={item.lastCountDate ?? ""} className={field} />
-                    </div>
-                    <div>
-                      <label className={label}>Sold</label>
-                      <input name="sold" type="number" min={0} defaultValue={item.sold ?? 0} className={field} />
-                    </div>
-                    <div>
-                      <label className={label}>Shrink</label>
-                      <input name="shrink" type="number" min={0} defaultValue={item.shrink ?? 0} className={field} />
-                    </div>
-                    <div className="flex items-end">
-                      <button type="submit" className={btn}>Save</button>
-                    </div>
-                    <div className="col-span-2 sm:col-span-6">
-                      <label className={label}>Price note (optional)</label>
-                      <input name="priceNote" type="text" defaultValue={item.priceNote ?? ""} placeholder="e.g. raised to offset commission" className={field} />
-                    </div>
-                  </form>
-
-                  <div className="flex flex-wrap items-end justify-between gap-3">
-                    {/* Print the Seller Info Band for this one book */}
-                    <form method="get" action={`/admin/spinner/${store._id}/band`} target="_blank" className="flex items-end gap-2">
-                      <input type="hidden" name="book" value={item.bookId} />
-                      <div>
-                        <label className={label}>Qty</label>
-                        <input name="qty" type="number" min={1} max={200} defaultValue={item.lastCount || 1} className={`${field} w-20`} />
-                      </div>
-                      <button type="submit" className="border-primary text-primary border px-3 py-1.5 text-xs font-black tracking-widest uppercase">
-                        Print slips
-                      </button>
-                    </form>
-                    <form action={removeRackItem}>
-                      <input type="hidden" name="storeId" value={store._id} />
-                      <input type="hidden" name="key" value={item._key} />
-                      <button type="submit" className={btnGhost}>Remove from rack</button>
-                    </form>
-                  </div>
-                </div>
-              </details>
-            ))}
-          </div>
-        )}
-
-        {rack.length > 0 && (
-          <SpinnerPrintSelection
-            storeId={store._id}
-            items={rack
-              .filter((i) => i.bookId)
-              .map((i) => ({
-                bookId: i.bookId as string,
-                title: i.bookTitle ?? "Untitled",
-                author: i.creatorName ?? "",
-                isRag: i.kind === "rag",
-                lastCount: i.lastCount ?? 0,
-              }))}
-          />
-        )}
-      </section>
-
-      {/* Add to the rack */}
-      <section className="grid max-w-4xl gap-8 sm:grid-cols-2">
-        <div>
-          <h2 className="text-primary mb-3 text-sm font-black tracking-widest uppercase">Add a comic</h2>
-          <SpinnerRackPicker storeId={store._id} kind="book" items={bookPicks} />
-        </div>
-        <div>
-          <h2 className="text-primary mb-3 text-sm font-black tracking-widest uppercase">Add a Rag issue</h2>
-          <SpinnerRackPicker storeId={store._id} kind="rag" items={ragPicks} />
-        </div>
-      </section>
-
-      {/* Earnings & payouts — collapsed, one panel per creator */}
-      <section className="space-y-2">
-        <h2 className="text-primary text-sm font-black tracking-widest uppercase">Earnings &amp; payouts</h2>
-        {earnings.length === 0 ? (
-          <p className="text-muted-foreground text-sm">Nothing to pay out yet.</p>
-        ) : (
-          <div className="border border-white/10">
-            {earnings.map((c) => (
-              <details key={c.creatorId} className="border-b border-white/10 last:border-b-0">
-                <summary className="marker:text-muted-foreground flex cursor-pointer flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-3 py-2.5 text-sm hover:bg-white/5">
-                  <span className="font-bold">{c.creatorName}</span>
-                  <span className="text-muted-foreground text-xs tracking-wide uppercase">
-                    owed{" "}
-                    <span className={c.outstanding > 0.005 ? "text-funding font-bold" : "text-foreground"}>
-                      {money(c.outstanding)}
-                    </span>
-                  </span>
-                </summary>
-                <div className="space-y-4 bg-white/[0.02] px-3 pt-2 pb-4">
-                  <p className="text-muted-foreground text-xs tracking-wide uppercase">
-                    {c.soldUnits} sold · gross {money(c.gross)} · expected{" "}
-                    <span className="text-foreground font-bold">{money(c.expected)}</span> · paid{" "}
-                    {money(c.paidTotal)}
-                  </p>
-                  <form action={recordPayout} className="flex flex-wrap items-end gap-2">
-                    <input type="hidden" name="storeId" value={store._id} />
-                    <input type="hidden" name="creatorId" value={c.creatorId} />
-                    <input type="hidden" name="creatorName" value={c.creatorName} />
-                    <div>
-                      <label className={label}>Paid to date $</label>
-                      <input name="paidTotal" type="number" step="0.01" min={0} defaultValue={c.paidTotal || ""} className={`${field} w-28`} />
-                    </div>
-                    <div>
-                      <label className={label}>Last paid</label>
-                      <input name="lastPaidDate" type="date" className={field} />
-                    </div>
-                    <div className="min-w-[8rem] flex-1">
-                      <label className={label}>Notes</label>
-                      <input name="notes" type="text" className={field} />
-                    </div>
-                    <button type="submit" className={btn}>Record payment</button>
-                  </form>
-                </div>
-              </details>
-            ))}
-          </div>
-        )}
+        <SpinnerStoreTabs
+          rack={
+            <SpinnerRackTable
+              storeId={store._id}
+              rows={rows}
+              bookPicks={bookPicks}
+              ragPicks={ragPicks}
+            />
+          }
+          earnings={earningsPanel}
+        />
       </section>
     </div>
   );

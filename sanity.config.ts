@@ -69,7 +69,10 @@ export default defineConfig([
   },
   {
     name: "submissions",
-    title: "Rag Submissions",
+    // "Operations" — this workspace holds Rag submissions AND spinner-rack stores
+    // (the structure is already titled Operations). basePath stays /studio/submissions
+    // so existing links and CORS origins keep working.
+    title: "Operations",
     basePath: "/studio/submissions",
     projectId,
     dataset: SUBMISSIONS_DATASET,

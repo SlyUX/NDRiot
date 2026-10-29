@@ -121,6 +121,15 @@ export async function removeRackItem(id: string, key: string): Promise<void> {
   await client().patch(id).unset([`rack[_key=="${key}"]`]).commit()
 }
 
+/** Remove several rack items by key in one patch (bulk "Remove selected"). */
+export async function removeRackItems(id: string, keys: string[]): Promise<void> {
+  if (keys.length === 0) return
+  await client()
+    .patch(id)
+    .unset(keys.map((k) => `rack[_key=="${k}"]`))
+    .commit()
+}
+
 /** Upsert a creator's payment record (keyed by creatorId). */
 export async function recordPayout(
   id: string,
