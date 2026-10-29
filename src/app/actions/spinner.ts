@@ -17,6 +17,7 @@ import {
   removeRackItem as removeRackItemDoc,
   removeRackItems as removeRackItemsDoc,
   updateRackItem as updateRackItemDoc,
+  uploadStoreLogo as uploadStoreLogoDoc,
 } from "@/sanity/spinner-store-client";
 
 /** The public /racks/[slug] key for a store — deterministic from its identity. */
@@ -86,6 +87,12 @@ export async function updateStoreMeta(fd: FormData): Promise<void> {
     fields.slug = storeSlug(existing.state, existing.storeName);
   }
   await patchStoreMeta(id, fields);
+  // A logo picked in the same form arrives as a File in the multipart body —
+  // upload it and point `logo` at the new asset. Empty/absent → left untouched.
+  const logo = fd.get("logo");
+  if (logo instanceof File && logo.size > 0) {
+    await uploadStoreLogoDoc(id, logo);
+  }
   revalidatePath(`/admin/spinner/${id}`);
 }
 

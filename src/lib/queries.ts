@@ -559,6 +559,11 @@ export const CON_RATING_CONTEXT_QUERY =
 export const RAG_ISSUES_QUERY = defineQuery(
   `*[_type=="ragIssue" && defined(slug.current)]|order(issueNumber desc){_id,title,issueNumber,"slug":slug.current,cover,publishedAt}`,
 );
+// Rag issues by id — to enrich spinner-rack items (which store only the id) with
+// their public cover + blurb for the shelf page. `description` is plain text.
+export const RAG_ISSUES_BY_IDS_QUERY = defineQuery(
+  `*[_type=="ragIssue" && _id in $ids && defined(slug.current)]{_id,title,issueNumber,"slug":slug.current,cover,"descriptionText":description}`,
+);
 // The newest issue, in full — featured on /magazine.
 export const RAG_LATEST_QUERY =
   defineQuery(`*[_type=="ragIssue" && defined(slug.current)]|order(issueNumber desc)[0]{

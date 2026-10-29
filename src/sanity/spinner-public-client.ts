@@ -28,6 +28,36 @@ const DATASET = process.env.SANITY_OWNERSHIP_DATASET ?? 'ndriot_auth'
 
 let cached: SanityClient | null = null
 
+/**
+ * A sized store-logo URL from a raw Sanity CDN url.
+ *
+ * Served straight from cdn.sanity.io (not the img.ndriot.com proxy the rest of
+ * the site's imagery uses): a store logo is admin-uploaded branding, not the
+ * reader/creator-uploaded content that proxy exists to CSAM-scan, and going
+ * direct avoids assuming the proxy mirrors this (private) dataset's asset path.
+ * Sizing rides on query params, which the CDN honors on the bare asset URL.
+ */
+export function sizedLogoUrl(rawUrl: string | null, width = 240): string | null {
+  if (!rawUrl) return null
+  const sep = rawUrl.includes('?') ? '&' : '?'
+  return `${rawUrl}${sep}w=${width}&auto=format&fit=max`
+}
+
+/**
+ * The same, from a Sanity image asset `_ref` (the shape getStore() hands the
+ * admin page, which reads the raw doc rather than a deref'd projection).
+ */
+export function logoUrlFromRef(
+  ref: string | null | undefined,
+  width = 240,
+): string | null {
+  if (!ref) return null
+  const m = /^image-([0-9a-f]+)-(\d+x\d+)-(\w+)$/.exec(ref)
+  if (!m) return null
+  const raw = `https://cdn.sanity.io/images/${projectId}/${DATASET}/${m[1]}-${m[2]}.${m[3]}`
+  return sizedLogoUrl(raw, width)
+}
+
 function client(): SanityClient {
   if (cached) return cached
   const token = process.env.SANITY_WRITE_TOKEN ?? process.env.CREATOR_SCRIPT
@@ -68,9 +98,11 @@ export async function racksForBook(bookId: string): Promise<PublicRackForBook[]>
 /** One item on a public rack shelf. */
 export interface PublicRackShelfItem {
   kind: 'book' | 'rag' | null
+  bookId: string | null
   bookTitle: string | null
   bookSlug: string | null
   creatorName: string | null
+  creatorSlug: string | null
   lastCount: number | null
   lastCountDate: string | null
   price: number | null
@@ -83,19 +115,25 @@ export interface PublicRack {
   slug: string | null
   address: string | null
   startDate: string | null
+  /** Sized, ready-to-use logo URL (null when the store has no logo). */
+  logoUrl: string | null
   items: PublicRackShelfItem[]
 }
 
 const PUBLIC_RACK = `*[_type=="spinnerStore" && status=="active" && slug==$slug][0]{
   storeName, state, slug, address, startDate,
-  "items": rack[]{ kind, bookTitle, bookSlug, creatorName, lastCount, lastCountDate, price }
+  "logoRaw": logo.asset->url,
+  "items": rack[]{ kind, bookId, bookTitle, bookSlug, creatorName, creatorSlug, lastCount, lastCountDate, price }
 }`
+
+/** The raw projection shape before logo post-processing. */
+type PublicRackRaw = Omit<PublicRack, 'logoUrl'> & { logoRaw: string | null }
 
 /** The active store at this slug, with its shelf ordered by creator then title. */
 export async function getPublicRack(slug: string): Promise<PublicRack | null> {
   if (!slug) return null
   try {
-    const rack = await client().fetch<PublicRack | null>(PUBLIC_RACK, { slug })
+    const rack = await client().fetch<PublicRackRaw | null>(PUBLIC_RACK, { slug })
     if (!rack) return null
     const items = [...(rack.items ?? [])].sort((a, b) => {
       const byCreator = (a.creatorName ?? '').localeCompare(b.creatorName ?? '')
@@ -103,7 +141,8 @@ export async function getPublicRack(slug: string): Promise<PublicRack | null> {
         ? byCreator
         : (a.bookTitle ?? '').localeCompare(b.bookTitle ?? '')
     })
-    return { ...rack, items }
+    const { logoRaw, ...rest } = rack
+    return { ...rest, items, logoUrl: sizedLogoUrl(logoRaw, 240) }
   } catch (cause) {
     console.error('[spinner-public] getPublicRack failed', cause)
     return null

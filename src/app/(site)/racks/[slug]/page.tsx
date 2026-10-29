@@ -1,16 +1,37 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { SectionHeading } from "@/components/section-heading";
+import { SpinnerShelf, type ShelfEntry } from "@/components/spinner-shelf";
 import { Section } from "@/components/ui/section";
 import { formatDate } from "@/lib/card-mappers";
 import { pageMetadata } from "@/lib/page-metadata";
+import {
+  RAG_ISSUES_BY_IDS_QUERY,
+  SAVED_BOOKS_QUERY,
+  safeFetch,
+} from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
+import { absoluteUrl } from "@/lib/site-url";
 import { money, rackStockLine, storeTitle } from "@/lib/spinner";
+import { GATED_TIER, MATURITY_TIER_LABELS, type MaturityTier } from "@/lib/taxonomy";
+import type { BookSummary, SanityImage } from "@/lib/types";
+import { urlFor } from "@/sanity/image";
 import { getPublicRack } from "@/sanity/spinner-public-client";
 
 export const dynamic = "force-dynamic";
+
+/** Rag issues enriched by id — just what a shelf cover needs. */
+interface ShelfRag {
+  _id: string;
+  title: string | null;
+  slug: string | null;
+  cover: SanityImage | null;
+  descriptionText: string | null;
+}
+
+const coverUrlFor = (cover: SanityImage | null | undefined): string | null =>
+  cover?.asset ? urlFor(cover).width(600).url() : null;
 
 export async function generateMetadata({
   params,
@@ -55,9 +76,98 @@ export default async function RackPage({
     placed ? `On the rack since ${placed}` : null,
   ].filter(Boolean);
 
+  // Enrich each rack item (stock/price, from the private store doc) with its
+  // public cover + blurb. Covers/descriptions live in the world-readable
+  // `production` dataset — fetched here by id, never through the private
+  // projection — so the security boundary doesn't move.
+  const bookIds = rack.items
+    .filter((i) => i.kind !== "rag" && i.bookId)
+    .map((i) => i.bookId as string);
+  const ragIds = rack.items
+    .filter((i) => i.kind === "rag" && i.bookId)
+    .map((i) => i.bookId as string);
+
+  const [books, rags] = await Promise.all([
+    bookIds.length
+      ? safeFetch<BookSummary[]>(SAVED_BOOKS_QUERY, { ids: bookIds }, [])
+      : Promise.resolve([]),
+    ragIds.length
+      ? safeFetch<ShelfRag[]>(RAG_ISSUES_BY_IDS_QUERY, { ids: ragIds }, [])
+      : Promise.resolve([]),
+  ]);
+  const bookById = new Map(books.map((b) => [b._id, b]));
+  const ragById = new Map(rags.map((r) => [r._id, r]));
+
+  const maturityOf = (tier: MaturityTier | null) => ({
+    maturityLabel: tier ? MATURITY_TIER_LABELS[tier] : null,
+    maturityRestricted: tier === GATED_TIER,
+  });
+
+  const entries: ShelfEntry[] = rack.items.map((item, i) => {
+    const key = item.bookId ?? `${item.kind}-${i}`;
+    const stockLine = rackStockLine(
+      item.lastCount,
+      item.lastCountDate,
+      settings.sections,
+    );
+    const priceLabel = item.price != null ? money(item.price) : null;
+
+    if (item.kind === "rag") {
+      const rag = item.bookId ? ragById.get(item.bookId) : undefined;
+      const href = item.bookSlug ? `/magazine/${item.bookSlug}` : null;
+      // Rags are compilations — ND Riot Rag, no single creator — and carry the
+      // Mature mark the admin tool assigns them.
+      return {
+        key,
+        kind: "rag",
+        title: item.bookTitle ?? rag?.title ?? "ND Riot Rag",
+        href,
+        creatorName: "ND Riot Rag",
+        creatorHref: null,
+        coverUrl: coverUrlFor(rag?.cover),
+        coverAlt: "",
+        description: rag?.descriptionText ?? null,
+        genres: null,
+        format: null,
+        ...maturityOf(GATED_TIER),
+        priceLabel,
+        stockLine,
+        shareUrl: absoluteUrl(href ?? `/racks/${slug}`),
+      };
+    }
+
+    const book = item.bookId ? bookById.get(item.bookId) : undefined;
+    const href = item.bookSlug ? `/comics/${item.bookSlug}` : null;
+    return {
+      key,
+      kind: "book",
+      title: item.bookTitle ?? book?.title ?? "Untitled",
+      href,
+      creatorName: item.creatorName ?? book?.creatorName ?? null,
+      creatorHref: item.creatorSlug ? `/creators/${item.creatorSlug}` : null,
+      coverUrl: coverUrlFor(book?.cover),
+      coverAlt: "",
+      description: book?.descriptionText ?? null,
+      genres: book?.genres ?? null,
+      format: book?.format ?? null,
+      ...maturityOf(book?.maturityRating ?? null),
+      priceLabel,
+      stockLine,
+      shareUrl: absoluteUrl(href ?? `/racks/${slug}`),
+    };
+  });
+
   return (
     <Section padding="lg">
-      <div className="space-y-2">
+      <div className="space-y-3">
+        {rack.logoUrl && (
+          // eslint-disable-next-line @next/next/no-img-element -- cross-dataset asset (ndriot_auth), served direct from the CDN; next/image isn't configured for it
+          <img
+            src={rack.logoUrl}
+            alt={`${storeTitle(rack)} logo`}
+            className="h-16 w-auto max-w-[200px] object-contain"
+          />
+        )}
         <h1 className="text-3xl font-black tracking-tighter uppercase">
           {storeTitle(rack)}
         </h1>
@@ -75,52 +185,18 @@ export default async function RackPage({
         <SectionHeading as="h2" size="sm">
           {settings.sections.rackShelfHeading}
         </SectionHeading>
-        {rack.items.length === 0 ? (
+        {entries.length === 0 ? (
           <p className="text-muted-foreground mt-4">
             Nothing on this rack right now.
           </p>
         ) : (
-          <ul className="divide-border border-border mt-4 divide-y border-y">
-            {rack.items.map((item, i) => {
-              const href = item.bookSlug
-                ? `${item.kind === "rag" ? "/magazine/" : "/comics/"}${item.bookSlug}`
-                : null;
-              const row = (
-                <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-3">
-                  <span className="min-w-0">
-                    <span className="group-hover:text-primary font-bold tracking-tight">
-                      {item.bookTitle}
-                    </span>
-                    {item.kind !== "rag" && item.creatorName && (
-                      <span className="text-muted-foreground"> · {item.creatorName}</span>
-                    )}
-                    {item.kind === "rag" && (
-                      <span className="text-muted-foreground"> · ND Riot Rag</span>
-                    )}
-                  </span>
-                  <span className="text-muted-foreground text-sm">
-                    {item.price != null ? `${money(item.price)} · ` : ""}
-                    {rackStockLine(
-                      item.lastCount,
-                      item.lastCountDate,
-                      settings.sections,
-                    )}
-                  </span>
-                </div>
-              );
-              return (
-                <li key={item.bookSlug ?? i}>
-                  {href ? (
-                    <Link href={href} className="group block">
-                      {row}
-                    </Link>
-                  ) : (
-                    row
-                  )}
-                </li>
-              );
-            })}
-          </ul>
+          <div className="mt-6">
+            <SpinnerShelf
+              entries={entries}
+              shareLabel={settings.sections.shareLabel}
+              linkCopiedLabel={settings.sections.linkCopiedLabel}
+            />
+          </div>
         )}
       </div>
     </Section>

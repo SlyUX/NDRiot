@@ -409,6 +409,13 @@ export type SpinnerStore = {
     | "WY";
   storeName: string;
   slug?: string;
+  logo?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
   status?: "active" | "ended";
   contactName?: string;
   contactEmail?: string;
@@ -443,6 +450,22 @@ export type SpinnerStore = {
     _type: "payout";
     _key: string;
   }>;
+};
+
+export type SanityImageCrop = {
+  _type: "sanity.imageCrop";
+  top: number;
+  bottom: number;
+  left: number;
+  right: number;
+};
+
+export type SanityImageHotspot = {
+  _type: "sanity.imageHotspot";
+  x: number;
+  y: number;
+  height: number;
+  width: number;
 };
 
 export type RagSubmission = {
@@ -1696,22 +1719,6 @@ export type SiteSettings = {
   >;
 };
 
-export type SanityImageCrop = {
-  _type: "sanity.imageCrop";
-  top: number;
-  bottom: number;
-  left: number;
-  right: number;
-};
-
-export type SanityImageHotspot = {
-  _type: "sanity.imageHotspot";
-  x: number;
-  y: number;
-  height: number;
-  width: number;
-};
-
 export type SanityImagePaletteSwatch = {
   _type: "sanity.imagePaletteSwatch";
   background?: string;
@@ -1831,6 +1838,8 @@ export type AllSanitySchemaTypes =
   | Update
   | NoiseIssue
   | SpinnerStore
+  | SanityImageCrop
+  | SanityImageHotspot
   | RagSubmission
   | SanityFileAssetReference
   | RagIssue
@@ -1848,8 +1857,6 @@ export type AllSanitySchemaTypes =
   | Creator
   | Organization
   | SiteSettings
-  | SanityImageCrop
-  | SanityImageHotspot
   | SanityImagePaletteSwatch
   | SanityImagePalette
   | SanityImageDimensions
@@ -4019,6 +4026,18 @@ export type RAG_ISSUES_QUERY_RESULT = Array<{
 }>;
 
 // Source: src/lib/queries.ts
+// Variable: RAG_ISSUES_BY_IDS_QUERY
+// Query: *[_type=="ragIssue" && _id in $ids && defined(slug.current)]{_id,title,issueNumber,"slug":slug.current,cover,"descriptionText":description}
+export type RAG_ISSUES_BY_IDS_QUERY_RESULT = Array<{
+  _id: string;
+  title: string;
+  issueNumber: number;
+  slug: string;
+  cover: ImageWithAlt;
+  descriptionText: string | null;
+}>;
+
+// Source: src/lib/queries.ts
 // Variable: RAG_LATEST_QUERY
 // Query: *[_type=="ragIssue" && defined(slug.current)]|order(issueNumber desc)[0]{  _id,title,issueNumber,publishedAt,description,cover,"pdfUrl":pdfFile.asset->url,  buyLinks[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},  toc,  contributors[]{_key,section,role,customName,"creatorName":creator->name,"creatorSlug":creator->slug.current}}
 export type RAG_LATEST_QUERY_RESULT = {
@@ -4893,6 +4912,7 @@ declare module "@sanity/client" {
     '*[_type=="venueRating" && target._ref==$conId]{\n  benefits,celebrityFocused,tableCost,note,\n  "creatorName":creator->name,"creatorSlug":creator->slug.current\n}': CONVENTION_RATINGS_QUERY_RESULT;
     '*[_type=="creator" && _id in $creatorIds]{\n  _id,name,\n  "appearance": *[_type=="conventionAppearance" && creator._ref==^._id && venue._ref==$conId][0]{status,tableNumber,note},\n  "rating": *[_type=="venueRating" && creator._ref==^._id && target._ref==$conId][0]{benefits,celebrityFocused,tableCost,note}\n}': CON_RATING_CONTEXT_QUERY_RESULT;
     '*[_type=="ragIssue" && defined(slug.current)]|order(issueNumber desc){_id,title,issueNumber,"slug":slug.current,cover,publishedAt}': RAG_ISSUES_QUERY_RESULT;
+    '*[_type=="ragIssue" && _id in $ids && defined(slug.current)]{_id,title,issueNumber,"slug":slug.current,cover,"descriptionText":description}': RAG_ISSUES_BY_IDS_QUERY_RESULT;
     '*[_type=="ragIssue" && defined(slug.current)]|order(issueNumber desc)[0]{\n  _id,title,issueNumber,publishedAt,description,cover,"pdfUrl":pdfFile.asset->url,\n  buyLinks[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},\n  toc,\n  contributors[]{_key,section,role,customName,"creatorName":creator->name,"creatorSlug":creator->slug.current}\n}': RAG_LATEST_QUERY_RESULT;
     '*[_type=="ragIssue" && slug.current==$slug][0]{\n  _id,title,issueNumber,publishedAt,description,cover,"pdfUrl":pdfFile.asset->url,\n  "acceptingSubmissions": submissionsOpen == true && (!defined(submissionsFrom) || dateTime(submissionsFrom + "T00:00:00Z") <= dateTime(now())) && (!defined(submissionsUntil) || dateTime(submissionsUntil + "T23:59:59Z") >= dateTime(now())),\n  buyLinks[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},\n  toc,\n  contributors[]{_key,section,role,customName,"creatorName":creator->name,"creatorSlug":creator->slug.current}\n}': RAG_ISSUE_QUERY_RESULT;
     '*[_type=="ragIssue" && defined(slug.current) && submissionsOpen == true && (!defined(submissionsFrom) || dateTime(submissionsFrom + "T00:00:00Z") <= dateTime(now())) && (!defined(submissionsUntil) || dateTime(submissionsUntil + "T23:59:59Z") >= dateTime(now()))]|order(issueNumber asc){_id,title,issueNumber,"slug":slug.current}': RAG_OPEN_SUBMISSIONS_QUERY_RESULT;

@@ -86,6 +86,25 @@ export async function patchStoreMeta(
 }
 
 /**
+ * Upload a logo image into this (private) dataset and point the store's `logo`
+ * field at it. The asset itself is served publicly by URL (Sanity assets aren't
+ * gated even in a private dataset), which is how the public shelf page can show
+ * it — see spinner-public-client.ts. Returns nothing; the caller revalidates.
+ */
+export async function uploadStoreLogo(
+  id: string,
+  file: File,
+): Promise<void> {
+  const asset = await client().assets.upload('image', file, {
+    filename: file.name || 'store-logo',
+  })
+  await client()
+    .patch(id)
+    .set({ logo: { _type: 'image', asset: { _type: 'reference', _ref: asset._id } } })
+    .commit()
+}
+
+/**
  * Append a book to the rack. Caller supplies the denormalized book/creator.
  * Idempotent on bookId — a title already on the rack is a no-op, so a stale
  * picker (or a double submit) can't duplicate a row.

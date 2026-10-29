@@ -20,6 +20,7 @@ import type {
   SpinnerRagPick,
 } from "@/lib/types";
 import { getStore } from "@/sanity/spinner-store-client";
+import { logoUrlFromRef } from "@/sanity/spinner-public-client";
 
 export const dynamic = "force-dynamic";
 
@@ -82,6 +83,9 @@ export default async function SpinnerStorePage({
 
   const earnings = computeEarnings(store);
   const sharePct = Math.round(creatorShare(store) * 100);
+  // Current logo (if any) for the thumbnail beside the upload field. getStore
+  // reads the raw doc, so this is an asset ref, not a deref'd URL.
+  const logoUrl = logoUrlFromRef(store.logo?.asset?._ref, 160);
 
   // Flat rack, sorted by author then title — the table carries author as a
   // column rather than a per-creator heading.
@@ -214,6 +218,17 @@ export default async function SpinnerStorePage({
           <div className="col-span-2">
             <label className={label} htmlFor="address">Address</label>
             <textarea id="address" name="address" rows={2} defaultValue={store.address ?? ""} className={field} />
+          </div>
+          <div className="col-span-2">
+            <label className={label} htmlFor="logo">Store logo</label>
+            <div className="flex items-center gap-3">
+              {logoUrl && (
+                // eslint-disable-next-line @next/next/no-img-element -- cross-dataset asset (ndriot_auth), served direct from the CDN; next/image isn't configured for it
+                <img src={logoUrl} alt="Current store logo" className="h-12 w-auto border border-white/20 bg-white/5 p-1" />
+              )}
+              <input id="logo" name="logo" type="file" accept="image/*" className="text-muted-foreground text-xs file:mr-3 file:border file:border-white/20 file:bg-transparent file:px-2 file:py-1 file:text-xs file:tracking-widest file:uppercase" />
+            </div>
+            <p className="text-muted-foreground mt-1 text-[10px]">Shown on the public shelf page. Choosing a file replaces the current logo on save.</p>
           </div>
           <div className="col-span-2">
             <button type="submit" className={btn}>Save details</button>

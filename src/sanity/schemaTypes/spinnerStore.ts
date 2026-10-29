@@ -50,6 +50,14 @@ export default defineType({
         'The /racks/… address for this store’s public shelf page. Set automatically from the state + store name; managed by the admin tool, not edited here.',
     }),
     defineField({
+      name: 'logo',
+      title: 'Store logo',
+      type: 'image',
+      description:
+        'The store’s logo, shown on its public shelf page (/racks/…). Upload from /admin/spinner. Optional.',
+      options: { hotspot: true },
+    }),
+    defineField({
       name: 'status',
       title: 'Status',
       type: 'string',

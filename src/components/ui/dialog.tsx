@@ -7,9 +7,11 @@ import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 /**
- * Modal dialog, on Radix. Square corners and token colors (§9); no enter/exit
- * animation, so there's nothing to gate behind prefers-reduced-motion. Radix
- * handles focus trapping, Escape, and the required labelling.
+ * Modal dialog, on Radix. Square corners and token colors (§9). A short
+ * coordinated entrance — the backdrop fades while the panel fades + zooms in
+ * together (tw-animate-css, keyed off Radix's data-state) — collapsed to instant
+ * under prefers-reduced-motion by the global rule in globals.css. Radix handles
+ * focus trapping, Escape, and the required labelling.
  */
 
 function Dialog(props: React.ComponentProps<typeof DialogPrimitive.Root>) {
@@ -33,12 +35,12 @@ function DialogContent({
     <DialogPrimitive.Portal>
       <DialogPrimitive.Overlay
         data-slot="dialog-overlay"
-        className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm"
+        className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0"
       />
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          'border-border bg-background fixed top-1/2 left-1/2 z-50 grid w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 gap-4 border p-6',
+          'border-border bg-background fixed top-1/2 left-1/2 z-50 grid w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 gap-4 border p-6 duration-200 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-90',
           className,
         )}
         {...props}
