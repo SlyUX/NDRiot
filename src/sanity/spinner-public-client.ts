@@ -68,27 +68,34 @@ function client(): SanityClient {
   return cached
 }
 
-/** One active rack that carries a given comic — for the comic page's block. */
+/** One active rack that carries a given comic — for the comic page's "In person"
+ *  list: just enough to render a logo + store name + state, linked to the shelf. */
 export interface PublicRackForBook {
   storeName: string | null
   state: string | null
   slug: string | null
-  startDate: string | null
-  lastCount: number | null
-  lastCountDate: string | null
+  /** Sized (small) logo URL, or null when the store has no logo. */
+  logoUrl: string | null
 }
 
 const RACKS_FOR_BOOK = `*[_type=="spinnerStore" && status=="active" && defined(slug) && $bookId in rack[].bookId]{
-  storeName, state, slug, startDate,
-  "lastCount": rack[bookId==$bookId][0].lastCount,
-  "lastCountDate": rack[bookId==$bookId][0].lastCountDate
+  storeName, state, slug,
+  "logoRaw": logo.asset->url
 } | order(state asc, storeName asc)`
 
-/** Active racks (if any) that carry this comic/Rag, newest-stock fields only. */
+type RackForBookRaw = Omit<PublicRackForBook, 'logoUrl'> & { logoRaw: string | null }
+
+/** Active racks (if any) that carry this comic/Rag, each with a small logo. */
 export async function racksForBook(bookId: string): Promise<PublicRackForBook[]> {
   if (!bookId) return []
   try {
-    return (await client().fetch<PublicRackForBook[]>(RACKS_FOR_BOOK, { bookId })) ?? []
+    const rows =
+      (await client().fetch<RackForBookRaw[]>(RACKS_FOR_BOOK, { bookId })) ?? []
+    // 90px source for a 30px mark — crisp on retina.
+    return rows.map(({ logoRaw, ...r }) => ({
+      ...r,
+      logoUrl: sizedLogoUrl(logoRaw, 90),
+    }))
   } catch (cause) {
     console.error('[spinner-public] racksForBook failed', cause)
     return []

@@ -560,8 +560,6 @@ export interface SiteSettings {
     stripsHeading: string;
     /** Prefix on a strip's link to its series ("Part of {series}"). */
     seriesPartOfLabel: string;
-    /** Spinner rack — the block on a comic page listing racks that carry it. */
-    rackHeading: string;
     /** Stock label; "{n}" is replaced with the count ("{n} in stock"). */
     rackInStock: string;
     rackOutOfStock: string;
@@ -679,6 +677,11 @@ export interface SiteSettings {
     previewNote: string;
     /** Heading over a book's buy/read links. `{title}` is replaced with the title. */
     buyHeading: string;
+    /** Sub-label over the online buy/read links, shown only when a comic also has
+     *  in-person stockists. */
+    getItHereOnlineLabel: string;
+    /** Sub-label over the in-person (spinner-rack) stockists in the same box. */
+    getItHereIrlLabel: string;
     /** Heading over a profile's syndicated feed. `{name}` → the outlet/creator name. */
     feedHeading: string;
     /** SaveButton — the reader's one explicit signal (§3). "Follow" throughout,
@@ -1482,7 +1485,6 @@ const DEFAULTS: SiteSettings = {
     creatorsHeading: "Comic Creators",
     stripsHeading: "Strips",
     seriesPartOfLabel: "Part of",
-    rackHeading: "Find this comic on a spinner rack",
     rackInStock: "{n} in stock",
     rackOutOfStock: "Out of stock",
     rackCountedPrefix: "counted",
@@ -1589,6 +1591,8 @@ const DEFAULTS: SiteSettings = {
     previewCta: "Read a preview (PDF)",
     previewNote: "Opens in a new tab on the host’s site",
     buyHeading: "Get it here",
+    getItHereOnlineLabel: "Online",
+    getItHereIrlLabel: "In person",
     feedHeading: "Latest from {name}",
     followLabel: "Follow",
     followingLabel: "Following",

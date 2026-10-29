@@ -864,13 +864,6 @@ export default defineType({
             'Prefix on a strip\'s link to the series it belongs to — e.g. "Part of" → "Part of Retails".',
         }),
         defineField({
-          name: "rackHeading",
-          title: "Spinner rack — comic-page heading",
-          type: "string",
-          description:
-            'Heads the block on a comic\'s page that lists the physical ND Riot spinner racks carrying it — e.g. "Find this comic on a spinner rack".',
-        }),
-        defineField({
           name: "rackInStock",
           title: "Spinner rack — in-stock label",
           type: "string",
@@ -1467,6 +1460,20 @@ export default defineType({
           type: "string",
           description:
             'Over the buy/read links on a book page — e.g. "Get it here". {title} is replaced with the comic’s title if you use it.',
+        }),
+        defineField({
+          name: "getItHereOnlineLabel",
+          title: "Get-it-here — online sub-label",
+          type: "string",
+          description:
+            'Small label over the ONLINE links inside the "Get it here" box — e.g. "Online". Only appears when a comic also has in-person stockists.',
+        }),
+        defineField({
+          name: "getItHereIrlLabel",
+          title: "Get-it-here — in-person sub-label",
+          type: "string",
+          description:
+            'Small label over the IN-PERSON stockists (spinner racks) in the "Get it here" box — e.g. "In person" or "IRL".',
         }),
         defineField({
           name: "feedHeading",

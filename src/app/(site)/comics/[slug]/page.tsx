@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ExternalLink } from "lucide-react";
 
@@ -31,7 +30,6 @@ import { formatPlace } from "@/lib/place";
 import { pageMetadata } from "@/lib/page-metadata";
 import { safeFetch, BOOK_QUERY } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
-import { rackStockLine, storeTitle } from "@/lib/spinner";
 import { racksForBook } from "@/sanity/spinner-public-client";
 import { absoluteUrl } from "@/lib/site-url";
 import {
@@ -80,8 +78,17 @@ export default async function BookPage({
   if (!book) notFound();
 
   // Which physical ND Riot racks carry this comic (active stores only). Reads a
-  // narrow, safe projection of the private store doc — never financials.
+  // narrow, safe projection of the private store doc — never financials. Shown as
+  // the "In person" column inside the Get-it-here box (logo · store · state).
   const racks = await racksForBook(book._id);
+  const irlLocations = racks
+    .filter((r) => r.slug)
+    .map((r) => ({
+      href: `/racks/${r.slug}`,
+      logoUrl: r.logoUrl,
+      storeName: r.storeName ?? "",
+      state: r.state ?? "",
+    }));
 
   const email = session?.user?.email;
   // A creator can't save their own comic — hide the button on a book whose
@@ -203,7 +210,14 @@ export default async function BookPage({
 
             {/* Buy/read links, beneath the preview — set apart in their own
               charcoal panel under the "Get it here" label. */}
-            <BookLinks links={book.links} heading={buyHeading} framed />
+            <BookLinks
+              links={book.links}
+              heading={buyHeading}
+              framed
+              irl={irlLocations}
+              onlineLabel={settings.sections.getItHereOnlineLabel}
+              irlLabel={settings.sections.getItHereIrlLabel}
+            />
           </div>
 
           <div className="space-y-5">
@@ -310,37 +324,6 @@ export default async function BookPage({
             )}
           </div>
         </Section>
-
-        {racks.length > 0 && (
-          <Section padding="md">
-            <SectionHeading as="h2" size="sm">
-              {settings.sections.rackHeading}
-            </SectionHeading>
-            {/* Square keylines, house style — a row per rack linking to its
-              public shelf, with exact count + as-of date. */}
-            <ul className="divide-border border-border mt-4 divide-y border-y">
-              {racks.map((rack) => (
-                <li key={rack.slug}>
-                  <Link
-                    href={`/racks/${rack.slug}`}
-                    className="group flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-3"
-                  >
-                    <span className="group-hover:text-primary font-bold tracking-tight">
-                      {storeTitle(rack)}
-                    </span>
-                    <span className="text-muted-foreground text-sm">
-                      {rackStockLine(
-                        rack.lastCount,
-                        rack.lastCountDate,
-                        settings.sections,
-                      )}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </Section>
-        )}
 
         {!!book.otherBooks?.length && (
           <ContentCardGrid

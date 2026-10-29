@@ -7552,13 +7552,6 @@
               },
               "optional": true
             },
-            "rackHeading": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
             "rackInStock": {
               "type": "objectAttribute",
               "value": {
@@ -8183,6 +8176,20 @@
               "optional": true
             },
             "buyHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "getItHereOnlineLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "getItHereIrlLabel": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

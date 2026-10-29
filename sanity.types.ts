@@ -1227,7 +1227,6 @@ export type SiteSettings = {
     booksHeading?: string;
     stripsHeading?: string;
     seriesPartOfLabel?: string;
-    rackHeading?: string;
     rackInStock?: string;
     rackOutOfStock?: string;
     rackCountedPrefix?: string;
@@ -1318,6 +1317,8 @@ export type SiteSettings = {
     previewCta?: string;
     previewNote?: string;
     buyHeading?: string;
+    getItHereOnlineLabel?: string;
+    getItHereIrlLabel?: string;
     feedHeading?: string;
     followLabel?: string;
     followingLabel?: string;
