@@ -142,7 +142,8 @@ export async function getPublicRack(slug: string): Promise<PublicRack | null> {
         : (a.bookTitle ?? '').localeCompare(b.bookTitle ?? '')
     })
     const { logoRaw, ...rest } = rack
-    return { ...rest, items, logoUrl: sizedLogoUrl(logoRaw, 240) }
+    // 480 so the shelf-header logo (up to ~96×300) stays crisp on retina.
+    return { ...rest, items, logoUrl: sizedLogoUrl(logoRaw, 480) }
   } catch (cause) {
     console.error('[spinner-public] getPublicRack failed', cause)
     return null

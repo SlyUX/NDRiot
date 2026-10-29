@@ -13,6 +13,7 @@ import {
 } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
 import { absoluteUrl } from "@/lib/site-url";
+import { cn } from "@/lib/utils";
 import { money, rackStockLine, storeTitle } from "@/lib/spinner";
 import { GATED_TIER, MATURITY_TIER_LABELS, type MaturityTier } from "@/lib/taxonomy";
 import type { BookSummary, SanityImage } from "@/lib/types";
@@ -165,10 +166,19 @@ export default async function RackPage({
           <img
             src={rack.logoUrl}
             alt={`${storeTitle(rack)} logo`}
-            className="h-16 w-auto max-w-[200px] object-contain"
+            className="h-30 w-auto max-w-[380px] object-contain"
           />
         )}
-        <h1 className="text-3xl font-black tracking-tighter uppercase">
+        {/* The logo leads when present, so the name steps down to a secondary
+            label; without a logo it carries more weight as the sole identifier. */}
+        <h1
+          className={cn(
+            "font-bold tracking-tight uppercase",
+            rack.logoUrl
+              ? "text-muted-foreground text-lg"
+              : "text-3xl font-black tracking-tighter",
+          )}
+        >
           {storeTitle(rack)}
         </h1>
         <p className="text-muted-foreground max-w-prose">
