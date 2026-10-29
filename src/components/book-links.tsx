@@ -79,15 +79,40 @@ export default function BookLinks({
   const showSub = hasOnline && hasIrl
   if (!hasOnline && !hasIrl) return null
 
+  // The framed panel is the teal "Get it here" card. A teal surface (§9's
+  // --personalize) takes BLACK content (white fails AA on it — 2.96:1) and a
+  // black/inverted primary button; the outline buttons are already near-black,
+  // so they read as-is, and small muted-gray text would fail, so onInk flips it
+  // all to black (7.11:1). NB: this reuses the personalization teal as a surface
+  // colour here; it is not a personalized section (§3).
+  const onInk = framed
+
   return (
-    <div className={cn('space-y-3', framed && 'bg-charcoal p-[15px]')}>
+    <div className={cn('space-y-3', framed && 'bg-personalize p-[15px]')}>
       {/* A group label, not a document heading: on the book page this block sits
           in the cover column, which precedes the <h1> title in source order, so
           a real heading here would land before the page's h1. A styled <p>
           keeps the look without breaking the heading outline (§10). */}
-      {heading && <p className="text-xs font-black tracking-widest uppercase">{heading}</p>}
+      {heading && (
+        <p
+          className={cn(
+            'text-xs font-black tracking-widest uppercase',
+            // Subdued: black at 70% reads as a dark teal-gray on the surface and
+            // still clears AA (~4.7:1) for this small heading; full black (7.11:1)
+            // was too stark. The sub-labels/store names stay full black.
+            onInk && 'text-personalize-foreground/70',
+          )}
+        >
+          {heading}
+        </p>
+      )}
       {showSub && onlineLabel && (
-        <p className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
+        <p
+          className={cn(
+            'text-[10px] font-black tracking-widest uppercase',
+            onInk ? 'text-personalize-foreground' : 'text-muted-foreground',
+          )}
+        >
           {onlineLabel}
         </p>
       )}
@@ -104,6 +129,7 @@ export default function BookLinks({
                 <Button
                   asChild
                   size="lg"
+                  variant={!campaign && onInk ? 'inverse' : 'default'}
                   className={cn(
                     'font-black tracking-wide uppercase',
                     campaign && 'bg-funding text-black hover:bg-funding/90',
@@ -118,7 +144,12 @@ export default function BookLinks({
                   </a>
                 </Button>
                 {deadline && (
-                  <span className="text-funding text-xs font-bold tracking-wide uppercase">
+                  <span
+                    className={cn(
+                      'text-xs font-bold tracking-wide uppercase',
+                      onInk ? 'text-personalize-foreground' : 'text-funding',
+                    )}
+                  >
                     Ends {deadline}
                   </span>
                 )}
@@ -146,7 +177,12 @@ export default function BookLinks({
       {hasIrl && (
         <div className="space-y-2">
           {showSub && irlLabel && (
-            <p className="text-muted-foreground text-[10px] font-black tracking-widest uppercase">
+            <p
+              className={cn(
+                'text-[10px] font-black tracking-widest uppercase',
+                onInk ? 'text-personalize-foreground' : 'text-muted-foreground',
+              )}
+            >
               {irlLabel}
             </p>
           )}
@@ -157,7 +193,9 @@ export default function BookLinks({
                   href={loc.href}
                   className="group focus-visible:ring-ring flex items-center gap-2.5 focus-visible:ring-2 focus-visible:outline-none"
                 >
-                  <span className="bg-background/50 flex size-[30px] shrink-0 items-center justify-center overflow-hidden">
+                  {/* A solid near-black tile so an arbitrary logo reads the same
+                      on charcoal or teal; the map-pin fallback sits on it too. */}
+                  <span className="bg-background flex size-[30px] shrink-0 items-center justify-center overflow-hidden">
                     {loc.logoUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element -- cross-dataset asset, served from the CDN; next/image isn't configured for it
                       <img src={loc.logoUrl} alt="" className="size-full object-contain" />
@@ -165,10 +203,19 @@ export default function BookLinks({
                       <MapPin className="text-muted-foreground size-3.5" aria-hidden />
                     )}
                   </span>
-                  <span className="min-w-0 flex-1 truncate text-sm font-bold group-hover:text-primary">
+                  <span
+                    className={cn(
+                      'min-w-0 flex-1 truncate text-sm font-bold',
+                      onInk
+                        ? 'text-personalize-foreground group-hover:underline'
+                        : 'group-hover:text-primary',
+                    )}
+                  >
                     {loc.storeName}
                   </span>
-                  <span className="text-muted-foreground text-xs tracking-widest uppercase">
+                  {/* State code in a white circle (black text, 21:1) — a small
+                      sanctioned round exception to §9's square corners. */}
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-white text-[10px] font-black tracking-tight text-black">
                     {loc.state}
                   </span>
                 </Link>
