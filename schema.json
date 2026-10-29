@@ -8833,6 +8833,13 @@
               },
               "optional": true
             },
+            "creatorStoresHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "creatorUpdatesHeading": {
               "type": "objectAttribute",
               "value": {

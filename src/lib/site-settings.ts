@@ -787,6 +787,9 @@ export interface SiteSettings {
     navLoginLabel: string;
     navJoinLabel: string;
     creatorBooksHeading: string;
+    /** Heading on the profile's "stores that carry this creator's books" box.
+     *  `{name}` → the creator's first name. */
+    creatorStoresHeading: string;
     creatorUpdatesHeading: string;
     updateDeleteLabel: string;
     updateDeletedLabel: string;
@@ -1091,7 +1094,7 @@ const DEFAULTS: SiteSettings = {
     headline: "“The Big Two”",
     tagline: "Elevating Independent Comics",
     featureCtaLabel: "Read more",
-    featuredHeading: "The Spinner Rack",
+    featuredHeading: "Off the Rack",
     newHeading: "New Comics & Comic Creators",
     ctas: [
       { label: "All Comic Creators", href: "/creators" },
@@ -1579,7 +1582,7 @@ const DEFAULTS: SiteSettings = {
     genreCreatorsHeading: "Comic Creators working in this genre",
     everythingElseHeading: "While you are here",
     discoverLabel: "Discover",
-    spinLabel: "Spin the rack",
+    spinLabel: "Spin it",
     rowSpinLabel: "Spin",
     feedMineHeading: "Your Feed",
     searchHomeLabel: "Search comics and comic creators",
@@ -1689,6 +1692,7 @@ const DEFAULTS: SiteSettings = {
     navLoginLabel: "Login",
     navJoinLabel: "Join",
     creatorBooksHeading: "{name}’s Comics",
+    creatorStoresHeading: "Spinner Racks",
     creatorUpdatesHeading: "{name}’s Updates",
     updateDeleteLabel: "Delete update",
     updateDeletedLabel: "Deleted",
@@ -1750,7 +1754,7 @@ const DEFAULTS: SiteSettings = {
   // live in the footer.
   nav: [
     { _type: "navLink", label: "Comics", href: "/comics" },
-    { _type: "navLink", label: "Comic Creators", href: "/creators" },
+    { _type: "navLink", label: "Creators", href: "/creators" },
     // The supporting family lives in one dropdown so it stops eating top-level
     // slots as it grows. A flat list (no sub-headings): Resources is a single
     // link to its own hub-of-rows landing; the rest are peer destinations.
@@ -1768,7 +1772,7 @@ const DEFAULTS: SiteSettings = {
         },
       ],
     },
-    { _type: "navLink", label: "ND Riot Rag", href: "/magazine" },
+    { _type: "navLink", label: "The Rag", href: "/magazine" },
     // "WTH?" = the newcomer's "what is this?" — orientation is user-serving, so
     // it earns a nav slot; the punk label keeps it an invitation, not an About.
     { _type: "navLink", label: "WTH?", href: "/about" },

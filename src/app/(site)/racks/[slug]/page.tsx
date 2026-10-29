@@ -61,12 +61,17 @@ export async function generateMetadata({
  */
 export default async function RackPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  // `?creator=<slug>` when arriving from a creator's "Stores that carry…" box —
+  // floats that creator's books to the top (explicit, user-directed; §3).
+  searchParams: Promise<{ creator?: string }>;
 }) {
   const { slug } = await params;
+  const { creator } = await searchParams;
   const [rack, settings] = await Promise.all([
-    getPublicRack(slug),
+    getPublicRack(slug, creator),
     getSiteSettings(),
   ]);
   if (!rack) notFound();

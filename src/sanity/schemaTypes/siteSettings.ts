@@ -2042,6 +2042,13 @@ export default defineType({
             'Use {name} for the creator’s first name — e.g. "{name}’s Books".',
         }),
         defineField({
+          name: "creatorStoresHeading",
+          title: "Creator page — stores-that-carry heading",
+          type: "string",
+          description:
+            'Heads the box listing physical stores (spinner racks) carrying this creator’s books. Use {name} for the first name — e.g. "Stores that carry {name}’s books".',
+        }),
+        defineField({
           name: "creatorUpdatesHeading",
           title: "Creator page — updates heading",
           type: "string",

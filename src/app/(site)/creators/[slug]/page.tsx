@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AlternatingSections } from "@/components/alternating-sections";
+import BookLinks from "@/components/book-links";
 import { ContentCardGrid } from "@/components/content-card-grid";
 import { StripGallery } from "@/components/strip-gallery";
 import { CreatorEvents } from "@/components/creator-events";
@@ -20,7 +21,6 @@ import { SocialIcon } from "@/components/social-icon";
 import { SectionHeading } from "@/components/section-heading";
 import { UpdateFeed } from "@/components/update-feed";
 import { ShareBar } from "@/components/share-bar";
-import { GenreBadge } from "@/components/genre-badge";
 import { Badge } from "@/components/ui/badge";
 import { externalHref } from "@/lib/utils";
 import { Section } from "@/components/ui/section";
@@ -58,6 +58,7 @@ import type {
   StripSummary,
   UpdateFeedItem,
 } from "@/lib/types";
+import { racksForCreator } from "@/sanity/spinner-public-client";
 import { urlFor } from "@/sanity/image";
 
 export const dynamic = "force-dynamic";
@@ -182,6 +183,23 @@ export default async function CreatorPage({
     "{name}",
     firstName,
   );
+  const storesHeading = settings.sections.creatorStoresHeading.replace(
+    "{name}",
+    firstName,
+  );
+
+  // Physical stores (spinner racks) carrying any of this creator's books — the
+  // "Stores that carry…" box in the sidebar. Each link carries ?creator=<slug>
+  // so the shelf floats this creator's books to the top on arrival (§3-explicit).
+  const stores = await racksForCreator(creator._id);
+  const storeLinks = stores
+    .filter((s) => s.slug)
+    .map((s) => ({
+      href: `/racks/${s.slug}?creator=${slug}`,
+      logoUrl: s.logoUrl,
+      storeName: s.storeName ?? "",
+      state: s.state ?? "",
+    }));
 
   // Their ND Riot updates — posts targeting this creator or one of their comics.
   // Read-only here, for everyone including the owner: posting and editing live on
@@ -225,9 +243,7 @@ export default async function CreatorPage({
     creator.photo ||
     creator.socials?.length ||
     creator.website ||
-    creator.genres?.length ||
-    creator.formats?.length ||
-    creator.audience,
+    storeLinks.length,
   );
 
   return (
@@ -327,32 +343,16 @@ export default async function CreatorPage({
                       </div>
                     )}
 
-                    {/* Genres link out to their category page; formats and audience
-                      have no page, so they stay unlinked. */}
-                    {(creator.genres?.length ||
-                      creator.formats?.length ||
-                      creator.audience) && (
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        {creator.genres?.map((genre) => (
-                          <GenreBadge key={genre} genre={genre} size="md" />
-                        ))}
-                        {creator.formats?.map((format) => (
-                          <Badge
-                            key={format}
-                            variant="outline"
-                            className="text-muted-foreground px-2.5 py-0.5 text-[10px] tracking-wider uppercase"
-                          >
-                            {format}
-                          </Badge>
-                        ))}
-                        {creator.audience && (
-                          <Badge
-                            variant="outline"
-                            className="text-muted-foreground px-2.5 py-0.5 text-[10px] tracking-wider uppercase"
-                          >
-                            {creator.audience}
-                          </Badge>
-                        )}
+                    {/* Physical stores carrying this creator's books — the teal
+                      "Get it here"-style box, IRL list only. Replaces the genre
+                      badges here; genres stay visible on the book cards below. */}
+                    {storeLinks.length > 0 && (
+                      <div className="w-full">
+                        <BookLinks
+                          irl={storeLinks}
+                          heading={storesHeading}
+                          framed
+                        />
                       </div>
                     )}
                   </div>

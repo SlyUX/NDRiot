@@ -1410,6 +1410,7 @@ export type SiteSettings = {
     navLoginLabel?: string;
     navJoinLabel?: string;
     creatorBooksHeading?: string;
+    creatorStoresHeading?: string;
     creatorUpdatesHeading?: string;
     updateDeleteLabel?: string;
     updateDeletedLabel?: string;

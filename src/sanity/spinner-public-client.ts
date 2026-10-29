@@ -136,8 +136,18 @@ const PUBLIC_RACK = `*[_type=="spinnerStore" && status=="active" && slug==$slug]
 /** The raw projection shape before logo post-processing. */
 type PublicRackRaw = Omit<PublicRack, 'logoUrl'> & { logoRaw: string | null }
 
-/** The active store at this slug, with its shelf ordered by creator then title. */
-export async function getPublicRack(slug: string): Promise<PublicRack | null> {
+/**
+ * The active store at this slug, its shelf ordered by creator then title.
+ *
+ * `prioritizeCreatorSlug` floats one creator's books to the top (keeping the
+ * neutral order within each group) — set when the reader clicked through from
+ * that creator's profile, so it's an explicit, user-directed sort, not an
+ * inferred ranking (§3). On a direct visit the shelf stays fully neutral.
+ */
+export async function getPublicRack(
+  slug: string,
+  prioritizeCreatorSlug?: string | null,
+): Promise<PublicRack | null> {
   if (!slug) return null
   try {
     const rack = await client().fetch<PublicRackRaw | null>(PUBLIC_RACK, { slug })
@@ -148,11 +158,42 @@ export async function getPublicRack(slug: string): Promise<PublicRack | null> {
         ? byCreator
         : (a.bookTitle ?? '').localeCompare(b.bookTitle ?? '')
     })
+    if (prioritizeCreatorSlug) {
+      // Stable second pass — Array.sort is stable, so matched items keep their
+      // neutral creator→title order, just hoisted above the rest.
+      items.sort(
+        (a, b) =>
+          (a.creatorSlug === prioritizeCreatorSlug ? 0 : 1) -
+          (b.creatorSlug === prioritizeCreatorSlug ? 0 : 1),
+      )
+    }
     const { logoRaw, ...rest } = rack
     // 480 so the shelf-header logo (up to ~96×300) stays crisp on retina.
     return { ...rest, items, logoUrl: sizedLogoUrl(logoRaw, 480) }
   } catch (cause) {
     console.error('[spinner-public] getPublicRack failed', cause)
     return null
+  }
+}
+
+const RACKS_FOR_CREATOR = `*[_type=="spinnerStore" && status=="active" && defined(slug) && $creatorId in rack[].creatorId]{
+  storeName, state, slug,
+  "logoRaw": logo.asset->url
+} | order(state asc, storeName asc)`
+
+/** Active racks that carry any of a creator's books — for the "Stores that carry
+ *  …" box on their profile. Same safe shape as racksForBook. */
+export async function racksForCreator(creatorId: string): Promise<PublicRackForBook[]> {
+  if (!creatorId) return []
+  try {
+    const rows =
+      (await client().fetch<RackForBookRaw[]>(RACKS_FOR_CREATOR, { creatorId })) ?? []
+    return rows.map(({ logoRaw, ...r }) => ({
+      ...r,
+      logoUrl: sizedLogoUrl(logoRaw, 90),
+    }))
+  } catch (cause) {
+    console.error('[spinner-public] racksForCreator failed', cause)
+    return []
   }
 }
