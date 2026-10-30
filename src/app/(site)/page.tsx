@@ -264,6 +264,7 @@ export default async function Home({
       <FilterBar
         facets={homeBookFacets(genres)}
         control="select"
+        collapsible
         resultCount={booksResult.total}
         searchLabel={settings.sections.searchBooksLabel}
       />
@@ -275,6 +276,7 @@ export default async function Home({
       <FilterBar
         facets={homeCreatorFacets(genres)}
         control="select"
+        collapsible
         resultCount={creatorsResult.total}
         searchLabel={settings.sections.searchCreatorsLabel}
         searchParam="cq"
@@ -330,7 +332,6 @@ export default async function Home({
       {!email && (
         <JoinBand
           heading={settings.home.joinBandHeading}
-          body={settings.home.joinBandBody}
           cta={settings.home.joinBandCta}
         />
       )}

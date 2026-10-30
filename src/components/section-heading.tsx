@@ -116,7 +116,13 @@ export function SectionHeading({
           <p className="text-muted-foreground mt-2 max-w-2xl text-sm">{subtitle}</p>
         )}
       </div>
-      {action && <div className="shrink-0">{action}</div>}
+      {/* ml-auto keeps the action right-aligned whether it shares the heading's
+          line or wraps below it on a narrow screen — without it, a wrapped
+          action (e.g. a long title + a Spin button pushing "view all" to its own
+          line on mobile) lands left-aligned and reads as a layout slip. */}
+      {action && (
+        <div className={cn("shrink-0", !centered && "ml-auto")}>{action}</div>
+      )}
     </div>
   )
 }

@@ -1239,7 +1239,6 @@ export type SiteSettings = {
       };
     };
     joinBandHeading?: string;
-    joinBandBody?: string;
     joinBandCta?: string;
   };
   sections?: {

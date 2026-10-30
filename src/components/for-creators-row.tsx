@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { CalendarDays, Wrench, Newspaper, Handshake } from "lucide-react";
 
+import { FeatureLinkCard } from "@/components/feature-link-card";
 import { SectionHeading } from "@/components/section-heading";
 import { Section, type SectionProps } from "@/components/ui/section";
 import type { FunnelCard } from "@/lib/site-settings";
@@ -9,8 +9,9 @@ import type { FunnelCard } from "@/lib/site-settings";
  * The "For Creators" row beneath Creators — a funnel, not a listing. One card
  * per creator-facing area (Conventions · Resources · Media · Allies): an icon, a
  * title, and a short "what's inside" blurb linking to the section. Icons + links
- * are fixed in code (structural); the copy is CMS-managed (§2). Replaces the old
- * home Conventions + Resources listing rows, which also drops their fetches.
+ * are fixed in code (structural); the copy is CMS-managed (§2). Each card
+ * collapses to a tappable row on mobile (FeatureLinkCard); desktop shows them
+ * in full.
  */
 export function ForCreatorsRow({
   heading,
@@ -26,36 +27,42 @@ export function ForCreatorsRow({
   };
   background?: SectionProps["background"];
 }) {
+  const iconClass = "text-primary size-6 shrink-0 md:size-7";
   const areas = [
-    { href: "/conventions", Icon: CalendarDays, card: cards.conventions },
-    { href: "/resources", Icon: Wrench, card: cards.resources },
-    { href: "/media", Icon: Newspaper, card: cards.media },
-    { href: "/allies", Icon: Handshake, card: cards.allies },
+    {
+      href: "/conventions",
+      icon: <CalendarDays aria-hidden="true" strokeWidth={1.75} className={iconClass} />,
+      card: cards.conventions,
+    },
+    {
+      href: "/resources",
+      icon: <Wrench aria-hidden="true" strokeWidth={1.75} className={iconClass} />,
+      card: cards.resources,
+    },
+    {
+      href: "/media",
+      icon: <Newspaper aria-hidden="true" strokeWidth={1.75} className={iconClass} />,
+      card: cards.media,
+    },
+    {
+      href: "/allies",
+      icon: <Handshake aria-hidden="true" strokeWidth={1.75} className={iconClass} />,
+      card: cards.allies,
+    },
   ];
 
   return (
     <Section padding="md" background={background}>
       <SectionHeading size="md">{heading}</SectionHeading>
-      <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {areas.map(({ href, Icon, card }) => (
-          <li key={href}>
-            <Link
-              href={href}
-              className="group border-border hover:border-primary focus-visible:ring-ring flex h-full flex-col border p-6 transition-colors focus-visible:ring-2 focus-visible:outline-none"
-            >
-              <Icon
-                aria-hidden="true"
-                className="text-primary size-7"
-                strokeWidth={1.75}
-              />
-              <h3 className="group-hover:text-primary mt-4 text-lg font-black tracking-tight uppercase transition-colors">
-                {card.title}
-              </h3>
-              <p className="text-muted-foreground mt-2 text-sm">
-                {card.description}
-              </p>
-            </Link>
-          </li>
+      <ul className="grid gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
+        {areas.map(({ href, icon, card }) => (
+          <FeatureLinkCard
+            key={href}
+            href={href}
+            icon={icon}
+            title={card.title}
+            description={card.description}
+          />
         ))}
       </ul>
     </Section>

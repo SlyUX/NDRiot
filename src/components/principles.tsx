@@ -1,5 +1,6 @@
 import { Shuffle, Scale, Equal, MegaphoneOff } from "lucide-react";
 
+import { PrincipleCard } from "@/components/principle-card";
 import type { FunnelCard } from "@/lib/site-settings";
 import { cn } from "@/lib/utils";
 
@@ -10,7 +11,8 @@ import { cn } from "@/lib/utils";
  * reading as part of the surrounding copy rather than a separate section. The
  * site *behaves* these everywhere (§3: random hero, no ranking, visible
  * filters); this is where it states them. Copy is CMS-managed (§2); icons are
- * structural (fixed in code).
+ * structural (fixed in code). Each card collapses to a tappable row on mobile
+ * (PrincipleCard); desktop shows them in full.
  *
  * `surface` boxes each item in a solid --surface-alt card — used over the hero
  * collage, where a consistent backdrop keeps the body copy legible against the
@@ -35,44 +37,50 @@ export function Principles({
    *  the hero art. */
   surface?: boolean;
 }) {
-  // Token colors read on both surfaces this lands on: --foreground title and
-  // --muted-foreground body stay legible over the hero's dark-washed art (the
-  // hero rail already uses --muted-foreground there) and on the /about band;
-  // the --primary icon is a graphic, clearing the 3:1 floor (§9).
+  // --foreground title and --muted-foreground body read on both surfaces this
+  // lands on (over the hero's dark-washed art and on the /about band); the
+  // --primary icon is a graphic, clearing the 3:1 floor (§9).
+  const iconClass = "text-primary size-6 shrink-0";
   const items = [
-    { key: "algorithm", Icon: Shuffle, card: principles.algorithm },
-    { key: "favoritism", Icon: Scale, card: principles.favoritism },
-    { key: "influencers", Icon: Equal, card: principles.influencers },
-    { key: "ads", Icon: MegaphoneOff, card: principles.ads },
+    {
+      key: "algorithm",
+      icon: <Shuffle aria-hidden="true" strokeWidth={1.75} className={iconClass} />,
+      card: principles.algorithm,
+    },
+    {
+      key: "favoritism",
+      icon: <Scale aria-hidden="true" strokeWidth={1.75} className={iconClass} />,
+      card: principles.favoritism,
+    },
+    {
+      key: "influencers",
+      icon: <Equal aria-hidden="true" strokeWidth={1.75} className={iconClass} />,
+      card: principles.influencers,
+    },
+    {
+      key: "ads",
+      icon: (
+        <MegaphoneOff aria-hidden="true" strokeWidth={1.75} className={iconClass} />
+      ),
+      card: principles.ads,
+    },
   ];
 
   return (
     <ul
       className={cn(
-        "grid gap-x-6 gap-y-8 sm:grid-cols-2",
+        "grid gap-x-6 gap-y-4 sm:grid-cols-2 sm:gap-y-8",
         columns === 4 && "lg:grid-cols-4",
       )}
     >
-      {items.map(({ key, Icon, card }) => (
-        <li
+      {items.map(({ key, icon, card }) => (
+        <PrincipleCard
           key={key}
-          className={cn(
-            surface &&
-              "bg-surface-alt border-border flex h-full flex-col border p-5",
-          )}
-        >
-          <Icon
-            aria-hidden="true"
-            className="text-primary size-6"
-            strokeWidth={1.75}
-          />
-          <h3 className="text-foreground mt-3 text-sm font-black tracking-wide uppercase">
-            {card.title}
-          </h3>
-          <p className="text-muted-foreground mt-1.5 text-sm leading-relaxed">
-            {card.description}
-          </p>
-        </li>
+          icon={icon}
+          title={card.title}
+          description={card.description}
+          surface={surface}
+        />
       ))}
     </ul>
   );

@@ -850,14 +850,7 @@ export default defineType({
           title: '"Join the Riot" band — heading',
           type: "string",
           description:
-            'The closing pink call-to-action band on the logged-out home — e.g. "Make comics? Join the Riot."',
-        }),
-        defineField({
-          name: "joinBandBody",
-          title: '"Join the Riot" band — body',
-          type: "text",
-          rows: 2,
-          description: "One line beneath the heading.",
+            'The pink call-to-action band on the logged-out home — e.g. "Make Comics? Read Comics?"',
         }),
         defineField({
           name: "joinBandCta",

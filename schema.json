@@ -7616,13 +7616,6 @@
               },
               "optional": true
             },
-            "joinBandBody": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
             "joinBandCta": {
               "type": "objectAttribute",
               "value": {

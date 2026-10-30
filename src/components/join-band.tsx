@@ -14,22 +14,17 @@ import { Section } from "@/components/ui/section";
  */
 export function JoinBand({
   heading,
-  body,
   cta,
 }: {
   heading: string;
-  body: string;
   cta: string;
 }) {
   return (
     <Section background="primary" padding="md">
       <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:justify-between">
-        <div className="max-w-2xl">
-          <h2 className="text-2xl font-black tracking-tighter uppercase sm:text-3xl">
-            {heading}
-          </h2>
-          <p className="mt-2 text-sm sm:text-base">{body}</p>
-        </div>
+        <h2 className="max-w-2xl text-2xl font-black tracking-tighter uppercase sm:text-3xl">
+          {heading}
+        </h2>
         <Button
           asChild
           size="lg"

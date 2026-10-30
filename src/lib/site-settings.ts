@@ -559,9 +559,8 @@ export interface SiteSettings {
       influencers: FunnelCard;
       ads: FunnelCard;
     };
-    /** The closing "Join the Riot" pink CTA band (logged-out home). */
+    /** The "Join the Riot" pink CTA band (logged-out home). */
     joinBandHeading: string;
-    joinBandBody: string;
     joinBandCta: string;
   };
   sections: {
@@ -1516,9 +1515,7 @@ const DEFAULTS: SiteSettings = {
           "ND Riot pledges to never narrow your exposure, never manipulate what you see, never rig the system to sell ads.",
       },
     },
-    joinBandHeading: "Make comics? Join the Riot.",
-    joinBandBody:
-      "List your books, build your creator profile, and reach readers.",
+    joinBandHeading: "Make Comics? Read Comics?",
     joinBandCta: "Join the Riot",
   },
   sections: {

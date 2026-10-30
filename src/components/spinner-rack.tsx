@@ -7,6 +7,7 @@ import { FeatureBook } from "@/components/feature-book";
 import { SaveButton } from "@/components/save-button";
 import { SlideOnChange } from "@/components/slide-on-change";
 import type { HeroFeatureItem } from "@/lib/hero-queue";
+import { cn } from "@/lib/utils";
 
 /** Load more picks once this few remain unseen, so a spin never waits on it. */
 const REFILL_AT = 3;
@@ -31,6 +32,7 @@ export function SpinnerRack({
   discoverLabel,
   ctaLabel,
   save,
+  className,
 }: {
   items: HeroFeatureItem[];
   featuredHeading: string;
@@ -42,6 +44,7 @@ export function SpinnerRack({
     savedLabel: string;
     signInCopy: { title: string; body: string; cta: string };
   };
+  className?: string;
 }) {
   const [items, setItems] = useState(initialItems);
   const [index, setIndex] = useState(0);
@@ -93,7 +96,7 @@ export function SpinnerRack({
   if (!current) return null;
 
   return (
-    <div className="flex h-full flex-col">
+    <div className={cn("flex h-full flex-col", className)}>
       {/* Heading row: the section name left, the Spin control right. */}
       <div className="mb-4 flex items-center gap-3">
         <h2 className="text-primary text-xs font-black tracking-[0.2em] uppercase">

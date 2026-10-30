@@ -292,8 +292,10 @@ export function Hero({
             {/* The four refusals, inline under the identity text (§2 copy from
                 the home settings) — logged-out only, since this whole strip is. */}
             {principles}
+            {/* Hidden on mobile — the nav's Join and the pink Join band already
+                carry the CTA there; this keeps the mobile hero tight. */}
             {ctas.length > 0 && (
-              <div className="flex flex-wrap gap-3">
+              <div className="hidden flex-wrap gap-3 md:flex">
                 {ctas.map((cta, i) => (
                   <Button
                     key={cta.href}
@@ -325,6 +327,10 @@ export function Hero({
                 discoverLabel={discoverLabel ?? "Spin the rack"}
                 ctaLabel={hero.featureCtaLabel}
                 save={heroSave}
+                // Hidden on mobile — the Comics row lands right after the hero
+                // there, so the spotlight would just delay it (§3 hero stays for
+                // desktop, where there's room beside the rail).
+                className="max-md:hidden"
               />
             )}
 
