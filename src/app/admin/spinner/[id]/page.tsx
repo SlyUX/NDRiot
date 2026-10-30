@@ -172,7 +172,14 @@ export default async function SpinnerStorePage({
         <Link href="/admin/spinner" className="text-muted-foreground hover:text-primary text-xs tracking-widest uppercase">
           ← All stores
         </Link>
-        <h1 className="mt-1 text-2xl font-black tracking-tighter uppercase">{storeTitle(store)}</h1>
+        <div className="mt-1 flex items-center gap-3">
+          {logoUrl && (
+            // Decorative — the store name sits right beside it (empty alt, §10).
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logoUrl} alt="" className="h-10 w-auto max-w-[120px] object-contain" />
+          )}
+          <h1 className="text-2xl font-black tracking-tighter uppercase">{storeTitle(store)}</h1>
+        </div>
         <p className="text-muted-foreground mt-1 text-sm">
           Creator share after cuts: <span className="text-foreground font-bold">{sharePct}%</span>
         </p>
