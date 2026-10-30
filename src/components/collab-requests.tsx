@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 import { respondCollab } from '@/app/actions/collab'
+import { formatDate } from '@/lib/card-mappers'
 import type { CollabSettings } from '@/lib/site-settings'
 import { COLLAB_RESPONSES, type CollabResponseValue } from '@/lib/taxonomy'
 import type { CollabStatus } from '@/sanity/collab-client'
@@ -17,6 +18,7 @@ export type IncomingCollab = {
   genre: string | null
   status: CollabStatus
   response: string | null
+  createdAt: string | null
 }
 export type SentCollab = {
   name: string
@@ -24,6 +26,7 @@ export type SentCollab = {
   genre: string | null
   status: CollabStatus
   response: string | null
+  createdAt: string | null
 }
 
 /**
@@ -97,12 +100,19 @@ export function CollabRequests({
                 key={i}
                 className="border-border flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b py-3 text-sm"
               >
-                <span>
-                  {nameNode(item.name, item.slug)}{' '}
-                  <span className="text-muted-foreground">
-                    · {copy.incomingVerb} {item.genre}
+                <div>
+                  <span>
+                    {nameNode(item.name, item.slug)}{' '}
+                    <span className="text-muted-foreground">
+                      · {copy.incomingVerb} {item.genre}
+                    </span>
                   </span>
-                </span>
+                  {item.createdAt && (
+                    <span className="text-muted-foreground mt-0.5 block text-xs">
+                      {copy.requestedPrefix} {formatDate(item.createdAt)}
+                    </span>
+                  )}
+                </div>
                 <span className="text-muted-foreground text-xs tracking-wide uppercase">
                   {item.status === 'pending'
                     ? copy.sentPendingLabel
@@ -149,6 +159,11 @@ function IncomingRow({
           {copy.incomingVerb} {item.genre}
         </span>
       </p>
+      {item.createdAt && (
+        <p className="text-muted-foreground mt-1 text-xs">
+          {copy.requestedPrefix} {formatDate(item.createdAt)}
+        </p>
+      )}
 
       {item.status === 'pending' || item.status === 'maybe' ? (
         <div className="mt-2.5 flex flex-wrap items-center gap-2">

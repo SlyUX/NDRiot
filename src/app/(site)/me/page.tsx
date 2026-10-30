@@ -289,6 +289,7 @@ export default async function AccountPage({
     genre: r.genre,
     status: r.status,
     response: r.response,
+    createdAt: r.createdAt,
   }));
   const sentCollab: SentCollab[] = collabSent.map((r) => ({
     name: collabById.get(r.toId)?.name ?? "A creator",
@@ -296,6 +297,7 @@ export default async function AccountPage({
     genre: r.genre,
     status: r.status,
     response: r.response,
+    createdAt: r.createdAt,
   }));
 
   // Your Updates — the creator's own posts (updates targeting a creator or comic
@@ -766,14 +768,18 @@ export default async function AccountPage({
     );
   }
 
-  const followsCount = followIds.length;
+  // The header "follows" stat counts followed CREATORS only — it links to the
+  // Network tab, which is about people. Saved comics (also follows for the feed,
+  // §3) live under Saved, so they aren't double-counted here. followIds (books +
+  // creators) still drives the Bunker feed; only this displayed stat narrows.
+  const followsCount = creatorIds.length;
   const cosignsCount = cosignIds.length;
 
   const bunkerView = (
     <Section
       padding="md"
       maxWidth="3xl"
-      innerClassName="mx-0 view-enter"
+      innerClassName="view-enter"
     >
       {/* The identity header is the creator's visible header, so the page h1
           stays for a11y (§10) but is hidden for them; a plain reader sees it. */}
@@ -877,7 +883,7 @@ export default async function AccountPage({
     <Section
       padding="md"
       maxWidth="3xl"
-      innerClassName="mx-0 view-enter"
+      innerClassName="view-enter"
     >
       {col3Tabs.length > 0 && <TabbedPanel tabs={col3Tabs} />}
       {isCreator && (
@@ -896,7 +902,7 @@ export default async function AccountPage({
     <Section
       padding="md"
       maxWidth="3xl"
-      innerClassName="mx-0 view-enter"
+      innerClassName="view-enter"
     >
       {col2Tabs.length > 0 ? (
         <TabbedPanel tabs={col2Tabs} />
@@ -919,7 +925,7 @@ export default async function AccountPage({
     <Section
       padding="md"
       maxWidth="3xl"
-      innerClassName="mx-0 view-enter"
+      innerClassName="view-enter"
     >
       <div className="space-y-3">
         <SectionHeading as="h2" size="sm">
