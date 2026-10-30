@@ -53,10 +53,22 @@ const btnOutline =
 const btnGhost =
   "text-muted-foreground hover:text-destructive text-[10px] font-black tracking-widest uppercase";
 
-// Checkbox column + the six data columns, shared by the header and every row so
-// they line up as a table.
-const dataGrid =
-  "grid grid-cols-[minmax(0,2fr)_minmax(0,1.3fr)_4.5rem_4.5rem_3.5rem_3.5rem] gap-x-3 items-center";
+// The six desktop data columns (the checkbox lives outside this grid). Applied
+// only at sm+ via `sm:grid`; on mobile each row is a stacked card instead. The
+// grid must not render on mobile — hiding column *content* with `hidden` leaves
+// the tracks in place, and the fixed Rating/Price/Stock/Sold tracks then squeeze
+// the Title column to nothing (the bug this layout replaces).
+const dataCols =
+  "grid-cols-[minmax(0,2fr)_minmax(0,1.3fr)_4.5rem_4.5rem_3.5rem_3.5rem] gap-x-3 items-center";
+
+const metaLine = (row: RackTableRow) =>
+  [
+    row.author,
+    row.maturityLabel,
+    row.price != null ? money(row.price) : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
 export function SpinnerRackTable({
   storeId,
@@ -165,7 +177,7 @@ export function SpinnerRackTable({
       ) : (
         <div className="border border-white/10">
           {/* Header */}
-          <div className="grid grid-cols-[1.5rem_1fr] items-center gap-2 border-b border-white/10 px-2 py-1.5">
+          <div className="text-muted-foreground grid grid-cols-[1.5rem_1fr] items-center gap-2 border-b border-white/10 px-2 py-1.5 text-[10px] tracking-widest uppercase">
             <input
               type="checkbox"
               aria-label="Select all"
@@ -175,13 +187,21 @@ export function SpinnerRackTable({
               }
               className="accent-primary size-4"
             />
-            <div className={`${dataGrid} text-muted-foreground text-[10px] tracking-widest uppercase`}>
-              <span>Title</span>
-              <span className="hidden sm:block">Author</span>
-              <span className="hidden text-right sm:block">Rating</span>
-              <span className="hidden text-right sm:block">Price</span>
-              <span className="hidden text-right sm:block">Stock</span>
-              <span className="hidden text-right sm:block">Sold</span>
+            <div>
+              {/* Desktop: full column labels */}
+              <div className={`hidden sm:grid ${dataCols}`}>
+                <span>Title</span>
+                <span>Author</span>
+                <span className="text-right">Rating</span>
+                <span className="text-right">Price</span>
+                <span className="text-right">Stock</span>
+                <span className="text-right">Sold</span>
+              </div>
+              {/* Mobile: just the two things each card shows */}
+              <div className="flex items-center justify-between sm:hidden">
+                <span>Title</span>
+                <span>Stock</span>
+              </div>
             </div>
           </div>
 
@@ -202,34 +222,68 @@ export function SpinnerRackTable({
                       type="button"
                       onClick={() => setExpanded((s) => toggle(s, row.key))}
                       aria-expanded={isOpen}
-                      className={`${dataGrid} w-full text-left text-sm hover:text-primary`}
+                      className="hover:text-primary w-full text-left text-sm"
                     >
-                      <span className="min-w-0 truncate font-semibold">
-                        <span aria-hidden className="text-muted-foreground mr-1 inline-block w-3">
+                      {/* Desktop: the six-column table row */}
+                      <div className={`hidden sm:grid ${dataCols}`}>
+                        <span className="min-w-0 truncate font-semibold">
+                          <span aria-hidden className="text-muted-foreground mr-1 inline-block w-3">
+                            {isOpen ? "▾" : "▸"}
+                          </span>
+                          {row.title}
+                          {row.kind === "rag" && (
+                            <span className="text-muted-foreground ml-2 text-[10px] tracking-widest uppercase">
+                              Rag
+                            </span>
+                          )}
+                        </span>
+                        <span className="text-muted-foreground min-w-0 truncate text-xs">
+                          {row.author}
+                        </span>
+                        <span className="text-right text-[10px] tracking-wider uppercase">
+                          {row.maturityLabel}
+                        </span>
+                        <span className="text-right tabular-nums">
+                          {row.price != null ? money(row.price) : "—"}
+                        </span>
+                        <span className="text-right tabular-nums">
+                          {row.lastCount ?? "—"}
+                        </span>
+                        <span className="text-muted-foreground text-right tabular-nums">
+                          {row.sold ?? 0}
+                        </span>
+                      </div>
+
+                      {/* Mobile: a stacked card — title + big Stock number, with a
+                          muted author · rating · price line beneath. */}
+                      <div className="flex items-start gap-2 sm:hidden">
+                        <span aria-hidden className="text-muted-foreground mt-0.5 w-3 shrink-0">
                           {isOpen ? "▾" : "▸"}
                         </span>
-                        {row.title}
-                        {row.kind === "rag" && (
-                          <span className="text-muted-foreground ml-2 text-[10px] tracking-widest uppercase">
-                            Rag
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate font-semibold">
+                            {row.title}
+                            {row.kind === "rag" && (
+                              <span className="text-muted-foreground ml-2 text-[10px] tracking-widest uppercase">
+                                Rag
+                              </span>
+                            )}
                           </span>
-                        )}
-                      </span>
-                      <span className="text-muted-foreground hidden min-w-0 truncate text-xs sm:block">
-                        {row.author}
-                      </span>
-                      <span className="hidden text-right text-[10px] tracking-wider uppercase sm:block">
-                        {row.maturityLabel}
-                      </span>
-                      <span className="hidden text-right tabular-nums sm:block">
-                        {row.price != null ? money(row.price) : "—"}
-                      </span>
-                      <span className="hidden text-right tabular-nums sm:block">
-                        {row.lastCount ?? "—"}
-                      </span>
-                      <span className="text-muted-foreground text-right tabular-nums">
-                        {row.sold ?? 0}
-                      </span>
+                          {metaLine(row) && (
+                            <span className="text-muted-foreground mt-0.5 block truncate text-xs">
+                              {metaLine(row)}
+                            </span>
+                          )}
+                        </span>
+                        <span className="shrink-0 text-right leading-tight">
+                          <span className="block text-base font-bold tabular-nums">
+                            {row.lastCount ?? "—"}
+                          </span>
+                          <span className="text-muted-foreground block text-[9px] tracking-widest uppercase">
+                            Stock
+                          </span>
+                        </span>
+                      </div>
                     </button>
                   </div>
 
