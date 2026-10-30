@@ -7508,13 +7508,6 @@
               },
               "optional": true
             },
-            "principlesHeading": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
             "principles": {
               "type": "objectAttribute",
               "value": {

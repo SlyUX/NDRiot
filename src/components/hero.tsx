@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -47,6 +48,9 @@ export interface HeroProps {
   feedHeading: string;
   /** Label for the "Spin the Rack" button — CMS copy (AGENTS.md §2). */
   discoverLabel?: string;
+  /** The four-refusals grid, rendered inline inside the identity strip — so it
+   *  appears logged-out only (the strip is hidden when signed in). */
+  principles?: ReactNode;
   /** When signed in, the evangelism tagline/subhead/buttons are hidden — the
    *  signed-in home shows the dashboard section nav above the hero instead. The
    *  random showcase (§3) stays for everyone. */
@@ -233,6 +237,7 @@ export function Hero({
   feedItems,
   feedHeading,
   discoverLabel,
+  principles,
   signedIn,
 }: HeroProps) {
   const hasFeature = heroItems.length > 0;
@@ -284,6 +289,9 @@ export function Hero({
                 </p>
               )}
             </div>
+            {/* The four refusals, inline under the identity text (§2 copy from
+                the home settings) — logged-out only, since this whole strip is. */}
+            {principles}
             {ctas.length > 0 && (
               <div className="flex flex-wrap gap-3">
                 {ctas.map((cta, i) => (

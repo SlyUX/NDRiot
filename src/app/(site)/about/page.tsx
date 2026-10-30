@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 
 import { JsonLd } from '@/components/json-ld'
 import PortableTextBody from '@/components/PortableTextBody'
+import { Principles } from '@/components/principles'
 import { SectionHeading } from '@/components/section-heading'
 import { Section } from '@/components/ui/section'
 import { pageMetadata } from '@/lib/page-metadata'
@@ -64,6 +65,10 @@ export default async function AboutPage() {
       ) : (
         <p className="text-muted-foreground max-w-prose">{about.seoDescription}</p>
       )}
+
+      {/* The four refusals, inline in the mission page (§2 copy — shared with the
+          home hero, so they stay in step). Two-up for the 3xl reading column. */}
+      <Principles principles={settings.home.principles} columns={2} />
 
       {about.faq.length > 0 && (
         <section className="space-y-5">

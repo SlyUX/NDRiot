@@ -550,11 +550,9 @@ export interface SiteSettings {
       media: FunnelCard;
       allies: FunnelCard;
     };
-    /** The "how ND Riot works" refusals — no algorithm, no favoritism, no
-     *  influencers, no ads. Logged-out they run headingless beneath the hero's
-     *  identity line; logged-in they carry the heading. Icons are fixed in
-     *  code; this is the copy. */
-    principlesHeading: string;
+    /** The four refusals — no algorithm, no favoritism, no influencers, no ads.
+     *  Rendered inline in the home hero's identity strip (logged-out) and on the
+     *  /about page. Icons are fixed in code; this is the copy. */
     principles: {
       algorithm: FunnelCard;
       favoritism: FunnelCard;
@@ -1492,7 +1490,6 @@ const DEFAULTS: SiteSettings = {
           "Vetted partners and services ND Riot vouches for.",
       },
     },
-    principlesHeading: "How ND Riot Works",
     principles: {
       algorithm: {
         title: "No algorithm — ever.",

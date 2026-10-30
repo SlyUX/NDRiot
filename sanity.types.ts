@@ -1220,7 +1220,6 @@ export type SiteSettings = {
         description?: string;
       };
     };
-    principlesHeading?: string;
     principles?: {
       algorithm?: {
         title?: string;

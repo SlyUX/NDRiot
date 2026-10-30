@@ -820,18 +820,11 @@ export default defineType({
           ),
         }),
         defineField({
-          name: "principlesHeading",
-          title: '"How ND Riot works" row heading',
-          type: "string",
-          description:
-            'Heading over the logged-out principles row — the three refusals shown to first-time visitors, e.g. "How ND Riot Works".',
-        }),
-        defineField({
           name: "principles",
-          title: '"How ND Riot works" cards',
+          title: '"How ND Riot works" refusals',
           type: "object",
           description:
-            "The refusals that define ND Riot: no algorithm, no favoritism, no influencers, no ads. Logged-out they run headingless beneath the hero identity line; logged-in they sit under the heading above. A title + a short statement each — icons are fixed in code, and these cards don't link.",
+            "The four refusals that define ND Riot: no algorithm, no favoritism, no influencers, no ads. Rendered inline under the hero's identity text on the logged-out home, and inline on the About (WTH?) page. A title + a short statement each — icons are fixed in code, and these don't link.",
           options: { collapsible: true, collapsed: true },
           fields: (
             ["algorithm", "favoritism", "influencers", "ads"] as const

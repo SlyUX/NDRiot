@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { ContentCardGrid } from "@/components/content-card-grid";
 import { StripsSubscribe } from "@/components/strips-subscribe";
 import { ForCreatorsRow } from "@/components/for-creators-row";
-import { PrinciplesRow } from "@/components/principles-row";
+import { Principles } from "@/components/principles";
 import { ShuffleRow } from "@/components/shuffle-row";
 import { FilterBar } from "@/components/filter-bar";
 import { Hero } from "@/components/hero";
@@ -318,19 +318,8 @@ export default async function Home({
         feedItems={feedItems}
         feedHeading={feedHeading}
         discoverLabel={settings.sections.spinLabel}
+        principles={<Principles principles={settings.home.principles} surface />}
         signedIn={Boolean(email)}
-      />
-
-      {/* The refusals — no algorithm / favoritism / influencers / ads. Shown to
-          everyone, directly beneath the hero. Logged-out it runs headingless on
-          --surface-alt, so it reads as the support for the hero's "Real Indie
-          Comics." identity line; logged-in it sits on a --primary (pink) band
-          under its own "How ND Riot Works" heading (the identity strip is hidden
-          there). Cards stay gray on either band. */}
-      <PrinciplesRow
-        heading={email ? settings.home.principlesHeading : undefined}
-        principles={settings.home.principles}
-        background={email ? "primary" : "alt"}
       />
 
       {/* Each row sets its own background explicitly (§9): Comics on --background,
