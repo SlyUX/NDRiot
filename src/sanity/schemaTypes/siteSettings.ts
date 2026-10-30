@@ -589,6 +589,7 @@ export default defineType({
         defineField({ name: "incomingHeading", title: "/me — incoming requests heading", type: "string" }),
         defineField({ name: "incomingIntro", title: "/me — incoming requests intro", type: "text", rows: 3 }),
         defineField({ name: "incomingVerb", title: "/me — incoming item phrase", type: "string", description: 'Reads "{name} <phrase> {genre}" — e.g. "wants to collaborate on".' }),
+        defineField({ name: "requestedPrefix", title: "/me — prefix before a request's date", type: "string", description: 'Reads "{prefix} {date}" under a collaboration request (both incoming and sent) — e.g. "Requested".' }),
         defineField({ name: "respondPrompt", title: "/me — respond prompt", type: "string" }),
         defineField({ name: "incomingMaybeNote", title: "/me — note on a deferred (“maybe”) request", type: "string", description: "Shown above the presets on a request they answered “maybe later” — it stays actionable so they can still choose “Yes” to connect." }),
         defineField({ name: "incomingEmpty", title: "/me — no incoming requests", type: "string" }),
@@ -813,6 +814,39 @@ export default defineType({
                   title: "Short description",
                   type: "text",
                   rows: 2,
+                }),
+              ],
+            }),
+          ),
+        }),
+        defineField({
+          name: "principlesHeading",
+          title: '"How ND Riot works" row heading',
+          type: "string",
+          description:
+            'Heading over the logged-out principles row — the three refusals shown to first-time visitors, e.g. "How ND Riot Works".',
+        }),
+        defineField({
+          name: "principles",
+          title: '"How ND Riot works" cards',
+          type: "object",
+          description:
+            "The refusals that define ND Riot: no algorithm, no favoritism, no influencers, no ads. Logged-out they run headingless beneath the hero identity line; logged-in they sit under the heading above. A title + a short statement each — icons are fixed in code, and these cards don't link.",
+          options: { collapsible: true, collapsed: true },
+          fields: (
+            ["algorithm", "favoritism", "influencers", "ads"] as const
+          ).map((area) =>
+            defineField({
+              name: area,
+              title: area.charAt(0).toUpperCase() + area.slice(1),
+              type: "object",
+              fields: [
+                defineField({ name: "title", title: "Title", type: "string" }),
+                defineField({
+                  name: "description",
+                  title: "Statement",
+                  type: "text",
+                  rows: 4,
                 }),
               ],
             }),

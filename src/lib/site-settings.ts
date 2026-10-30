@@ -393,6 +393,7 @@ export type CollabSettings = {
   incomingHeading: string;
   incomingIntro: string;
   incomingVerb: string;
+  requestedPrefix: string;
   respondPrompt: string;
   incomingMaybeNote: string;
   incomingEmpty: string;
@@ -548,6 +549,17 @@ export interface SiteSettings {
       resources: FunnelCard;
       media: FunnelCard;
       allies: FunnelCard;
+    };
+    /** The "how ND Riot works" refusals — no algorithm, no favoritism, no
+     *  influencers, no ads. Logged-out they run headingless beneath the hero's
+     *  identity line; logged-in they carry the heading. Icons are fixed in
+     *  code; this is the copy. */
+    principlesHeading: string;
+    principles: {
+      algorithm: FunnelCard;
+      favoritism: FunnelCard;
+      influencers: FunnelCard;
+      ads: FunnelCard;
     };
   };
   sections: {
@@ -1437,6 +1449,7 @@ const DEFAULTS: SiteSettings = {
     incomingIntro:
       "Creators who’d like to work with you. Respond with a preset — you’re under no obligation, and there’s no wrong answer. Only a “Yes, let’s connect” shares an email introduction.",
     incomingVerb: "wants to collaborate on",
+    requestedPrefix: "Requested",
     respondPrompt: "Respond:",
     incomingMaybeNote:
       "You said “Maybe later” — you can connect anytime, or close it out:",
@@ -1477,6 +1490,29 @@ const DEFAULTS: SiteSettings = {
         title: "Allies",
         description:
           "Vetted partners and services ND Riot vouches for.",
+      },
+    },
+    principlesHeading: "How ND Riot Works",
+    principles: {
+      algorithm: {
+        title: "No algorithm — ever.",
+        description:
+          "You know what you like. ND Riot sorts everything at random so every book and creator gets equal exposure — filters let you dig deeper, and following a project keeps you in its loop. It's not our job to guess where you want to be.",
+      },
+      favoritism: {
+        title: "No favoritism.",
+        description:
+          "No staff picks, no “featured,” no top-ten. We never put a thumb on the scale or endorse one project over another — the only thing that rises is what you choose to follow, and that lives in your private space.",
+      },
+      influencers: {
+        title: "No influencers.",
+        description:
+          "Todd McFarlane is just as welcome as Stephen Fox — same shelf, same odds. No paid partnerships, no cash-chasing, none of the corporate comic bullshit. A level playing field, every time.",
+      },
+      ads: {
+        title: "No ads.",
+        description:
+          "ND Riot pledges to never narrow your exposure, never manipulate visibility, never rig the system to sell ads. The platform answers to readers and creators — never advertisers.",
       },
     },
   },

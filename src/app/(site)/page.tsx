@@ -1,16 +1,15 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { Check } from "lucide-react";
 
 import { ContentCardGrid } from "@/components/content-card-grid";
 import { StripsSubscribe } from "@/components/strips-subscribe";
 import { ForCreatorsRow } from "@/components/for-creators-row";
+import { PrinciplesRow } from "@/components/principles-row";
 import { ShuffleRow } from "@/components/shuffle-row";
 import { FilterBar } from "@/components/filter-bar";
 import { Hero } from "@/components/hero";
 import { JsonLd } from "@/components/json-ld";
 import { LoadMore } from "@/components/load-more";
-import { NewsletterForm } from "@/components/newsletter-form";
 import {
   organizationSchema,
   jsonLdGraph,
@@ -295,45 +294,6 @@ export default async function Home({
     : seededShuffle(creators, effCreatorSeed);
 
 
-  // The pink newsletter band, rendered in two positions and toggled by
-  // breakpoint: after the hero on desktop, after the Comics row on phones.
-  const newsletterBand = (
-    <div className="mx-auto flex max-w-[90rem] flex-col gap-6 px-6 py-10 text-left sm:flex-row sm:items-start sm:justify-center sm:gap-12 lg:px-0">
-      {/* Left column: the heading + what each issue carries. */}
-      <div className="max-w-xl">
-        <h2 className="text-2xl font-black tracking-tighter uppercase sm:text-3xl">
-          {settings.newsletter.heading}
-        </h2>
-        {settings.newsletter.items.length > 0 && (
-          <ul className="mt-3 flex flex-col gap-1 text-sm text-black">
-            {settings.newsletter.items.map((item) => (
-              <li key={item} className="flex items-start gap-2">
-                <Check aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
-                {/* **word** → bold, so the key nouns stand out in the list. */}
-                <span>
-                  {item.split("**").map((part, i) =>
-                    i % 2 === 1 ? (
-                      <strong key={i} className="font-bold">
-                        {part}
-                      </strong>
-                    ) : (
-                      part
-                    ),
-                  )}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-      {/* Right column: the pitch, then the form directly beneath it. */}
-      <div className="w-full space-y-3 sm:max-w-md">
-        <p className="text-sm text-black">{settings.newsletter.description}</p>
-        <NewsletterForm copy={settings.newsletter} variant="band" />
-      </div>
-    </div>
-  );
-
   return (
     <div>
       {ragBanner && (
@@ -361,11 +321,17 @@ export default async function Home({
         signedIn={Boolean(email)}
       />
 
-      {/* Newsletter band — beneath the hero on desktop; on phones the copy
-          below moves under the Comics row. §9 pink. */}
-      <section className="bg-primary text-primary-foreground max-md:hidden">
-        {newsletterBand}
-      </section>
+      {/* The refusals — no algorithm / favoritism / influencers / ads. Shown to
+          everyone, directly beneath the hero. Logged-out it runs headingless on
+          --surface-alt, so it reads as the support for the hero's "Real Indie
+          Comics." identity line; logged-in it sits on a --primary (pink) band
+          under its own "How ND Riot Works" heading (the identity strip is hidden
+          there). Cards stay gray on either band. */}
+      <PrinciplesRow
+        heading={email ? settings.home.principlesHeading : undefined}
+        principles={settings.home.principles}
+        background={email ? "primary" : "alt"}
+      />
 
       {/* Each row sets its own background explicitly (§9): Comics on --background,
           Comic Creators on --surface-alt, For Creators on --background, Strips on
@@ -408,12 +374,6 @@ export default async function Home({
             booksFiltering ? settings.empty.filteredBooks : settings.empty.books
           }
         />
-
-        {/* Newsletter band on phones only — sits after Comics (a raw <section>
-            between the explicit-background rows). */}
-        <section className="bg-primary text-primary-foreground md:hidden">
-          {newsletterBand}
-        </section>
 
         {/* Creators: wide horizontal cards. Same browse-scroll / search-grid split
             as the books row above. */}

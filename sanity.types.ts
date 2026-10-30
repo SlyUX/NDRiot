@@ -1151,6 +1151,7 @@ export type SiteSettings = {
     incomingHeading?: string;
     incomingIntro?: string;
     incomingVerb?: string;
+    requestedPrefix?: string;
     respondPrompt?: string;
     incomingMaybeNote?: string;
     incomingEmpty?: string;
@@ -1215,6 +1216,25 @@ export type SiteSettings = {
         description?: string;
       };
       allies?: {
+        title?: string;
+        description?: string;
+      };
+    };
+    principlesHeading?: string;
+    principles?: {
+      algorithm?: {
+        title?: string;
+        description?: string;
+      };
+      favoritism?: {
+        title?: string;
+        description?: string;
+      };
+      influencers?: {
+        title?: string;
+        description?: string;
+      };
+      ads?: {
         title?: string;
         description?: string;
       };

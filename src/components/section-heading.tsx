@@ -28,6 +28,9 @@ const headingVariants = cva('font-black tracking-tighter', {
     tone: {
       default: 'text-foreground',
       primary: 'text-primary',
+      /** Black, for a heading sitting ON a --primary (pink) surface — white fails
+       *  AA on pink, black is 5.69:1 (§9). */
+      onPrimary: 'text-primary-foreground',
       /** Personalization teal — headings tuned to the signed-in person (the
        *  home "My Feed" rail). */
       personalize: 'text-personalize',
