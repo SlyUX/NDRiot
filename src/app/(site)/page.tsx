@@ -5,6 +5,7 @@ import { ContentCardGrid } from "@/components/content-card-grid";
 import { StripsSubscribe } from "@/components/strips-subscribe";
 import { ForCreatorsRow } from "@/components/for-creators-row";
 import { Principles } from "@/components/principles";
+import { JoinBand } from "@/components/join-band";
 import { ShuffleRow } from "@/components/shuffle-row";
 import { FilterBar } from "@/components/filter-bar";
 import { Hero } from "@/components/hero";
@@ -322,6 +323,18 @@ export default async function Home({
         signedIn={Boolean(email)}
       />
 
+      {/* The pink "Join the Riot" band, high on the page where the subscribe bar
+          used to sit — so the rhythm reads dark hero → vibrant band → dark
+          content. Logged-out only; the page's one large field of brand color
+          and its conversion moment. */}
+      {!email && (
+        <JoinBand
+          heading={settings.home.joinBandHeading}
+          body={settings.home.joinBandBody}
+          cta={settings.home.joinBandCta}
+        />
+      )}
+
       {/* Each row sets its own background explicitly (§9): Comics on --background,
           Comic Creators on --surface-alt, For Creators on --background, Strips on
           --surface-alt. Explicit (not auto-alternated) because the interactive
@@ -436,6 +449,7 @@ export default async function Home({
             emptyMessage=""
           />
         )}
+
       </>
     </div>
   );

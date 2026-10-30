@@ -1238,6 +1238,9 @@ export type SiteSettings = {
         description?: string;
       };
     };
+    joinBandHeading?: string;
+    joinBandBody?: string;
+    joinBandCta?: string;
   };
   sections?: {
     editorialHeading?: string;

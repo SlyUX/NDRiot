@@ -559,6 +559,10 @@ export interface SiteSettings {
       influencers: FunnelCard;
       ads: FunnelCard;
     };
+    /** The closing "Join the Riot" pink CTA band (logged-out home). */
+    joinBandHeading: string;
+    joinBandBody: string;
+    joinBandCta: string;
   };
   sections: {
     editorialHeading: string;
@@ -1494,24 +1498,28 @@ const DEFAULTS: SiteSettings = {
       algorithm: {
         title: "No algorithm — ever.",
         description:
-          "You know what you like. ND Riot sorts everything at random so every book and creator gets equal exposure — filters let you dig deeper, and following a project keeps you in its loop. It's not our job to guess where you want to be.",
+          "You know what you like. Everything's sorted at random, so every book and creator gets equal exposure — filters and follows let you dig deeper. We don't guess where you want to be.",
       },
       favoritism: {
         title: "No favoritism.",
         description:
-          "No staff picks, no “featured,” no top-ten. We never put a thumb on the scale or endorse one project over another — the only thing that rises is what you choose to follow, and that lives in your private space.",
+          "No staff picks, no “featured,” no top-ten. We never put a thumb on the scale — the only thing that rises is what you follow, and that stays private.",
       },
       influencers: {
         title: "No influencers.",
         description:
-          "Todd McFarlane is just as welcome as Stephen Fox — same shelf, same odds. No paid partnerships, no cash-chasing, none of the corporate comic bullshit. A level playing field, every time.",
+          "Todd McFarlane is just as welcome as Stephen Fox — same shelf, same odds. No paid partnerships, no cash-chasing, none of the corporate comic bullshit.",
       },
       ads: {
         title: "No ads.",
         description:
-          "ND Riot pledges to never narrow your exposure, never manipulate visibility, never rig the system to sell ads. The platform answers to readers and creators — never advertisers.",
+          "ND Riot pledges to never narrow your exposure, never manipulate what you see, never rig the system to sell ads.",
       },
     },
+    joinBandHeading: "Make comics? Join the Riot.",
+    joinBandBody:
+      "List your books, build your creator profile, and reach readers.",
+    joinBandCta: "Join the Riot",
   },
   sections: {
     editorialHeading: "Editorial",

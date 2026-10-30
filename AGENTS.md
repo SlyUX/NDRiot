@@ -76,6 +76,7 @@ Assume **every string, image, label, and link a reader sees is CMS-managed** unl
 - Every field needs a Studio-side `title` and `description` — editors are the users of the schema.
 - Images: always `urlFor()` with an explicit `width()`; always real `alt` text from Sanity (`asset->altText` or a sibling field), never the title as a fallback.
 - **American English** in all reader-facing copy and Studio labels — `organization`, not `organisation`; `color`, `favorite`, `catalog`, `-ize`. ND Riot is a US project. (Pre-existing internal code comments are not copy and can lag.)
+- **Voice: sharp, concise, clear.** Say it once — never the same thing two ways. Cut filler; short beats verbose. A heading and its body shouldn't restate each other, and a sentence shouldn't repeat what the UI already shows. Applies to all reader-facing copy and Studio labels (and to default copy in `site-settings.ts`).
 
 ## 3. Discovery is user-directed, never inferred
 
