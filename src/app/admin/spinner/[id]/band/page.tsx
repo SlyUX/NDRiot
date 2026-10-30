@@ -227,7 +227,13 @@ export default async function SellerInfoBandPage({
     .info { padding: 1in 0.75in; }
     .info h1 { font-size: 40px; font-weight: 900; line-height: 1.05; margin: 0 0 6px; }
     .info .author { font-size: 20px; margin: 0 0 20px; }
-    .info .desc { font-size: 15px; line-height: 1.6; margin: 0 0 28px; white-space: pre-wrap; }
+    /* Real paragraphs, not pre-wrap: pt::text joins blocks with "\n\n" and any
+       empty editor block adds another, which rendered as multiple blank lines.
+       Splitting into <p>s with a fixed margin makes every gap a single,
+       uniform paragraph break regardless of how many blank blocks are present. */
+    .info .desc { margin: 0 0 28px; }
+    .info .desc p { font-size: 15px; line-height: 1.6; margin: 0 0 12px; }
+    .info .desc p:last-child { margin-bottom: 0; }
     .info .infoqr { height: 2in; width: 2in; }
     .info .qrlabel { font-size: 12px; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.12em; }
     .qr svg, .infoqr svg { width: 100%; height: 100%; display: block; }
@@ -297,7 +303,19 @@ export default async function SellerInfoBandPage({
                 {item.author && (
                   <p className="author">{item.kind === "rag" ? item.author : `by ${item.author}`}</p>
                 )}
-                {item.description && <p className="desc">{item.description}</p>}
+                {(() => {
+                  const paras = item.description
+                    .split(/\n\s*\n/)
+                    .map((p) => p.trim())
+                    .filter(Boolean);
+                  return paras.length > 0 ? (
+                    <div className="desc">
+                      {paras.map((para, pi) => (
+                        <p key={pi}>{para}</p>
+                      ))}
+                    </div>
+                  ) : null;
+                })()}
                 {item.infoQr && (
                   <>
                     <div className="infoqr" dangerouslySetInnerHTML={{ __html: item.infoQr }} />
