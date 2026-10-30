@@ -106,13 +106,30 @@ export function UserNav({
         href={href}
         aria-current={active ? "page" : undefined}
         className={cn(
-          "focus-visible:ring-ring flex flex-col items-center justify-end gap-1 text-[10px] font-bold tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:-outline-offset-2 focus-visible:outline-none",
+          "group focus-visible:ring-ring flex flex-col items-center justify-end gap-1 text-[10px] font-bold tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:-outline-offset-2 focus-visible:outline-none",
           variant === "bar" ? "px-3 py-2.5" : "py-2.5 leading-none",
-          active ? "text-primary" : "text-muted-foreground hover:text-primary",
         )}
       >
-        {lead}
-        <span className="max-w-[7rem] text-center leading-tight">{item.label}</span>
+        {/* Colors split by element: on the --surface-alt band pink is 3.99:1, which
+            clears the 3:1 floor for the icon (a large, non-text glyph) but FAILS AA
+            for the small label (§9) — so the active/hover accent lives on the icon,
+            and the label uses white (active) / muted (idle), both AA here. */}
+        <span
+          className={cn(
+            "flex items-center justify-center",
+            active ? "text-primary" : "text-muted-foreground group-hover:text-primary",
+          )}
+        >
+          {lead}
+        </span>
+        <span
+          className={cn(
+            "max-w-[7rem] text-center leading-tight",
+            active ? "text-foreground" : "text-muted-foreground group-hover:text-foreground",
+          )}
+        >
+          {item.label}
+        </span>
       </Link>
     );
   };
@@ -123,7 +140,7 @@ export function UserNav({
           extra margin). px-6 outer / max-w inner aligns with content. Left-
           aligned and natural width — the tabs sit together at the left gutter
           rather than stretching across the full width. */}
-      <div className="hidden px-6 md:block">
+      <div className="bg-surface-alt border-primary hidden border-b px-6 md:block">
         <nav
           aria-label="Your dashboard"
           className="mx-auto flex max-w-[90rem] items-end justify-center gap-1 py-1"
@@ -137,7 +154,7 @@ export function UserNav({
       <nav
         aria-label="Your dashboard"
         className={cn(
-          "border-primary/40 bg-background fixed inset-x-3 bottom-3 z-40 grid items-end rounded-full border px-2 shadow-[0_2px_20px_rgba(0,0,0,0.6)] md:hidden",
+          "border-primary/40 bg-surface-alt fixed inset-x-3 bottom-3 z-40 grid items-end rounded-full border px-2 shadow-[0_2px_20px_rgba(0,0,0,0.6)] md:hidden",
           items.length >= 5 ? "grid-cols-5" : "grid-cols-4",
         )}
       >
