@@ -69,7 +69,16 @@ export function Principles({
   return (
     <ul
       className={cn(
-        "grid gap-x-6 gap-y-4 sm:grid-cols-2 sm:gap-y-8",
+        "grid gap-x-6 sm:grid-cols-2",
+        // Mobile + surface: the four refusals share one --surface-alt box,
+        // split into tappable rows by hairline dividers. The box carries the
+        // horizontal padding (px-5) so the dividers inset to the text column
+        // instead of running edge to edge; rows keep only vertical padding. At
+        // sm+ the grid breaks them back into separate cards, so the box (and its
+        // padding) moves onto each item (below).
+        surface
+          ? "divide-border bg-surface-alt gap-y-0 divide-y border border-border px-5 sm:gap-y-8 sm:divide-y-0 sm:border-0 sm:bg-transparent sm:px-0"
+          : "gap-y-4 sm:gap-y-8",
         columns === 4 && "lg:grid-cols-4",
       )}
     >

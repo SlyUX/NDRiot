@@ -29,7 +29,11 @@ export function PrincipleCard({
   return (
     <li
       className={cn(
-        surface && "bg-surface-alt border-border border p-5 md:flex md:h-full md:flex-col",
+        // Mobile: only vertical padding — the row sits inside the parent's
+        // shared box, which owns the horizontal padding. sm+: the item gets its
+        // own --surface-alt card (full padding) back; md+ it stacks.
+        surface &&
+          "py-5 sm:bg-surface-alt sm:border sm:border-border sm:p-5 md:flex md:h-full md:flex-col",
       )}
     >
       {/* The tap target is a mobile affordance; md+ it's inert and the row lays

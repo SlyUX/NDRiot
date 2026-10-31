@@ -60,7 +60,9 @@ export function ShuffleRow({
           onClick={reshuffle}
           className="focus-visible:ring-ring border-border text-foreground hover:border-primary hover:text-primary inline-flex shrink-0 items-center gap-1.5 border px-2.5 py-1 text-xs font-bold tracking-widest uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none"
         >
-          {spinLabel}
+          {/* Mobile shows the icon alone; the label stays sr-only so the button
+              keeps its accessible name, then becomes visible text at md+. */}
+          <span className="sr-only md:not-sr-only">{spinLabel}</span>
           <Shuffle aria-hidden="true" strokeWidth={2.5} className="size-3.5" />
         </button>
       }
