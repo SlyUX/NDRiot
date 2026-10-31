@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { usePathname } from 'next/navigation'
-import { Bookmark } from 'lucide-react'
+import { Bookmark, UserPlus, UserCheck } from 'lucide-react'
 
 import { toggleSaveAction } from '@/app/actions/saves'
 import { SignInDialog } from '@/components/sign-in-dialog'
@@ -10,11 +10,13 @@ import type { SavedItemType } from '@/sanity/reader-client'
 import { cn } from '@/lib/utils'
 
 /**
- * Save/bookmark toggle for a comic or maker — the reader's one explicit signal
- * (AGENTS.md §3). White button, black text (21:1) — deliberately neutral, not
- * the funding green, so it never reads as "campaign." Optimistic: the bookmark
- * fills on click and reconciles with the server. Signed out, it opens the
- * sign-in modal instead of acting. Labels come from Sanity (§2).
+ * Save/follow toggle — the reader's one explicit signal (AGENTS.md §3). The
+ * glyph matches the verb: a creator is *followed* (UserPlus → UserCheck), while
+ * a comic or strip is *saved* (a bookmark that fills). White button, black text
+ * (21:1) — deliberately neutral, not the funding green, so it never reads as
+ * "campaign." Optimistic: the icon changes on click and reconciles with the
+ * server. Signed out, it opens the sign-in modal instead of acting. Labels come
+ * from Sanity (§2).
  */
 export function SaveButton({
   itemType,
@@ -64,6 +66,10 @@ export function SaveButton({
 
   const label = saved ? savedLabel : saveLabel
   const icon = variant === 'icon'
+  // Creators are followed (person glyph, plus → check); comics/strips are saved
+  // (a bookmark that fills). The glyph tracks the verb its label already uses.
+  const follow = itemType === 'creator'
+  const Glyph = follow ? (saved ? UserCheck : UserPlus) : Bookmark
   return (
     <>
       <button
@@ -91,7 +97,11 @@ export function SaveButton({
           className,
         )}
       >
-        <Bookmark aria-hidden="true" strokeWidth={2.5} className={cn('size-4', saved && 'fill-current')} />
+        <Glyph
+          aria-hidden="true"
+          strokeWidth={2.5}
+          className={cn('size-4', !follow && saved && 'fill-current')}
+        />
         {!icon && label}
       </button>
       {!signedIn && (
