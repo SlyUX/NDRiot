@@ -327,10 +327,6 @@ export function Hero({
                 discoverLabel={discoverLabel ?? "Spin the rack"}
                 ctaLabel={hero.featureCtaLabel}
                 save={heroSave}
-                // Hidden on mobile — the Comics row lands right after the hero
-                // there, so the spotlight would just delay it (§3 hero stays for
-                // desktop, where there's room beside the rail).
-                className="max-md:hidden"
               />
             )}
 
