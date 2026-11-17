@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 import { respondCollab } from '@/app/actions/collab'
+import { Spinner } from '@/components/ui/spinner'
 import { formatDate } from '@/lib/card-mappers'
 import type { CollabSettings } from '@/lib/site-settings'
 import { COLLAB_RESPONSES, type CollabResponseValue } from '@/lib/taxonomy'
@@ -139,15 +140,20 @@ function IncomingRow({
   nameNode: React.ReactNode
 }) {
   const [pending, startTransition] = useTransition()
+  const [which, setWhich] = useState<CollabResponseValue | null>(null)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   function respond(value: CollabResponseValue) {
     setError(null)
+    setWhich(value)
     startTransition(async () => {
       const result = await respondCollab({ fromId: item.fromId, response: value })
       if (result.ok) router.refresh()
-      else setError(result.error ?? 'Something went wrong.')
+      else {
+        setError(result.error ?? 'Something went wrong.')
+        setWhich(null)
+      }
     })
   }
 
@@ -178,12 +184,13 @@ function IncomingRow({
               onClick={() => respond(o.value)}
               disabled={pending}
               className={cn(
-                'focus-visible:ring-ring border px-3 py-1.5 text-[11px] font-bold tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60',
+                'focus-visible:ring-ring inline-flex items-center gap-1.5 border px-3 py-1.5 text-[11px] font-bold tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60',
                 o.accepts
                   ? 'bg-primary text-primary-foreground border-primary'
                   : 'text-muted-foreground hover:border-primary/60 hover:text-foreground border-white/20',
               )}
             >
+              {pending && which === o.value && <Spinner className="size-3.5" />}
               {responseLabel(o.value)}
             </button>
           ))}
