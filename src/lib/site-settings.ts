@@ -403,6 +403,59 @@ export type CollabSettings = {
   sentEmpty: string;
 }
 
+/** Creator-to-creator messaging — the Chat Request button + dialog. Parallel to
+ *  collab; the collaboration option inside the dialog reuses CollabSettings. */
+export type MessagingSettings = {
+  requestButtonLabel: string;
+  dialogTitle: string;
+  dialogBody: string;
+  noteLabel: string;
+  notePlaceholder: string;
+  submitLabel: string;
+  cancelLabel: string;
+  /** Button states when a thread already exists. */
+  sentLabel: string;
+  activeLabel: string;
+  /** The hr-separated collaboration option, shown last when the target is open to it. */
+  collabPromptHeading: string;
+  collabPromptBody: string;
+  collabPromptCta: string;
+  backLabel: string;
+  /** /me — incoming requests. */
+  incomingHeading: string;
+  incomingIntro: string;
+  incomingVerb: string;
+  acceptLabel: string;
+  declineLabel: string;
+  requestedPrefix: string;
+  followsYouLabel: string;
+  mutualLabel: string;
+  incomingEmpty: string;
+  /** /me — conversations + composer. */
+  threadsHeading: string;
+  threadsEmpty: string;
+  awaitingReplyLabel: string;
+  composerPlaceholder: string;
+  sendLabel: string;
+  /** Conversation actions. */
+  leaveLabel: string;
+  leaveConfirm: string;
+  blockLabel: string;
+  blockConfirm: string;
+  /** Report dialog. */
+  reportLabel: string;
+  reportHeading: string;
+  reportReasonLabel: string;
+  reportReasonHarassment: string;
+  reportReasonSpam: string;
+  reportReasonInappropriate: string;
+  reportReasonOther: string;
+  reportNotePlaceholder: string;
+  reportSubmitLabel: string;
+  reportCancelLabel: string;
+  reportThanks: string;
+}
+
 export interface FaqItem {
   question: string;
   answer: string;
@@ -502,6 +555,13 @@ export type NotificationsSettings = {
   collabResponseBody: string;
   collabIntroSubject: string;
   collabIntroBody: string;
+  /** Message handshake — request → B, accept/decline → A. Parallel to collab. */
+  messageRequestSubject: string;
+  messageRequestBody: string;
+  messageAcceptedSubject: string;
+  messageAcceptedBody: string;
+  messageDeclinedSubject: string;
+  messageDeclinedBody: string;
 };
 
 export interface SiteSettings {
@@ -530,6 +590,7 @@ export interface SiteSettings {
   reviewNotice: ReviewNoticeSettings;
   contact: ContactSettings;
   collab: CollabSettings;
+  messaging: MessagingSettings;
   home: {
     genresHeading: string;
     booksHeading: string;
@@ -1064,6 +1125,43 @@ const DEFAULTS: SiteSettings = {
       "",
       "— ND Riot",
     ].join("\n"),
+    messageRequestSubject: "{from} wants to message you on ND Riot",
+    messageRequestBody: [
+      "Hi {to},",
+      "",
+      "{from}, a creator on ND Riot, would like to start a conversation with you.",
+      "",
+      "They wrote:",
+      "  “{note}”",
+      "",
+      "• Who they are: {profile}",
+      "• You decide: accept to open the thread, or decline — no obligation, no judgment either way.",
+      "• Your email stays private. Messaging happens on ND Riot, not over email.",
+      "",
+      "Accept or decline from your dashboard: {dashboard}",
+      "",
+      "— ND Riot",
+    ].join("\n"),
+    messageAcceptedSubject: "{to} accepted your message on ND Riot",
+    messageAcceptedBody: [
+      "Hi {from},",
+      "",
+      "{to} accepted — your conversation is open.",
+      "",
+      "Pick up the thread: {dashboard}",
+      "",
+      "— ND Riot",
+    ].join("\n"),
+    messageDeclinedSubject: "{to} isn’t able to connect right now",
+    messageDeclinedBody: [
+      "Hi {from},",
+      "",
+      "{to} isn’t able to connect right now — and that’s completely okay.",
+      "",
+      "Thanks for reaching out and helping build the community.",
+      "",
+      "— ND Riot",
+    ].join("\n"),
   },
   discordUrl: "https://discord.gg/YR9Y4mDSbK",
   // Discord (community) stays prominent up top; these are the traditional
@@ -1460,6 +1558,55 @@ const DEFAULTS: SiteSettings = {
     sentRespondedPrefix: "They responded:",
     sentEmpty: "You haven’t sent any collaboration requests yet.",
   },
+  messaging: {
+    requestButtonLabel: "Chat Request",
+    dialogTitle: "Message {name}",
+    dialogBody:
+      "Send {name} a short note to start a conversation. They’ll accept or decline — no obligation either way. Your email stays private; messaging happens here on ND Riot.",
+    noteLabel: "Your note",
+    notePlaceholder: "Introduce yourself and say what’s on your mind…",
+    submitLabel: "Send request",
+    cancelLabel: "Cancel",
+    sentLabel: "Request sent",
+    activeLabel: "Open conversation",
+    collabPromptHeading: "Looking to collaborate?",
+    collabPromptBody:
+      "A collaboration request is different: a one-time, structured ask about working together — quick preset replies, and an email intro if they say yes. Not an ongoing chat.",
+    collabPromptCta: "Send a collaboration request instead",
+    backLabel: "← Back to message",
+    incomingHeading: "Message requests",
+    incomingIntro:
+      "Creators who’d like to talk. Accept to open a conversation, or decline — no obligation, no wrong answer.",
+    incomingVerb: "wants to message you",
+    acceptLabel: "Accept",
+    declineLabel: "Decline",
+    requestedPrefix: "Requested",
+    followsYouLabel: "Follows you",
+    mutualLabel: "You follow each other",
+    incomingEmpty: "No message requests right now.",
+    threadsHeading: "Conversations",
+    threadsEmpty: "No conversations yet.",
+    awaitingReplyLabel: "Awaiting reply",
+    composerPlaceholder: "Write a message…",
+    sendLabel: "Send",
+    leaveLabel: "Leave",
+    leaveConfirm:
+      "Leave this conversation? It closes for both of you and can’t be reopened.",
+    blockLabel: "Block",
+    blockConfirm:
+      "Block this creator? The conversation closes and they can’t message you again.",
+    reportLabel: "Report",
+    reportHeading: "Report a message",
+    reportReasonLabel: "Reason",
+    reportReasonHarassment: "Harassment",
+    reportReasonSpam: "Spam",
+    reportReasonInappropriate: "Inappropriate content",
+    reportReasonOther: "Other",
+    reportNotePlaceholder: "Add context (optional)",
+    reportSubmitLabel: "Submit report",
+    reportCancelLabel: "Cancel",
+    reportThanks: "Thanks — our team will review it.",
+  },
   home: {
     genresHeading: "Browse by genre",
     booksHeading: "Comics",
@@ -1821,7 +1968,7 @@ export const SITE_SETTINGS_QUERY = `*[_id=="siteSettings"][0]{
   siteTitle,siteDescription,footer,discordUrl,socialLinks[]{platform,url},
   newsletter{heading,description,items,placeholder,buttonLabel,consent,successMessage,errorMessage},
   about{heading,body,faqHeading,faq[]{question,answer},seoTitle,seoDescription},aiLetter,aiUsage,
-  home,sections,empty,creatorIntake,bookIntake,mediaIntake,stripIntake,reviewNotice,notifications,noise,collab,
+  home,sections,empty,creatorIntake,bookIntake,mediaIntake,stripIntake,reviewNotice,notifications,noise,collab,messaging,
   hero{background,headline,body,tagline,featureCtaLabel,featuredHeading,newHeading,ctas[]{label,href}},
   join{heading,editHeading,body,ctaLabel,formUrl,funnelHeading,funnelIntro,creatorsLabel,creatorsDesc,contactLabel,contactDesc,mediaLabel,mediaDesc,readersLabel,readersDesc,readersBadge,terms,termsWhy},
   contact{heading,linkLabel,body,nameLabel,emailLabel,subjectLabel,messageLabel,submitLabel,successMessage,errorMessage},
@@ -1936,6 +2083,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     stripIntake: mergeGroup(DEFAULTS.stripIntake, data.stripIntake),
     reviewNotice: mergeGroup(DEFAULTS.reviewNotice, data.reviewNotice),
     collab: mergeGroup(DEFAULTS.collab, data.collab),
+    messaging: mergeGroup(DEFAULTS.messaging, data.messaging),
     contact: {
       // Field-by-field like `join` above: a blank string falls back to the
       // default, and the rich-text body passes through untouched.

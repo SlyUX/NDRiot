@@ -349,6 +349,50 @@ export type NoiseIssue = {
   sentAt?: string;
 };
 
+export type MessageReport = {
+  _id: string;
+  _type: "messageReport";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  status: "open" | "actioned" | "dismissed";
+  reason?: "harassment" | "spam" | "inappropriate" | "other";
+  reportedText?: string;
+  reporterNote?: string;
+  reporterId?: string;
+  reporterName?: string;
+  threadId?: string;
+  messageKey?: string;
+  reviewNote?: string;
+  createdAt?: string;
+};
+
+export type MessageThread = {
+  _id: string;
+  _type: "messageThread";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  status: "pending" | "active" | "declined" | "closed" | "blocked";
+  participantIds?: Array<string>;
+  participantNames?: Array<string>;
+  initiatedById?: string;
+  closedById?: string;
+  blockedById?: string;
+  introNote?: string;
+  messages?: Array<{
+    fromId?: string;
+    fromName?: string;
+    body?: string;
+    createdAt?: string;
+    _type: "messageItem";
+    _key: string;
+  }>;
+  createdAt?: string;
+  respondedAt?: string;
+  lastMessageAt?: string;
+};
+
 export type SpinnerStore = {
   _id: string;
   _type: "spinnerStore";
@@ -1072,6 +1116,12 @@ export type SiteSettings = {
     collabResponseBody?: string;
     collabIntroSubject?: string;
     collabIntroBody?: string;
+    messageRequestSubject?: string;
+    messageRequestBody?: string;
+    messageAcceptedSubject?: string;
+    messageAcceptedBody?: string;
+    messageDeclinedSubject?: string;
+    messageDeclinedBody?: string;
   };
   noise?: {
     mastheadTitle?: string;
@@ -1159,6 +1209,50 @@ export type SiteSettings = {
     sentPendingLabel?: string;
     sentRespondedPrefix?: string;
     sentEmpty?: string;
+  };
+  messaging?: {
+    requestButtonLabel?: string;
+    dialogTitle?: string;
+    dialogBody?: string;
+    noteLabel?: string;
+    notePlaceholder?: string;
+    submitLabel?: string;
+    cancelLabel?: string;
+    sentLabel?: string;
+    activeLabel?: string;
+    collabPromptHeading?: string;
+    collabPromptBody?: string;
+    collabPromptCta?: string;
+    backLabel?: string;
+    incomingHeading?: string;
+    incomingIntro?: string;
+    incomingVerb?: string;
+    acceptLabel?: string;
+    declineLabel?: string;
+    requestedPrefix?: string;
+    followsYouLabel?: string;
+    mutualLabel?: string;
+    incomingEmpty?: string;
+    threadsHeading?: string;
+    threadsEmpty?: string;
+    awaitingReplyLabel?: string;
+    composerPlaceholder?: string;
+    sendLabel?: string;
+    leaveLabel?: string;
+    leaveConfirm?: string;
+    blockLabel?: string;
+    blockConfirm?: string;
+    reportLabel?: string;
+    reportHeading?: string;
+    reportReasonLabel?: string;
+    reportReasonHarassment?: string;
+    reportReasonSpam?: string;
+    reportReasonInappropriate?: string;
+    reportReasonOther?: string;
+    reportNotePlaceholder?: string;
+    reportSubmitLabel?: string;
+    reportCancelLabel?: string;
+    reportThanks?: string;
   };
   hero?: {
     background?: ImageWithAlt;
@@ -1860,6 +1954,8 @@ export type AllSanitySchemaTypes =
   | MediaReference
   | Update
   | NoiseIssue
+  | MessageReport
+  | MessageThread
   | SpinnerStore
   | SanityImageCrop
   | SanityImageHotspot

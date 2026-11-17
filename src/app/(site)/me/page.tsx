@@ -9,6 +9,15 @@ import {
   type IncomingCollab,
   type SentCollab,
 } from "@/components/collab-requests";
+import {
+  MessageRequests,
+  type IncomingMessageRequest,
+} from "@/components/message-requests";
+import {
+  MessageThreads,
+  type Conversation,
+  type AwaitingRow,
+} from "@/components/message-threads";
 import { EventDialog } from "@/components/event-dialog";
 import { EventsManager } from "@/components/events-manager";
 import { InitialsAvatar } from "@/components/initials-avatar";
@@ -59,7 +68,8 @@ import {
 import { appearanceToFeedItem, mergeFeed } from "@/lib/feed-mappers";
 import { getSiteSettings } from "@/lib/site-settings";
 import { ownedDocIds } from "@/sanity/ownership-client";
-import { mutualCosignIds } from "@/sanity/cosign-client";
+import { followSignal, mutualCosignIds } from "@/sanity/cosign-client";
+import { threadsFor } from "@/sanity/message-client";
 import { incomingRequests, sentRequests } from "@/sanity/collab-client";
 import { followerCount, savedItems } from "@/sanity/reader-client";
 import { urlFor } from "@/sanity/image";
@@ -190,6 +200,7 @@ export default async function AccountPage({
     collabIncoming,
     collabSent,
     myStripsRaw,
+    messageThreadsRaw,
   ] = await Promise.all([
     // Saved view: the reader's saved comics + strips.
     v === "saved" && bookIds.length
@@ -244,6 +255,10 @@ export default async function AccountPage({
     v === "bunker" && ownedCreatorIds.length
       ? safeFetch<StripSummary[]>(CREATOR_STRIPS_QUERY, { id: myCreatorId }, [])
       : Promise.resolve<StripSummary[]>([]),
+    // Network view: the creator's message threads (requests + conversations).
+    v === "network" && isCreator
+      ? threadsFor(myCreatorId)
+      : Promise.resolve([] as Awaited<ReturnType<typeof threadsFor>>),
   ]);
 
   // Your Feed = followed creators' updates + their convention appearances,
@@ -299,6 +314,66 @@ export default async function AccountPage({
     response: r.response,
     createdAt: r.createdAt,
   }));
+
+  // Messaging (Network view): resolve each other participant's public identity,
+  // then split threads into incoming requests / sent-awaiting / active
+  // conversations. The private follow signal is computed per incoming request.
+  const otherOf = (t: (typeof messageThreadsRaw)[number]) =>
+    (t.participantIds ?? []).find((id) => id !== myCreatorId) ?? "";
+  const messageOtherIds = [...new Set(messageThreadsRaw.map(otherOf).filter(Boolean))];
+  const messageOthers = messageOtherIds.length
+    ? await safeFetch<{ _id: string; name: string | null; slug: string | null }[]>(
+        COLLAB_CREATORS_QUERY,
+        { ids: messageOtherIds },
+        [],
+      )
+    : [];
+  const messageById = new Map(messageOthers.map((c) => [c._id, c]));
+
+  const incomingMessages: IncomingMessageRequest[] = await Promise.all(
+    messageThreadsRaw
+      .filter((t) => t.status === "pending" && t.initiatedById !== myCreatorId)
+      .map(async (t) => {
+        const otherId = otherOf(t);
+        return {
+          fromId: otherId,
+          name: messageById.get(otherId)?.name ?? "A creator",
+          slug: messageById.get(otherId)?.slug ?? null,
+          note: t.introNote ?? null,
+          createdAt: t.createdAt ?? null,
+          signal: await followSignal(otherId, myCreatorId, email ?? ""),
+        };
+      }),
+  );
+
+  const conversations: Conversation[] = messageThreadsRaw
+    .filter((t) => t.status === "active")
+    .map((t) => {
+      const otherId = otherOf(t);
+      return {
+        threadDocId: t._id,
+        otherName: messageById.get(otherId)?.name ?? "A creator",
+        otherSlug: messageById.get(otherId)?.slug ?? null,
+        messages: (t.messages ?? []).map((m) => ({
+          key: m._key,
+          fromId: m.fromId ?? "",
+          body: m.body ?? "",
+          createdAt: m.createdAt ?? null,
+        })),
+        lastMessageAt: t.lastMessageAt ?? null,
+      };
+    });
+
+  const awaitingMessages: AwaitingRow[] = messageThreadsRaw
+    .filter((t) => t.status === "pending" && t.initiatedById === myCreatorId)
+    .map((t) => {
+      const otherId = otherOf(t);
+      return {
+        name: messageById.get(otherId)?.name ?? "A creator",
+        slug: messageById.get(otherId)?.slug ?? null,
+        createdAt: t.createdAt ?? null,
+      };
+    });
 
   // Your Updates — the creator's own posts (updates targeting a creator or comic
   // they own), for the dashboard. Owner-editable, same as on the profile.
@@ -894,6 +969,21 @@ export default async function AccountPage({
             copy={settings.collab}
           />
         </div>
+      )}
+      {isCreator && (
+        <>
+          <div className="mt-10">
+            <MessageRequests incoming={incomingMessages} copy={settings.messaging} />
+          </div>
+          <div className="mt-10">
+            <MessageThreads
+              conversations={conversations}
+              awaiting={awaitingMessages}
+              meId={myCreatorId}
+              copy={settings.messaging}
+            />
+          </div>
+        </>
       )}
     </Section>
   );

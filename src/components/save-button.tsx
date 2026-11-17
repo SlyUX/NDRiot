@@ -27,6 +27,7 @@ export function SaveButton({
   savedLabel,
   signInCopy,
   variant = 'solid',
+  collapseLabelWhenSaved = false,
   className,
 }: {
   itemType: SavedItemType
@@ -44,6 +45,9 @@ export function SaveButton({
    * label rides along as the accessible name (aria-label) rather than visible text.
    */
   variant?: 'solid' | 'outline' | 'icon'
+  /** On the profile action row: once followed, collapse to the glyph only
+   *  (label stays as the accessible name). Keeps the row tidy next to Chat Request. */
+  collapseLabelWhenSaved?: boolean
   className?: string
 }) {
   const [saved, setSaved] = useState(initialSaved)
@@ -102,7 +106,7 @@ export function SaveButton({
           strokeWidth={2.5}
           className={cn('size-4', !follow && saved && 'fill-current')}
         />
-        {!icon && label}
+        {!icon && !(collapseLabelWhenSaved && saved) && label}
       </button>
       {!signedIn && (
         <SignInDialog

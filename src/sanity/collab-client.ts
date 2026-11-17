@@ -179,3 +179,19 @@ export async function sentRequests(fromId: string): Promise<CollabRequest[]> {
     return []
   }
 }
+
+/** Count of pending incoming collaboration requests — for the nav badge. */
+export async function pendingCollabCount(toId: string): Promise<number> {
+  if (!toId) return 0
+  try {
+    return (
+      (await client().fetch<number>(
+        `count(*[_type=="collabRequest" && toId==$toId && status=="pending"])`,
+        { toId },
+      )) ?? 0
+    )
+  } catch (cause) {
+    console.error('[collab] pendingCollabCount failed', cause)
+    return 0
+  }
+}

@@ -12,7 +12,7 @@ import { FeedPreview } from "@/components/feed-preview";
 import { JsonLd } from "@/components/json-ld";
 import { OrganizationLink } from "@/components/organization-link";
 import PortableTextBody from "@/components/PortableTextBody";
-import { CollabRequestButton } from "@/components/collab-request-button";
+import { ChatRequestButton } from "@/components/chat-request-button";
 import { InitialsAvatar } from "@/components/initials-avatar";
 import { OwnerTabs } from "@/components/owner-tabs";
 import { SaveButton } from "@/components/save-button";
@@ -34,6 +34,7 @@ import { isSaved, savedItems } from "@/sanity/reader-client";
 import { mutualCosignIds } from "@/sanity/cosign-client";
 import { ownsCreator, creatorsOwnedBy } from "@/sanity/ownership-client";
 import { sentRequest, type CollabStatus } from "@/sanity/collab-client";
+import { getThread } from "@/sanity/message-client";
 import { fetchFeed } from "@/lib/feed-parse";
 import {
   safeFetch,
@@ -145,6 +146,14 @@ export default async function CreatorPage({
       response: collabReq?.response ?? null,
     };
   }
+
+  // Messaging: any existing thread between the viewer and this creator (parallel
+  // to collab; general, not gated on openToCollaboration). Drives the Chat
+  // Request button's state — request / sent / open conversation / none.
+  const messageThread =
+    viewerCreatorId && !isOwner
+      ? await getThread(viewerCreatorId, creator._id)
+      : null;
 
   // This creator's Cosigns — the creators they mutually follow (each follows the
   // other), derived from the private save store. Public by definition (both
@@ -414,6 +423,7 @@ export default async function CreatorPage({
                         signedIn={Boolean(email)}
                         saveLabel={settings.sections.followLabel}
                         savedLabel={settings.sections.followingLabel}
+                        collapseLabelWhenSaved
                         signInCopy={{
                           title: settings.sections.accountSignInTitle,
                           body: settings.sections.accountSignInBody,
@@ -421,14 +431,18 @@ export default async function CreatorPage({
                         }}
                       />
                     )}
-                    {collab && (
-                      <CollabRequestButton
+                    {viewerCreatorId && !isOwner && (
+                      <ChatRequestButton
                         toId={creator._id}
                         toName={creator.name ?? ""}
+                        copy={settings.messaging}
+                        collabCopy={settings.collab}
                         genres={GENRES}
-                        copy={settings.collab}
-                        status={collab.status}
-                        response={collab.response}
+                        threadStatus={messageThread?.status ?? null}
+                        collabEligible={
+                          Boolean(creator.openToCollaboration) && !collab?.status
+                        }
+                        dashboardHref="/me"
                       />
                     )}
                     <ShareBar

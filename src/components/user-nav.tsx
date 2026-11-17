@@ -27,6 +27,9 @@ export interface UserNavItem {
   /** Short text shown in the icon slot instead of a glyph (e.g. the Rag issue
    *  number "003" on the Submit item), in a bold condensed style. */
   iconText?: string;
+  /** A count shown as a small badge over the icon — pending actions awaiting
+   *  the user (incoming message + collaboration requests). 0/undefined hides it. */
+  badge?: number;
 }
 
 /**
@@ -105,6 +108,7 @@ export function UserNav({
         key={item.id}
         href={href}
         aria-current={active ? "page" : undefined}
+        aria-label={item.badge ? `${item.label}, ${item.badge} awaiting` : undefined}
         className={cn(
           "group focus-visible:ring-ring flex flex-col items-center justify-end gap-1 text-[10px] font-bold tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:-outline-offset-2 focus-visible:outline-none",
           variant === "bar" ? "px-3 py-2.5" : "py-2.5 leading-none",
@@ -116,11 +120,19 @@ export function UserNav({
             and the label uses white (active) / muted (idle), both AA here. */}
         <span
           className={cn(
-            "flex items-center justify-center",
+            "relative flex items-center justify-center",
             active ? "text-primary" : "text-muted-foreground group-hover:text-primary",
           )}
         >
           {lead}
+          {item.badge ? (
+            <span
+              aria-hidden="true"
+              className="bg-primary text-primary-foreground absolute -top-1.5 -right-2 flex min-w-3.5 items-center justify-center px-0.5 text-[9px] font-black leading-none tabular-nums"
+            >
+              {item.badge > 9 ? "9+" : item.badge}
+            </span>
+          ) : null}
         </span>
         <span
           className={cn(

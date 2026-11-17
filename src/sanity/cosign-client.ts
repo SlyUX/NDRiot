@@ -17,6 +17,37 @@ import { isSaved, savedItems } from '@/sanity/reader-client'
  * Cost is O(follows) existence checks — fine at this scale; batch later if a
  * creator follows very many.
  */
+export type FollowSignal = 'mutual' | 'follows-you' | 'none'
+
+/**
+ * The PRIVATE relationship signal shown only to a message recipient evaluating a
+ * request: does the requester follow them, and is it mutual (a Cosign)? A one-way
+ * "follows you" is never public — it surfaces here, to the recipient alone, as
+ * trust context. `meEmail` is passed in (the caller already has it) to save a
+ * lookup. Fail-soft to 'none'.
+ */
+export async function followSignal(
+  requesterId: string,
+  meId: string,
+  meEmail: string,
+): Promise<FollowSignal> {
+  if (!requesterId || !meId || !meEmail) return 'none'
+  try {
+    const requesterEmail = await ownerEmailOf(requesterId)
+    if (!requesterEmail) return 'none'
+    const [theyFollowMe, iFollowThem] = await Promise.all([
+      isSaved(requesterEmail, meId),
+      isSaved(meEmail, requesterId),
+    ])
+    if (theyFollowMe && iFollowThem) return 'mutual'
+    if (theyFollowMe) return 'follows-you'
+    return 'none'
+  } catch (cause) {
+    console.error('[cosign] followSignal failed', cause)
+    return 'none'
+  }
+}
+
 export async function mutualCosignIds(creatorId: string): Promise<string[]> {
   if (!creatorId) return []
   try {

@@ -18,6 +18,8 @@ import {
 } from '@/lib/queries'
 import type { RagOpenSubmission } from '@/lib/types'
 import { creatorsOwnedBy } from '@/sanity/ownership-client'
+import { pendingCollabCount } from '@/sanity/collab-client'
+import { pendingRequestCount } from '@/sanity/message-client'
 import { urlFor } from '@/sanity/image'
 import { getSiteSettings } from '@/lib/site-settings'
 import { RESOURCE_CATEGORIES } from '@/lib/taxonomy'
@@ -59,6 +61,9 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   // Plain readers (no profile) keep their Google account image.
   let avatar = session?.user?.image ?? null
   let isCreator = false
+  // Pending actions awaiting a signed-in creator — incoming message requests +
+  // pending collab requests — shown as a Network badge on every page.
+  let pendingActions = 0
   const email = session?.user?.email
   if (email) {
     const owned = await creatorsOwnedBy(email)
@@ -70,6 +75,11 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       if (profile?.photo) {
         avatar = urlFor(profile.photo).width(96).height(96).fit('crop').url()
       }
+      const [pendingMsgs, pendingCollabs] = await Promise.all([
+        pendingRequestCount(owned[0]),
+        pendingCollabCount(owned[0]),
+      ])
+      pendingActions = pendingMsgs + pendingCollabs
     }
   }
   const s = settings.sections
@@ -157,7 +167,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
           avatarUrl={avatar}
           items={[
             { id: "bunker", label: s.dashboardTabBunker },
-            { id: "network", label: s.dashboardTabNetwork },
+            { id: "network", label: s.dashboardTabNetwork, badge: pendingActions },
             { id: "saved", label: s.dashboardTabSaved },
             { id: "settings", label: s.dashboardTabSettings },
             ...(submitIssue

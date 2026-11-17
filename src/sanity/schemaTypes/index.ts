@@ -11,6 +11,8 @@ import ally from "./ally";
 import ragIssue from "./ragIssue";
 import ragSubmission from "./ragSubmission";
 import spinnerStore from "./spinnerStore";
+import messageThread from "./messageThread";
+import messageReport from "./messageReport";
 import noiseIssue from "./noiseIssue";
 import update from "./update";
 import convention from "./convention";
@@ -41,6 +43,8 @@ export const schemaTypes = [
   ragIssue,
   ragSubmission,
   spinnerStore,
+  messageThread,
+  messageReport,
   noiseIssue,
   update,
   convention,
