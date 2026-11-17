@@ -457,6 +457,8 @@ export type MessagingSettings = {
   muteLabel: string;
   unmuteLabel: string;
   mutedLabel: string;
+  /** The nudge shown right after you follow a creator. Token: {name}. */
+  followNudge: string;
 }
 
 export interface FaqItem {
@@ -1612,6 +1614,7 @@ const DEFAULTS: SiteSettings = {
     muteLabel: "Mute",
     unmuteLabel: "Unmute",
     mutedLabel: "Muted",
+    followNudge: "You’re following {name} — send them a message?",
   },
   home: {
     genresHeading: "Browse by genre",

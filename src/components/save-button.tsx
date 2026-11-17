@@ -28,6 +28,7 @@ export function SaveButton({
   signInCopy,
   variant = 'solid',
   collapseLabelWhenSaved = false,
+  onSavedChange,
   className,
 }: {
   itemType: SavedItemType
@@ -48,6 +49,8 @@ export function SaveButton({
   /** On the profile action row: once followed, collapse to the glyph only
    *  (label stays as the accessible name). Keeps the row tidy next to Chat Request. */
   collapseLabelWhenSaved?: boolean
+  /** Called after a successful toggle — lets a parent offer "message them?" on follow. */
+  onSavedChange?: (saved: boolean) => void
   className?: string
 }) {
   const [saved, setSaved] = useState(initialSaved)
@@ -64,7 +67,9 @@ export function SaveButton({
     setSaved(next) // optimistic
     startTransition(async () => {
       const result = await toggleSaveAction(itemType, itemId, pathname)
-      setSaved(result.error ? !next : result.saved)
+      const nextSaved = result.error ? !next : result.saved
+      setSaved(nextSaved)
+      onSavedChange?.(nextSaved)
     })
   }
 

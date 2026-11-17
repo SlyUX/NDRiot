@@ -12,10 +12,9 @@ import { FeedPreview } from "@/components/feed-preview";
 import { JsonLd } from "@/components/json-ld";
 import { OrganizationLink } from "@/components/organization-link";
 import PortableTextBody from "@/components/PortableTextBody";
-import { ChatRequestButton } from "@/components/chat-request-button";
+import { ProfileActions } from "@/components/profile-actions";
 import { InitialsAvatar } from "@/components/initials-avatar";
 import { OwnerTabs } from "@/components/owner-tabs";
-import { SaveButton } from "@/components/save-button";
 import SocialLinks from "@/components/SocialLinks";
 import { SocialIcon } from "@/components/social-icon";
 import { SectionHeading } from "@/components/section-heading";
@@ -415,36 +414,28 @@ export default async function CreatorPage({
                         No Follow/Chat on your own profile. Between two creators, a
                         mutual follow becomes a Cosign — see the hint below. */}
                     {!isOwner && (
-                      <div className="flex flex-wrap items-center gap-3">
-                        <SaveButton
-                          itemType="creator"
-                          itemId={creator._id}
-                          initialSaved={saved}
-                          signedIn={Boolean(email)}
-                          saveLabel={settings.sections.followLabel}
-                          savedLabel={settings.sections.followingLabel}
-                          collapseLabelWhenSaved
-                          signInCopy={{
-                            title: settings.sections.accountSignInTitle,
-                            body: settings.sections.accountSignInBody,
-                            cta: settings.sections.accountSignInCta,
-                          }}
-                        />
-                        {viewerCreatorId && (
-                          <ChatRequestButton
-                            toId={creator._id}
-                            toName={creator.name ?? ""}
-                            copy={settings.messaging}
-                            collabCopy={settings.collab}
-                            genres={GENRES}
-                            threadStatus={messageThread?.status ?? null}
-                            collabEligible={
-                              Boolean(creator.openToCollaboration) && !collab?.status
-                            }
-                            dashboardHref="/me"
-                          />
-                        )}
-                      </div>
+                      <ProfileActions
+                        creatorId={creator._id}
+                        creatorName={creator.name ?? ""}
+                        saved={saved}
+                        signedIn={Boolean(email)}
+                        viewerIsCreator={Boolean(viewerCreatorId)}
+                        followLabel={settings.sections.followLabel}
+                        followingLabel={settings.sections.followingLabel}
+                        signInCopy={{
+                          title: settings.sections.accountSignInTitle,
+                          body: settings.sections.accountSignInBody,
+                          cta: settings.sections.accountSignInCta,
+                        }}
+                        messaging={settings.messaging}
+                        collab={settings.collab}
+                        genres={GENRES}
+                        threadStatus={messageThread?.status ?? null}
+                        collabEligible={
+                          Boolean(creator.openToCollaboration) && !collab?.status
+                        }
+                        dashboardHref="/me"
+                      />
                     )}
                     <ShareBar
                       title={creator.name ?? ""}

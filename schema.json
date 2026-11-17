@@ -7796,6 +7796,13 @@
                 "type": "string"
               },
               "optional": true
+            },
+            "followNudge": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
             }
           }
         },

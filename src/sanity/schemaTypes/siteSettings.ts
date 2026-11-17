@@ -696,6 +696,7 @@ export default defineType({
         defineField({ name: "muteLabel", title: "Conversation — mute button", type: "string" }),
         defineField({ name: "unmuteLabel", title: "Conversation — unmute button", type: "string" }),
         defineField({ name: "mutedLabel", title: "Conversation — muted indicator", type: "string" }),
+        defineField({ name: "followNudge", title: "Follow-step nudge", type: "string", description: 'Shown right after you follow a creator — e.g. "You\'re following {name} — send them a message?" Token: {name}.' }),
       ],
     }),
 

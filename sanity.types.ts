@@ -1256,6 +1256,7 @@ export type SiteSettings = {
     muteLabel?: string;
     unmuteLabel?: string;
     mutedLabel?: string;
+    followNudge?: string;
   };
   hero?: {
     background?: ImageWithAlt;

@@ -42,6 +42,8 @@ export function ChatRequestButton({
   threadStatus,
   collabEligible,
   dashboardHref,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
 }: {
   toId: string
   toName: string
@@ -53,8 +55,13 @@ export function ChatRequestButton({
   collabEligible: boolean
   /** Where an active conversation lives (the /me view). */
   dashboardHref: string
+  /** Optional controlled open — lets a parent (e.g. the follow nudge) open it. */
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }) {
-  const [open, setOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
+  const open = controlledOpen ?? internalOpen
+  const setOpen = controlledOnOpenChange ?? setInternalOpen
   const [mode, setMode] = useState<'message' | 'collab'>('message')
   const [note, setNote] = useState('')
   const [genre, setGenre] = useState('')
@@ -72,7 +79,7 @@ export function ChatRequestButton({
       pendingCloseRef.current = false
       setOpen(false)
     }
-  }, [pending])
+  }, [pending, setOpen])
 
   // A thread already exists → a status, not the request button.
   if (threadStatus === 'active') {
