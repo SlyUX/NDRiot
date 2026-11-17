@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Flag, LogOut, Send, ShieldX } from 'lucide-react'
 
 import {
   blockMessage,
+  fetchThreadMessages,
   markRead,
   optOutMessage,
   reportMessage,
@@ -152,12 +153,41 @@ function ConversationPanel({
   const [body, setBody] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [reportOpen, setReportOpen] = useState(false)
+  const [messages, setMessages] = useState(conversation.messages)
   const [pending, startTransition] = useTransition()
   const router = useRouter()
+  const lastKeyRef = useRef<string | null>(
+    conversation.messages[conversation.messages.length - 1]?.key ?? null,
+  )
+
+  // Fetch the latest messages and apply them only when a NEW one has arrived, so
+  // an idle poll never re-renders the composer. After mount the poll owns this
+  // state (no props→state mirroring); `send` calls it for an immediate update.
+  const refresh = useCallback(async () => {
+    const res = await fetchThreadMessages({ threadDocId: conversation.threadDocId })
+    if (!res) return
+    const last = res.messages[res.messages.length - 1]
+    if (last && last.key !== lastKeyRef.current) {
+      lastKeyRef.current = last.key
+      setMessages(res.messages)
+      if (last.fromId !== meId) void markRead({ threadDocId: conversation.threadDocId })
+    }
+  }, [conversation.threadDocId, meId])
+
+  // Poll while the conversation is open — near-real-time without a chat server.
+  // Pauses when the tab is hidden.
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden')
+        return
+      void refresh()
+    }, 2500)
+    return () => clearInterval(id)
+  }, [refresh])
 
   // Report snapshots the other person's most recent message, when there is one.
   const lastOtherKey =
-    [...conversation.messages].reverse().find((m) => m.fromId !== meId)?.key ?? ''
+    [...messages].reverse().find((m) => m.fromId !== meId)?.key ?? ''
 
   function send() {
     if (!body.trim()) return
@@ -166,7 +196,7 @@ function ConversationPanel({
       const result = await sendMessage({ threadDocId: conversation.threadDocId, body })
       if (result.ok) {
         setBody('')
-        router.refresh()
+        void refresh()
       } else {
         setError(result.error ?? 'Something went wrong.')
       }
@@ -194,10 +224,10 @@ function ConversationPanel({
   return (
     <div className="pb-4">
       <div className="bg-card max-h-80 space-y-2 overflow-y-auto p-3">
-        {conversation.messages.length === 0 ? (
+        {messages.length === 0 ? (
           <p className="text-muted-foreground text-sm">{copy.threadsEmpty}</p>
         ) : (
-          conversation.messages.map((m) => {
+          messages.map((m) => {
             const mine = m.fromId === meId
             return (
               <div key={m.key} className={cn('flex', mine ? 'justify-end' : 'justify-start')}>

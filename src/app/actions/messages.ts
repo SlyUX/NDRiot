@@ -248,6 +248,39 @@ export async function markRead(input: { threadDocId: string }): Promise<void> {
   await markThreadRead(self.id, input.threadDocId);
 }
 
+export type ThreadPoll = {
+  status: string;
+  messages: {
+    key: string;
+    fromId: string;
+    body: string;
+    createdAt: string | null;
+  }[];
+};
+
+/**
+ * Fetch an open thread's messages for the near-real-time poll (~2.5s while the
+ * conversation is open). Participant-gated; returns null if not allowed. Cheap
+ * on purpose — one small doc read, no page re-render.
+ */
+export async function fetchThreadMessages(input: {
+  threadDocId: string;
+}): Promise<ThreadPoll | null> {
+  const self = await me();
+  if ("error" in self) return null;
+  const thread = await getThreadById(input.threadDocId);
+  if (!thread || !(thread.participantIds ?? []).includes(self.id)) return null;
+  return {
+    status: thread.status,
+    messages: (thread.messages ?? []).map((m) => ({
+      key: m._key,
+      fromId: m.fromId ?? "",
+      body: m.body ?? "",
+      createdAt: m.createdAt ?? null,
+    })),
+  };
+}
+
 /** Opt out — the thread closes for both. Terminal. */
 export async function optOutMessage(input: {
   threadDocId: string;
