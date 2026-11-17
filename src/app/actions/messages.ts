@@ -19,6 +19,7 @@ import {
   getThreadById,
   markThreadRead,
   respondToThread,
+  setMuted,
   threadId,
 } from "@/sanity/message-client";
 import { getWriteClient } from "@/sanity/write-client";
@@ -311,6 +312,25 @@ export async function blockMessage(input: {
     return { ok: false, error: "This conversation isn’t yours." };
 
   if (!(await blockThread(input.threadDocId, self.id)))
+    return { ok: false, error: "Something went wrong — please try again." };
+
+  revalidatePath("/me");
+  return { ok: true };
+}
+
+/** Mute or unmute a conversation — it stays active but drops from the badge. */
+export async function toggleMute(input: {
+  threadDocId: string;
+  muted: boolean;
+}): Promise<MessageResult> {
+  const self = await me();
+  if ("error" in self) return { ok: false, error: self.error };
+
+  const thread = await getThreadById(input.threadDocId);
+  if (!thread || !(thread.participantIds ?? []).includes(self.id))
+    return { ok: false, error: "This conversation isn’t yours." };
+
+  if (!(await setMuted(self.id, input.threadDocId, input.muted)))
     return { ok: false, error: "Something went wrong — please try again." };
 
   revalidatePath("/me");

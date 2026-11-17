@@ -454,6 +454,9 @@ export type MessagingSettings = {
   reportSubmitLabel: string;
   reportCancelLabel: string;
   reportThanks: string;
+  muteLabel: string;
+  unmuteLabel: string;
+  mutedLabel: string;
 }
 
 export interface FaqItem {
@@ -1606,6 +1609,9 @@ const DEFAULTS: SiteSettings = {
     reportSubmitLabel: "Submit report",
     reportCancelLabel: "Cancel",
     reportThanks: "Thanks — our team will review it.",
+    muteLabel: "Mute",
+    unmuteLabel: "Unmute",
+    mutedLabel: "Muted",
   },
   home: {
     genresHeading: "Browse by genre",

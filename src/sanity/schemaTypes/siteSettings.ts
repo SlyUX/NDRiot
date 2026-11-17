@@ -693,6 +693,9 @@ export default defineType({
         defineField({ name: "reportSubmitLabel", title: "Report dialog — submit", type: "string" }),
         defineField({ name: "reportCancelLabel", title: "Report dialog — cancel", type: "string" }),
         defineField({ name: "reportThanks", title: "Report dialog — thanks", type: "string" }),
+        defineField({ name: "muteLabel", title: "Conversation — mute button", type: "string" }),
+        defineField({ name: "unmuteLabel", title: "Conversation — unmute button", type: "string" }),
+        defineField({ name: "mutedLabel", title: "Conversation — muted indicator", type: "string" }),
       ],
     }),
 

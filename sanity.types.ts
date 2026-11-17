@@ -1253,6 +1253,9 @@ export type SiteSettings = {
     reportSubmitLabel?: string;
     reportCancelLabel?: string;
     reportThanks?: string;
+    muteLabel?: string;
+    unmuteLabel?: string;
+    mutedLabel?: string;
   };
   hero?: {
     background?: ImageWithAlt;

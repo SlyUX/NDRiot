@@ -354,19 +354,75 @@ export async function readStamps(creatorId: string): Promise<Map<string, string>
 export async function unreadThreadCount(creatorId: string): Promise<number> {
   if (!creatorId) return 0
   try {
-    const [stamps, reads] = await Promise.all([
+    const [stamps, reads, muted] = await Promise.all([
       client().fetch<{ _id: string; lastMessageAt: string | null }[]>(
         `*[_type=="messageThread" && $id in participantIds && status=="active"]{_id, lastMessageAt}`,
         { id: creatorId },
       ),
       readStamps(creatorId),
+      mutedThreadIds(creatorId),
     ])
     return (stamps ?? []).filter(
-      (t) => t.lastMessageAt && t.lastMessageAt > (reads.get(t._id) ?? ''),
+      (t) =>
+        t.lastMessageAt &&
+        !muted.has(t._id) &&
+        t.lastMessageAt > (reads.get(t._id) ?? ''),
     ).length
   } catch (cause) {
     console.error('[message] unreadThreadCount failed', cause)
     return 0
+  }
+}
+
+/* ------------------------------------------------------------ mute */
+
+/**
+ * Per-(creator, thread) mute markers — schema-less, like read markers. A muted
+ * thread stays active and readable; it just drops out of the unread nav badge.
+ * Presence of the doc = muted.
+ */
+function muteId(creatorId: string, threadDocId: string): string {
+  return `msgmute.${creatorId}__${threadDocId}`.replace(/[^a-zA-Z0-9._-]/g, '-')
+}
+
+/** Mute or unmute a thread for this creator. */
+export async function setMuted(
+  creatorId: string,
+  threadDocId: string,
+  muted: boolean,
+): Promise<boolean> {
+  if (!creatorId || !threadDocId) return false
+  try {
+    if (muted) {
+      await client().createOrReplace({
+        _id: muteId(creatorId, threadDocId),
+        _type: 'messageMute',
+        creatorId,
+        threadId: threadDocId,
+      })
+    } else {
+      await client().delete(muteId(creatorId, threadDocId))
+    }
+    return true
+  } catch (cause) {
+    console.error('[message] setMuted failed', cause)
+    return false
+  }
+}
+
+/** The thread ids this creator has muted. */
+export async function mutedThreadIds(creatorId: string): Promise<Set<string>> {
+  if (!creatorId) return new Set()
+  try {
+    const ids =
+      (await client().fetch<string[]>(
+        `*[_type=="messageMute" && creatorId==$id].threadId`,
+        { id: creatorId },
+      )) ?? []
+    return new Set(ids.filter(Boolean))
+  } catch (cause) {
+    console.error('[message] mutedThreadIds failed', cause)
+    return new Set()
   }
 }
 

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Flag, LogOut, Send, ShieldX } from 'lucide-react'
+import { Bell, BellOff, Flag, LogOut, Send, ShieldX } from 'lucide-react'
 
 import {
   blockMessage,
@@ -12,6 +12,7 @@ import {
   optOutMessage,
   reportMessage,
   sendMessage,
+  toggleMute,
 } from '@/app/actions/messages'
 import {
   Dialog,
@@ -37,6 +38,8 @@ export type Conversation = {
   lastMessageAt: string | null
   /** The other person has posted since this creator last read the thread. */
   unread: boolean
+  /** This creator has muted the thread (stays active, drops from the badge). */
+  muted: boolean
 }
 export type AwaitingRow = {
   name: string
@@ -101,6 +104,12 @@ export function MessageThreads({
                       />
                     )}
                     {c.otherName}
+                    {c.muted && (
+                      <BellOff
+                        aria-label={copy.mutedLabel}
+                        className="text-muted-foreground size-3 shrink-0"
+                      />
+                    )}
                   </span>
                   {c.lastMessageAt && (
                     <span className="text-muted-foreground text-xs font-normal">
@@ -154,6 +163,7 @@ function ConversationPanel({
   const [error, setError] = useState<string | null>(null)
   const [reportOpen, setReportOpen] = useState(false)
   const [messages, setMessages] = useState(conversation.messages)
+  const [muted, setMutedState] = useState(conversation.muted)
   const [pending, startTransition] = useTransition()
   const router = useRouter()
   const lastKeyRef = useRef<string | null>(
@@ -218,6 +228,18 @@ function ConversationPanel({
       const result = await blockMessage({ threadDocId: conversation.threadDocId })
       if (result.ok) router.refresh()
       else setError(result.error ?? 'Something went wrong.')
+    })
+  }
+
+  function mute() {
+    const next = !muted
+    setMutedState(next) // optimistic
+    startTransition(async () => {
+      const result = await toggleMute({ threadDocId: conversation.threadDocId, muted: next })
+      if (!result.ok) {
+        setMutedState(!next)
+        setError(result.error ?? 'Something went wrong.')
+      }
     })
   }
 
@@ -288,6 +310,19 @@ function ConversationPanel({
       )}
 
       <div className="text-muted-foreground mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-bold tracking-wide uppercase">
+        <button
+          type="button"
+          onClick={mute}
+          disabled={pending}
+          className="hover:text-foreground focus-visible:ring-ring inline-flex items-center gap-1 transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
+        >
+          {muted ? (
+            <Bell aria-hidden="true" className="size-3.5" />
+          ) : (
+            <BellOff aria-hidden="true" className="size-3.5" />
+          )}
+          {muted ? copy.unmuteLabel : copy.muteLabel}
+        </button>
         <button
           type="button"
           onClick={leave}

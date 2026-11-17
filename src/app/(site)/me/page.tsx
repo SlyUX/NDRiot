@@ -69,7 +69,7 @@ import { appearanceToFeedItem, mergeFeed } from "@/lib/feed-mappers";
 import { getSiteSettings } from "@/lib/site-settings";
 import { ownedDocIds } from "@/sanity/ownership-client";
 import { followSignal, mutualCosignIds } from "@/sanity/cosign-client";
-import { readStamps, threadsFor } from "@/sanity/message-client";
+import { mutedThreadIds, readStamps, threadsFor } from "@/sanity/message-client";
 import { incomingRequests, sentRequests } from "@/sanity/collab-client";
 import { followerCount, savedItems } from "@/sanity/reader-client";
 import { urlFor } from "@/sanity/image";
@@ -349,6 +349,9 @@ export default async function AccountPage({
   const msgReads = messageThreadsRaw.length
     ? await readStamps(myCreatorId)
     : new Map<string, string>();
+  const msgMuted = messageThreadsRaw.length
+    ? await mutedThreadIds(myCreatorId)
+    : new Set<string>();
   const conversations: Conversation[] = messageThreadsRaw
     .filter((t) => t.status === "active")
     .map((t) => {
@@ -367,6 +370,7 @@ export default async function AccountPage({
         unread: Boolean(
           t.lastMessageAt && t.lastMessageAt > (msgReads.get(t._id) ?? ""),
         ),
+        muted: msgMuted.has(t._id),
       };
     });
 
