@@ -37,6 +37,9 @@ function client(): SanityClient {
 
 export interface ReaderPrefs {
   subscribeAllStrips: boolean
+  /** Email me about direct messages / collaboration requests. Default on (opt-out). */
+  emailMessages: boolean
+  emailCollab: boolean
   /** ISO timestamp; `null` until a baseline is established. */
   notificationsSeenAt: string | null
   /**
@@ -49,6 +52,8 @@ export interface ReaderPrefs {
 
 const EMPTY: ReaderPrefs = {
   subscribeAllStrips: false,
+  emailMessages: true,
+  emailCollab: true,
   notificationsSeenAt: null,
   ragBannerDismissedPeriod: null,
 }
@@ -72,7 +77,7 @@ export async function getReaderPrefs(email: string): Promise<ReaderPrefs> {
   if (!owner) return EMPTY
   try {
     const doc = await client().fetch<ReaderPrefs | null>(
-      `*[_id==$id][0]{"subscribeAllStrips":coalesce(subscribeAllStrips,false),notificationsSeenAt,"ragBannerDismissedPeriod":coalesce(ragBannerDismissedPeriod,null)}`,
+      `*[_id==$id][0]{"subscribeAllStrips":coalesce(subscribeAllStrips,false),"emailMessages":coalesce(emailMessages,true),"emailCollab":coalesce(emailCollab,true),notificationsSeenAt,"ragBannerDismissedPeriod":coalesce(ragBannerDismissedPeriod,null)}`,
       { id: prefsId(owner) },
     )
     return doc ?? EMPTY
@@ -100,6 +105,8 @@ export async function ensureSeenBaseline(email: string): Promise<ReaderPrefs> {
   }
   return {
     subscribeAllStrips: current.subscribeAllStrips,
+    emailMessages: current.emailMessages,
+    emailCollab: current.emailCollab,
     notificationsSeenAt: now,
     ragBannerDismissedPeriod: current.ragBannerDismissedPeriod,
   }
@@ -116,6 +123,25 @@ export async function setStripSubscription(email: string, enabled: boolean): Pro
     return enabled
   } catch (cause) {
     console.error('[reader-prefs] setStripSubscription failed', cause)
+    return false
+  }
+}
+
+/** Set an email notification preference (emailMessages / emailCollab). */
+export async function setEmailPref(
+  email: string,
+  key: 'emailMessages' | 'emailCollab',
+  value: boolean,
+): Promise<boolean> {
+  const owner = normalizeEmail(email)
+  if (!owner) return false
+  const now = new Date().toISOString()
+  try {
+    await client().createIfNotExists(seed(owner, now))
+    await client().patch(prefsId(owner)).set({ [key]: value }).commit()
+    return value
+  } catch (cause) {
+    console.error('[reader-prefs] setEmailPref failed', cause)
     return false
   }
 }

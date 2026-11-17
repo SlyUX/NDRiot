@@ -18,6 +18,7 @@ import {
   type Conversation,
   type AwaitingRow,
 } from "@/components/message-threads";
+import { NotificationPrefs } from "@/components/notification-prefs";
 import { EventDialog } from "@/components/event-dialog";
 import { EventsManager } from "@/components/events-manager";
 import { InitialsAvatar } from "@/components/initials-avatar";
@@ -70,6 +71,7 @@ import { getSiteSettings } from "@/lib/site-settings";
 import { ownedDocIds } from "@/sanity/ownership-client";
 import { followSignal, mutualCosignIds } from "@/sanity/cosign-client";
 import { mutedThreadIds, readStamps, threadsFor } from "@/sanity/message-client";
+import { getReaderPrefs } from "@/sanity/reader-prefs-client";
 import { incomingRequests, sentRequests } from "@/sanity/collab-client";
 import { followerCount, savedItems } from "@/sanity/reader-client";
 import { urlFor } from "@/sanity/image";
@@ -273,6 +275,8 @@ export default async function AccountPage({
   // cards; Bunker-only follower count (§3: self-knowledge, not a scoreboard).
   const newsletterSubscribed =
     v === "settings" ? await isSubscribedToNewsletter(email) : true;
+  const notifPrefs =
+    v === "settings" && isCreator ? await getReaderPrefs(email ?? "") : null;
   const cosigns =
     v === "network" && cosignIds.length
       ? await safeFetch<CreatorSummary[]>(SAVED_CREATORS_QUERY, { ids: cosignIds }, [])
@@ -1056,6 +1060,30 @@ export default async function AccountPage({
           />
         </div>
       </div>
+
+      {isCreator && notifPrefs && (
+        <div className="mt-10">
+          <SectionHeading as="h2" size="sm">
+            {settings.messaging.prefsHeading}
+          </SectionHeading>
+          <NotificationPrefs
+            onLabel={settings.messaging.prefOnLabel}
+            offLabel={settings.messaging.prefOffLabel}
+            items={[
+              {
+                key: "emailMessages",
+                label: settings.messaging.prefMessagesLabel,
+                initial: notifPrefs.emailMessages,
+              },
+              {
+                key: "emailCollab",
+                label: settings.messaging.prefCollabLabel,
+                initial: notifPrefs.emailCollab,
+              },
+            ]}
+          />
+        </div>
+      )}
 
       {/* Your Media — owners of an outlet manage it here. */}
       {ownedMedia.length > 0 && (

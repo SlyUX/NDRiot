@@ -459,6 +459,12 @@ export type MessagingSettings = {
   mutedLabel: string;
   /** The nudge shown right after you follow a creator. Token: {name}. */
   followNudge: string;
+  /** /me notification preferences (opt-out email toggles). */
+  prefsHeading: string;
+  prefMessagesLabel: string;
+  prefCollabLabel: string;
+  prefOnLabel: string;
+  prefOffLabel: string;
 }
 
 export interface FaqItem {
@@ -1650,6 +1656,11 @@ const DEFAULTS: SiteSettings = {
     unmuteLabel: "Unmute",
     mutedLabel: "Muted",
     followNudge: "You’re following {name} — send them a message?",
+    prefsHeading: "Notifications",
+    prefMessagesLabel: "Email me about messages",
+    prefCollabLabel: "Email me about collaboration requests",
+    prefOnLabel: "On",
+    prefOffLabel: "Off",
   },
   home: {
     genresHeading: "Browse by genre",

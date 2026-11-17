@@ -1264,6 +1264,11 @@ export type SiteSettings = {
     unmuteLabel?: string;
     mutedLabel?: string;
     followNudge?: string;
+    prefsHeading?: string;
+    prefMessagesLabel?: string;
+    prefCollabLabel?: string;
+    prefOnLabel?: string;
+    prefOffLabel?: string;
   };
   hero?: {
     background?: ImageWithAlt;

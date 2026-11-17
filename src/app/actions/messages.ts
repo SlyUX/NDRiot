@@ -9,6 +9,7 @@ import { fillTokens, sendEmail } from "@/lib/notify-email";
 import { getSiteSettings } from "@/lib/site-settings";
 import { absoluteUrl } from "@/lib/site-url";
 import { creatorsOwnedBy, ownerEmailOf } from "@/sanity/ownership-client";
+import { getReaderPrefs } from "@/sanity/reader-prefs-client";
 import {
   appendMessage,
   blockThread,
@@ -124,7 +125,7 @@ export async function requestMessage(input: {
     getSiteSettings(),
     ownerEmailOf(input.toId),
   ]);
-  if (toEmail) {
+  if (toEmail && (await getReaderPrefs(toEmail)).emailMessages) {
     const n = settings.notifications;
     await sendEmail({
       to: toEmail,
@@ -184,7 +185,7 @@ export async function respondMessage(input: {
     creatorName(toId),
     ownerEmailOf(input.fromId),
   ]);
-  if (fromEmail) {
+  if (fromEmail && (await getReaderPrefs(fromEmail)).emailMessages) {
     await sendEmail({
       to: fromEmail,
       subject: fillTokens(

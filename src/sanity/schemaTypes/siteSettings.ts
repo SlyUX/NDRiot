@@ -732,6 +732,11 @@ export default defineType({
         defineField({ name: "unmuteLabel", title: "Conversation — unmute button", type: "string" }),
         defineField({ name: "mutedLabel", title: "Conversation — muted indicator", type: "string" }),
         defineField({ name: "followNudge", title: "Follow-step nudge", type: "string", description: 'Shown right after you follow a creator — e.g. "You\'re following {name} — send them a message?" Token: {name}.' }),
+        defineField({ name: "prefsHeading", title: "/me notifications — heading", type: "string" }),
+        defineField({ name: "prefMessagesLabel", title: "/me notifications — messages toggle", type: "string" }),
+        defineField({ name: "prefCollabLabel", title: "/me notifications — collaboration toggle", type: "string" }),
+        defineField({ name: "prefOnLabel", title: "/me notifications — on", type: "string" }),
+        defineField({ name: "prefOffLabel", title: "/me notifications — off", type: "string" }),
       ],
     }),
 

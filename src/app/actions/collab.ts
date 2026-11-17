@@ -22,6 +22,7 @@ import {
   creatorsOwnedBy,
   ownerEmailOf,
 } from "@/sanity/ownership-client";
+import { getReaderPrefs } from "@/sanity/reader-prefs-client";
 import { getWriteClient } from "@/sanity/write-client";
 
 /**
@@ -130,7 +131,7 @@ export async function requestCollab(input: {
     ),
     ownerEmailOf(input.toId),
   ]);
-  if (toEmail) {
+  if (toEmail && (await getReaderPrefs(toEmail)).emailCollab) {
     const n = settings.notifications;
     await sendEmail({
       to: toEmail,

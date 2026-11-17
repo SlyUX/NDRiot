@@ -1,7 +1,11 @@
 'use server'
 
 import { auth } from '@/auth'
-import { dismissRagBanner, setStripSubscription } from '@/sanity/reader-prefs-client'
+import {
+  dismissRagBanner,
+  setEmailPref,
+  setStripSubscription,
+} from '@/sanity/reader-prefs-client'
 
 /**
  * Toggle the signed-in reader's "notify me about new strips" subscription.
@@ -20,6 +24,27 @@ export async function setStripSubscriptionAction(
   } catch (cause) {
     console.error('[notifications] set strip subscription failed', cause)
     return { ok: false, subscribed: false }
+  }
+}
+
+/**
+ * Toggle an email notification preference (messages / collaboration requests).
+ * Opt-out: on by default; this lets a creator turn the emails off. Identity from
+ * the verified session.
+ */
+export async function setEmailPrefAction(
+  key: 'emailMessages' | 'emailCollab',
+  value: boolean,
+): Promise<{ ok: boolean; value: boolean }> {
+  const session = await auth()
+  const email = session?.user?.email?.trim()
+  if (!email) return { ok: false, value }
+  try {
+    const next = await setEmailPref(email, key, value)
+    return { ok: true, value: next }
+  } catch (cause) {
+    console.error('[notifications] set email pref failed', cause)
+    return { ok: false, value }
   }
 }
 
