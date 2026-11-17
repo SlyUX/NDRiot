@@ -296,4 +296,78 @@ export async function createReport(input: {
   }
 }
 
+/* ------------------------------------------------------------ read state */
+
+/**
+ * Per-(creator, thread) read markers — tiny bookkeeping docs, schema-less like
+ * reader saves (no moderation surface needed). A thread is "unread" for a
+ * creator when its lastMessageAt is newer than their marker. Sending or opening
+ * a thread advances the marker, so a creator's own last message never reads as
+ * unread. ISO timestamps compare lexicographically (all UTC, one format).
+ */
+function readId(creatorId: string, threadDocId: string): string {
+  return `msgread.${creatorId}__${threadDocId}`.replace(/[^a-zA-Z0-9._-]/g, '-')
+}
+
+/** Advance this creator's read marker on a thread to now. Idempotent. */
+export async function markThreadRead(creatorId: string, threadDocId: string): Promise<boolean> {
+  if (!creatorId || !threadDocId) return false
+  try {
+    await client().createOrReplace({
+      _id: readId(creatorId, threadDocId),
+      _type: 'messageRead',
+      creatorId,
+      threadId: threadDocId,
+      lastReadAt: new Date().toISOString(),
+    })
+    return true
+  } catch (cause) {
+    console.error('[message] markThreadRead failed', cause)
+    return false
+  }
+}
+
+/** This creator's read markers as a map threadId → lastReadAt (ISO). */
+export async function readStamps(creatorId: string): Promise<Map<string, string>> {
+  if (!creatorId) return new Map()
+  try {
+    const rows =
+      (await client().fetch<{ threadId: string | null; lastReadAt: string | null }[]>(
+        `*[_type=="messageRead" && creatorId==$id]{threadId, lastReadAt}`,
+        { id: creatorId },
+      )) ?? []
+    return new Map(
+      rows
+        .filter((r): r is { threadId: string; lastReadAt: string } =>
+          Boolean(r.threadId && r.lastReadAt),
+        )
+        .map((r) => [r.threadId, r.lastReadAt]),
+    )
+  } catch (cause) {
+    console.error('[message] readStamps failed', cause)
+    return new Map()
+  }
+}
+
+/** Count of active threads with activity newer than this creator last read —
+ *  the unread half of the nav badge. */
+export async function unreadThreadCount(creatorId: string): Promise<number> {
+  if (!creatorId) return 0
+  try {
+    const [stamps, reads] = await Promise.all([
+      client().fetch<{ _id: string; lastMessageAt: string | null }[]>(
+        `*[_type=="messageThread" && $id in participantIds && status=="active"]{_id, lastMessageAt}`,
+        { id: creatorId },
+      ),
+      readStamps(creatorId),
+    ])
+    return (stamps ?? []).filter(
+      (t) => t.lastMessageAt && t.lastMessageAt > (reads.get(t._id) ?? ''),
+    ).length
+  } catch (cause) {
+    console.error('[message] unreadThreadCount failed', cause)
+    return 0
+  }
+}
+
 export { threadId }

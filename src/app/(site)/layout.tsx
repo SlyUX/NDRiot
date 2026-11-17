@@ -19,7 +19,7 @@ import {
 import type { RagOpenSubmission } from '@/lib/types'
 import { creatorsOwnedBy } from '@/sanity/ownership-client'
 import { pendingCollabCount } from '@/sanity/collab-client'
-import { pendingRequestCount } from '@/sanity/message-client'
+import { pendingRequestCount, unreadThreadCount } from '@/sanity/message-client'
 import { urlFor } from '@/sanity/image'
 import { getSiteSettings } from '@/lib/site-settings'
 import { RESOURCE_CATEGORIES } from '@/lib/taxonomy'
@@ -75,11 +75,12 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       if (profile?.photo) {
         avatar = urlFor(profile.photo).width(96).height(96).fit('crop').url()
       }
-      const [pendingMsgs, pendingCollabs] = await Promise.all([
+      const [pendingMsgs, pendingCollabs, unread] = await Promise.all([
         pendingRequestCount(owned[0]),
         pendingCollabCount(owned[0]),
+        unreadThreadCount(owned[0]),
       ])
-      pendingActions = pendingMsgs + pendingCollabs
+      pendingActions = pendingMsgs + pendingCollabs + unread
     }
   }
   const s = settings.sections

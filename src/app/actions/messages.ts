@@ -17,6 +17,7 @@ import {
   createThreadRequest,
   getThread,
   getThreadById,
+  markThreadRead,
   respondToThread,
   threadId,
 } from "@/sanity/message-client";
@@ -197,6 +198,9 @@ export async function respondMessage(input: {
     });
   }
 
+  // Accepting means they've seen the opener — don't badge it as unread.
+  if (input.accept) await markThreadRead(toId, threadId(input.fromId, toId));
+
   revalidatePath("/me");
   return { ok: true };
 }
@@ -230,8 +234,18 @@ export async function sendMessage(input: {
   if (res === "error")
     return { ok: false, error: "Something went wrong — please try again." };
 
+  // Sending is reading — advance my marker so my own message isn't "unread".
+  await markThreadRead(self.id, input.threadDocId);
+
   revalidatePath("/me");
   return { ok: true };
+}
+
+/** Advance this creator's read marker — called when they open a conversation. */
+export async function markRead(input: { threadDocId: string }): Promise<void> {
+  const self = await me();
+  if ("error" in self) return;
+  await markThreadRead(self.id, input.threadDocId);
 }
 
 /** Opt out — the thread closes for both. Terminal. */

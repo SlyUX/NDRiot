@@ -7,6 +7,7 @@ import { Flag, LogOut, Send, ShieldX } from 'lucide-react'
 
 import {
   blockMessage,
+  markRead,
   optOutMessage,
   reportMessage,
   sendMessage,
@@ -32,6 +33,8 @@ export type Conversation = {
   otherSlug: string | null
   messages: ConversationMessage[]
   lastMessageAt: string | null
+  /** The other person has posted since this creator last read the thread. */
+  unread: boolean
 }
 export type AwaitingRow = {
   name: string
@@ -57,6 +60,7 @@ export function MessageThreads({
   copy: MessagingSettings
 }) {
   const [openId, setOpenId] = useState<string | null>(null)
+  const [locallyRead, setLocallyRead] = useState<Set<string>>(new Set())
 
   return (
     <section>
@@ -70,15 +74,32 @@ export function MessageThreads({
         <ul className="mt-4">
           {conversations.map((c) => {
             const isOpen = openId === c.threadDocId
+            const showUnread = c.unread && !locallyRead.has(c.threadDocId)
             return (
               <li key={c.threadDocId} className="border-border border-b">
                 <button
                   type="button"
-                  onClick={() => setOpenId(isOpen ? null : c.threadDocId)}
+                  onClick={() => {
+                    const next = isOpen ? null : c.threadDocId
+                    setOpenId(next)
+                    if (next && showUnread) {
+                      setLocallyRead((s) => new Set(s).add(c.threadDocId))
+                      void markRead({ threadDocId: c.threadDocId })
+                    }
+                  }}
                   aria-expanded={isOpen}
+                  aria-label={showUnread ? `${c.otherName}, unread` : undefined}
                   className="hover:text-primary flex w-full items-center justify-between gap-3 py-3 text-left text-sm font-bold transition-colors"
                 >
-                  <span>{c.otherName}</span>
+                  <span className="flex items-center gap-2">
+                    {showUnread && (
+                      <span
+                        aria-hidden="true"
+                        className="bg-primary inline-block size-2 shrink-0"
+                      />
+                    )}
+                    {c.otherName}
+                  </span>
                   {c.lastMessageAt && (
                     <span className="text-muted-foreground text-xs font-normal">
                       {formatDate(c.lastMessageAt)}
