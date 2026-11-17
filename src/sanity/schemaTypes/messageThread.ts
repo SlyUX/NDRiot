@@ -139,6 +139,14 @@ export default defineType({
       type: 'datetime',
       readOnly: true,
     }),
+    defineField({
+      name: 'reviewedAt',
+      title: 'Reviewed',
+      type: 'datetime',
+      readOnly: true,
+      description:
+        'When a moderator last ran an admin-initiated review (both participants were notified).',
+    }),
   ],
   orderings: [
     {

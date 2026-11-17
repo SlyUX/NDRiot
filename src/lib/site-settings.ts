@@ -567,6 +567,13 @@ export type NotificationsSettings = {
   messageAcceptedBody: string;
   messageDeclinedSubject: string;
   messageDeclinedBody: string;
+  /** Moderation: admin-initiated review → both participants; report outcome → reporter. */
+  messageReviewedSubject: string;
+  messageReviewedBody: string;
+  reportActionedSubject: string;
+  reportActionedBody: string;
+  reportDismissedSubject: string;
+  reportDismissedBody: string;
 };
 
 export interface SiteSettings {
@@ -1164,6 +1171,34 @@ const DEFAULTS: SiteSettings = {
       "{to} isn’t able to connect right now — and that’s completely okay.",
       "",
       "Thanks for reaching out and helping build the community.",
+      "",
+      "— ND Riot",
+    ].join("\n"),
+    messageReviewedSubject: "An ND Riot admin reviewed a conversation you’re in",
+    messageReviewedBody: [
+      "Hi,",
+      "",
+      "We’re letting you know that a member of the ND Riot team reviewed one of your direct-message conversations. Nobody reported it — we notify both people whenever we open a conversation that wasn’t reported, as a check on our own access.",
+      "",
+      "If you have questions, just reply to this email.",
+      "",
+      "— ND Riot",
+    ].join("\n"),
+    reportActionedSubject: "We reviewed your report",
+    reportActionedBody: [
+      "Hi,",
+      "",
+      "Thanks for reporting a message on ND Riot. We reviewed it and took action.",
+      "",
+      "You don’t need to do anything else. If you have concerns, just reply to this email.",
+      "",
+      "— ND Riot",
+    ].join("\n"),
+    reportDismissedSubject: "We reviewed your report",
+    reportDismissedBody: [
+      "Hi,",
+      "",
+      "Thanks for reporting a message on ND Riot. We reviewed it and didn’t find a policy violation this time — but we appreciate you flagging it, and please keep reporting anything that doesn’t sit right.",
       "",
       "— ND Riot",
     ].join("\n"),

@@ -434,6 +434,41 @@ export default defineType({
           rows: 8,
           description: "A gentle, no-judgment close. Tokens: {from}, {to}.",
         }),
+        defineField({
+          name: "messageReviewedSubject",
+          title: "Message reviewed (admin-initiated) → both — subject",
+          type: "string",
+        }),
+        defineField({
+          name: "messageReviewedBody",
+          title: "Message reviewed (admin-initiated) → both — body",
+          type: "text",
+          rows: 8,
+          description:
+            "Sent to BOTH participants when a moderator reviews a thread that nobody reported — the transparency check on admin access.",
+        }),
+        defineField({
+          name: "reportActionedSubject",
+          title: "Report actioned → reporter — subject",
+          type: "string",
+        }),
+        defineField({
+          name: "reportActionedBody",
+          title: "Report actioned → reporter — body",
+          type: "text",
+          rows: 6,
+        }),
+        defineField({
+          name: "reportDismissedSubject",
+          title: "Report dismissed → reporter — subject",
+          type: "string",
+        }),
+        defineField({
+          name: "reportDismissedBody",
+          title: "Report dismissed → reporter — body",
+          type: "text",
+          rows: 6,
+        }),
       ],
     }),
 

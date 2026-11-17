@@ -13,6 +13,10 @@ import {
   ResubmitRagAction,
   DeclineRagAction,
 } from "./src/sanity/actions/rag-decision";
+import {
+  NotifyReviewAction,
+  ResolveReportAction,
+} from "./src/sanity/actions/message-moderation";
 import { metricsTool } from "./src/sanity/tools/metrics";
 import { projectId, dataset, apiVersion } from "./src/sanity/env";
 
@@ -90,6 +94,8 @@ export default defineConfig([
       actions: (prev, { schemaType }) => {
         if (schemaType === "ragSubmission")
           return [...prev, AcceptRagAction, ResubmitRagAction, DeclineRagAction];
+        if (schemaType === "messageThread") return [...prev, NotifyReviewAction];
+        if (schemaType === "messageReport") return [...prev, ResolveReportAction];
         return prev;
       },
     },

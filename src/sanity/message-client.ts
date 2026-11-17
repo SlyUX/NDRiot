@@ -2,7 +2,7 @@ import 'server-only'
 
 import { createClient, type SanityClient } from 'next-sanity'
 
-import type { MessageThread } from '../../sanity.types'
+import type { MessageReport, MessageThread } from '../../sanity.types'
 
 import { apiVersion, projectId } from './env'
 
@@ -371,6 +371,32 @@ export async function unreadThreadCount(creatorId: string): Promise<number> {
   } catch (cause) {
     console.error('[message] unreadThreadCount failed', cause)
     return 0
+  }
+}
+
+/* --------------------------------------------------------- moderation */
+
+/** Record an admin-initiated review on a thread (both participants are notified
+ *  by the route that calls this). */
+export async function setReviewed(threadDocId: string): Promise<boolean> {
+  if (!threadDocId) return false
+  try {
+    await client().patch(threadDocId).set({ reviewedAt: new Date().toISOString() }).commit()
+    return true
+  } catch (cause) {
+    console.error('[message] setReviewed failed', cause)
+    return false
+  }
+}
+
+/** A report doc by id — for the resolve-report route. */
+export async function getReportById(docId: string): Promise<MessageReport | null> {
+  if (!docId) return null
+  try {
+    return await client().fetch<MessageReport | null>(`*[_id==$id][0]`, { id: docId })
+  } catch (cause) {
+    console.error('[message] getReportById failed', cause)
+    return null
   }
 }
 

@@ -391,6 +391,7 @@ export type MessageThread = {
   createdAt?: string;
   respondedAt?: string;
   lastMessageAt?: string;
+  reviewedAt?: string;
 };
 
 export type SpinnerStore = {
@@ -1122,6 +1123,12 @@ export type SiteSettings = {
     messageAcceptedBody?: string;
     messageDeclinedSubject?: string;
     messageDeclinedBody?: string;
+    messageReviewedSubject?: string;
+    messageReviewedBody?: string;
+    reportActionedSubject?: string;
+    reportActionedBody?: string;
+    reportDismissedSubject?: string;
+    reportDismissedBody?: string;
   };
   noise?: {
     mastheadTitle?: string;
