@@ -22,7 +22,7 @@ import { SectionHeading } from "@/components/section-heading";
 import { UpdateFeed } from "@/components/update-feed";
 import { ShareBar } from "@/components/share-bar";
 import { Badge } from "@/components/ui/badge";
-import { externalHref } from "@/lib/utils";
+import { externalHref, hostLabel } from "@/lib/utils";
 import { Section } from "@/components/ui/section";
 import { bookToCard, creatorToCard } from "@/lib/card-mappers";
 import { formatPlace } from "@/lib/place";
@@ -175,10 +175,9 @@ export default async function CreatorPage({
     "{name}",
     firstName,
   );
-  const feedHeading = settings.sections.feedHeading.replace(
-    "{name}",
-    firstName,
-  );
+  const feedHeading = settings.sections.feedHeading
+    .replace("{name}", firstName)
+    .replace("{baseURL}", hostLabel(creator.feedUrl));
   const updatesHeading = settings.sections.creatorUpdatesHeading.replace(
     "{name}",
     firstName,

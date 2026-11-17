@@ -1634,7 +1634,7 @@ const DEFAULTS: SiteSettings = {
     buyHeading: "Get it here",
     getItHereOnlineLabel: "Online",
     getItHereIrlLabel: "In person",
-    feedHeading: "Latest from {name}",
+    feedHeading: "Updates from {baseURL}",
     followLabel: "Follow",
     followingLabel: "Following",
     accountTitle: "Your ND Riot",

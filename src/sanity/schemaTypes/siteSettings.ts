@@ -1520,7 +1520,7 @@ export default defineType({
           title: "Profile feed heading",
           type: "string",
           description:
-            'Over a creator’s or outlet’s syndicated RSS feed on their profile. Use {name} for their name — e.g. "Latest from {name}".',
+            'Over a creator’s or outlet’s syndicated RSS feed on their profile. Tokens: {baseURL} = the feed’s domain (e.g. "site.com"), {name} = their name. E.g. "Updates from {baseURL}".',
         }),
         defineField({
           name: "followLabel",

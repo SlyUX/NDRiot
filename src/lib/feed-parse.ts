@@ -21,6 +21,9 @@ export interface FeedEntry {
   link: string
   /** ISO 8601, or null when the feed omits/malforms the date. */
   date: string | null
+  /** Plain-text item summary — HTML tags and entities stripped out — or null
+   *  when the feed item carries no description. The display truncates it. */
+  summary: string | null
 }
 
 export interface ParsedFeed {
@@ -117,6 +120,42 @@ function normalizeDate(raw: string | null): string | null {
   return Number.isNaN(ms) ? null : new Date(ms).toISOString()
 }
 
+/** The handful of HTML entities a feed summary commonly carries beyond the five
+ *  XML ones the parser already resolves. Numeric entities decode generically. */
+const NAMED_ENTITIES: Record<string, string> = {
+  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ',
+  mdash: '—', ndash: '–', hellip: '…', rsquo: '’', lsquo: '‘',
+  ldquo: '“', rdquo: '”', trade: '™', copy: '©', reg: '®',
+}
+
+function decodeEntities(text: string): string {
+  return text.replace(/&(#x?[0-9a-f]+|[a-z][a-z0-9]*);/gi, (match, code: string) => {
+    if (code[0] === '#') {
+      const n =
+        code[1] === 'x' || code[1] === 'X'
+          ? parseInt(code.slice(2), 16)
+          : parseInt(code.slice(1), 10)
+      return Number.isFinite(n) ? String.fromCodePoint(n) : match
+    }
+    return NAMED_ENTITIES[code.toLowerCase()] ?? match
+  })
+}
+
+/**
+ * A feed's description/summary is HTML (often CDATA-wrapped). Reduce it to plain
+ * text for a short preview: drop tags, decode the common entities, collapse
+ * whitespace. Rendered as text in React, so this is for legibility, not safety.
+ */
+function htmlToText(raw: string | null): string | null {
+  if (!raw) return null
+  const text = decodeEntities(raw.replace(/<[^>]*>/g, ' '))
+    .replace(/\s+/g, ' ')
+    // A stripped inline tag can leave a space before punctuation ("markup .").
+    .replace(/\s+([.,;:!?)])/g, '$1')
+    .trim()
+  return text || null
+}
+
 /** RSS 2.0 / RDF item: link is text; date is pubDate or dc:date. */
 function rssEntry(value: Json): FeedEntry | null {
   const item = asRecord(value)
@@ -124,7 +163,12 @@ function rssEntry(value: Json): FeedEntry | null {
   const title = asText(item.title)
   const link = asText(item.link)
   if (!title || !link) return null
-  return { title, link, date: normalizeDate(asText(item.pubDate) ?? asText(item['dc:date'])) }
+  return {
+    title,
+    link,
+    date: normalizeDate(asText(item.pubDate) ?? asText(item['dc:date'])),
+    summary: htmlToText(asText(item.description)),
+  }
 }
 
 /** Atom link is `<link href rel>` — one or many; prefer rel="alternate". */
@@ -146,7 +190,12 @@ function atomEntry(value: Json): FeedEntry | null {
   const title = asText(entry.title)
   const link = atomLink(entry.link)
   if (!title || !link) return null
-  return { title, link, date: normalizeDate(asText(entry.updated) ?? asText(entry.published)) }
+  return {
+    title,
+    link,
+    date: normalizeDate(asText(entry.updated) ?? asText(entry.published)),
+    summary: htmlToText(asText(entry.summary) ?? asText(entry.content)),
+  }
 }
 
 export function parseFeed(xml: string): ParsedFeed | null {

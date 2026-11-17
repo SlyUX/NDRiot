@@ -1,7 +1,7 @@
 import { SectionHeading } from '@/components/section-heading'
 import { formatDate } from '@/lib/card-mappers'
 import type { FeedEntry } from '@/lib/feed-parse'
-import { externalHref } from '@/lib/utils'
+import { externalHref, truncate } from '@/lib/utils'
 
 /**
  * A profile's latest syndicated items — a creator's or outlet's own RSS/Atom
@@ -32,6 +32,7 @@ export function FeedPreview({
         {entries.slice(0, limit).map((entry) => {
           const href = externalHref(entry.link)
           const date = formatDate(entry.date)
+          const preview = truncate(entry.summary, 160)
           return (
             <li key={entry.link} className="flex flex-col gap-0.5">
               {href ? (
@@ -45,6 +46,9 @@ export function FeedPreview({
                 </a>
               ) : (
                 <span className="text-sm leading-snug font-bold">{entry.title}</span>
+              )}
+              {preview && (
+                <p className="text-muted-foreground text-xs leading-snug">{preview}</p>
               )}
               {date && (
                 <time dateTime={entry.date ?? undefined} className="text-muted-foreground text-xs">

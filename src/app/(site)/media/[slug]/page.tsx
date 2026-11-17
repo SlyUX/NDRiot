@@ -13,7 +13,7 @@ import { safeFetch, MEDIA_DETAIL_QUERY } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
 import { absoluteUrl } from '@/lib/site-url'
 import type { Genre, MediaDetail } from '@/lib/types'
-import { externalHref } from '@/lib/utils'
+import { externalHref, hostLabel } from '@/lib/utils'
 import { urlFor } from '@/sanity/image'
 
 export const dynamic = 'force-dynamic'
@@ -124,7 +124,12 @@ export default async function MediaDetailPage({ params }: { params: Promise<{ sl
 
       {feed && (
         <div className="mt-10">
-          <FeedPreview heading={sections.feedHeading.replace('{name}', media.name)} entries={feed.entries} />
+          <FeedPreview
+            heading={sections.feedHeading
+              .replace('{name}', media.name)
+              .replace('{baseURL}', hostLabel(media.feedUrl))}
+            entries={feed.entries}
+          />
         </div>
       )}
 

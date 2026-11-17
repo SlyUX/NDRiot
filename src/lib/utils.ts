@@ -32,6 +32,21 @@ export function externalHref(url: string | null | undefined): string | undefined
  * Returns undefined for empty input, so a caller can `&&` it away rather than
  * render an empty node.
  */
+/**
+ * The bare display host of a URL — the hostname without a leading `www.`, no
+ * scheme and no path (e.g. "https://www.site.com/rss/" → "site.com"). Empty
+ * string when the input isn't a valid absolute URL. Feeds the RSS block's
+ * "Updates from {baseURL}" heading.
+ */
+export function hostLabel(raw: string | null | undefined): string {
+  if (!raw) return ""
+  try {
+    return new URL(raw).hostname.replace(/^www\./, "")
+  } catch {
+    return ""
+  }
+}
+
 export function truncate(text: string | null | undefined, max: number): string | undefined {
   if (!text) return undefined
   const clean = text.replace(/\s+/g, " ").trim()
