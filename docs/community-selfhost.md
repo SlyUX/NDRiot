@@ -9,6 +9,12 @@ original plan: embedded creator community, gated to the current roster; server
 stands up by hand (this doc), ND Riot integration built after against the live
 box.
 
+**There is now a simpler alternative to weigh against this one:**
+[`community-forum.md`](community-forum.md) — a native, async + near-real-time
+forum that needs no server (it reuses the creator-messaging primitives). This
+self-host path is only required if the community must be a **live hangout** with
+presence/voice; a forum covers near-live text without the VPS.
+
 Last reviewed: 2026-11-17.
 
 ---
