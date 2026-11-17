@@ -17,6 +17,7 @@ import {
   DialogContent,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Spinner } from '@/components/ui/spinner'
 import { formatDate } from '@/lib/card-mappers'
 import type { MessagingSettings } from '@/lib/site-settings'
 import { cn } from '@/lib/utils'
@@ -241,7 +242,11 @@ function ConversationPanel({
           aria-label={copy.sendLabel}
           className="bg-primary text-primary-foreground focus-visible:ring-ring inline-flex items-center gap-1.5 px-3 py-2 text-xs font-black tracking-widest uppercase transition-opacity focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
         >
-          <Send aria-hidden="true" className="size-4" />
+          {pending ? (
+            <Spinner className="size-4" />
+          ) : (
+            <Send aria-hidden="true" className="size-4" />
+          )}
           {copy.sendLabel}
         </button>
       </div>
@@ -403,8 +408,9 @@ function ReportDialog({
                 type="button"
                 onClick={submit}
                 disabled={pending}
-                className="bg-primary text-primary-foreground focus-visible:ring-ring px-4 py-2 text-xs font-black tracking-widest uppercase transition-opacity focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
+                className="bg-primary text-primary-foreground focus-visible:ring-ring inline-flex items-center gap-2 px-4 py-2 text-xs font-black tracking-widest uppercase transition-opacity focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
               >
+                {pending && <Spinner />}
                 {copy.reportSubmitLabel}
               </button>
               <button

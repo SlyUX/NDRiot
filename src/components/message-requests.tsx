@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { UserCheck, UserPlus } from 'lucide-react'
 
 import { respondMessage } from '@/app/actions/messages'
+import { Spinner } from '@/components/ui/spinner'
 import { formatDate } from '@/lib/card-mappers'
 import type { MessagingSettings } from '@/lib/site-settings'
 import type { FollowSignal } from '@/sanity/cosign-client'
@@ -75,15 +76,20 @@ function RequestRow({
   copy: MessagingSettings
 }) {
   const [pending, startTransition] = useTransition()
+  const [which, setWhich] = useState<'accept' | 'decline' | null>(null)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
 
   function respond(accept: boolean) {
     setError(null)
+    setWhich(accept ? 'accept' : 'decline')
     startTransition(async () => {
       const result = await respondMessage({ fromId: item.fromId, accept })
       if (result.ok) router.refresh()
-      else setError(result.error ?? 'Something went wrong.')
+      else {
+        setError(result.error ?? 'Something went wrong.')
+        setWhich(null)
+      }
     })
   }
 
@@ -121,16 +127,18 @@ function RequestRow({
           type="button"
           onClick={() => respond(true)}
           disabled={pending}
-          className="bg-primary text-primary-foreground border-primary focus-visible:ring-ring border px-3 py-1.5 text-[11px] font-bold tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
+          className="bg-primary text-primary-foreground border-primary focus-visible:ring-ring inline-flex items-center gap-1.5 border px-3 py-1.5 text-[11px] font-bold tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
         >
+          {pending && which === 'accept' && <Spinner className="size-3.5" />}
           {copy.acceptLabel}
         </button>
         <button
           type="button"
           onClick={() => respond(false)}
           disabled={pending}
-          className="text-muted-foreground hover:border-primary/60 hover:text-foreground focus-visible:ring-ring border border-white/20 px-3 py-1.5 text-[11px] font-bold tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
+          className="text-muted-foreground hover:border-primary/60 hover:text-foreground focus-visible:ring-ring inline-flex items-center gap-1.5 border border-white/20 px-3 py-1.5 text-[11px] font-bold tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
         >
+          {pending && which === 'decline' && <Spinner className="size-3.5" />}
           {copy.declineLabel}
         </button>
       </div>

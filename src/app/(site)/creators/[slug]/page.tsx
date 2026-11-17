@@ -409,41 +409,42 @@ export default async function CreatorPage({
                     </div>
                   )}
 
-                  <div className="mt-5 flex flex-wrap items-center gap-3">
-                    {/* No Follow on your own profile — you can't follow yourself.
-                        For everyone else it's "Follow", not "Save": truer for a
-                        person, and the same underlying saved signal (§3). Between
-                        two creators, a mutual follow becomes a Cosign — see the
-                        hint below. */}
+                  <div className="mt-5 flex flex-col gap-3">
+                    {/* Follow + Chat Request on one row; Share wraps onto its own
+                        row beneath at every width (not just mobile) — cleaner.
+                        No Follow/Chat on your own profile. Between two creators, a
+                        mutual follow becomes a Cosign — see the hint below. */}
                     {!isOwner && (
-                      <SaveButton
-                        itemType="creator"
-                        itemId={creator._id}
-                        initialSaved={saved}
-                        signedIn={Boolean(email)}
-                        saveLabel={settings.sections.followLabel}
-                        savedLabel={settings.sections.followingLabel}
-                        collapseLabelWhenSaved
-                        signInCopy={{
-                          title: settings.sections.accountSignInTitle,
-                          body: settings.sections.accountSignInBody,
-                          cta: settings.sections.accountSignInCta,
-                        }}
-                      />
-                    )}
-                    {viewerCreatorId && !isOwner && (
-                      <ChatRequestButton
-                        toId={creator._id}
-                        toName={creator.name ?? ""}
-                        copy={settings.messaging}
-                        collabCopy={settings.collab}
-                        genres={GENRES}
-                        threadStatus={messageThread?.status ?? null}
-                        collabEligible={
-                          Boolean(creator.openToCollaboration) && !collab?.status
-                        }
-                        dashboardHref="/me"
-                      />
+                      <div className="flex flex-wrap items-center gap-3">
+                        <SaveButton
+                          itemType="creator"
+                          itemId={creator._id}
+                          initialSaved={saved}
+                          signedIn={Boolean(email)}
+                          saveLabel={settings.sections.followLabel}
+                          savedLabel={settings.sections.followingLabel}
+                          collapseLabelWhenSaved
+                          signInCopy={{
+                            title: settings.sections.accountSignInTitle,
+                            body: settings.sections.accountSignInBody,
+                            cta: settings.sections.accountSignInCta,
+                          }}
+                        />
+                        {viewerCreatorId && (
+                          <ChatRequestButton
+                            toId={creator._id}
+                            toName={creator.name ?? ""}
+                            copy={settings.messaging}
+                            collabCopy={settings.collab}
+                            genres={GENRES}
+                            threadStatus={messageThread?.status ?? null}
+                            collabEligible={
+                              Boolean(creator.openToCollaboration) && !collab?.status
+                            }
+                            dashboardHref="/me"
+                          />
+                        )}
+                      </div>
                     )}
                     <ShareBar
                       title={creator.name ?? ""}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Handshake, MessageSquare } from 'lucide-react'
 
@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { Spinner } from '@/components/ui/spinner'
 import type { CollabSettings, MessagingSettings } from '@/lib/site-settings'
 import { cn } from '@/lib/utils'
 
@@ -61,6 +62,18 @@ export function ChatRequestButton({
   const [pending, startTransition] = useTransition()
   const router = useRouter()
 
+  // Keep the dialog open (showing the spinner) until the action AND the data
+  // refresh both finish, then close — so there's no gap where the dialog has
+  // closed but the profile hasn't caught up. (router.refresh() inside the
+  // transition holds `pending` true until the new data renders.)
+  const pendingCloseRef = useRef(false)
+  useEffect(() => {
+    if (!pending && pendingCloseRef.current) {
+      pendingCloseRef.current = false
+      setOpen(false)
+    }
+  }, [pending])
+
   // A thread already exists → a status, not the request button.
   if (threadStatus === 'active') {
     return (
@@ -91,7 +104,7 @@ export function ChatRequestButton({
     startTransition(async () => {
       const result = await requestMessage({ toId, note })
       if (result.ok) {
-        setOpen(false)
+        pendingCloseRef.current = true
         router.refresh()
       } else {
         setError(result.error ?? 'Something went wrong.')
@@ -108,7 +121,7 @@ export function ChatRequestButton({
     startTransition(async () => {
       const result = await requestCollab({ toId, genre })
       if (result.ok) {
-        setOpen(false)
+        pendingCloseRef.current = true
         router.refresh()
       } else {
         setError(result.error ?? 'Something went wrong.')
@@ -181,8 +194,9 @@ export function ChatRequestButton({
                 type="button"
                 onClick={submitMessage}
                 disabled={pending}
-                className="bg-primary text-primary-foreground focus-visible:ring-ring px-4 py-2 text-xs font-black tracking-widest uppercase transition-opacity focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
+                className="bg-primary text-primary-foreground focus-visible:ring-ring inline-flex items-center gap-2 px-4 py-2 text-xs font-black tracking-widest uppercase transition-opacity focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
               >
+                {pending && <Spinner />}
                 {copy.submitLabel}
               </button>
               <button
@@ -271,8 +285,9 @@ export function ChatRequestButton({
                 type="button"
                 onClick={submitCollab}
                 disabled={pending}
-                className="bg-primary text-primary-foreground focus-visible:ring-ring px-4 py-2 text-xs font-black tracking-widest uppercase transition-opacity focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
+                className="bg-primary text-primary-foreground focus-visible:ring-ring inline-flex items-center gap-2 px-4 py-2 text-xs font-black tracking-widest uppercase transition-opacity focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
               >
+                {pending && <Spinner />}
                 {collabCopy.submitLabel}
               </button>
               <button
