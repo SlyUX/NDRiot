@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Bell, BellOff, Flag, LogOut, Send, ShieldX } from 'lucide-react'
+import { ArrowLeft, Bell, BellOff, Flag, LogOut, Send, ShieldX } from 'lucide-react'
 
 import {
   blockMessage,
@@ -189,7 +189,7 @@ export function MessageThreads({
           if (!next) setOpen(false)
         }}
       >
-        <DialogContent variant="sheet" className="gap-0">
+        <DialogContent variant="sheet" className="gap-0" data-chat-sheet="">
           {active && (
             <ConversationPanel
               key={active.threadDocId}
@@ -272,6 +272,45 @@ function ConversationPanel({
     if (el) el.scrollTop = el.scrollHeight
   }, [messages, outbox.length])
 
+  // Keyboard-safe sheet on mobile. The full-screen sheet is `fixed inset-0`,
+  // which tracks the LAYOUT viewport — and iOS doesn't shrink that when the
+  // keyboard opens, so the composer ends up behind it. Pin the sheet to the
+  // VISUAL viewport instead (height + offset), so the composer rides just above
+  // the keyboard. Desktop keeps its centered CSS sizing (styles cleared there).
+  useEffect(() => {
+    const vv = window.visualViewport
+    const sheet = document.querySelector<HTMLElement>('[data-chat-sheet]')
+    if (!vv || !sheet) return
+    const desktop = window.matchMedia('(min-width: 640px)')
+
+    const apply = () => {
+      if (desktop.matches) {
+        sheet.style.height = ''
+        sheet.style.top = ''
+        sheet.style.bottom = ''
+        return
+      }
+      sheet.style.height = `${vv.height}px`
+      sheet.style.top = `${vv.offsetTop}px`
+      sheet.style.bottom = 'auto'
+      const el = scrollRef.current
+      if (el) el.scrollTop = el.scrollHeight // keep the latest message in view
+    }
+
+    apply()
+    vv.addEventListener('resize', apply)
+    vv.addEventListener('scroll', apply)
+    desktop.addEventListener('change', apply)
+    return () => {
+      vv.removeEventListener('resize', apply)
+      vv.removeEventListener('scroll', apply)
+      desktop.removeEventListener('change', apply)
+      sheet.style.height = ''
+      sheet.style.top = ''
+      sheet.style.bottom = ''
+    }
+  }, [])
+
   // Report snapshots the other person's most recent message, when there is one.
   const lastOtherKey =
     [...messages].reverse().find((m) => m.fromId !== meId)?.key ?? ''
@@ -334,31 +373,53 @@ function ConversationPanel({
 
   return (
     <>
-      {/* Header — name + optional collab context. Leaves room for the close X. */}
-      <div className="border-border shrink-0 border-b px-4 py-3 pr-12 sm:px-6">
-        <DialogTitle>
-          {conversation.otherSlug ? (
-            <Link
-              href={`/creators/${conversation.otherSlug}`}
-              className="hover:text-primary transition-colors"
-            >
-              {conversation.otherName}
-            </Link>
-          ) : (
-            conversation.otherName
-          )}
-        </DialogTitle>
-        {conversation.contextLabel && (
-          <p className="text-muted-foreground mt-1 text-xs font-bold tracking-wide uppercase">
-            {conversation.contextLabel}
-          </p>
-        )}
+      {/* Header — back + avatar + name (+ optional collab context). Fixed at the
+          top of the sheet (shrink-0, outside the scroll region, own z-layer) so
+          it's always visible. Leaves room for the close X at top-right. */}
+      <div className="border-border bg-background relative z-10 shrink-0 border-b px-4 py-3 pr-12 sm:px-6">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            // aria-label: §2 exempts these from the no-hardcoded-copy rule.
+            aria-label="Back to conversations"
+            className="text-muted-foreground hover:text-foreground focus-visible:ring-ring -ml-1 shrink-0 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+          >
+            <ArrowLeft aria-hidden="true" className="size-5" />
+          </button>
+          <AvatarCircle
+            src={conversation.otherAvatarUrl}
+            name={conversation.otherName}
+            className="size-9 shrink-0"
+          />
+          <div className="min-w-0 flex-1">
+            <DialogTitle className="truncate">
+              {conversation.otherSlug ? (
+                <Link
+                  href={`/creators/${conversation.otherSlug}`}
+                  className="hover:text-primary transition-colors"
+                >
+                  {conversation.otherName}
+                </Link>
+              ) : (
+                conversation.otherName
+              )}
+            </DialogTitle>
+            {conversation.contextLabel && (
+              <p className="text-muted-foreground mt-0.5 truncate text-xs font-bold tracking-wide uppercase">
+                {conversation.contextLabel}
+              </p>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Messages — the only scrolling region. */}
+      {/* Messages — the only scrolling region. `min-h-0` lets flex-1 actually
+          constrain and scroll here, instead of the column overflowing and
+          shoving the composer out of view. */}
       <div
         ref={scrollRef}
-        className="bg-card flex-1 space-y-2 overflow-y-auto px-4 py-3 sm:px-6"
+        className="bg-card min-h-0 flex-1 space-y-2 overflow-y-auto px-4 py-3 sm:px-6"
       >
         {messages.length === 0 && outbox.length === 0 ? (
           <p className="text-muted-foreground text-sm">{copy.threadsEmpty}</p>
@@ -405,8 +466,9 @@ function ConversationPanel({
         )}
       </div>
 
-      {/* Composer + actions — pinned below the scroll region. */}
-      <div className="border-border shrink-0 border-t px-4 py-3 sm:px-6">
+      {/* Composer + actions — pinned below the scroll region. A little extra
+          bottom room on mobile so the action row isn't flush to the edge. */}
+      <div className="border-border shrink-0 border-t px-4 py-3 pb-5 sm:px-6 sm:pb-3">
         <div className="flex items-end gap-2">
           <textarea
             value={body}
