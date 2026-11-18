@@ -1249,6 +1249,7 @@ export type SiteSettings = {
     composerPlaceholder?: string;
     sendLabel?: string;
     sendHint?: string;
+    sendingLabel?: string;
     leaveLabel?: string;
     leaveConfirm?: string;
     blockLabel?: string;

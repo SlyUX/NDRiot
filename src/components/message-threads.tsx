@@ -58,10 +58,12 @@ export type AwaitingRow = {
 }
 
 /**
- * The creator's conversations on /me. Active threads expand to a message panel
- * with a composer and the safety controls (leave / block / report). Sent
- * requests still awaiting a reply show as quiet "awaiting" rows. No realtime —
- * sending refreshes the server data (fine at beta scale).
+ * The creator's conversations on /me. A row opens the thread as a responsive
+ * modal — full-screen on phones (so the keyboard can't shove the layout around),
+ * a centered panel on desktop — which keeps switching and leaving a chat from
+ * reflowing the list behind it. Sent requests still awaiting a reply show as
+ * quiet "awaiting" rows. Near-real-time by polling while the modal is open (fine
+ * at beta scale).
  */
 export function MessageThreads({
   incoming,
@@ -80,7 +82,10 @@ export function MessageThreads({
   /** Optional section heading; omitted when a tab already labels the panel. */
   heading?: string
 }) {
-  const [openId, setOpenId] = useState<string | null>(null)
+  // `open` drives the modal; `active` holds the conversation and is kept through
+  // the close animation (Radix needs the content mounted while it animates out).
+  const [open, setOpen] = useState(false)
+  const [active, setActive] = useState<Conversation | null>(null)
   const [locallyRead, setLocallyRead] = useState<Set<string>>(new Set())
 
   return (
@@ -99,21 +104,20 @@ export function MessageThreads({
             <RequestRow key={item.fromId} item={item} copy={copy} />
           ))}
           {conversations.map((c) => {
-            const isOpen = openId === c.threadDocId
             const showUnread = c.unread && !locallyRead.has(c.threadDocId)
             return (
               <li key={c.threadDocId} className="border-border border-b">
                 <button
                   type="button"
                   onClick={() => {
-                    const next = isOpen ? null : c.threadDocId
-                    setOpenId(next)
-                    if (next && showUnread) {
+                    setActive(c)
+                    setOpen(true)
+                    if (showUnread) {
                       setLocallyRead((s) => new Set(s).add(c.threadDocId))
                       void markRead({ threadDocId: c.threadDocId })
                     }
                   }}
-                  aria-expanded={isOpen}
+                  aria-haspopup="dialog"
                   aria-label={showUnread ? `${c.otherName}, unread` : undefined}
                   className="hover:text-primary flex w-full items-center gap-3 py-3 text-left transition-colors"
                 >
@@ -150,7 +154,6 @@ export function MessageThreads({
                     </span>
                   )}
                 </button>
-                {isOpen && <ConversationPanel conversation={c} meId={meId} copy={copy} />}
               </li>
             )
           })}
@@ -179,6 +182,25 @@ export function MessageThreads({
           ))}
         </ul>
       )}
+
+      <Dialog
+        open={open}
+        onOpenChange={(next) => {
+          if (!next) setOpen(false)
+        }}
+      >
+        <DialogContent variant="sheet" className="gap-0">
+          {active && (
+            <ConversationPanel
+              key={active.threadDocId}
+              conversation={active}
+              meId={meId}
+              copy={copy}
+              onClose={() => setOpen(false)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </section>
   )
 }
@@ -187,15 +209,20 @@ function ConversationPanel({
   conversation,
   meId,
   copy,
+  onClose,
 }: {
   conversation: Conversation
   meId: string
   copy: MessagingSettings
+  onClose: () => void
 }) {
   const [body, setBody] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [reportOpen, setReportOpen] = useState(false)
   const [messages, setMessages] = useState(conversation.messages)
+  // Optimistic sends: shown as reduced-opacity bubbles until the server confirms.
+  // On failure the bubble is removed and its text is returned to the composer.
+  const [outbox, setOutbox] = useState<{ key: string; body: string }[]>([])
   const [muted, setMutedState] = useState(conversation.muted)
   const [pending, startTransition] = useTransition()
   const router = useRouter()
@@ -207,13 +234,22 @@ function ConversationPanel({
   // Fetch the latest messages and apply them only when a NEW one has arrived, so
   // an idle poll never re-renders the composer. After mount the poll owns this
   // state (no props→state mirroring); `send` calls it for an immediate update.
+  // Dropping the matching optimistic bubble happens in the SAME commit as the
+  // real message lands — so the "sending" and sent copies never show together
+  // (one-frame overlap otherwise), whichever path (send or poll) brings it in.
+  // (Rare edge: two identical messages sent back-to-back may briefly show one
+  // bubble until the next poll; it self-corrects.)
   const refresh = useCallback(async () => {
     const res = await fetchThreadMessages({ threadDocId: conversation.threadDocId })
     if (!res) return
     const last = res.messages[res.messages.length - 1]
     if (last && last.key !== lastKeyRef.current) {
       lastKeyRef.current = last.key
+      const serverMine = new Set(
+        res.messages.filter((m) => m.fromId === meId).map((m) => m.body),
+      )
       setMessages(res.messages)
+      setOutbox((o) => o.filter((m) => !serverMine.has(m.body)))
       if (last.fromId !== meId) void markRead({ threadDocId: conversation.threadDocId })
     }
   }, [conversation.threadDocId, meId])
@@ -229,25 +265,34 @@ function ConversationPanel({
     return () => clearInterval(id)
   }, [refresh])
 
-  // Keep the pane pinned to the latest message (on open and on each new one).
+  // Keep the pane pinned to the latest message (on open, each new one, and each
+  // optimistic send).
   useEffect(() => {
     const el = scrollRef.current
     if (el) el.scrollTop = el.scrollHeight
-  }, [messages])
+  }, [messages, outbox.length])
 
   // Report snapshots the other person's most recent message, when there is one.
   const lastOtherKey =
     [...messages].reverse().find((m) => m.fromId !== meId)?.key ?? ''
 
   function send() {
-    if (!body.trim()) return
+    const text = body.trim()
+    if (!text) return
     setError(null)
+    const key = `pending-${Date.now()}-${Math.random().toString(36).slice(2)}`
+    setOutbox((o) => [...o, { key, body: text }])
+    setBody('')
     startTransition(async () => {
-      const result = await sendMessage({ threadDocId: conversation.threadDocId, body })
+      const result = await sendMessage({ threadDocId: conversation.threadDocId, body: text })
       if (result.ok) {
-        setBody('')
-        void refresh()
+        // refresh() swaps the real message in and drops this bubble in one commit.
+        await refresh()
       } else {
+        setOutbox((o) => o.filter((m) => m.key !== key))
+        // Hand the text back so it can be edited and resent; keep anything the
+        // user has already started typing since.
+        setBody((b) => (b.trim() ? b : text))
         setError(result.error ?? 'Something went wrong.')
       }
     })
@@ -257,8 +302,10 @@ function ConversationPanel({
     if (!window.confirm(copy.leaveConfirm)) return
     startTransition(async () => {
       const result = await optOutMessage({ threadDocId: conversation.threadDocId })
-      if (result.ok) router.refresh()
-      else setError(result.error ?? 'Something went wrong.')
+      if (result.ok) {
+        onClose()
+        router.refresh()
+      } else setError(result.error ?? 'Something went wrong.')
     })
   }
 
@@ -266,8 +313,10 @@ function ConversationPanel({
     if (!window.confirm(copy.blockConfirm)) return
     startTransition(async () => {
       const result = await blockMessage({ threadDocId: conversation.threadDocId })
-      if (result.ok) router.refresh()
-      else setError(result.error ?? 'Something went wrong.')
+      if (result.ok) {
+        onClose()
+        router.refresh()
+      } else setError(result.error ?? 'Something went wrong.')
     })
   }
 
@@ -284,128 +333,157 @@ function ConversationPanel({
   }
 
   return (
-    <div className="pb-4">
-      {conversation.contextLabel && (
-        <p className="text-muted-foreground mb-2 text-xs font-bold tracking-wide uppercase">
-          {conversation.contextLabel}
-        </p>
-      )}
-      <div
-        ref={scrollRef}
-        className="bg-card max-h-[50vh] space-y-2 overflow-y-auto p-3"
-      >
-        {messages.length === 0 ? (
-          <p className="text-muted-foreground text-sm">{copy.threadsEmpty}</p>
-        ) : (
-          messages.map((m) => {
-            const mine = m.fromId === meId
-            return (
-              <div key={m.key} className={cn('flex', mine ? 'justify-end' : 'justify-start')}>
-                <div
-                  className={cn(
-                    'max-w-[80%] px-3 py-2 text-sm',
-                    mine
-                      ? 'bg-primary text-primary-foreground'
-                      : 'border border-white/15 text-foreground',
-                  )}
-                >
-                  <p className="whitespace-pre-wrap">{m.body}</p>
-                  {m.createdAt && (
-                    <p
-                      className={cn(
-                        'mt-1 text-[10px]',
-                        mine ? 'text-primary-foreground/70' : 'text-muted-foreground',
-                      )}
-                    >
-                      {formatDate(m.createdAt)}
-                    </p>
-                  )}
-                </div>
-              </div>
-            )
-          })
+    <>
+      {/* Header — name + optional collab context. Leaves room for the close X. */}
+      <div className="border-border shrink-0 border-b px-4 py-3 pr-12 sm:px-6">
+        <DialogTitle>
+          {conversation.otherSlug ? (
+            <Link
+              href={`/creators/${conversation.otherSlug}`}
+              className="hover:text-primary transition-colors"
+            >
+              {conversation.otherName}
+            </Link>
+          ) : (
+            conversation.otherName
+          )}
+        </DialogTitle>
+        {conversation.contextLabel && (
+          <p className="text-muted-foreground mt-1 text-xs font-bold tracking-wide uppercase">
+            {conversation.contextLabel}
+          </p>
         )}
       </div>
 
-      <div className="mt-3 flex items-end gap-2">
-        <textarea
-          value={body}
-          rows={2}
-          onChange={(e) => setBody(e.target.value)}
-          onKeyDown={(e) => {
-            // Shift+Enter sends; plain Enter is a newline (per request).
-            if (e.key === 'Enter' && e.shiftKey) {
-              e.preventDefault()
-              send()
-            }
-          }}
-          placeholder={copy.composerPlaceholder}
-          className="focus-visible:ring-ring flex-1 resize-none border border-white/20 bg-transparent px-3 py-2 text-sm focus-visible:ring-2 focus-visible:outline-none"
-        />
-        <button
-          type="button"
-          onClick={send}
-          disabled={pending || !body.trim()}
-          aria-label={copy.sendLabel}
-          className="bg-primary text-primary-foreground focus-visible:ring-ring inline-flex items-center gap-1.5 px-3 py-2 text-xs font-black tracking-widest uppercase transition-opacity focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
-        >
-          {pending ? (
-            <Spinner className="size-4" />
-          ) : (
-            <Send aria-hidden="true" className="size-4" />
-          )}
-          {copy.sendLabel}
-        </button>
+      {/* Messages — the only scrolling region. */}
+      <div
+        ref={scrollRef}
+        className="bg-card flex-1 space-y-2 overflow-y-auto px-4 py-3 sm:px-6"
+      >
+        {messages.length === 0 && outbox.length === 0 ? (
+          <p className="text-muted-foreground text-sm">{copy.threadsEmpty}</p>
+        ) : (
+          <>
+            {messages.map((m) => {
+              const mine = m.fromId === meId
+              return (
+                <div key={m.key} className={cn('flex', mine ? 'justify-end' : 'justify-start')}>
+                  <div
+                    className={cn(
+                      'max-w-[80%] px-3 py-2 text-sm',
+                      mine
+                        ? 'bg-primary text-primary-foreground'
+                        : 'border border-white/15 text-foreground',
+                    )}
+                  >
+                    <p className="whitespace-pre-wrap">{m.body}</p>
+                    {m.createdAt && (
+                      <p
+                        className={cn(
+                          'mt-1 text-[10px]',
+                          mine ? 'text-primary-foreground/70' : 'text-muted-foreground',
+                        )}
+                      >
+                        {formatDate(m.createdAt)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+            {outbox.map((m) => (
+              <div key={m.key} className="flex justify-end">
+                <div className="bg-primary text-primary-foreground max-w-[80%] px-3 py-2 text-sm opacity-60">
+                  <p className="whitespace-pre-wrap">{m.body}</p>
+                  <p className="text-primary-foreground/70 mt-1 text-[10px]">
+                    {copy.sendingLabel}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </>
+        )}
       </div>
-      <p className="text-muted-foreground mt-1 text-[10px]">{copy.sendHint}</p>
 
-      {error && (
-        <p role="alert" className="text-destructive mt-2 text-sm">
-          {error}
-        </p>
-      )}
+      {/* Composer + actions — pinned below the scroll region. */}
+      <div className="border-border shrink-0 border-t px-4 py-3 sm:px-6">
+        <div className="flex items-end gap-2">
+          <textarea
+            value={body}
+            rows={2}
+            onChange={(e) => setBody(e.target.value)}
+            onKeyDown={(e) => {
+              // Shift+Enter sends; plain Enter is a newline (per request).
+              if (e.key === 'Enter' && e.shiftKey) {
+                e.preventDefault()
+                send()
+              }
+            }}
+            placeholder={copy.composerPlaceholder}
+            /* 16px on touch so iOS doesn't zoom the field on focus; tighter on desktop. */
+            className="focus-visible:ring-ring flex-1 resize-none border border-white/20 bg-transparent px-3 py-2 text-base focus-visible:ring-2 focus-visible:outline-none sm:text-sm"
+          />
+          <button
+            type="button"
+            onClick={send}
+            disabled={!body.trim()}
+            aria-label={copy.sendLabel}
+            className="bg-primary text-primary-foreground focus-visible:ring-ring inline-flex items-center gap-1.5 px-3 py-2 text-xs font-black tracking-widest uppercase transition-opacity focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
+          >
+            <Send aria-hidden="true" className="size-4" />
+            {copy.sendLabel}
+          </button>
+        </div>
+        <p className="text-muted-foreground mt-1 text-[10px]">{copy.sendHint}</p>
 
-      <div className="text-muted-foreground mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-bold tracking-wide uppercase">
-        <button
-          type="button"
-          onClick={mute}
-          disabled={pending}
-          className="hover:text-foreground focus-visible:ring-ring inline-flex items-center gap-1 transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
-        >
-          {muted ? (
-            <Bell aria-hidden="true" className="size-3.5" />
-          ) : (
-            <BellOff aria-hidden="true" className="size-3.5" />
-          )}
-          {muted ? copy.unmuteLabel : copy.muteLabel}
-        </button>
-        <button
-          type="button"
-          onClick={leave}
-          disabled={pending}
-          className="hover:text-foreground focus-visible:ring-ring inline-flex items-center gap-1 transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
-        >
-          <LogOut aria-hidden="true" className="size-3.5" />
-          {copy.leaveLabel}
-        </button>
-        <button
-          type="button"
-          onClick={block}
-          disabled={pending}
-          className="hover:text-destructive focus-visible:ring-ring inline-flex items-center gap-1 transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
-        >
-          <ShieldX aria-hidden="true" className="size-3.5" />
-          {copy.blockLabel}
-        </button>
-        <button
-          type="button"
-          onClick={() => setReportOpen(true)}
-          disabled={pending}
-          className="hover:text-destructive focus-visible:ring-ring inline-flex items-center gap-1 transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
-        >
-          <Flag aria-hidden="true" className="size-3.5" />
-          {copy.reportLabel}
-        </button>
+        {error && (
+          <p role="alert" className="text-destructive mt-2 text-sm">
+            {error}
+          </p>
+        )}
+
+        <div className="text-muted-foreground mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-bold tracking-wide uppercase">
+          <button
+            type="button"
+            onClick={mute}
+            disabled={pending}
+            className="hover:text-foreground focus-visible:ring-ring inline-flex items-center gap-1 transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
+          >
+            {muted ? (
+              <Bell aria-hidden="true" className="size-3.5" />
+            ) : (
+              <BellOff aria-hidden="true" className="size-3.5" />
+            )}
+            {muted ? copy.unmuteLabel : copy.muteLabel}
+          </button>
+          <button
+            type="button"
+            onClick={leave}
+            disabled={pending}
+            className="hover:text-foreground focus-visible:ring-ring inline-flex items-center gap-1 transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
+          >
+            <LogOut aria-hidden="true" className="size-3.5" />
+            {copy.leaveLabel}
+          </button>
+          <button
+            type="button"
+            onClick={block}
+            disabled={pending}
+            className="hover:text-destructive focus-visible:ring-ring inline-flex items-center gap-1 transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
+          >
+            <ShieldX aria-hidden="true" className="size-3.5" />
+            {copy.blockLabel}
+          </button>
+          <button
+            type="button"
+            onClick={() => setReportOpen(true)}
+            disabled={pending}
+            className="hover:text-destructive focus-visible:ring-ring inline-flex items-center gap-1 transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
+          >
+            <Flag aria-hidden="true" className="size-3.5" />
+            {copy.reportLabel}
+          </button>
+        </div>
       </div>
 
       <ReportDialog
@@ -415,7 +493,7 @@ function ConversationPanel({
         messageKey={lastOtherKey}
         copy={copy}
       />
-    </div>
+    </>
   )
 }
 
@@ -495,7 +573,7 @@ function ReportDialog({
                   setError(null)
                 }}
                 className={cn(
-                  'focus-visible:ring-ring w-full border bg-transparent px-3 py-2 text-sm focus-visible:ring-2 focus-visible:outline-none',
+                  'focus-visible:ring-ring w-full border bg-transparent px-3 py-2 text-base focus-visible:ring-2 focus-visible:outline-none sm:text-sm',
                   reason ? 'border-primary text-foreground' : 'text-muted-foreground border-white/20',
                 )}
               >
@@ -515,7 +593,7 @@ function ReportDialog({
               rows={3}
               onChange={(e) => setNote(e.target.value)}
               placeholder={copy.reportNotePlaceholder}
-              className="focus-visible:ring-ring mt-3 w-full resize-none border border-white/20 bg-transparent px-3 py-2 text-sm focus-visible:ring-2 focus-visible:outline-none"
+              className="focus-visible:ring-ring mt-3 w-full resize-none border border-white/20 bg-transparent px-3 py-2 text-base focus-visible:ring-2 focus-visible:outline-none sm:text-sm"
             />
 
             {error && (
