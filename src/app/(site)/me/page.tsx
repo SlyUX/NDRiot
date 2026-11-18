@@ -1236,5 +1236,11 @@ export default async function AccountPage({
   // Key by view so switching sections remounts the wrapper — React otherwise
   // updates the <Section> in place (same type/position), and a CSS enter
   // animation only plays on mount, so the transition wouldn't replay view→view.
-  return <div key={view ?? "bunker"}>{viewContent}</div>;
+  // pb clears the fixed mobile user-nav island — the footer carries this on every
+  // other page, but the footer is hidden here (app layer), so the page owns it.
+  return (
+    <div key={view ?? "bunker"} className="pb-28 md:pb-0">
+      {viewContent}
+    </div>
+  );
 }

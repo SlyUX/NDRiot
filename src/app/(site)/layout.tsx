@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Rss } from 'lucide-react'
 
+import { FooterGate } from '@/components/footer-gate'
 import { Logo } from '@/components/logo'
 import { MainNav } from '@/components/main-nav'
 import { SiteHeader } from '@/components/site-header'
@@ -191,6 +192,10 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
 
       <main>{children}</main>
 
+      {/* Hidden on the app-layer dashboard (/me); the website footer is chrome
+          for the content pages. On /me, the mobile-island clearance that this
+          pb normally provides is carried by the page itself instead. */}
+      <FooterGate>
       {/* pb clears the fixed mobile island at the bottom of the page (signed in). */}
       <footer
         className={cn(
@@ -290,6 +295,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
           </div>
         </div>
       </footer>
+      </FooterGate>
     </>
   )
 }
