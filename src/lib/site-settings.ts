@@ -466,6 +466,9 @@ export type MessagingSettings = {
   prefCollabLabel: string;
   prefOnLabel: string;
   prefOffLabel: string;
+  /** /me Network view tab labels. */
+  tabConversations: string;
+  tabCollaborations: string;
 }
 
 export interface FaqItem {
@@ -1663,6 +1666,8 @@ const DEFAULTS: SiteSettings = {
     prefCollabLabel: "Email me about collaboration requests",
     prefOnLabel: "On",
     prefOffLabel: "Off",
+    tabConversations: "Conversations",
+    tabCollaborations: "Collaborations",
   },
   home: {
     genresHeading: "Browse by genre",

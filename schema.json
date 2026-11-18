@@ -7894,6 +7894,20 @@
                 "type": "string"
               },
               "optional": true
+            },
+            "tabConversations": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "tabCollaborations": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
             }
           }
         },

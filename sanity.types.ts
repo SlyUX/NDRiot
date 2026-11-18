@@ -1270,6 +1270,8 @@ export type SiteSettings = {
     prefCollabLabel?: string;
     prefOnLabel?: string;
     prefOffLabel?: string;
+    tabConversations?: string;
+    tabCollaborations?: string;
   };
   hero?: {
     background?: ImageWithAlt;

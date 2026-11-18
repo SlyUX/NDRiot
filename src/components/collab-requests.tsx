@@ -63,68 +63,49 @@ export function CollabRequests({
       <span className="font-bold">{name}</span>
     )
 
+  if (incoming.length === 0 && sent.length === 0) {
+    return <p className="text-muted-foreground text-sm">{copy.incomingEmpty}</p>
+  }
+
+  // One unified list — incoming (respond) then sent (status). The tab is the
+  // heading; the explanatory intro moved to the (ⓘ) tooltip beside it.
   return (
-    <div className="space-y-10">
-      <section>
-        <h3 className="text-xl font-black tracking-tight uppercase">
-          {copy.incomingHeading}
-        </h3>
-        <p className="text-muted-foreground mt-1.5 max-w-prose text-sm">
-          {copy.incomingIntro}
-        </p>
-
-        {incoming.length === 0 ? (
-          <p className="text-muted-foreground mt-4 text-sm">{copy.incomingEmpty}</p>
-        ) : (
-          <ul className="mt-4">
-            {incoming.map((item) => (
-              <IncomingRow
-                key={item.fromId}
-                item={item}
-                copy={copy}
-                responseLabel={responseLabel}
-                nameNode={nameNode(item.name, item.slug)}
-              />
-            ))}
-          </ul>
-        )}
-      </section>
-
-      {sent.length > 0 && (
-        <section>
-          <h3 className="text-xl font-black tracking-tight uppercase">
-            {copy.sentHeading}
-          </h3>
-          <ul className="mt-4">
-            {sent.map((item, i) => (
-              <li
-                key={i}
-                className="border-border flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b py-3 text-sm"
-              >
-                <div>
-                  <span>
-                    {nameNode(item.name, item.slug)}{' '}
-                    <span className="text-muted-foreground">
-                      · {copy.incomingVerb} {item.genre}
-                    </span>
-                  </span>
-                  {item.createdAt && (
-                    <span className="text-muted-foreground mt-0.5 block text-xs">
-                      {copy.requestedPrefix} {formatDate(item.createdAt)}
-                    </span>
-                  )}
-                </div>
-                <span className="text-muted-foreground text-xs tracking-wide uppercase">
-                  {item.status === 'pending'
-                    ? copy.sentPendingLabel
-                    : `${copy.sentRespondedPrefix} ${item.response ?? ''}`.trim()}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-    </div>
+    <ul>
+      {incoming.map((item) => (
+        <IncomingRow
+          key={item.fromId}
+          item={item}
+          copy={copy}
+          responseLabel={responseLabel}
+          nameNode={nameNode(item.name, item.slug)}
+        />
+      ))}
+      {sent.map((item, i) => (
+        <li
+          key={`sent-${i}`}
+          className="border-border flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b py-3 text-sm"
+        >
+          <div>
+            <span>
+              {nameNode(item.name, item.slug)}{' '}
+              <span className="text-muted-foreground">
+                · {copy.incomingVerb} {item.genre}
+              </span>
+            </span>
+            {item.createdAt && (
+              <span className="text-muted-foreground mt-0.5 block text-xs">
+                {copy.requestedPrefix} {formatDate(item.createdAt)}
+              </span>
+            )}
+          </div>
+          <span className="text-muted-foreground text-xs tracking-wide uppercase">
+            {item.status === 'pending'
+              ? copy.sentPendingLabel
+              : `${copy.sentRespondedPrefix} ${item.response ?? ''}`.trim()}
+          </span>
+        </li>
+      ))}
+    </ul>
   )
 }
 

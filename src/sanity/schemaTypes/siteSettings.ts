@@ -738,6 +738,8 @@ export default defineType({
         defineField({ name: "prefCollabLabel", title: "/me notifications — collaboration toggle", type: "string" }),
         defineField({ name: "prefOnLabel", title: "/me notifications — on", type: "string" }),
         defineField({ name: "prefOffLabel", title: "/me notifications — off", type: "string" }),
+        defineField({ name: "tabConversations", title: "/me — Conversations tab label", type: "string" }),
+        defineField({ name: "tabCollaborations", title: "/me — Collaborations tab label", type: "string" }),
       ],
     }),
 

@@ -9,6 +9,7 @@ import {
   type IncomingCollab,
   type SentCollab,
 } from "@/components/collab-requests";
+import { CollabInfoTooltip } from "@/components/collab-info-tooltip";
 import {
   MessageRequests,
   type IncomingMessageRequest,
@@ -634,6 +635,39 @@ export default async function AccountPage({
   // follows, derived — read-only tiles marked with the handshake) then Followed
   // Creators (their own follows, removable).
   const col3Tabs: PanelTab[] = [];
+  // Creator-only inbox tabs, first (Conversations is the default): message
+  // threads + incoming requests, then the collaboration handshakes.
+  if (isCreator) {
+    col3Tabs.push({
+      id: "conversations",
+      label: settings.messaging.tabConversations,
+      content: (
+        <>
+          <MessageRequests incoming={incomingMessages} copy={settings.messaging} />
+          <div className="mt-8">
+            <MessageThreads
+              conversations={conversations}
+              awaiting={awaitingMessages}
+              meId={myCreatorId}
+              copy={settings.messaging}
+            />
+          </div>
+        </>
+      ),
+    });
+    col3Tabs.push({
+      id: "collaborations",
+      label: settings.messaging.tabCollaborations,
+      action: <CollabInfoTooltip text={settings.collab.incomingIntro} />,
+      content: (
+        <CollabRequests
+          incoming={incomingCollab}
+          sent={sentCollab}
+          copy={settings.collab}
+        />
+      ),
+    });
+  }
   if (cosigns.length > 0) {
     col3Tabs.push({
       id: "cosigns",
@@ -984,30 +1018,6 @@ export default async function AccountPage({
       innerClassName="view-enter"
     >
       {col3Tabs.length > 0 && <TabbedPanel tabs={col3Tabs} />}
-      {isCreator && (
-        <div className={col3Tabs.length > 0 ? "mt-10" : ""}>
-          <CollabRequests
-            incoming={incomingCollab}
-            sent={sentCollab}
-            copy={settings.collab}
-          />
-        </div>
-      )}
-      {isCreator && (
-        <>
-          <div className="mt-10">
-            <MessageRequests incoming={incomingMessages} copy={settings.messaging} />
-          </div>
-          <div className="mt-10">
-            <MessageThreads
-              conversations={conversations}
-              awaiting={awaitingMessages}
-              meId={myCreatorId}
-              copy={settings.messaging}
-            />
-          </div>
-        </>
-      )}
     </Section>
   );
 
