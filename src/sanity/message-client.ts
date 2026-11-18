@@ -46,6 +46,13 @@ function threadId(a: string, b: string): string {
   return `thread.${x}__${y}`.replace(/[^a-zA-Z0-9._-]/g, '-')
 }
 
+/** Separate id lane for a collaboration chat, so a pair can have both a general
+ *  message thread AND a dedicated collab chat without colliding. */
+function collabThreadId(a: string, b: string): string {
+  const [x, y] = [a, b].sort()
+  return `thread.collab.${x}__${y}`.replace(/[^a-zA-Z0-9._-]/g, '-')
+}
+
 /** The thread for this pair, or null. Drives the profile button + thread view. */
 export async function getThread(a: string, b: string): Promise<MessageThread | null> {
   if (!a || !b) return null
@@ -136,6 +143,48 @@ export async function createThreadRequest(input: {
     const message = cause instanceof Error ? cause.message : String(cause)
     if (/already exists|conflict|409/i.test(message)) return 'exists'
     console.error('[message] createThreadRequest failed', cause)
+    return 'error'
+  }
+}
+
+/**
+ * Open the dedicated collaboration chat when a collab request is accepted. An
+ * active, collab-origin thread in its own id lane, seeded empty (the genre shows
+ * as the chat's context). `create` makes it idempotent — a second accept no-ops.
+ */
+export async function createCollabThread(input: {
+  aId: string
+  aName: string
+  bId: string
+  bName: string
+  genre: string
+  createdAt: string
+}): Promise<'created' | 'exists' | 'error'> {
+  const { aId, bId } = input
+  if (!aId || !bId || aId === bId) return 'error'
+  const nameOf: Record<string, string> = { [aId]: input.aName, [bId]: input.bName }
+  const participantIds = [aId, bId].sort()
+  const participantNames = participantIds.map((id) => nameOf[id] ?? '')
+  try {
+    await client().create({
+      _id: collabThreadId(aId, bId),
+      _type: 'messageThread',
+      status: 'active',
+      origin: 'collab',
+      collabGenre: input.genre,
+      participantIds,
+      participantNames,
+      initiatedById: aId,
+      messages: [],
+      createdAt: input.createdAt,
+      respondedAt: input.createdAt,
+      lastMessageAt: input.createdAt,
+    })
+    return 'created'
+  } catch (cause) {
+    const message = cause instanceof Error ? cause.message : String(cause)
+    if (/already exists|conflict|409/i.test(message)) return 'exists'
+    console.error('[message] createCollabThread failed', cause)
     return 'error'
   }
 }

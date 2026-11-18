@@ -38,6 +38,8 @@ export type Conversation = {
   otherAvatarUrl: string | null
   /** The last message's body, for the row preview. */
   preview: string | null
+  /** Optional context line for a collab chat, e.g. "Collaborating on Sci-Fi". */
+  contextLabel: string | null
   messages: ConversationMessage[]
   lastMessageAt: string | null
   /** The other person has posted since this creator last read the thread. */
@@ -62,25 +64,28 @@ export function MessageThreads({
   awaiting,
   meId,
   copy,
+  heading,
 }: {
   conversations: Conversation[]
   awaiting: AwaitingRow[]
   meId: string
   copy: MessagingSettings
+  /** Optional section heading; omitted when a tab already labels the panel. */
+  heading?: string
 }) {
   const [openId, setOpenId] = useState<string | null>(null)
   const [locallyRead, setLocallyRead] = useState<Set<string>>(new Set())
 
   return (
     <section>
-      <h3 className="text-xl font-black tracking-tight uppercase">
-        {copy.threadsHeading}
-      </h3>
+      {heading && (
+        <h3 className="text-xl font-black tracking-tight uppercase">{heading}</h3>
+      )}
 
       {conversations.length === 0 && awaiting.length === 0 ? (
-        <p className="text-muted-foreground mt-4 text-sm">{copy.threadsEmpty}</p>
+        <p className="text-muted-foreground text-sm">{copy.threadsEmpty}</p>
       ) : (
-        <ul className="mt-4">
+        <ul className={heading ? 'mt-4' : ''}>
           {conversations.map((c) => {
             const isOpen = openId === c.threadDocId
             const showUnread = c.unread && !locallyRead.has(c.threadDocId)
@@ -121,9 +126,9 @@ export function MessageThreads({
                         />
                       )}
                     </span>
-                    {c.preview && (
+                    {(c.preview ?? c.contextLabel) && (
                       <span className="text-muted-foreground block truncate text-xs">
-                        {c.preview}
+                        {c.preview ?? c.contextLabel}
                       </span>
                     )}
                   </span>
@@ -268,6 +273,11 @@ function ConversationPanel({
 
   return (
     <div className="pb-4">
+      {conversation.contextLabel && (
+        <p className="text-muted-foreground mb-2 text-xs font-bold tracking-wide uppercase">
+          {conversation.contextLabel}
+        </p>
+      )}
       <div
         ref={scrollRef}
         className="bg-card max-h-[50vh] space-y-2 overflow-y-auto p-3"

@@ -674,6 +674,7 @@ export default defineType({
         defineField({ name: "sentPendingLabel", title: "/me — sent, awaiting reply", type: "string" }),
         defineField({ name: "sentRespondedPrefix", title: "/me — sent, prefix before their reply", type: "string" }),
         defineField({ name: "sentEmpty", title: "/me — no sent requests", type: "string" }),
+        defineField({ name: "viewAllRequestsLabel", title: "/me — view all (older) requests link", type: "string" }),
       ],
     }),
 
@@ -740,6 +741,7 @@ export default defineType({
         defineField({ name: "prefOffLabel", title: "/me notifications — off", type: "string" }),
         defineField({ name: "tabConversations", title: "/me — Conversations tab label", type: "string" }),
         defineField({ name: "tabCollaborations", title: "/me — Collaborations tab label", type: "string" }),
+        defineField({ name: "collabChatLabel", title: "Collaboration chat — context line", type: "string", description: "Shown atop an accepted-collaboration chat. Token: {genre}." }),
       ],
     }),
 

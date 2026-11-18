@@ -2109,6 +2109,30 @@
         },
         "optional": true
       },
+      "origin": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "union",
+          "of": [
+            {
+              "type": "string",
+              "value": "message"
+            },
+            {
+              "type": "string",
+              "value": "collab"
+            }
+          ]
+        },
+        "optional": true
+      },
+      "collabGenre": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
       "closedById": {
         "type": "objectAttribute",
         "value": {
@@ -7521,6 +7545,13 @@
                 "type": "string"
               },
               "optional": true
+            },
+            "viewAllRequestsLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
             }
           }
         },
@@ -7903,6 +7934,13 @@
               "optional": true
             },
             "tabCollaborations": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "collabChatLabel": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

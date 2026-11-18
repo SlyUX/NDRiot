@@ -377,6 +377,8 @@ export type MessageThread = {
   participantIds?: Array<string>;
   participantNames?: Array<string>;
   initiatedById?: string;
+  origin?: "message" | "collab";
+  collabGenre?: string;
   closedById?: string;
   blockedById?: string;
   introNote?: string;
@@ -1216,6 +1218,7 @@ export type SiteSettings = {
     sentPendingLabel?: string;
     sentRespondedPrefix?: string;
     sentEmpty?: string;
+    viewAllRequestsLabel?: string;
   };
   messaging?: {
     requestButtonLabel?: string;
@@ -1272,6 +1275,7 @@ export type SiteSettings = {
     prefOffLabel?: string;
     tabConversations?: string;
     tabCollaborations?: string;
+    collabChatLabel?: string;
   };
   hero?: {
     background?: ImageWithAlt;

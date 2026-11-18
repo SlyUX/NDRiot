@@ -401,6 +401,7 @@ export type CollabSettings = {
   sentPendingLabel: string;
   sentRespondedPrefix: string;
   sentEmpty: string;
+  viewAllRequestsLabel: string;
 }
 
 /** Creator-to-creator messaging — the Chat Request button + dialog. Parallel to
@@ -469,6 +470,8 @@ export type MessagingSettings = {
   /** /me Network view tab labels. */
   tabConversations: string;
   tabCollaborations: string;
+  /** The context line atop an accepted-collaboration chat. Token: {genre}. */
+  collabChatLabel: string;
 }
 
 export interface FaqItem {
@@ -1141,7 +1144,9 @@ const DEFAULTS: SiteSettings = {
       "",
       "Good news — you and {other} both want to collaborate on {genre}.",
       "",
-      "Just reply to this email to start the conversation. Your reply goes straight to {other}; your address stays private until you send it.",
+      "Your dedicated collaboration chat is ready on ND Riot — open it under Network → Collaborations.",
+      "",
+      "For large files or anything heavy, you can reply to this email instead; your reply goes straight to {other}, and your address stays private until you send it.",
       "",
       "Have fun making something together.",
       "",
@@ -1607,6 +1612,7 @@ const DEFAULTS: SiteSettings = {
     sentPendingLabel: "Awaiting a reply",
     sentRespondedPrefix: "They responded:",
     sentEmpty: "You haven’t sent any collaboration requests yet.",
+    viewAllRequestsLabel: "View all requests",
   },
   messaging: {
     requestButtonLabel: "Chat Request",
@@ -1668,6 +1674,7 @@ const DEFAULTS: SiteSettings = {
     prefOffLabel: "Off",
     tabConversations: "Conversations",
     tabCollaborations: "Collaborations",
+    collabChatLabel: "Collaborating on {genre}",
   },
   home: {
     genresHeading: "Browse by genre",

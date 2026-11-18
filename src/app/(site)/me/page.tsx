@@ -69,6 +69,7 @@ import {
 } from "@/lib/queries";
 import { appearanceToFeedItem, mergeFeed } from "@/lib/feed-mappers";
 import { getSiteSettings } from "@/lib/site-settings";
+import { daysAgoISO } from "@/lib/utils";
 import { ownedDocIds } from "@/sanity/ownership-client";
 import { followSignal, mutualCosignIds } from "@/sanity/cosign-client";
 import { mutedThreadIds, readStamps, threadsFor } from "@/sanity/message-client";
@@ -339,9 +340,12 @@ export default async function AccountPage({
     const p = messageById.get(id)?.photo;
     return p ? urlFor(p).width(96).height(96).fit("crop").url() : null;
   };
+  // General chats vs. accepted-collaboration chats — separate id lanes / tabs.
+  const generalThreads = messageThreadsRaw.filter((t) => t.origin !== "collab");
+  const collabThreadsRaw = messageThreadsRaw.filter((t) => t.origin === "collab");
 
   const incomingMessages: IncomingMessageRequest[] = await Promise.all(
-    messageThreadsRaw
+    generalThreads
       .filter((t) => t.status === "pending" && t.initiatedById !== myCreatorId)
       .map(async (t) => {
         const otherId = otherOf(t);
@@ -363,7 +367,7 @@ export default async function AccountPage({
   const msgMuted = messageThreadsRaw.length
     ? await mutedThreadIds(myCreatorId)
     : new Set<string>();
-  const conversations: Conversation[] = messageThreadsRaw
+  const conversations: Conversation[] = generalThreads
     .filter((t) => t.status === "active")
     .map((t) => {
       const otherId = otherOf(t);
@@ -373,6 +377,7 @@ export default async function AccountPage({
         otherSlug: messageById.get(otherId)?.slug ?? null,
         otherAvatarUrl: avatarOf(otherId),
         preview: (t.messages ?? []).at(-1)?.body ?? null,
+        contextLabel: null,
         messages: (t.messages ?? []).map((m) => ({
           key: m._key,
           fromId: m.fromId ?? "",
@@ -387,7 +392,7 @@ export default async function AccountPage({
       };
     });
 
-  const awaitingMessages: AwaitingRow[] = messageThreadsRaw
+  const awaitingMessages: AwaitingRow[] = generalThreads
     .filter((t) => t.status === "pending" && t.initiatedById === myCreatorId)
     .map((t) => {
       const otherId = otherOf(t);
@@ -398,6 +403,32 @@ export default async function AccountPage({
         createdAt: t.createdAt ?? null,
       };
     });
+
+  // Accepted-collaboration chats (reuse the conversation UI), tagged with genre.
+  const collabConversations: Conversation[] = collabThreadsRaw.map((t) => {
+    const otherId = otherOf(t);
+    return {
+      threadDocId: t._id,
+      otherName: messageById.get(otherId)?.name ?? "A creator",
+      otherSlug: messageById.get(otherId)?.slug ?? null,
+      otherAvatarUrl: avatarOf(otherId),
+      preview: (t.messages ?? []).at(-1)?.body ?? null,
+      contextLabel: t.collabGenre
+        ? settings.messaging.collabChatLabel.replace("{genre}", t.collabGenre)
+        : null,
+      messages: (t.messages ?? []).map((m) => ({
+        key: m._key,
+        fromId: m.fromId ?? "",
+        body: m.body ?? "",
+        createdAt: m.createdAt ?? null,
+      })),
+      lastMessageAt: t.lastMessageAt ?? null,
+      unread: Boolean(
+        t.lastMessageAt && t.lastMessageAt > (msgReads.get(t._id) ?? ""),
+      ),
+      muted: msgMuted.has(t._id),
+    };
+  });
 
   // Your Updates — the creator's own posts (updates targeting a creator or comic
   // they own), for the dashboard. Owner-editable, same as on the profile.
@@ -634,6 +665,8 @@ export default async function AccountPage({
   // Column three — the reader's relationships with creators: Cosigns (mutual
   // follows, derived — read-only tiles marked with the handshake) then Followed
   // Creators (their own follows, removable).
+  // Collab requests older than 7 days fold behind "view all" (server-computed).
+  const collabRecentSince = daysAgoISO(7);
   const col3Tabs: PanelTab[] = [];
   // Creator-only inbox tabs, first (Conversations is the default): message
   // threads + incoming requests, then the collaboration handshakes.
@@ -660,11 +693,22 @@ export default async function AccountPage({
       label: settings.messaging.tabCollaborations,
       action: <CollabInfoTooltip text={settings.collab.incomingIntro} />,
       content: (
-        <CollabRequests
-          incoming={incomingCollab}
-          sent={sentCollab}
-          copy={settings.collab}
-        />
+        <div className="space-y-8">
+          {collabConversations.length > 0 && (
+            <MessageThreads
+              conversations={collabConversations}
+              awaiting={[]}
+              meId={myCreatorId}
+              copy={settings.messaging}
+            />
+          )}
+          <CollabRequests
+            incoming={incomingCollab}
+            sent={sentCollab}
+            copy={settings.collab}
+            recentSince={collabRecentSince}
+          />
+        </div>
       ),
     });
   }

@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { ChevronDown } from 'lucide-react'
 
 import { respondCollab } from '@/app/actions/collab'
 import { Spinner } from '@/components/ui/spinner'
@@ -39,11 +40,16 @@ export function CollabRequests({
   incoming,
   sent,
   copy,
+  recentSince,
 }: {
   incoming: IncomingCollab[]
   sent: SentCollab[]
   copy: CollabSettings
+  /** ISO cutoff (server-computed) — requests older than this fold away. */
+  recentSince: string
 }) {
+  const [showAll, setShowAll] = useState(false)
+
   const responseLabel = (v: CollabResponseValue) =>
     v === 'accepted'
       ? copy.responseAcceptedLabel
@@ -63,49 +69,89 @@ export function CollabRequests({
       <span className="font-bold">{name}</span>
     )
 
-  if (incoming.length === 0 && sent.length === 0) {
+  // Accepted collaborations are chats now (shown above the requests), not rows.
+  const incomingReq = incoming.filter((i) => i.status !== 'accepted')
+  const sentReq = sent.filter((s) => s.status !== 'accepted')
+
+  if (incomingReq.length === 0 && sentReq.length === 0) {
     return <p className="text-muted-foreground text-sm">{copy.incomingEmpty}</p>
   }
 
-  // One unified list — incoming (respond) then sent (status). The tab is the
-  // heading; the explanatory intro moved to the (ⓘ) tooltip beside it.
-  return (
-    <ul>
-      {incoming.map((item) => (
-        <IncomingRow
-          key={item.fromId}
-          item={item}
-          copy={copy}
-          responseLabel={responseLabel}
-          nameNode={nameNode(item.name, item.slug)}
-        />
-      ))}
-      {sent.map((item, i) => (
-        <li
-          key={`sent-${i}`}
-          className="border-border flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b py-3 text-sm"
-        >
-          <div>
-            <span>
-              {nameNode(item.name, item.slug)}{' '}
-              <span className="text-muted-foreground">
-                · {copy.incomingVerb} {item.genre}
-              </span>
-            </span>
-            {item.createdAt && (
-              <span className="text-muted-foreground mt-0.5 block text-xs">
-                {copy.requestedPrefix} {formatDate(item.createdAt)}
-              </span>
-            )}
-          </div>
-          <span className="text-muted-foreground text-xs tracking-wide uppercase">
-            {item.status === 'pending'
-              ? copy.sentPendingLabel
-              : `${copy.sentRespondedPrefix} ${item.response ?? ''}`.trim()}
+  const isRecent = (createdAt: string | null) =>
+    Boolean(createdAt) && (createdAt as string) > recentSince
+
+  const recentIncoming = incomingReq.filter((i) => isRecent(i.createdAt))
+  const oldIncoming = incomingReq.filter((i) => !isRecent(i.createdAt))
+  const recentSent = sentReq.filter((s) => isRecent(s.createdAt))
+  const oldSent = sentReq.filter((s) => !isRecent(s.createdAt))
+  const oldCount = oldIncoming.length + oldSent.length
+
+  const incomingRow = (item: IncomingCollab) => (
+    <IncomingRow
+      key={item.fromId}
+      item={item}
+      copy={copy}
+      responseLabel={responseLabel}
+      nameNode={nameNode(item.name, item.slug)}
+    />
+  )
+
+  const sentRow = (item: SentCollab, key: string) => (
+    <li
+      key={key}
+      className="border-border flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b py-3 text-sm"
+    >
+      <div>
+        <span>
+          {nameNode(item.name, item.slug)}{' '}
+          <span className="text-muted-foreground">
+            · {copy.incomingVerb} {item.genre}
           </span>
-        </li>
-      ))}
-    </ul>
+        </span>
+        {item.createdAt && (
+          <span className="text-muted-foreground mt-0.5 block text-xs">
+            {copy.requestedPrefix} {formatDate(item.createdAt)}
+          </span>
+        )}
+      </div>
+      <span className="text-muted-foreground text-xs tracking-wide uppercase">
+        {item.status === 'pending'
+          ? copy.sentPendingLabel
+          : `${copy.sentRespondedPrefix} ${item.response ?? ''}`.trim()}
+      </span>
+    </li>
+  )
+
+  // Last 7 days visible; older folds behind a plain text link + caret.
+  return (
+    <div>
+      <ul>
+        {recentIncoming.map(incomingRow)}
+        {recentSent.map((item, i) => sentRow(item, `rs-${i}`))}
+      </ul>
+      {oldCount > 0 && (
+        <>
+          <button
+            type="button"
+            onClick={() => setShowAll((v) => !v)}
+            aria-expanded={showAll}
+            className="text-muted-foreground hover:text-primary focus-visible:ring-ring mt-3 inline-flex items-center gap-1 text-xs font-bold tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none"
+          >
+            <ChevronDown
+              aria-hidden="true"
+              className={cn('size-3.5 transition-transform', showAll && 'rotate-180')}
+            />
+            {copy.viewAllRequestsLabel}
+          </button>
+          {showAll && (
+            <ul className="mt-2">
+              {oldIncoming.map(incomingRow)}
+              {oldSent.map((item, i) => sentRow(item, `os-${i}`))}
+            </ul>
+          )}
+        </>
+      )}
+    </div>
   )
 }
 

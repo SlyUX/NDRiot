@@ -38,6 +38,12 @@ export function externalHref(url: string | null | undefined): string | undefined
  * string when the input isn't a valid absolute URL. Feeds the RSS block's
  * "Updates from {baseURL}" heading.
  */
+/** ISO timestamp for N days ago — for server-side recency cutoffs. (Kept out of
+ *  component bodies so the react purity rule doesn't flag the Date call.) */
+export function daysAgoISO(days: number): string {
+  return new Date(Date.now() - days * 24 * 3600 * 1000).toISOString()
+}
+
 export function hostLabel(raw: string | null | undefined): string {
   if (!raw) return ""
   try {

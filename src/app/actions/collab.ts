@@ -23,6 +23,7 @@ import {
   ownerEmailOf,
 } from "@/sanity/ownership-client";
 import { getReaderPrefs } from "@/sanity/reader-prefs-client";
+import { createCollabThread } from "@/sanity/message-client";
 import { getWriteClient } from "@/sanity/write-client";
 
 /**
@@ -217,6 +218,16 @@ export async function respondCollab(input: {
   // On "yes", introduce them by email — each reply-to the other, so an address
   // only surfaces when someone actually replies.
   if (option.accepts) {
+    // An accepted collaboration opens a dedicated in-app chat (its own id lane,
+    // so it coexists with any general message thread between the two).
+    await createCollabThread({
+      aId: input.fromId,
+      aName: fromCreator?.name ?? "A creator",
+      bId: toId,
+      bName: toCreator?.name ?? "A creator",
+      genre: result.genre ?? "",
+      createdAt: new Date().toISOString(),
+    });
     const intro = (you: string, other: string) =>
       fillTokens(n.collabIntroBody, {
         you,

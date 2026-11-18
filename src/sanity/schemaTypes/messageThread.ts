@@ -76,6 +76,29 @@ export default defineType({
       description: 'Which creator sent the original request.',
     }),
     defineField({
+      name: 'origin',
+      title: 'Origin',
+      type: 'string',
+      readOnly: true,
+      description:
+        'How the thread began — a direct message, or an accepted collaboration. Drives which /me tab it shows in.',
+      options: {
+        list: [
+          { title: 'Message', value: 'message' },
+          { title: 'Collaboration', value: 'collab' },
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'message',
+    }),
+    defineField({
+      name: 'collabGenre',
+      title: 'Collaboration genre',
+      type: 'string',
+      readOnly: true,
+      description: 'For a collaboration chat — the genre the collaboration is about.',
+    }),
+    defineField({
       name: 'closedById',
       title: 'Closed by (id)',
       type: 'string',
