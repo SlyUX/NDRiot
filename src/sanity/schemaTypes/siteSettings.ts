@@ -1751,9 +1751,15 @@ export default defineType({
         }),
         defineField({
           name: "accountFollowedCreatorsHeading",
-          title: "Dashboard — Followed Creators tab",
+          title: "Dashboard — Followed Creators heading",
           type: "string",
-          description: 'The tab showing every creator you follow (beside Cosigns) — e.g. "Followed Creators".',
+          description: 'The heading over every creator you follow (inside the Follows tab, beneath Cosigns) — e.g. "Followed Creators".',
+        }),
+        defineField({
+          name: "accountFollowsTabLabel",
+          title: "Dashboard — Follows tab label (combined Cosigns + Follows)",
+          type: "string",
+          description: 'The tab that holds both Cosigns and Followed Creators, each under its own heading — e.g. "Follows".',
         }),
         defineField({
           name: "accountRemoveLabel",

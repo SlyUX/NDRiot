@@ -712,12 +712,18 @@ export default async function AccountPage({
       ),
     });
   }
-  if (cosigns.length > 0) {
+  if (cosigns.length > 0 || savedCreators.length > 0) {
     col3Tabs.push({
-      id: "cosigns",
-      label: s.accountCosignsHeading,
+      id: "follows",
+      label: s.accountFollowsTabLabel,
       content: (
-        <ul className={tileGrid}>
+        <div className="space-y-8">
+          {cosigns.length > 0 && (
+            <div>
+              <SectionHeading as="h3" size="sm">
+                {s.accountCosignsHeading}
+              </SectionHeading>
+              <ul className={`${tileGrid} mt-3`}>
           {cosigns.map((c) => (
             <li key={c._id}>
               <Link
@@ -752,16 +758,15 @@ export default async function AccountPage({
               </Link>
             </li>
           ))}
-        </ul>
-      ),
-    });
-  }
-  if (savedCreators.length > 0) {
-    col3Tabs.push({
-      id: "followed-creators",
-      label: s.accountFollowedCreatorsHeading,
-      content: (
-        <ul className={tileGrid}>
+              </ul>
+            </div>
+          )}
+          {savedCreators.length > 0 && (
+            <div>
+              <SectionHeading as="h3" size="sm">
+                {s.accountFollowedCreatorsHeading}
+              </SectionHeading>
+              <ul className={`${tileGrid} mt-3`}>
           {savedCreators.map((c) => (
             <SavedItemRow
               key={c._id}
@@ -790,7 +795,10 @@ export default async function AccountPage({
               }
             />
           ))}
-        </ul>
+              </ul>
+            </div>
+          )}
+        </div>
       ),
     });
   }

@@ -1475,6 +1475,7 @@ export type SiteSettings = {
     accountSavedStripsHeading?: string;
     accountCosignsHeading?: string;
     accountFollowedCreatorsHeading?: string;
+    accountFollowsTabLabel?: string;
     accountRemoveLabel?: string;
     accountRemovedLabel?: string;
     accountUndoLabel?: string;

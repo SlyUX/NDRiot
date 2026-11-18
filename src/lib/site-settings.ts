@@ -805,6 +805,7 @@ export interface SiteSettings {
     accountSavedStripsHeading: string;
     accountCosignsHeading: string;
     accountFollowedCreatorsHeading: string;
+    accountFollowsTabLabel: string;
     accountRemoveLabel: string;
     accountRemovedLabel: string;
     accountUndoLabel: string;
@@ -1672,8 +1673,8 @@ const DEFAULTS: SiteSettings = {
     prefCollabLabel: "Email me about collaboration requests",
     prefOnLabel: "On",
     prefOffLabel: "Off",
-    tabConversations: "Conversations",
-    tabCollaborations: "Collaborations",
+    tabConversations: "Chat",
+    tabCollaborations: "Collab",
     collabChatLabel: "Collaborating on {genre}",
   },
   home: {
@@ -1868,6 +1869,7 @@ const DEFAULTS: SiteSettings = {
     accountSavedStripsHeading: "Saved Strips",
     accountCosignsHeading: "Cosigns",
     accountFollowedCreatorsHeading: "Followed Creators",
+    accountFollowsTabLabel: "Follows",
     accountRemoveLabel: "Remove",
     accountRemovedLabel: "Removed",
     accountUndoLabel: "Undo",

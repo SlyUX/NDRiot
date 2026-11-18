@@ -9292,6 +9292,13 @@
               },
               "optional": true
             },
+            "accountFollowsTabLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "accountRemoveLabel": {
               "type": "objectAttribute",
               "value": {
