@@ -265,12 +265,16 @@ function ConversationPanel({
     return () => clearInterval(id)
   }, [refresh])
 
+  const pinToBottom = useCallback(() => {
+    const el = scrollRef.current
+    if (el) el.scrollTop = el.scrollHeight
+  }, [])
+
   // Keep the pane pinned to the latest message (on open, each new one, and each
   // optimistic send).
   useEffect(() => {
-    const el = scrollRef.current
-    if (el) el.scrollTop = el.scrollHeight
-  }, [messages, outbox.length])
+    pinToBottom()
+  }, [messages, outbox.length, pinToBottom])
 
   // Keyboard-safe sheet on mobile. The full-screen sheet is `fixed inset-0`,
   // which tracks the LAYOUT viewport — and iOS doesn't shrink that when the
@@ -293,8 +297,10 @@ function ConversationPanel({
       sheet.style.height = `${vv.height}px`
       sheet.style.top = `${vv.offsetTop}px`
       sheet.style.bottom = 'auto'
-      const el = scrollRef.current
-      if (el) el.scrollTop = el.scrollHeight // keep the latest message in view
+      // Defer the pin to the next frame: the sheet just resized, and scrolling in
+      // the same tick pins against the PRE-resize height, which leaves the last
+      // message hidden under the keyboard. rAF lets layout settle first.
+      requestAnimationFrame(pinToBottom)
     }
 
     apply()
@@ -309,7 +315,7 @@ function ConversationPanel({
       sheet.style.top = ''
       sheet.style.bottom = ''
     }
-  }, [])
+  }, [pinToBottom])
 
   // Report snapshots the other person's most recent message, when there is one.
   const lastOtherKey =
@@ -474,6 +480,13 @@ function ConversationPanel({
             value={body}
             rows={2}
             onChange={(e) => setBody(e.target.value)}
+            onFocus={() => {
+              // Pin the last message just above the composer when the keyboard
+              // opens. The resize path handles most of it; the timeout also beats
+              // iOS's keyboard-open animation and the already-open case.
+              requestAnimationFrame(pinToBottom)
+              setTimeout(pinToBottom, 300)
+            }}
             onKeyDown={(e) => {
               // Shift+Enter sends; plain Enter is a newline (per request).
               if (e.key === 'Enter' && e.shiftKey) {
