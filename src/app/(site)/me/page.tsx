@@ -74,6 +74,7 @@ import { getReaderPrefs } from "@/sanity/reader-prefs-client";
 import { incomingRequests, sentRequests } from "@/sanity/collab-client";
 import { followerCount, savedItems } from "@/sanity/reader-client";
 import { urlFor } from "@/sanity/image";
+import { messageImageUrl } from "@/lib/messages";
 import type {
   BookSummary,
   ConventionSummary,
@@ -364,6 +365,24 @@ export default async function AccountPage({
   const msgMuted = messageThreadsRaw.length
     ? await mutedThreadIds(myCreatorId)
     : new Set<string>();
+
+  // Shared message mappers (general + collab threads use the same shape). The
+  // preview falls back to a photo label when the last message is image-only.
+  type RawThread = (typeof messageThreadsRaw)[number];
+  const previewOf = (t: RawThread): string | null => {
+    const last = (t.messages ?? []).at(-1);
+    if (!last) return null;
+    return last.body || (last.image ? settings.messaging.imageSentLabel : null);
+  };
+  const mapMessages = (t: RawThread) =>
+    (t.messages ?? []).map((m) => ({
+      key: m._key,
+      fromId: m.fromId ?? "",
+      body: m.body ?? "",
+      imageUrl: messageImageUrl(m.image),
+      createdAt: m.createdAt ?? null,
+    }));
+
   const conversations: Conversation[] = generalThreads
     .filter((t) => t.status === "active")
     .map((t) => {
@@ -373,14 +392,9 @@ export default async function AccountPage({
         otherName: messageById.get(otherId)?.name ?? "A creator",
         otherSlug: messageById.get(otherId)?.slug ?? null,
         otherAvatarUrl: avatarOf(otherId),
-        preview: (t.messages ?? []).at(-1)?.body ?? null,
+        preview: previewOf(t),
         contextLabel: null,
-        messages: (t.messages ?? []).map((m) => ({
-          key: m._key,
-          fromId: m.fromId ?? "",
-          body: m.body ?? "",
-          createdAt: m.createdAt ?? null,
-        })),
+        messages: mapMessages(t),
         lastMessageAt: t.lastMessageAt ?? null,
         unread: Boolean(
           t.lastMessageAt && t.lastMessageAt > (msgReads.get(t._id) ?? ""),
@@ -409,16 +423,11 @@ export default async function AccountPage({
       otherName: messageById.get(otherId)?.name ?? "A creator",
       otherSlug: messageById.get(otherId)?.slug ?? null,
       otherAvatarUrl: avatarOf(otherId),
-      preview: (t.messages ?? []).at(-1)?.body ?? null,
+      preview: previewOf(t),
       contextLabel: t.collabGenre
         ? settings.messaging.collabChatLabel.replace("{genre}", t.collabGenre)
         : null,
-      messages: (t.messages ?? []).map((m) => ({
-        key: m._key,
-        fromId: m.fromId ?? "",
-        body: m.body ?? "",
-        createdAt: m.createdAt ?? null,
-      })),
+      messages: mapMessages(t),
       lastMessageAt: t.lastMessageAt ?? null,
       unread: Boolean(
         t.lastMessageAt && t.lastMessageAt > (msgReads.get(t._id) ?? ""),

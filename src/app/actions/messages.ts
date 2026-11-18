@@ -22,7 +22,9 @@ import {
   respondToThread,
   setMuted,
   threadId,
+  uploadMessageImage,
 } from "@/sanity/message-client";
+import { messageImageUrl } from "@/lib/messages";
 import { getWriteClient } from "@/sanity/write-client";
 
 /**
@@ -243,6 +245,53 @@ export async function sendMessage(input: {
   return { ok: true };
 }
 
+/**
+ * Send a message with a shared image (optional caption). Taken as FormData so the
+ * downscaled File can ride along; the client caps it at 380×1080 before upload,
+ * which keeps it well under the server-action body limit. The image is stored in
+ * the private dataset (moderatable like the text), and surfaces in-app only.
+ */
+export async function sendImageMessage(formData: FormData): Promise<MessageResult> {
+  const self = await me();
+  if ("error" in self) return { ok: false, error: self.error };
+
+  const threadDocId = String(formData.get("threadDocId") ?? "");
+  if (!threadDocId) return { ok: false, error: "This conversation isn’t yours." };
+
+  const caption = String(formData.get("caption") ?? "").trim();
+  if (caption.length > MAX_BODY)
+    return { ok: false, error: "That message is too long." };
+
+  const file = formData.get("image");
+  if (!(file instanceof File) || file.size === 0)
+    return { ok: false, error: "Add an image first." };
+
+  if (await rateLimited("message-send"))
+    return { ok: false, error: "You’re sending very quickly — give it a moment." };
+
+  const uploaded = await uploadMessageImage(file, `message-${Date.now()}.jpg`);
+  if ("error" in uploaded) return { ok: false, error: uploaded.error };
+
+  const res = await appendMessage({
+    threadDocId,
+    fromId: self.id,
+    fromName: (await creatorName(self.id)) ?? "A creator",
+    body: caption,
+    createdAt: new Date().toISOString(),
+    imageAssetId: uploaded.assetId,
+  });
+  if (res === "not-participant")
+    return { ok: false, error: "This conversation isn’t yours." };
+  if (res === "not-active")
+    return { ok: false, error: "This conversation isn’t open." };
+  if (res === "error")
+    return { ok: false, error: "Something went wrong — please try again." };
+
+  await markThreadRead(self.id, threadDocId);
+  revalidatePath("/me");
+  return { ok: true };
+}
+
 /** Advance this creator's read marker — called when they open a conversation. */
 export async function markRead(input: { threadDocId: string }): Promise<void> {
   const self = await me();
@@ -256,6 +305,7 @@ export type ThreadPoll = {
     key: string;
     fromId: string;
     body: string;
+    imageUrl: string | null;
     createdAt: string | null;
   }[];
 };
@@ -278,6 +328,7 @@ export async function fetchThreadMessages(input: {
       key: m._key,
       fromId: m.fromId ?? "",
       body: m.body ?? "",
+      imageUrl: messageImageUrl(m.image),
       createdAt: m.createdAt ?? null,
     })),
   };

@@ -4,6 +4,8 @@ import { createClient, type SanityClient } from 'next-sanity'
 
 import type { MessageReport, MessageThread } from '../../sanity.types'
 
+import { uploadImageFile, type UploadResult } from '@/lib/intake/uploads'
+
 import { apiVersion, projectId } from './env'
 
 /**
@@ -39,6 +41,20 @@ function client(): SanityClient {
 }
 
 type MessageItem = NonNullable<MessageThread['messages']>[number]
+
+/**
+ * Upload a shared message image into the PRIVATE `ndriot_auth` dataset (where the
+ * threads live — assets are per-dataset). The file is already downscaled to
+ * 380×1080 client-side; this validates type/size server-side and returns the
+ * bare asset id. Non-fatal by contract (returns `{ error }`), like the intake
+ * uploader it delegates to.
+ */
+export async function uploadMessageImage(
+  file: File,
+  filename: string,
+): Promise<UploadResult> {
+  return uploadImageFile(file, filename, client())
+}
 
 /** Deterministic, _id-safe id for the unordered pair {a, b}. */
 function threadId(a: string, b: string): string {
@@ -261,6 +277,8 @@ export async function appendMessage(input: {
   fromName: string
   body: string
   createdAt: string
+  /** Optional shared image — a bare asset id already uploaded to this dataset. */
+  imageAssetId?: string | null
 }): Promise<SendResult> {
   try {
     const thread = await client().fetch<MessageThread | null>(
@@ -278,6 +296,14 @@ export async function appendMessage(input: {
       fromName: input.fromName,
       body: input.body,
       createdAt: input.createdAt,
+      ...(input.imageAssetId
+        ? {
+            image: {
+              _type: 'image' as const,
+              asset: { _type: 'reference' as const, _ref: input.imageAssetId },
+            },
+          }
+        : {}),
     }
     await client()
       .patch(input.threadDocId)

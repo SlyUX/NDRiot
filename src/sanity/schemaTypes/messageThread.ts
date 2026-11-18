@@ -135,10 +135,22 @@ export default defineType({
             defineField({ name: 'fromId', title: 'From (id)', type: 'string' }),
             defineField({ name: 'fromName', title: 'From', type: 'string' }),
             defineField({ name: 'body', title: 'Body', type: 'text', rows: 2 }),
+            defineField({
+              name: 'image',
+              title: 'Image',
+              type: 'image',
+              description:
+                'An optional shared image, downsized to 380×1080 on upload. Stored in this private dataset so it can be reviewed here like the text.',
+            }),
             defineField({ name: 'createdAt', title: 'Sent', type: 'datetime' }),
           ],
           preview: {
-            select: { title: 'fromName', subtitle: 'body' },
+            select: { title: 'fromName', subtitle: 'body', media: 'image' },
+            prepare: ({ title, subtitle, media }) => ({
+              title,
+              subtitle: subtitle || (media ? '📷 Image' : ''),
+              media,
+            }),
           },
         }),
       ],

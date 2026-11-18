@@ -716,6 +716,7 @@ export default defineType({
         defineField({ name: "sendLabel", title: "Conversation — send button", type: "string" }),
         defineField({ name: "sendHint", title: "Conversation — send hint (near the button)", type: "string" }),
         defineField({ name: "sendingLabel", title: "Conversation — sending state (on the message while it sends)", type: "string" }),
+        defineField({ name: "imageSentLabel", title: "Conversation list — preview for an image-only message", type: "string" }),
         defineField({ name: "leaveLabel", title: "Conversation — leave button", type: "string" }),
         defineField({ name: "leaveConfirm", title: "Conversation — leave confirmation", type: "text", rows: 2 }),
         defineField({ name: "blockLabel", title: "Conversation — block button", type: "string" }),

@@ -441,6 +441,8 @@ export type MessagingSettings = {
   sendHint: string;
   /** The reduced-opacity state on a message bubble while it's being sent. */
   sendingLabel: string;
+  /** Conversation-list preview when the last message is an image with no text. */
+  imageSentLabel: string;
   /** Conversation actions. */
   leaveLabel: string;
   leaveConfirm: string;
@@ -1650,6 +1652,7 @@ const DEFAULTS: SiteSettings = {
     sendLabel: "Send",
     sendHint: "Shift + Enter to send",
     sendingLabel: "Sending…",
+    imageSentLabel: "Photo",
     leaveLabel: "Leave",
     leaveConfirm:
       "Leave this conversation? It closes for both of you and can’t be reopened.",

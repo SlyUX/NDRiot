@@ -1,9 +1,26 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+  type ChangeEvent,
+} from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Bell, BellOff, Flag, LogOut, Send, ShieldX } from 'lucide-react'
+import {
+  ArrowLeft,
+  Bell,
+  BellOff,
+  Flag,
+  ImagePlus,
+  LogOut,
+  Send,
+  ShieldX,
+  X,
+} from 'lucide-react'
 
 import {
   blockMessage,
@@ -11,9 +28,15 @@ import {
   markRead,
   optOutMessage,
   reportMessage,
+  sendImageMessage,
   sendMessage,
   toggleMute,
 } from '@/app/actions/messages'
+import {
+  ALLOWED_IMAGE_TYPES,
+  downscaleToBox,
+  MAX_PICK_BYTES,
+} from '@/lib/intake/downscale'
 import {
   Dialog,
   DialogContent,
@@ -33,6 +56,8 @@ export type ConversationMessage = {
   key: string
   fromId: string
   body: string
+  /** A shared image's display URL (already capped at 380×1080), or null. */
+  imageUrl: string | null
   createdAt: string | null
 }
 export type Conversation = {
@@ -55,6 +80,22 @@ export type AwaitingRow = {
   name: string
   slug: string | null
   createdAt: string | null
+}
+
+/**
+ * A message's sent timestamp, e.g. "11/18/2026 @11:42am" — date + lowercase
+ * 12-hour time in the viewer's local zone. Pure (derives only from its arg), and
+ * the panel renders client-side (the sheet opens on interaction), so there's no
+ * SSR/hydration zone mismatch.
+ */
+function formatMessageTime(iso: string): string {
+  const d = new Date(iso)
+  const date = d.toLocaleDateString('en-US') // 11/18/2026
+  const time = d
+    .toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+    .replace(/\s/g, '')
+    .toLowerCase() // 11:42am
+  return `${date} @${time}`
 }
 
 /**
@@ -222,14 +263,38 @@ function ConversationPanel({
   const [messages, setMessages] = useState(conversation.messages)
   // Optimistic sends: shown as reduced-opacity bubbles until the server confirms.
   // On failure the bubble is removed and its text is returned to the composer.
-  const [outbox, setOutbox] = useState<{ key: string; body: string }[]>([])
+  // `previewUrl` is a local object URL for an image send (null for text).
+  const [outbox, setOutbox] = useState<
+    { key: string; body: string; previewUrl: string | null }[]
+  >([])
+  // A chosen-but-not-yet-sent image: the downscaled File + its local preview URL.
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
+  const [pendingPreview, setPendingPreview] = useState<string | null>(null)
+  // Keys of images that failed to load — shown as a quiet "Photo" label instead
+  // of a broken-image box (e.g. a preview URL revoked as the sheet closes).
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set())
+  const markImageFailed = (key: string) =>
+    setFailedImages((s) => (s.has(key) ? s : new Set(s).add(key)))
   const [muted, setMutedState] = useState(conversation.muted)
   const [pending, startTransition] = useTransition()
   const router = useRouter()
   const lastKeyRef = useRef<string | null>(
     conversation.messages[conversation.messages.length - 1]?.key ?? null,
   )
+  // How many of MY image messages the server has confirmed — the optimistic
+  // image bubbles are reconciled by this count (images have no body to match on).
+  const myImageCountRef = useRef(
+    conversation.messages.filter((m) => m.fromId === meId && m.imageUrl).length,
+  )
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const objectUrlsRef = useRef<string[]>([])
   const scrollRef = useRef<HTMLDivElement>(null)
+
+  // Free the local image preview URLs when the conversation closes.
+  useEffect(() => {
+    const urls = objectUrlsRef.current
+    return () => urls.forEach((u) => URL.revokeObjectURL(u))
+  }, [])
 
   // Fetch the latest messages and apply them only when a NEW one has arrived, so
   // an idle poll never re-renders the composer. After mount the poll owns this
@@ -245,11 +310,30 @@ function ConversationPanel({
     const last = res.messages[res.messages.length - 1]
     if (last && last.key !== lastKeyRef.current) {
       lastKeyRef.current = last.key
+      // Text bubbles reconcile by body; image bubbles by count (no body to match).
       const serverMine = new Set(
         res.messages.filter((m) => m.fromId === meId).map((m) => m.body),
       )
+      const serverMyImages = res.messages.filter(
+        (m) => m.fromId === meId && m.imageUrl,
+      ).length
+      let dropImages = Math.max(0, serverMyImages - myImageCountRef.current)
+      myImageCountRef.current = serverMyImages
       setMessages(res.messages)
-      setOutbox((o) => o.filter((m) => !serverMine.has(m.body)))
+      setOutbox((o) =>
+        o.filter((m) => {
+          if (m.previewUrl) {
+            // An optimistic image bubble: drop the oldest ones the server now has.
+            if (dropImages > 0) {
+              dropImages--
+              return false
+            }
+            return true
+          }
+          // A text bubble: drop once its text is on the server.
+          return !serverMine.has(m.body)
+        }),
+      )
       if (last.fromId !== meId) void markRead({ threadDocId: conversation.threadDocId })
     }
   }, [conversation.threadDocId, meId])
@@ -334,12 +418,48 @@ function ConversationPanel({
   const lastOtherKey =
     [...messages].reverse().find((m) => m.fromId !== meId)?.key ?? ''
 
+  const newKey = () => `pending-${Date.now()}-${Math.random().toString(36).slice(2)}`
+
+  // Stage a chosen image: downscale to 380×1080 client-side, then hold it for the
+  // next Send. Oversized or unreadable picks are rejected before upload.
+  async function onPick(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = '' // let the same file be re-picked after a remove
+    if (!file) return
+    setError(null)
+    if (file.size > MAX_PICK_BYTES) {
+      // Inline validation message (errors are inline throughout this component).
+      setError('That image is too large.')
+      return
+    }
+    const resized = await downscaleToBox(file, 380, 1080)
+    // A non-image (or a decode failure) comes back unchanged; only raster images
+    // the server accepts should be staged.
+    if (!ALLOWED_IMAGE_TYPES.includes(resized.type)) {
+      setError('Use a JPG, PNG, or WebP image.')
+      return
+    }
+    const url = URL.createObjectURL(resized)
+    objectUrlsRef.current.push(url)
+    setPendingFile(resized)
+    setPendingPreview(url)
+  }
+
+  function clearPending() {
+    setPendingFile(null)
+    setPendingPreview(null)
+  }
+
   function send() {
+    if (pendingFile) {
+      sendImage()
+      return
+    }
     const text = body.trim()
     if (!text) return
     setError(null)
-    const key = `pending-${Date.now()}-${Math.random().toString(36).slice(2)}`
-    setOutbox((o) => [...o, { key, body: text }])
+    const key = newKey()
+    setOutbox((o) => [...o, { key, body: text, previewUrl: null }])
     setBody('')
     startTransition(async () => {
       const result = await sendMessage({ threadDocId: conversation.threadDocId, body: text })
@@ -351,6 +471,42 @@ function ConversationPanel({
         // Hand the text back so it can be edited and resent; keep anything the
         // user has already started typing since.
         setBody((b) => (b.trim() ? b : text))
+        setError(result.error ?? 'Something went wrong.')
+      }
+    })
+  }
+
+  // Send the staged image (with any typed text as a caption). Optimistic: show
+  // the local preview at reduced opacity; the count-based reconcile in refresh()
+  // swaps it for the real one. On failure, restore the staged image + caption.
+  function sendImage() {
+    const file = pendingFile
+    const preview = pendingPreview
+    if (!file) return
+    const caption = body.trim()
+    setError(null)
+    const key = newKey()
+    setOutbox((o) => [...o, { key, body: caption, previewUrl: preview }])
+    setBody('')
+    clearPending()
+    startTransition(async () => {
+      const fd = new FormData()
+      fd.set('threadDocId', conversation.threadDocId)
+      fd.set('caption', caption)
+      fd.set('image', file)
+      const result = await sendImageMessage(fd)
+      if (result.ok) {
+        // Bring in the real message, then deterministically drop THIS optimistic
+        // bubble by key. The count-based reconcile in refresh() also clears image
+        // bubbles when the poll beats us here; removing by key guarantees no
+        // lingering "Sending…" copy once the send itself has confirmed.
+        await refresh()
+        setOutbox((o) => o.filter((m) => m.key !== key))
+      } else {
+        setOutbox((o) => o.filter((m) => m.key !== key))
+        setPendingFile(file)
+        setPendingPreview(preview)
+        setBody((b) => (b.trim() ? b : caption))
         setError(result.error ?? 'Something went wrong.')
       }
     })
@@ -456,7 +612,26 @@ function ConversationPanel({
                         : 'border border-white/15 text-foreground',
                     )}
                   >
-                    <p className="whitespace-pre-wrap">{m.body}</p>
+                    {m.imageUrl &&
+                      (failedImages.has(m.key) ? (
+                        <p className={cn('text-xs italic opacity-80', m.body && 'mb-1.5')}>
+                          {copy.imageSentLabel}
+                        </p>
+                      ) : (
+                        // alt: a chat photo has no caption data; a sender-framed
+                        // functional description is the honest alt here (§2).
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={m.imageUrl}
+                          alt={mine ? 'Photo you shared' : `Photo from ${conversation.otherName}`}
+                          onError={() => markImageFailed(m.key)}
+                          className={cn(
+                            'block max-h-[320px] max-w-full',
+                            m.body && 'mb-1.5',
+                          )}
+                        />
+                      ))}
+                    {m.body && <p className="whitespace-pre-wrap">{m.body}</p>}
                     {m.createdAt && (
                       <p
                         className={cn(
@@ -464,7 +639,7 @@ function ConversationPanel({
                           mine ? 'text-primary-foreground/70' : 'text-muted-foreground',
                         )}
                       >
-                        {formatDate(m.createdAt)}
+                        {formatMessageTime(m.createdAt)}
                       </p>
                     )}
                   </div>
@@ -474,7 +649,16 @@ function ConversationPanel({
             {outbox.map((m) => (
               <div key={m.key} className="flex justify-end">
                 <div className="bg-primary text-primary-foreground max-w-[80%] px-3 py-2 text-sm opacity-60">
-                  <p className="whitespace-pre-wrap">{m.body}</p>
+                  {m.previewUrl && !failedImages.has(m.key) && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={m.previewUrl}
+                      alt=""
+                      onError={() => markImageFailed(m.key)}
+                      className={cn('block max-h-[320px] max-w-full', m.body && 'mb-1.5')}
+                    />
+                  )}
+                  {m.body && <p className="whitespace-pre-wrap">{m.body}</p>}
                   <p className="text-primary-foreground/70 mt-1 text-[10px]">
                     {copy.sendingLabel}
                   </p>
@@ -488,7 +672,34 @@ function ConversationPanel({
       {/* Composer + actions — pinned below the scroll region. A little extra
           bottom room on mobile so the action row isn't flush to the edge. */}
       <div className="border-border shrink-0 border-t px-4 py-3 pb-5 sm:px-6 sm:pb-3">
-        <div className="flex items-end gap-2">
+        {pendingPreview && (
+          <div className="relative mb-2 inline-block">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={pendingPreview}
+              alt=""
+              className="border-border block max-h-24 max-w-[120px] border"
+            />
+            <button
+              type="button"
+              onClick={clearPending}
+              aria-label="Remove image"
+              className="bg-background text-foreground hover:text-primary focus-visible:ring-ring absolute -top-2 -right-2 border border-white/30 p-0.5 focus-visible:ring-2 focus-visible:outline-none"
+            >
+              <X aria-hidden="true" className="size-3.5" />
+            </button>
+          </div>
+        )}
+        {/* items-stretch makes the textarea grow to the exact height of the
+            stacked Attach-over-Send column on its right. */}
+        <div className="flex items-stretch gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={onPick}
+          />
           <textarea
             value={body}
             rows={2}
@@ -511,16 +722,27 @@ function ConversationPanel({
             /* 16px on touch so iOS doesn't zoom the field on focus; tighter on desktop. */
             className="focus-visible:ring-ring flex-1 resize-none border border-white/20 bg-transparent px-3 py-2 text-base focus-visible:ring-2 focus-visible:outline-none sm:text-sm"
           />
-          <button
-            type="button"
-            onClick={send}
-            disabled={!body.trim()}
-            aria-label={copy.sendLabel}
-            className="bg-primary text-primary-foreground focus-visible:ring-ring inline-flex items-center gap-1.5 px-3 py-2 text-xs font-black tracking-widest uppercase transition-opacity focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
-          >
-            <Send aria-hidden="true" className="size-4" />
-            {copy.sendLabel}
-          </button>
+          <div className="flex shrink-0 flex-col gap-2">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={pending}
+              aria-label="Add a photo"
+              className="text-muted-foreground hover:text-primary focus-visible:ring-ring flex w-full items-center justify-center border border-white/20 px-3 py-2 transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
+            >
+              <ImagePlus aria-hidden="true" className="size-5" />
+            </button>
+            <button
+              type="button"
+              onClick={send}
+              disabled={!body.trim() && !pendingFile}
+              aria-label={copy.sendLabel}
+              className="bg-primary text-primary-foreground focus-visible:ring-ring flex w-full items-center justify-center gap-1.5 px-3 py-2 text-xs font-black tracking-widest uppercase transition-opacity focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
+            >
+              <Send aria-hidden="true" className="size-4" />
+              {copy.sendLabel}
+            </button>
+          </div>
         </div>
         <p className="text-muted-foreground mt-1 text-[10px]">{copy.sendHint}</p>
 

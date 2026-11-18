@@ -386,6 +386,13 @@ export type MessageThread = {
     fromId?: string;
     fromName?: string;
     body?: string;
+    image?: {
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      _type: "image";
+    };
     createdAt?: string;
     _type: "messageItem";
     _key: string;
@@ -394,6 +401,22 @@ export type MessageThread = {
   respondedAt?: string;
   lastMessageAt?: string;
   reviewedAt?: string;
+};
+
+export type SanityImageCrop = {
+  _type: "sanity.imageCrop";
+  top: number;
+  bottom: number;
+  left: number;
+  right: number;
+};
+
+export type SanityImageHotspot = {
+  _type: "sanity.imageHotspot";
+  x: number;
+  y: number;
+  height: number;
+  width: number;
 };
 
 export type SpinnerStore = {
@@ -497,22 +520,6 @@ export type SpinnerStore = {
     _type: "payout";
     _key: string;
   }>;
-};
-
-export type SanityImageCrop = {
-  _type: "sanity.imageCrop";
-  top: number;
-  bottom: number;
-  left: number;
-  right: number;
-};
-
-export type SanityImageHotspot = {
-  _type: "sanity.imageHotspot";
-  x: number;
-  y: number;
-  height: number;
-  width: number;
 };
 
 export type RagSubmission = {
@@ -1250,6 +1257,7 @@ export type SiteSettings = {
     sendLabel?: string;
     sendHint?: string;
     sendingLabel?: string;
+    imageSentLabel?: string;
     leaveLabel?: string;
     leaveConfirm?: string;
     blockLabel?: string;
@@ -1981,9 +1989,9 @@ export type AllSanitySchemaTypes =
   | NoiseIssue
   | MessageReport
   | MessageThread
-  | SpinnerStore
   | SanityImageCrop
   | SanityImageHotspot
+  | SpinnerStore
   | RagSubmission
   | SanityFileAssetReference
   | RagIssue
