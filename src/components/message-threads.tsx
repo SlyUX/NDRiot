@@ -265,15 +265,27 @@ function ConversationPanel({
     return () => clearInterval(id)
   }, [refresh])
 
-  const pinToBottom = useCallback(() => {
+  // Pin the pane to the newest message. `smooth` glides (a new message, a send,
+  // the focus settle); the default snaps instantly (first open, and keyboard
+  // tracking, where gluing each frame looks smoother than chasing a moving
+  // target). Smooth is dropped under prefers-reduced-motion (§10).
+  const pinToBottom = useCallback((smooth = false) => {
     const el = scrollRef.current
-    if (el) el.scrollTop = el.scrollHeight
+    if (!el) return
+    const reduce =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    el.scrollTo({
+      top: el.scrollHeight,
+      behavior: smooth && !reduce ? 'smooth' : 'auto',
+    })
   }, [])
 
-  // Keep the pane pinned to the latest message (on open, each new one, and each
-  // optimistic send).
+  // Snap to the bottom on open; glide for every message after that.
+  const firstPinRef = useRef(true)
   useEffect(() => {
-    pinToBottom()
+    pinToBottom(!firstPinRef.current)
+    firstPinRef.current = false
   }, [messages, outbox.length, pinToBottom])
 
   // Keyboard-safe sheet on mobile. The full-screen sheet is `fixed inset-0`,
@@ -299,8 +311,9 @@ function ConversationPanel({
       sheet.style.bottom = 'auto'
       // Defer the pin to the next frame: the sheet just resized, and scrolling in
       // the same tick pins against the PRE-resize height, which leaves the last
-      // message hidden under the keyboard. rAF lets layout settle first.
-      requestAnimationFrame(pinToBottom)
+      // message hidden under the keyboard. rAF lets layout settle first. Instant
+      // here so the pane stays glued as the keyboard rises.
+      requestAnimationFrame(() => pinToBottom(false))
     }
 
     apply()
@@ -484,8 +497,8 @@ function ConversationPanel({
               // Pin the last message just above the composer when the keyboard
               // opens. The resize path handles most of it; the timeout also beats
               // iOS's keyboard-open animation and the already-open case.
-              requestAnimationFrame(pinToBottom)
-              setTimeout(pinToBottom, 300)
+              requestAnimationFrame(() => pinToBottom(false))
+              setTimeout(() => pinToBottom(true), 300)
             }}
             onKeyDown={(e) => {
               // Shift+Enter sends; plain Enter is a newline (per request).
