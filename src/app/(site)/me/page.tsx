@@ -10,10 +10,7 @@ import {
   type SentCollab,
 } from "@/components/collab-requests";
 import { CollabInfoTooltip } from "@/components/collab-info-tooltip";
-import {
-  MessageRequests,
-  type IncomingMessageRequest,
-} from "@/components/message-requests";
+import { type IncomingMessageRequest } from "@/components/message-requests";
 import {
   MessageThreads,
   type Conversation,
@@ -675,17 +672,13 @@ export default async function AccountPage({
       id: "conversations",
       label: settings.messaging.tabConversations,
       content: (
-        <>
-          <MessageRequests incoming={incomingMessages} copy={settings.messaging} />
-          <div className="mt-8">
-            <MessageThreads
-              conversations={conversations}
-              awaiting={awaitingMessages}
-              meId={myCreatorId}
-              copy={settings.messaging}
-            />
-          </div>
-        </>
+        <MessageThreads
+          incoming={incomingMessages}
+          conversations={conversations}
+          awaiting={awaitingMessages}
+          meId={myCreatorId}
+          copy={settings.messaging}
+        />
       ),
     });
     col3Tabs.push({
@@ -696,6 +689,7 @@ export default async function AccountPage({
         <div className="space-y-8">
           {collabConversations.length > 0 && (
             <MessageThreads
+              incoming={[]}
               conversations={collabConversations}
               awaiting={[]}
               meId={myCreatorId}

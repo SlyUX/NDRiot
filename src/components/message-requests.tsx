@@ -23,41 +23,6 @@ export type IncomingMessageRequest = {
   signal: FollowSignal
 }
 
-/**
- * Incoming message requests on /me — accept to open a conversation, or decline.
- * Always a deliberate choice (no auto-accept). The requester's note is a
- * micro-dose of who they are; the follow signal is private context shown only
- * here, to the recipient (AGENTS §3 — one-way follows never go public).
- */
-export function MessageRequests({
-  incoming,
-  copy,
-}: {
-  incoming: IncomingMessageRequest[]
-  copy: MessagingSettings
-}) {
-  return (
-    <section>
-      <h3 className="text-xl font-black tracking-tight uppercase">
-        {copy.incomingHeading}
-      </h3>
-      <p className="text-muted-foreground mt-1.5 max-w-prose text-sm">
-        {copy.incomingIntro}
-      </p>
-
-      {incoming.length === 0 ? (
-        <p className="text-muted-foreground mt-4 text-sm">{copy.incomingEmpty}</p>
-      ) : (
-        <ul className="mt-4">
-          {incoming.map((item) => (
-            <RequestRow key={item.fromId} item={item} copy={copy} />
-          ))}
-        </ul>
-      )}
-    </section>
-  )
-}
-
 function SignalBadge({ signal, copy }: { signal: FollowSignal; copy: MessagingSettings }) {
   if (signal === 'none') return null
   const mutual = signal === 'mutual'
@@ -70,7 +35,14 @@ function SignalBadge({ signal, copy }: { signal: FollowSignal; copy: MessagingSe
   )
 }
 
-function RequestRow({
+/**
+ * A single incoming message-request row — accept to open a conversation, or
+ * decline (always a deliberate choice, no auto-accept). The note is a micro-dose
+ * of the requester; the follow signal is private context shown only to the
+ * recipient (§3). Rendered inline at the top of the Conversations list, alongside
+ * active threads — like collaboration requests.
+ */
+export function RequestRow({
   item,
   copy,
 }: {

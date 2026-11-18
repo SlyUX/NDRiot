@@ -19,6 +19,10 @@ import {
   DialogContent,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  RequestRow,
+  type IncomingMessageRequest,
+} from '@/components/message-requests'
 import { AvatarCircle } from '@/components/ui/avatar-circle'
 import { Spinner } from '@/components/ui/spinner'
 import { formatDate } from '@/lib/card-mappers'
@@ -60,12 +64,15 @@ export type AwaitingRow = {
  * sending refreshes the server data (fine at beta scale).
  */
 export function MessageThreads({
+  incoming,
   conversations,
   awaiting,
   meId,
   copy,
   heading,
 }: {
+  /** Incoming message requests — shown as rows at the top of the list. */
+  incoming: IncomingMessageRequest[]
   conversations: Conversation[]
   awaiting: AwaitingRow[]
   meId: string
@@ -82,10 +89,15 @@ export function MessageThreads({
         <h3 className="text-xl font-black tracking-tight uppercase">{heading}</h3>
       )}
 
-      {conversations.length === 0 && awaiting.length === 0 ? (
+      {incoming.length === 0 &&
+      conversations.length === 0 &&
+      awaiting.length === 0 ? (
         <p className="text-muted-foreground text-sm">{copy.threadsEmpty}</p>
       ) : (
         <ul className={heading ? 'mt-4' : ''}>
+          {incoming.map((item) => (
+            <RequestRow key={item.fromId} item={item} copy={copy} />
+          ))}
           {conversations.map((c) => {
             const isOpen = openId === c.threadDocId
             const showUnread = c.unread && !locallyRead.has(c.threadDocId)
