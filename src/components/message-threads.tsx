@@ -289,6 +289,9 @@ function ConversationPanel({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const objectUrlsRef = useRef<string[]>([])
   const scrollRef = useRef<HTMLDivElement>(null)
+  // Tracks whether the pane is parked at the bottom, so an image finishing its
+  // async load re-pins only when the reader hasn't scrolled up to read history.
+  const atBottomRef = useRef(true)
 
   // Free the local image preview URLs when the conversation closes.
   useEffect(() => {
@@ -365,11 +368,25 @@ function ConversationPanel({
     })
   }, [])
 
+  // Within ~120px of the bottom counts as "parked at the bottom."
+  const isNearBottom = () => {
+    const el = scrollRef.current
+    if (!el) return true
+    return el.scrollHeight - el.scrollTop - el.clientHeight < 120
+  }
+  // An image only knows its height once it loads, which grows the pane after we
+  // already pinned — so re-pin on load, but only if the reader is still parked at
+  // the bottom (don't yank someone who scrolled up while an old image loaded).
+  const onImageLoad = () => {
+    if (atBottomRef.current) pinToBottom(true)
+  }
+
   // Snap to the bottom on open; glide for every message after that.
   const firstPinRef = useRef(true)
   useEffect(() => {
     pinToBottom(!firstPinRef.current)
     firstPinRef.current = false
+    atBottomRef.current = true // a new message/send parks us at the bottom
   }, [messages, outbox.length, pinToBottom])
 
   // Keyboard-safe sheet on mobile. The full-screen sheet is `fixed inset-0`,
@@ -594,6 +611,9 @@ function ConversationPanel({
           shoving the composer out of view. */}
       <div
         ref={scrollRef}
+        onScroll={() => {
+          atBottomRef.current = isNearBottom()
+        }}
         className="bg-card min-h-0 flex-1 space-y-2 overflow-y-auto px-4 py-3 sm:px-6"
       >
         {messages.length === 0 && outbox.length === 0 ? (
@@ -625,6 +645,7 @@ function ConversationPanel({
                           src={m.imageUrl}
                           alt={mine ? 'Photo you shared' : `Photo from ${conversation.otherName}`}
                           onError={() => markImageFailed(m.key)}
+                          onLoad={onImageLoad}
                           className={cn(
                             'block max-h-[320px] max-w-full',
                             m.body && 'mb-1.5',
@@ -655,6 +676,7 @@ function ConversationPanel({
                       src={m.previewUrl}
                       alt=""
                       onError={() => markImageFailed(m.key)}
+                      onLoad={onImageLoad}
                       className={cn('block max-h-[320px] max-w-full', m.body && 'mb-1.5')}
                     />
                   )}
