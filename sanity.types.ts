@@ -1245,6 +1245,7 @@ export type SiteSettings = {
     awaitingReplyLabel?: string;
     composerPlaceholder?: string;
     sendLabel?: string;
+    sendHint?: string;
     leaveLabel?: string;
     leaveConfirm?: string;
     blockLabel?: string;
@@ -3736,11 +3737,12 @@ export type OWNED_CREATOR_REGION_QUERY_RESULT =
 
 // Source: src/lib/queries.ts
 // Variable: COLLAB_CREATORS_QUERY
-// Query: *[_type=="creator" && _id in $ids]{_id,name,"slug":slug.current}
+// Query: *[_type=="creator" && _id in $ids]{_id,name,"slug":slug.current,photo}
 export type COLLAB_CREATORS_QUERY_RESULT = Array<{
   _id: string;
   name: string;
   slug: string;
+  photo: ImageWithAlt | null;
 }>;
 
 // Source: src/lib/queries.ts
@@ -5028,7 +5030,7 @@ declare module "@sanity/client" {
     '*[_type=="convention" && defined(slug.current) && defined(startDate) && startDate >= $today && _id != $excludeId]|order(startDate asc)[0...4]{_id,name,"slug":slug.current,place,whenHint,startDate,endDate}': UPCOMING_CONVENTIONS_QUERY_RESULT;
     'array::unique(*[_type=="convention" && defined(slug.current) && defined(place.region)].place.region)': CONVENTION_REGIONS_QUERY_RESULT;
     '*[_type=="creator" && _id==$id][0].place.region': OWNED_CREATOR_REGION_QUERY_RESULT;
-    '*[_type=="creator" && _id in $ids]{_id,name,"slug":slug.current}': COLLAB_CREATORS_QUERY_RESULT;
+    '*[_type=="creator" && _id in $ids]{_id,name,"slug":slug.current,photo}': COLLAB_CREATORS_QUERY_RESULT;
     '*[_type=="ally" && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,offering,logo,about}': ALLIES_QUERY_RESULT;
     '*[_type=="ally" && slug.current==$slug][0]{_id,name,"slug":slug.current,url,offering,logo,about}': ALLY_QUERY_RESULT;
     '*[_type=="strip" && defined(slug.current)]|order(publishedAt desc)[0...8]{_id,title,"slug":slug.current,image,caption,"dimensions":image.asset->metadata.dimensions{width,height},genres,maturityRating,publishedAt,"creatorName":creator->name,"creatorSlug":creator->slug.current,"seriesId":series._ref,"seriesTitle":series->title,"seriesSlug":series->slug.current}': STRIPS_QUERY_RESULT;

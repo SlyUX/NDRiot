@@ -79,6 +79,7 @@ import type {
   BookSummary,
   ConventionSummary,
   CreatorSummary,
+  CollabCreator,
   StripSummary,
   MediaSummary,
   OwnedAppearance,
@@ -297,7 +298,7 @@ export default async function AccountPage({
   ];
   const collabOthers = collabOtherIds.length
     ? await safeFetch<
-        { _id: string; name: string | null; slug: string | null }[]
+        CollabCreator[]
       >(COLLAB_CREATORS_QUERY, { ids: collabOtherIds }, [])
     : [];
   const collabById = new Map(collabOthers.map((c) => [c._id, c]));
@@ -326,13 +327,17 @@ export default async function AccountPage({
     (t.participantIds ?? []).find((id) => id !== myCreatorId) ?? "";
   const messageOtherIds = [...new Set(messageThreadsRaw.map(otherOf).filter(Boolean))];
   const messageOthers = messageOtherIds.length
-    ? await safeFetch<{ _id: string; name: string | null; slug: string | null }[]>(
+    ? await safeFetch<CollabCreator[]>(
         COLLAB_CREATORS_QUERY,
         { ids: messageOtherIds },
         [],
       )
     : [];
   const messageById = new Map(messageOthers.map((c) => [c._id, c]));
+  const avatarOf = (id: string) => {
+    const p = messageById.get(id)?.photo;
+    return p ? urlFor(p).width(96).height(96).fit("crop").url() : null;
+  };
 
   const incomingMessages: IncomingMessageRequest[] = await Promise.all(
     messageThreadsRaw
@@ -343,6 +348,7 @@ export default async function AccountPage({
           fromId: otherId,
           name: messageById.get(otherId)?.name ?? "A creator",
           slug: messageById.get(otherId)?.slug ?? null,
+          avatarUrl: avatarOf(otherId),
           note: t.introNote ?? null,
           createdAt: t.createdAt ?? null,
           signal: await followSignal(otherId, myCreatorId, email ?? ""),
@@ -364,6 +370,8 @@ export default async function AccountPage({
         threadDocId: t._id,
         otherName: messageById.get(otherId)?.name ?? "A creator",
         otherSlug: messageById.get(otherId)?.slug ?? null,
+        otherAvatarUrl: avatarOf(otherId),
+        preview: (t.messages ?? []).at(-1)?.body ?? null,
         messages: (t.messages ?? []).map((m) => ({
           key: m._key,
           fromId: m.fromId ?? "",
@@ -385,6 +393,7 @@ export default async function AccountPage({
       return {
         name: messageById.get(otherId)?.name ?? "A creator",
         slug: messageById.get(otherId)?.slug ?? null,
+        avatarUrl: avatarOf(otherId),
         createdAt: t.createdAt ?? null,
       };
     });

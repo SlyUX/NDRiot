@@ -19,6 +19,7 @@ import {
   DialogContent,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { AvatarCircle } from '@/components/ui/avatar-circle'
 import { Spinner } from '@/components/ui/spinner'
 import { formatDate } from '@/lib/card-mappers'
 import type { MessagingSettings } from '@/lib/site-settings'
@@ -34,6 +35,9 @@ export type Conversation = {
   threadDocId: string
   otherName: string
   otherSlug: string | null
+  otherAvatarUrl: string | null
+  /** The last message's body, for the row preview. */
+  preview: string | null
   messages: ConversationMessage[]
   lastMessageAt: string | null
   /** The other person has posted since this creator last read the thread. */
@@ -94,25 +98,37 @@ export function MessageThreads({
                   }}
                   aria-expanded={isOpen}
                   aria-label={showUnread ? `${c.otherName}, unread` : undefined}
-                  className="hover:text-primary flex w-full items-center justify-between gap-3 py-3 text-left text-sm font-bold transition-colors"
+                  className="hover:text-primary flex w-full items-center gap-3 py-3 text-left transition-colors"
                 >
-                  <span className="flex items-center gap-2">
-                    {showUnread && (
-                      <span
-                        aria-hidden="true"
-                        className="bg-primary inline-block size-2 shrink-0"
-                      />
-                    )}
-                    {c.otherName}
-                    {c.muted && (
-                      <BellOff
-                        aria-label={copy.mutedLabel}
-                        className="text-muted-foreground size-3 shrink-0"
-                      />
+                  <AvatarCircle
+                    src={c.otherAvatarUrl}
+                    name={c.otherName}
+                    className="size-9"
+                  />
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-center gap-2 text-sm font-bold">
+                      {showUnread && (
+                        <span
+                          aria-hidden="true"
+                          className="bg-primary inline-block size-2 shrink-0"
+                        />
+                      )}
+                      <span className="truncate">{c.otherName}</span>
+                      {c.muted && (
+                        <BellOff
+                          aria-label={copy.mutedLabel}
+                          className="text-muted-foreground size-3 shrink-0"
+                        />
+                      )}
+                    </span>
+                    {c.preview && (
+                      <span className="text-muted-foreground block truncate text-xs">
+                        {c.preview}
+                      </span>
                     )}
                   </span>
                   {c.lastMessageAt && (
-                    <span className="text-muted-foreground text-xs font-normal">
+                    <span className="text-muted-foreground shrink-0 text-xs">
                       {formatDate(c.lastMessageAt)}
                     </span>
                   )}
@@ -169,6 +185,7 @@ function ConversationPanel({
   const lastKeyRef = useRef<string | null>(
     conversation.messages[conversation.messages.length - 1]?.key ?? null,
   )
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   // Fetch the latest messages and apply them only when a NEW one has arrived, so
   // an idle poll never re-renders the composer. After mount the poll owns this
@@ -194,6 +211,12 @@ function ConversationPanel({
     }, 2500)
     return () => clearInterval(id)
   }, [refresh])
+
+  // Keep the pane pinned to the latest message (on open and on each new one).
+  useEffect(() => {
+    const el = scrollRef.current
+    if (el) el.scrollTop = el.scrollHeight
+  }, [messages])
 
   // Report snapshots the other person's most recent message, when there is one.
   const lastOtherKey =
@@ -245,7 +268,10 @@ function ConversationPanel({
 
   return (
     <div className="pb-4">
-      <div className="bg-card max-h-80 space-y-2 overflow-y-auto p-3">
+      <div
+        ref={scrollRef}
+        className="bg-card max-h-[50vh] space-y-2 overflow-y-auto p-3"
+      >
         {messages.length === 0 ? (
           <p className="text-muted-foreground text-sm">{copy.threadsEmpty}</p>
         ) : (
@@ -284,6 +310,13 @@ function ConversationPanel({
           value={body}
           rows={2}
           onChange={(e) => setBody(e.target.value)}
+          onKeyDown={(e) => {
+            // Shift+Enter sends; plain Enter is a newline (per request).
+            if (e.key === 'Enter' && e.shiftKey) {
+              e.preventDefault()
+              send()
+            }
+          }}
           placeholder={copy.composerPlaceholder}
           className="focus-visible:ring-ring flex-1 resize-none border border-white/20 bg-transparent px-3 py-2 text-sm focus-visible:ring-2 focus-visible:outline-none"
         />
@@ -302,6 +335,7 @@ function ConversationPanel({
           {copy.sendLabel}
         </button>
       </div>
+      <p className="text-muted-foreground mt-1 text-[10px]">{copy.sendHint}</p>
 
       {error && (
         <p role="alert" className="text-destructive mt-2 text-sm">

@@ -435,7 +435,7 @@ export const OWNED_CREATOR_REGION_QUERY = defineQuery(
 // Minimal name + slug for a set of creators — resolves collab-request ids (which
 // live in the private dataset) to public identities for the /me dashboard.
 export const COLLAB_CREATORS_QUERY = defineQuery(
-  `*[_type=="creator" && _id in $ids]{_id,name,"slug":slug.current}`,
+  `*[_type=="creator" && _id in $ids]{_id,name,"slug":slug.current,photo}`,
 );
 // Cosigns are now derived (a mutual creator↔creator follow), computed in
 // src/sanity/cosign-client.ts and resolved for display via SAVED_CREATORS_QUERY

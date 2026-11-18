@@ -7720,6 +7720,13 @@
               },
               "optional": true
             },
+            "sendHint": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "leaveLabel": {
               "type": "objectAttribute",
               "value": {

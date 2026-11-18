@@ -10,6 +10,7 @@ import type {
   CREATOR_APPEARANCES_QUERY_RESULT,
   OWNED_APPEARANCES_QUERY_RESULT,
   CREATOR_QUERY_RESULT,
+  COLLAB_CREATORS_QUERY_RESULT,
   DOWNLOADS_QUERY_RESULT,
   DOWNLOAD_QUERY_RESULT,
   RESOURCES_QUERY_RESULT,
@@ -52,6 +53,8 @@ import type {
 export type { BookFormat, Genre, MaturityRating } from "@/lib/taxonomy";
 
 export type SanityImage = ImageWithAlt;
+/** A creator resolved for collab/messaging rows (id, name, slug, photo). */
+export type CollabCreator = COLLAB_CREATORS_QUERY_RESULT[number];
 export type RichText = NonNullable<COLUMN_QUERY_RESULT>["body"];
 
 /** Editor copy for a genre/format hub (intro + SEO overrides). Nullable — a hub can lack a doc. */

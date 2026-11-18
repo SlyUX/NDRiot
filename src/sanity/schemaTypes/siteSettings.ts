@@ -713,6 +713,7 @@ export default defineType({
         defineField({ name: "awaitingReplyLabel", title: "/me — sent request awaiting reply", type: "string" }),
         defineField({ name: "composerPlaceholder", title: "Conversation — composer placeholder", type: "string" }),
         defineField({ name: "sendLabel", title: "Conversation — send button", type: "string" }),
+        defineField({ name: "sendHint", title: "Conversation — send hint (near the button)", type: "string" }),
         defineField({ name: "leaveLabel", title: "Conversation — leave button", type: "string" }),
         defineField({ name: "leaveConfirm", title: "Conversation — leave confirmation", type: "text", rows: 2 }),
         defineField({ name: "blockLabel", title: "Conversation — block button", type: "string" }),

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { UserCheck, UserPlus } from 'lucide-react'
 
 import { respondMessage } from '@/app/actions/messages'
+import { AvatarCircle } from '@/components/ui/avatar-circle'
 import { Spinner } from '@/components/ui/spinner'
 import { formatDate } from '@/lib/card-mappers'
 import type { MessagingSettings } from '@/lib/site-settings'
@@ -15,6 +16,7 @@ export type IncomingMessageRequest = {
   fromId: string
   name: string
   slug: string | null
+  avatarUrl: string | null
   note: string | null
   createdAt: string | null
   /** PRIVATE to the recipient — "follows you" / mutual (Cosign) / nothing. */
@@ -105,8 +107,10 @@ function RequestRow({
   )
 
   return (
-    <li className="border-border border-b py-4">
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+    <li className="border-border flex items-start gap-3 border-b py-4">
+      <AvatarCircle src={item.avatarUrl} name={item.name} className="mt-0.5 size-9" />
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
         <span>
           {name}{' '}
           <span className="text-muted-foreground">{copy.incomingVerb}</span>
@@ -148,6 +152,7 @@ function RequestRow({
           {error}
         </p>
       )}
+      </div>
     </li>
   )
 }

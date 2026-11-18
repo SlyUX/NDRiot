@@ -437,6 +437,7 @@ export type MessagingSettings = {
   awaitingReplyLabel: string;
   composerPlaceholder: string;
   sendLabel: string;
+  sendHint: string;
   /** Conversation actions. */
   leaveLabel: string;
   leaveConfirm: string;
@@ -1635,6 +1636,7 @@ const DEFAULTS: SiteSettings = {
     awaitingReplyLabel: "Awaiting reply",
     composerPlaceholder: "Write a message…",
     sendLabel: "Send",
+    sendHint: "Shift + Enter to send",
     leaveLabel: "Leave",
     leaveConfirm:
       "Leave this conversation? It closes for both of you and can’t be reopened.",
