@@ -166,7 +166,7 @@ export function ForumNewThread({
         </p>
       )}
 
-      <div className="mt-3 flex items-center gap-3">
+      <div className="mt-3 flex flex-wrap items-center gap-3">
         <button
           type="button"
           onClick={submit}

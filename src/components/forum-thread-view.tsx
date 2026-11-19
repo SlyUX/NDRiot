@@ -338,7 +338,7 @@ export function ForumThreadView({
             placeholder={copy.replyPlaceholder}
             className="focus-visible:ring-ring w-full resize-y border border-white/20 bg-transparent px-3 py-2 text-base focus-visible:ring-2 focus-visible:outline-none sm:text-sm"
           />
-          <div className="mt-2 flex items-center gap-2">
+          <div className="mt-2 flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={send}
@@ -538,7 +538,7 @@ function EditDialog({
           </p>
         )}
 
-        <div className="mt-5 flex items-center gap-3">
+        <div className="mt-5 flex flex-wrap items-center gap-3">
           <button
             type="button"
             onClick={save}
