@@ -165,19 +165,14 @@ export function UserNav({
       </div>
 
       {/* Phones: fixed rounded island, detached from the edges so it floats and
-          clears rounded device corners (esp. iOS). Background is a translucent
-          tint of --primary (40% over transparent) so the island reads as a pink
-          app-layer surface floating over the near-black page. Composited over
-          --background it's ~#68023D: white labels 12.6:1, muted labels 4.9:1
-          (AA), pink active icon 3.4:1 (clears the 3:1 non-text/glyph floor);
-          labels stay white/muted, so §10 holds. */}
+          clears rounded device corners (esp. iOS). --app-nav is an opaque deep
+          magenta (brand pink darkened) so the island reads as a pink app-layer
+          surface but stays legible over scrolling content — a translucent pink
+          tint failed that. Contrast recorded with the token in globals.css. */}
       <nav
         aria-label="Your dashboard"
-        style={{
-          backgroundColor: "color-mix(in oklab, var(--primary) 40%, transparent)",
-        }}
         className={cn(
-          "border-primary/40 fixed inset-x-3 bottom-3 z-40 grid items-end rounded-full border px-2 shadow-[0_2px_20px_rgba(0,0,0,0.6)] md:hidden",
+          "border-primary/40 bg-app-nav fixed inset-x-3 bottom-3 z-40 grid items-end rounded-full border px-2 shadow-[0_2px_20px_rgba(0,0,0,0.6)] md:hidden",
           items.length >= 6
             ? "grid-cols-6"
             : items.length === 5

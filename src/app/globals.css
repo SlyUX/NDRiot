@@ -55,6 +55,7 @@
   --color-dashboard: var(--dashboard);
   --color-dashboard-foreground: var(--dashboard-foreground);
   --color-surface-alt: var(--surface-alt);
+  --color-app-nav: var(--app-nav);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
@@ -119,6 +120,13 @@
      you"), which stays on the home feed rail. */
   --dashboard: #88cafc;
   --dashboard-foreground: #000000;
+  /* Mobile user-nav island surface — brand pink darkened to a deep magenta so
+     the floating app-layer bar reads as pink but stays OPAQUE and legible over
+     scrolling text and images (a translucent pink tint of --primary failed
+     that). White labels 12.6:1 (AAA), --muted-foreground 4.9:1 (AA), --primary
+     icon 3.4:1 (clears the 3:1 non-text/glyph floor; labels stay white/muted,
+     so §10 holds). Island surface only — the desktop bar keeps --surface-alt. */
+  --app-nav: #60153a;
   /* zinc-400 is the floor for muted text — zinc-500 is 4.27:1 and fails AA. */
   --muted-foreground: #a1a1aa;
   --accent: #18181b;
