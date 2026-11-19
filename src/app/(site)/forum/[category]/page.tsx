@@ -62,28 +62,27 @@ export default async function ForumBoardPage({
         {copy.backToBoardsLabel}
       </Link>
 
-      <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-0">
-          <h1 className="flex items-center gap-2 text-3xl font-black tracking-tighter uppercase">
-            {board.title}
-            {board.adminOnlyPosts && (
-              <Lock className="text-muted-foreground size-5" aria-label="Admin-only posting" />
-            )}
-          </h1>
-          {board.description && (
-            <p className="text-muted-foreground mt-2 max-w-prose text-sm">{board.description}</p>
+      <div className="mt-4">
+        <h1 className="flex items-center gap-2 text-3xl font-black tracking-tighter uppercase">
+          {board.title}
+          {board.adminOnlyPosts && (
+            <Lock className="text-muted-foreground size-5 shrink-0" aria-label="Admin-only posting" />
           )}
-        </div>
-        {canPost && (
-          <div className="shrink-0">
-            <ForumNewThread
-              categoryId={board._id}
-              categorySlug={board.slug.current}
-              copy={copy}
-            />
-          </div>
+        </h1>
+        {board.description && (
+          <p className="text-muted-foreground mt-2 max-w-prose text-sm">{board.description}</p>
         )}
       </div>
+
+      {canPost && (
+        <div className="mt-6">
+          <ForumNewThread
+            categoryId={board._id}
+            categorySlug={board.slug.current}
+            copy={copy}
+          />
+        </div>
+      )}
 
       {!canPost && (
         <p className="text-muted-foreground mt-4 text-sm">{copy.adminOnlyNotice}</p>
