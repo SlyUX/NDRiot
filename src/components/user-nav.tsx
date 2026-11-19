@@ -117,14 +117,17 @@ export function UserNav({
           variant === "bar" ? "px-3 py-2.5" : "py-2.5 leading-none",
         )}
       >
-        {/* Colors split by element: on the --surface-alt band pink is 3.99:1, which
-            clears the 3:1 floor for the icon (a large, non-text glyph) but FAILS AA
-            for the small label (§9) — so the active/hover accent lives on the icon,
-            and the label uses white (active) / muted (idle), both AA here. */}
+        {/* Labels are always white; the only active cue is the icon — white when
+            idle, --primary when active. Exactly one tab is active at a time, so
+            the single pink icon reads as the current section. Both surfaces this
+            nav sits on clear AA for white and the 3:1 glyph floor for pink:
+            --app-nav island (white 12.6:1 / pink 3.4:1), --surface-alt desktop
+            bar (white 14.7:1 / pink 3.99:1). Pink stays on the glyph, never the
+            small label. */}
         <span
           className={cn(
             "relative flex items-center justify-center",
-            active ? "text-primary" : "text-muted-foreground group-hover:text-primary",
+            active ? "text-primary" : "text-foreground group-hover:text-primary",
           )}
         >
           {lead}
@@ -137,12 +140,7 @@ export function UserNav({
             </span>
           ) : null}
         </span>
-        <span
-          className={cn(
-            "max-w-[7rem] text-center leading-tight",
-            active ? "text-foreground" : "text-muted-foreground group-hover:text-foreground",
-          )}
-        >
+        <span className="text-foreground max-w-[7rem] text-center leading-tight">
           {item.label}
         </span>
       </Link>
