@@ -26,15 +26,16 @@ const reportBucket = (
   S: Parameters<StructureResolver>[0],
   title: string,
   status: string,
+  type: 'messageReport' | 'forumReport' = 'messageReport',
 ) =>
   S.listItem()
-    .id(`report-${status}`)
+    .id(`${type}-${status}`)
     .title(title)
     .child(
       S.documentList()
         .title(title)
-        .filter('_type == "messageReport" && status == $status')
-        .params({ status })
+        .filter('_type == $type && status == $status')
+        .params({ status, type })
         .defaultOrdering([{ field: 'createdAt', direction: 'desc' }]),
     )
 
@@ -96,6 +97,52 @@ export const submissionStructure: StructureResolver = (S) =>
                 .title('All reports')
                 .child(
                   S.documentTypeList('messageReport')
+                    .title('All reports')
+                    .defaultOrdering([{ field: 'createdAt', direction: 'desc' }]),
+                ),
+            ]),
+        ),
+      S.divider(),
+      S.listItem()
+        .id('forumBoards')
+        .title('Forum boards')
+        .child(
+          S.documentTypeList('forumBoard')
+            .title('Forum boards')
+            .defaultOrdering([{ field: 'order', direction: 'asc' }]),
+        ),
+      S.listItem()
+        .id('forumThreads')
+        .title('Forum threads')
+        .child(
+          S.documentTypeList('forumThread')
+            .title('Forum threads')
+            .defaultOrdering([{ field: 'lastPostAt', direction: 'desc' }]),
+        ),
+      S.listItem()
+        .id('forumPosts')
+        .title('Forum posts')
+        .child(
+          S.documentTypeList('forumPost')
+            .title('Forum posts')
+            .defaultOrdering([{ field: 'createdAt', direction: 'desc' }]),
+        ),
+      S.listItem()
+        .id('forumReports')
+        .title('Forum reports')
+        .child(
+          S.list()
+            .title('Forum reports')
+            .items([
+              reportBucket(S, 'Open', 'open', 'forumReport'),
+              reportBucket(S, 'Actioned', 'actioned', 'forumReport'),
+              reportBucket(S, 'Dismissed', 'dismissed', 'forumReport'),
+              S.divider(),
+              S.listItem()
+                .id('allForumReports')
+                .title('All reports')
+                .child(
+                  S.documentTypeList('forumReport')
                     .title('All reports')
                     .defaultOrdering([{ field: 'createdAt', direction: 'desc' }]),
                 ),

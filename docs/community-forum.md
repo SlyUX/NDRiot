@@ -1,12 +1,42 @@
 # Community: native forum (the async + near-real-time alternative)
 
-Status: **sketch for the January direction decision; nothing built.** The
-counterpart to [`community-selfhost.md`](community-selfhost.md) (the Discord-like,
-self-hosted path). This path drops the real-time-chat requirement and builds a
-forum natively on ND Riot's existing stack — which removes the server/VPS
-entirely. Weigh the two in January.
+Status: **SHIPPED (beta) 2026-11-19.** The native path won over the Discord-like
+self-host ([`community-selfhost.md`](community-selfhost.md), now shelved — no
+voice/presence needed). Built on the existing Next.js + Sanity stack, reusing the
+messaging primitives; no VPS.
 
-Last reviewed: 2026-11-17.
+Decisions as built (this session):
+- **Roster-gated**, private `ndriot_auth` dataset — only signed-in creators read
+  or post; not public, not indexed. Ships to the trusted beta roster **ahead of**
+  the full content policy / age gate (same risk acceptance as messaging); the
+  forum invite waits on that content-policy work landing. See docs/legal-brief.md
+  §5/§8.
+- **No voice.** Near-real-time via **polling** (private dataset rules out
+  token-free `listen()`): the open thread polls at the ~2.5 s messaging cadence;
+  board/thread lists refresh on navigation.
+- **Images in the beta**, reusing the messaging pipeline (downscale → private
+  upload → `img.ndriot.com` CSAM proxy), capped at 1080×1350.
+- **§3 holds.** Threads sort by `lastPostAt` (recency/bump) — timestamp only, no
+  reply/reaction/vote field to rank by. Boards hold a fixed editorial `order`.
+  `pinned` is admin housekeeping. Empty boards invite the first thread.
+- **Full self-serve edit + delete** of own posts, **with revision history
+  retained**; a delete is a tombstone (content kept for moderation).
+- **Per-thread unread**, reusing the messaging read-marker pattern; a Forum tab
+  with an unread badge in the user-nav island (creators only).
+- **9 seeded boards** (`forumCategory`, editorial order): Announcements
+  (admin-post), Collab, The Drawing Board, Shop Talk, Inspiration, Conventions,
+  Spinner Racks, Show & Tell, The Back Room. Seeded by
+  `scripts/seed-forum-categories.mjs` (`npm run seed:forum -- --commit`); editable
+  in Studio thereafter.
+
+Code: schemas `src/sanity/schemaTypes/forum{Category,Thread,Post,Report}.ts`;
+client `src/sanity/forum-client.ts`; actions `src/app/actions/forum.ts`; routes
+`src/app/(site)/forum/**`; UI `src/components/forum-*.tsx`; moderation in the
+Operations Studio workspace + `src/app/api/admin/forum/resolve-report/route.ts`.
+
+Original sketch (2026-11-17) follows, for the reasoning record.
+
+Last reviewed: 2026-11-19.
 
 ---
 

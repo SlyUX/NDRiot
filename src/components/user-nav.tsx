@@ -5,6 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import {
   Bookmark,
   LayoutDashboard,
+  MessagesSquare,
   SlidersHorizontal,
   Users,
   type LucideIcon,
@@ -14,6 +15,7 @@ import { cn } from "@/lib/utils";
 
 const ICONS: Record<string, LucideIcon> = {
   network: Users,
+  forum: MessagesSquare,
   saved: Bookmark,
   settings: SlidersHorizontal,
 };
@@ -88,10 +90,11 @@ export function UserNav({
 
   const tab = (item: UserNavItem, variant: "bar" | "island") => {
     const href = item.href ?? hrefFor(item.id);
-    // An href item (the Rag submit shortcut) is active when its path matches;
-    // a dashboard item is active when its ?view= is the current one.
-    const active = item.href
-      ? pathname === item.href.split("?")[0]
+    // An href item (Forum, the Rag submit shortcut) is active on its path or any
+    // sub-path; a dashboard item is active when its ?view= is the current one.
+    const base = item.href ? item.href.split("?")[0] : null;
+    const active = base
+      ? pathname === base || pathname.startsWith(`${base}/`)
       : currentView === item.id;
     // Icon slot: a number (e.g. the Rag issue "003"), the avatar, or a glyph.
     // Fixed height so every tab's text baseline lands at the same y when the row
@@ -167,7 +170,11 @@ export function UserNav({
         aria-label="Your dashboard"
         className={cn(
           "border-primary/40 bg-surface-alt fixed inset-x-3 bottom-3 z-40 grid items-end rounded-full border px-2 shadow-[0_2px_20px_rgba(0,0,0,0.6)] md:hidden",
-          items.length >= 5 ? "grid-cols-5" : "grid-cols-4",
+          items.length >= 6
+            ? "grid-cols-6"
+            : items.length === 5
+              ? "grid-cols-5"
+              : "grid-cols-4",
         )}
       >
         {items.map((item) => tab(item, "island"))}

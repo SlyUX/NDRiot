@@ -349,6 +349,120 @@ export type NoiseIssue = {
   sentAt?: string;
 };
 
+export type ForumReport = {
+  _id: string;
+  _type: "forumReport";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  status: "open" | "actioned" | "dismissed";
+  reason?: "harassment" | "spam" | "inappropriate" | "other";
+  reportedText?: string;
+  reporterNote?: string;
+  reporterId?: string;
+  reporterName?: string;
+  threadId?: string;
+  postId?: string;
+  reviewNote?: string;
+  createdAt?: string;
+};
+
+export type ForumThreadReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "forumThread";
+};
+
+export type ForumPost = {
+  _id: string;
+  _type: "forumPost";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  thread: ForumThreadReference;
+  authorId?: string;
+  authorName?: string;
+  body?: string;
+  image?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
+  isOpener?: boolean;
+  status: "visible" | "deleted";
+  createdAt?: string;
+  editedAt?: string;
+  revisions?: Array<{
+    body?: string;
+    image?: {
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      _type: "image";
+    };
+    savedAt?: string;
+    _type: "revision";
+    _key: string;
+  }>;
+};
+
+export type SanityImageCrop = {
+  _type: "sanity.imageCrop";
+  top: number;
+  bottom: number;
+  left: number;
+  right: number;
+};
+
+export type SanityImageHotspot = {
+  _type: "sanity.imageHotspot";
+  x: number;
+  y: number;
+  height: number;
+  width: number;
+};
+
+export type ForumBoardReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "forumBoard";
+};
+
+export type ForumThread = {
+  _id: string;
+  _type: "forumThread";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title: string;
+  category: ForumBoardReference;
+  authorId?: string;
+  authorName?: string;
+  status: "open" | "locked" | "removed";
+  pinned?: boolean;
+  createdAt?: string;
+  lastPostAt?: string;
+  reviewedAt?: string;
+};
+
+export type ForumBoard = {
+  _id: string;
+  _type: "forumBoard";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title: string;
+  slug: Slug;
+  description?: string;
+  order: number;
+  adminOnlyPosts?: boolean;
+};
+
 export type MessageReport = {
   _id: string;
   _type: "messageReport";
@@ -401,22 +515,6 @@ export type MessageThread = {
   respondedAt?: string;
   lastMessageAt?: string;
   reviewedAt?: string;
-};
-
-export type SanityImageCrop = {
-  _type: "sanity.imageCrop";
-  top: number;
-  bottom: number;
-  left: number;
-  right: number;
-};
-
-export type SanityImageHotspot = {
-  _type: "sanity.imageHotspot";
-  x: number;
-  y: number;
-  height: number;
-  width: number;
 };
 
 export type SpinnerStore = {
@@ -1286,6 +1384,51 @@ export type SiteSettings = {
     tabCollaborations?: string;
     collabChatLabel?: string;
   };
+  forum?: {
+    heading?: string;
+    intro?: string;
+    latestLabel?: string;
+    newLabel?: string;
+    signedOutHeading?: string;
+    signedOutBody?: string;
+    backToBoardsLabel?: string;
+    newThreadLabel?: string;
+    adminOnlyNotice?: string;
+    emptyBoardHeading?: string;
+    emptyBoardBody?: string;
+    threadTitleLabel?: string;
+    threadTitlePlaceholder?: string;
+    threadBodyPlaceholder?: string;
+    threadSubmitLabel?: string;
+    cancelLabel?: string;
+    backToThreadsLabel?: string;
+    replyPlaceholder?: string;
+    replyLabel?: string;
+    sendHint?: string;
+    sendingLabel?: string;
+    imageSentLabel?: string;
+    lockedNotice?: string;
+    openerLabel?: string;
+    editLabel?: string;
+    editingHeading?: string;
+    saveLabel?: string;
+    editedLabel?: string;
+    deleteLabel?: string;
+    deleteConfirm?: string;
+    deletedLabel?: string;
+    removeImageLabel?: string;
+    reportLabel?: string;
+    reportHeading?: string;
+    reportReasonLabel?: string;
+    reportReasonHarassment?: string;
+    reportReasonSpam?: string;
+    reportReasonInappropriate?: string;
+    reportReasonOther?: string;
+    reportNotePlaceholder?: string;
+    reportSubmitLabel?: string;
+    reportCancelLabel?: string;
+    reportThanks?: string;
+  };
   hero?: {
     background?: ImageWithAlt;
     headline?: string;
@@ -1534,6 +1677,7 @@ export type SiteSettings = {
     dashboardTabBunker?: string;
     dashboardTabActivity?: string;
     dashboardTabNetwork?: string;
+    dashboardTabForum?: string;
     dashboardTabSaved?: string;
     dashboardTabSettings?: string;
     accountFollowersLabel?: string;
@@ -1987,10 +2131,16 @@ export type AllSanitySchemaTypes =
   | MediaReference
   | Update
   | NoiseIssue
-  | MessageReport
-  | MessageThread
+  | ForumReport
+  | ForumThreadReference
+  | ForumPost
   | SanityImageCrop
   | SanityImageHotspot
+  | ForumBoardReference
+  | ForumThread
+  | ForumBoard
+  | MessageReport
+  | MessageThread
   | SpinnerStore
   | RagSubmission
   | SanityFileAssetReference
@@ -3044,6 +3194,12 @@ export type OWNED_DOCS_QUERY_RESULT = Array<
       _id: string;
       _type: "creator";
       name: string;
+      slug: string;
+    }
+  | {
+      _id: string;
+      _type: "forumBoard";
+      name: null;
       slug: string;
     }
   | {

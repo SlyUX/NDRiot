@@ -17,6 +17,7 @@ import {
   NotifyReviewAction,
   ResolveReportAction,
 } from "./src/sanity/actions/message-moderation";
+import { ResolveForumReportAction } from "./src/sanity/actions/forum-moderation";
 import { metricsTool } from "./src/sanity/tools/metrics";
 import { projectId, dataset, apiVersion } from "./src/sanity/env";
 
@@ -29,6 +30,10 @@ const PRODUCTION_HIDDEN = [
   "spinnerStore",
   "messageThread",
   "messageReport",
+  "forumBoard",
+  "forumThread",
+  "forumPost",
+  "forumReport",
 ];
 
 /** The private dataset holding Rag submissions (same default as the server clients). */
@@ -96,6 +101,7 @@ export default defineConfig([
           return [...prev, AcceptRagAction, ResubmitRagAction, DeclineRagAction];
         if (schemaType === "messageThread") return [...prev, NotifyReviewAction];
         if (schemaType === "messageReport") return [...prev, ResolveReportAction];
+        if (schemaType === "forumReport") return [...prev, ResolveForumReportAction];
         return prev;
       },
     },

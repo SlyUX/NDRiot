@@ -13,6 +13,10 @@ import ragSubmission from "./ragSubmission";
 import spinnerStore from "./spinnerStore";
 import messageThread from "./messageThread";
 import messageReport from "./messageReport";
+import forumBoard from "./forumBoard";
+import forumThread from "./forumThread";
+import forumPost from "./forumPost";
+import forumReport from "./forumReport";
 import noiseIssue from "./noiseIssue";
 import update from "./update";
 import convention from "./convention";
@@ -45,6 +49,10 @@ export const schemaTypes = [
   spinnerStore,
   messageThread,
   messageReport,
+  forumBoard,
+  forumThread,
+  forumPost,
+  forumReport,
   noiseIssue,
   update,
   convention,

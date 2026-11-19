@@ -478,6 +478,61 @@ export type MessagingSettings = {
   collabChatLabel: string;
 }
 
+/** The roster-gated community forum — boards, threads, posts, composer, and the
+ *  signed-out wall. Board names/descriptions are forumBoard docs, not here. */
+export type ForumSettings = {
+  /** /forum board list. */
+  heading: string;
+  intro: string;
+  latestLabel: string;
+  newLabel: string;
+  signedOutHeading: string;
+  signedOutBody: string;
+  /** Board page. */
+  backToBoardsLabel: string;
+  newThreadLabel: string;
+  adminOnlyNotice: string;
+  emptyBoardHeading: string;
+  emptyBoardBody: string;
+  /** New-thread composer. */
+  threadTitleLabel: string;
+  threadTitlePlaceholder: string;
+  threadBodyPlaceholder: string;
+  threadSubmitLabel: string;
+  cancelLabel: string;
+  /** Thread view + reply composer. */
+  backToThreadsLabel: string;
+  replyPlaceholder: string;
+  replyLabel: string;
+  sendHint: string;
+  sendingLabel: string;
+  /** Preview/fallback for an image-only post. */
+  imageSentLabel: string;
+  lockedNotice: string;
+  openerLabel: string;
+  /** Post actions + states. */
+  editLabel: string;
+  editingHeading: string;
+  saveLabel: string;
+  editedLabel: string;
+  deleteLabel: string;
+  deleteConfirm: string;
+  deletedLabel: string;
+  removeImageLabel: string;
+  /** Report dialog. */
+  reportLabel: string;
+  reportHeading: string;
+  reportReasonLabel: string;
+  reportReasonHarassment: string;
+  reportReasonSpam: string;
+  reportReasonInappropriate: string;
+  reportReasonOther: string;
+  reportNotePlaceholder: string;
+  reportSubmitLabel: string;
+  reportCancelLabel: string;
+  reportThanks: string;
+};
+
 export interface FaqItem {
   question: string;
   answer: string;
@@ -620,6 +675,7 @@ export interface SiteSettings {
   contact: ContactSettings;
   collab: CollabSettings;
   messaging: MessagingSettings;
+  forum: ForumSettings;
   home: {
     genresHeading: string;
     booksHeading: string;
@@ -865,6 +921,7 @@ export interface SiteSettings {
     dashboardTabBunker: string;
     dashboardTabActivity: string;
     dashboardTabNetwork: string;
+    dashboardTabForum: string;
     dashboardTabSaved: string;
     dashboardTabSettings: string;
     accountFollowersLabel: string;
@@ -1683,6 +1740,53 @@ const DEFAULTS: SiteSettings = {
     tabCollaborations: "Collab",
     collabChatLabel: "Collaborating on {genre}",
   },
+  forum: {
+    heading: "The Forum",
+    intro: "Where ND Riot creators talk shop. Pick a board and jump in.",
+    latestLabel: "Latest",
+    newLabel: "New",
+    signedOutHeading: "The Forum is for creators",
+    signedOutBody:
+      "Sign in with the account tied to your ND Riot creator page to read and post.",
+    backToBoardsLabel: "← All boards",
+    newThreadLabel: "New thread",
+    adminOnlyNotice: "Only ND Riot starts threads here. You can still reply.",
+    emptyBoardHeading: "No threads yet",
+    emptyBoardBody: "Be the first — start one.",
+    threadTitleLabel: "Title",
+    threadTitlePlaceholder: "What’s this about?",
+    threadBodyPlaceholder: "Say your piece…",
+    threadSubmitLabel: "Post thread",
+    cancelLabel: "Cancel",
+    backToThreadsLabel: "← Back",
+    replyPlaceholder: "Write a reply…",
+    replyLabel: "Reply",
+    sendHint: "Shift + Enter to send",
+    sendingLabel: "Sending…",
+    imageSentLabel: "Photo",
+    lockedNotice: "This thread is locked — no new replies.",
+    openerLabel: "Started the thread",
+    editLabel: "Edit",
+    editingHeading: "Edit post",
+    saveLabel: "Save",
+    editedLabel: "edited",
+    deleteLabel: "Delete",
+    deleteConfirm:
+      "Delete this post? It leaves the thread, but the record is kept for moderation.",
+    deletedLabel: "This post was removed by its author.",
+    removeImageLabel: "Remove image",
+    reportLabel: "Report",
+    reportHeading: "Report a post",
+    reportReasonLabel: "Reason",
+    reportReasonHarassment: "Harassment",
+    reportReasonSpam: "Spam",
+    reportReasonInappropriate: "Inappropriate content",
+    reportReasonOther: "Other",
+    reportNotePlaceholder: "Add context (optional)",
+    reportSubmitLabel: "Submit report",
+    reportCancelLabel: "Cancel",
+    reportThanks: "Thanks — our team will review it.",
+  },
   home: {
     genresHeading: "Browse by genre",
     booksHeading: "Comics",
@@ -1930,6 +2034,7 @@ const DEFAULTS: SiteSettings = {
     dashboardTabBunker: "Bunker",
     dashboardTabActivity: "Activity",
     dashboardTabNetwork: "Network",
+    dashboardTabForum: "Forum",
     dashboardTabSaved: "Saved",
     dashboardTabSettings: "Settings",
     accountFollowersLabel: "followers",
@@ -2045,7 +2150,7 @@ export const SITE_SETTINGS_QUERY = `*[_id=="siteSettings"][0]{
   siteTitle,siteDescription,footer,discordUrl,socialLinks[]{platform,url},
   newsletter{heading,description,items,placeholder,buttonLabel,consent,successMessage,errorMessage},
   about{heading,body,faqHeading,faq[]{question,answer},seoTitle,seoDescription},aiLetter,aiUsage,
-  home,sections,empty,creatorIntake,bookIntake,mediaIntake,stripIntake,reviewNotice,notifications,noise,collab,messaging,
+  home,sections,empty,creatorIntake,bookIntake,mediaIntake,stripIntake,reviewNotice,notifications,noise,collab,messaging,forum,
   hero{background,headline,body,tagline,featureCtaLabel,featuredHeading,newHeading,ctas[]{label,href}},
   join{heading,editHeading,body,ctaLabel,formUrl,funnelHeading,funnelIntro,creatorsLabel,creatorsDesc,contactLabel,contactDesc,mediaLabel,mediaDesc,readersLabel,readersDesc,readersBadge,terms,termsWhy},
   contact{heading,linkLabel,body,nameLabel,emailLabel,subjectLabel,messageLabel,submitLabel,successMessage,errorMessage},
@@ -2161,6 +2266,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     reviewNotice: mergeGroup(DEFAULTS.reviewNotice, data.reviewNotice),
     collab: mergeGroup(DEFAULTS.collab, data.collab),
     messaging: mergeGroup(DEFAULTS.messaging, data.messaging),
+    forum: mergeGroup(DEFAULTS.forum, data.forum),
     contact: {
       // Field-by-field like `join` above: a blank string falls back to the
       // default, and the rich-text body passes through untouched.

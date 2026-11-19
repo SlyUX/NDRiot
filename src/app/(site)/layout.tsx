@@ -21,6 +21,7 @@ import type { RagOpenSubmission } from '@/lib/types'
 import { creatorsOwnedBy } from '@/sanity/ownership-client'
 import { pendingCollabCount } from '@/sanity/collab-client'
 import { pendingRequestCount, unreadThreadCount } from '@/sanity/message-client'
+import { totalUnread as forumUnreadCount } from '@/sanity/forum-client'
 import { urlFor } from '@/sanity/image'
 import { getSiteSettings } from '@/lib/site-settings'
 import { RESOURCE_CATEGORIES } from '@/lib/taxonomy'
@@ -65,6 +66,8 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   // Pending actions awaiting a signed-in creator — incoming message requests +
   // pending collab requests — shown as a Network badge on every page.
   let pendingActions = 0
+  // Unread forum threads — the Forum tab's badge (creators only).
+  let forumUnread = 0
   const email = session?.user?.email
   if (email) {
     const owned = await creatorsOwnedBy(email)
@@ -76,12 +79,14 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       if (profile?.photo) {
         avatar = urlFor(profile.photo).width(96).height(96).fit('crop').url()
       }
-      const [pendingMsgs, pendingCollabs, unread] = await Promise.all([
+      const [pendingMsgs, pendingCollabs, unread, forum] = await Promise.all([
         pendingRequestCount(owned[0]),
         pendingCollabCount(owned[0]),
         unreadThreadCount(owned[0]),
+        forumUnreadCount(owned[0]),
       ])
       pendingActions = pendingMsgs + pendingCollabs + unread
+      forumUnread = forum
     }
   }
   const s = settings.sections
@@ -170,6 +175,18 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
           items={[
             { id: "bunker", label: s.dashboardTabBunker },
             { id: "network", label: s.dashboardTabNetwork, badge: pendingActions },
+            // Forum — creators only (it's roster-gated); its own route, not a
+            // /me view, so it carries an explicit href.
+            ...(isCreator
+              ? [
+                  {
+                    id: "forum",
+                    label: s.dashboardTabForum,
+                    href: "/forum",
+                    badge: forumUnread,
+                  },
+                ]
+              : []),
             { id: "saved", label: s.dashboardTabSaved },
             { id: "settings", label: s.dashboardTabSettings },
             ...(submitIssue
