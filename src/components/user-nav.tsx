@@ -6,7 +6,6 @@ import {
   LayoutDashboard,
   MessagesSquare,
   SlidersHorizontal,
-  Users,
   type LucideIcon,
 } from "lucide-react";
 
@@ -14,10 +13,10 @@ import { FlamingHeart } from "@/components/flaming-heart";
 import { cn } from "@/lib/utils";
 
 // Faves ("saved") uses the flaming-heart Fave mark, not a lucide glyph — handled
-// as a special case in icon() below.
+// as a special case in icon() below. "network" is the Comms tab (messages +
+// collaborations + forum), so it takes the chat-bubble glyph.
 const ICONS: Record<string, LucideIcon> = {
-  network: Users,
-  forum: MessagesSquare,
+  network: MessagesSquare,
   settings: SlidersHorizontal,
 };
 
@@ -33,6 +32,9 @@ export interface UserNavItem {
   /** A count shown as a small badge over the icon — pending actions awaiting
    *  the user (incoming message + collaboration requests). 0/undefined hides it. */
   badge?: number;
+  /** Extra path prefixes that also mark this item active — e.g. Comms → /forum,
+   *  which lives on its own routes outside /me. */
+  matchPrefixes?: string[];
 }
 
 /**
@@ -94,12 +96,18 @@ export function UserNav({
 
   const tab = (item: UserNavItem, variant: "bar" | "island") => {
     const href = item.href ?? hrefFor(item.id);
-    // An href item (Forum, the Rag submit shortcut) is active on its path or any
+    // An href item (the Rag submit shortcut) is active on its path or any
     // sub-path; a dashboard item is active when its ?view= is the current one.
+    // matchPrefixes adds more active paths (Comms stays lit on /forum*).
     const base = item.href ? item.href.split("?")[0] : null;
-    const active = base
-      ? pathname === base || pathname.startsWith(`${base}/`)
-      : currentView === item.id;
+    const active =
+      (base
+        ? pathname === base || pathname.startsWith(`${base}/`)
+        : currentView === item.id) ||
+      (item.matchPrefixes?.some(
+        (p) => pathname === p || pathname.startsWith(`${p}/`),
+      ) ??
+        false);
     // Icon slot: a number (e.g. the Rag issue "003"), the avatar, or a glyph.
     // Fixed height so every tab's text baseline lands at the same y when the row
     // bottom-aligns, regardless of which lead it uses.

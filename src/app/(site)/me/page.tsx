@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { BunkerCreateMenu } from "@/components/bunker-create-menu";
 import { BunkerTabs, type BunkerTab } from "@/components/bunker-tabs";
+import { ForumBoardList } from "@/components/forum-board-list";
 import { SignInButton, SignOutButton } from "@/components/auth-controls";
 import {
   CollabRequests,
@@ -71,6 +72,11 @@ import {
   readStamps,
   threadsFor,
 } from "@/sanity/message-client";
+import {
+  latestThreadByCategory,
+  listCategories,
+  unreadByCategory,
+} from "@/sanity/forum-client";
 import { getReaderPrefs } from "@/sanity/reader-prefs-client";
 import { incomingRequests, sentRequests } from "@/sanity/collab-client";
 import { followerCount, savedItems } from "@/sanity/reader-client";
@@ -692,6 +698,20 @@ export default async function AccountPage({
   // Network view (col3Tabs) — the creator's communication inbox: Conversations
   // (message threads + requests) then Collaborations (handshakes). Creator-only.
   // Follows + Cosigns live in Faves (favesTabs), unshifted in below.
+  // Comms "Forum" tab — the roster's boards embedded in the dashboard (§4: the
+  // same ForumBoardList as /forum). Creator-only (forum is roster-gated), and
+  // only fetched when the Comms view is open.
+  let forumBoards: Awaited<ReturnType<typeof listCategories>> = [];
+  let forumUnreadByCat = new Map<string, number>();
+  let forumLatest: Awaited<ReturnType<typeof latestThreadByCategory>> =
+    new Map();
+  if (v === "network" && isCreator) {
+    [forumBoards, forumUnreadByCat, forumLatest] = await Promise.all([
+      listCategories(),
+      unreadByCategory(myCreatorId),
+      latestThreadByCategory(),
+    ]);
+  }
   const col3Tabs: PanelTab[] = [];
   // Creator-only inbox tabs, first (Conversations is the default): message
   // threads + incoming requests, then the collaboration handshakes.
@@ -731,6 +751,19 @@ export default async function AccountPage({
             recentSince={collabRecentSince}
           />
         </div>
+      ),
+    });
+    col3Tabs.push({
+      id: "forum",
+      label: s.dashboardTabForum,
+      content: (
+        <ForumBoardList
+          categories={forumBoards}
+          unread={forumUnreadByCat}
+          latest={forumLatest}
+          newLabel={settings.forum.newLabel}
+          latestLabel={settings.forum.latestLabel}
+        />
       ),
     });
   }

@@ -192,26 +192,17 @@ export default async function SiteLayout({
           avatarUrl={avatar}
           items={[
             { id: "bunker", label: s.dashboardTabBunker },
-            // Network — the communication inbox (messages + collaborations), so
-            // creators only; a plain reader has neither. (Follows moved to Faves.)
+            // Comms — the whole communication area (messages + collaborations +
+            // forum), so creators only; a plain reader has none of it. One tab,
+            // active on both the /me messages surface and the /forum routes; its
+            // badge aggregates message/collab requests + unread forum threads.
             ...(isCreator
               ? [
                   {
                     id: "network",
                     label: s.dashboardTabNetwork,
-                    badge: pendingActions,
-                  },
-                ]
-              : []),
-            // Forum — creators only (it's roster-gated); its own route, not a
-            // /me view, so it carries an explicit href.
-            ...(isCreator
-              ? [
-                  {
-                    id: "forum",
-                    label: s.dashboardTabForum,
-                    href: "/forum",
-                    badge: forumUnread,
+                    badge: pendingActions + forumUnread,
+                    matchPrefixes: ["/forum"],
                   },
                 ]
               : []),

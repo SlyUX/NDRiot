@@ -2145,15 +2145,17 @@ export default defineType({
         }),
         defineField({
           name: "dashboardTabNetwork",
-          title: "Dashboard tab — Network",
+          title: "Dashboard tab — Comms",
           type: "string",
-          description: "Your conversations and collaboration requests.",
+          description:
+            "The communication area: messages, collaborations, and the forum. e.g. \"Comms\".",
         }),
         defineField({
           name: "dashboardTabForum",
-          title: "Dashboard tab — Forum",
+          title: "Comms — Forum sub-tab",
           type: "string",
-          description: "The roster-gated community forum (creators only).",
+          description:
+            "The Forum sub-tab inside Comms — the roster-gated board list (creators only). e.g. \"Forum\".",
         }),
         defineField({
           name: "dashboardTabSaved",

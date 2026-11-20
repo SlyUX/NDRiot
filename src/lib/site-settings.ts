@@ -2038,7 +2038,7 @@ const DEFAULTS: SiteSettings = {
     stripsSubscribedLabel: "Notifying",
     dashboardTabBunker: "Bunker",
     dashboardTabActivity: "Activity",
-    dashboardTabNetwork: "Network",
+    dashboardTabNetwork: "Comms",
     dashboardTabForum: "Forum",
     dashboardTabSaved: "Faves",
     dashboardTabSettings: "Preferences",
