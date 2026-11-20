@@ -209,8 +209,8 @@ export default async function AccountPage({
     v === "saved" && bookIds.length
       ? safeFetch<BookSummary[]>(SAVED_BOOKS_QUERY, { ids: bookIds }, [])
       : Promise.resolve<BookSummary[]>([]),
-    // Network view: creators the reader follows ("Followed Creators").
-    v === "network" && creatorIds.length
+    // Faves view: creators the reader follows ("Followed Creators").
+    v === "saved" && creatorIds.length
       ? safeFetch<CreatorSummary[]>(SAVED_CREATORS_QUERY, { ids: creatorIds }, [])
       : Promise.resolve<CreatorSummary[]>([]),
     v === "saved" && stripIds.length
@@ -235,8 +235,8 @@ export default async function AccountPage({
     v === "bunker" && followIds.length
       ? safeFetch<AppearanceFeedRow[]>(APPEARANCE_FEED_QUERY, { ids: followIds, limit: 30 }, [])
       : Promise.resolve<AppearanceFeedRow[]>([]),
-    // Cosigns (mutual follows): the Bunker stat count + the Network cosign cards.
-    (v === "bunker" || v === "network") && isCreator
+    // Cosigns (mutual follows): the Bunker stat count + the Faves cosign cards.
+    (v === "bunker" || v === "saved") && isCreator
       ? mutualCosignIds(myCreatorId)
       : Promise.resolve<string[]>([]),
     // Bunker Comics tab: the strip composer's series dropdown.
@@ -279,7 +279,7 @@ export default async function AccountPage({
   const notifPrefs =
     v === "settings" && isCreator ? await getReaderPrefs(email ?? "") : null;
   const cosigns =
-    v === "network" && cosignIds.length
+    v === "saved" && cosignIds.length
       ? await safeFetch<CreatorSummary[]>(SAVED_CREATORS_QUERY, { ids: cosignIds }, [])
       : [];
   const followers =
@@ -586,17 +586,16 @@ export default async function AccountPage({
     postedLabel: s.accountEventPosted,
   };
 
-  // Two tabbed dashboard columns — Updates|Feed and Cosigns|Saved Comics. The
-  // panels are headingless; the tab label is the heading. Empty tabs are
-  // dropped, empty columns aren't rendered.
+  // Headingless tabbed panels — the tab label is the heading. Empty tabs are
+  // dropped, empty panels aren't rendered.
   const tileGrid =
     "grid grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))] gap-3";
 
-  // Column two — the reader's own saved work: Saved Comics leads (default tab),
-  // then Saved Strips. Both are removable saves.
-  const col2Tabs: PanelTab[] = [];
+  // Faves — the reader's follows + saves. Comics leads (default tab), then
+  // saved Strips, then Creators (appended below). Saves removable; cosigns derived.
+  const favesTabs: PanelTab[] = [];
   if (savedBooks.length > 0) {
-    col2Tabs.push({
+    favesTabs.push({
       id: "saved-comics",
       label: s.accountSavedComicsHeading,
       content: (
@@ -632,7 +631,7 @@ export default async function AccountPage({
     });
   }
   if (savedStrips.length > 0) {
-    col2Tabs.push({
+    favesTabs.push({
       id: "saved-strips",
       label: s.accountSavedStripsHeading,
       content: (
@@ -668,11 +667,11 @@ export default async function AccountPage({
     });
   }
 
-  // Column three — the reader's relationships with creators: Cosigns (mutual
-  // follows, derived — read-only tiles marked with the handshake) then Followed
-  // Creators (their own follows, removable).
   // Collab requests older than 7 days fold behind "view all" (server-computed).
   const collabRecentSince = daysAgoISO(7);
+  // Network view (col3Tabs) — the creator's communication inbox: Conversations
+  // (message threads + requests) then Collaborations (handshakes). Creator-only.
+  // Follows + Cosigns live in Faves (favesTabs), unshifted in below.
   const col3Tabs: PanelTab[] = [];
   // Creator-only inbox tabs, first (Conversations is the default): message
   // threads + incoming requests, then the collaboration handshakes.
@@ -715,9 +714,12 @@ export default async function AccountPage({
       ),
     });
   }
+  // Faves "Creators" tab — appended last, after saved Comics/Strips, so Comics
+  // stays the default (lead) tab: your Cosigns (mutual follows, derived,
+  // read-only) then the creators you follow (removable).
   if (cosigns.length > 0 || savedCreators.length > 0) {
-    col3Tabs.push({
-      id: "follows",
+    favesTabs.push({
+      id: "creators",
       label: s.accountFollowsTabLabel,
       content: (
         <div className="space-y-8">
@@ -955,9 +957,9 @@ export default async function AccountPage({
     );
   }
 
-  // The header "follows" stat counts followed CREATORS only — it links to the
-  // Network tab, which is about people. Saved comics (also follows for the feed,
-  // §3) live under Saved, so they aren't double-counted here. followIds (books +
+  // The header "follows" stat counts followed CREATORS only — it links to Faves,
+  // where follows now live. Saved comics (also follows for the feed, §3) sit
+  // under Faves too, so they aren't double-counted here. followIds (books +
   // creators) still drives the Bunker feed; only this displayed stat narrows.
   const followsCount = creatorIds.length;
   const cosignsCount = cosignIds.length;
@@ -1025,16 +1027,18 @@ export default async function AccountPage({
                 Followers is a count only (follows are stored hashed, so there's
                 no who-follows-you list to open); follows + cosigns → Network. */}
             <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-sm">
+              {/* "faved by" reads before the count — "faved by 12" — unlike the
+                  follows/cosigns stats, which read "12 faves" / "12 cosigns". */}
               <span>
-                <span className="text-foreground font-bold">
-                  {followers.toLocaleString("en-US")}
-                </span>{" "}
                 <span className="text-muted-foreground">
                   {s.accountFollowersLabel}
+                </span>{" "}
+                <span className="text-foreground font-bold">
+                  {followers.toLocaleString("en-US")}
                 </span>
               </span>
               <Link
-                href="/me?view=network"
+                href="/me?view=saved"
                 className="hover:text-primary underline underline-offset-2"
               >
                 <span className="text-foreground font-bold">
@@ -1045,7 +1049,7 @@ export default async function AccountPage({
                 </span>
               </Link>
               <Link
-                href="/me?view=network"
+                href="/me?view=saved"
                 className="hover:text-primary underline underline-offset-2"
               >
                 <span className="text-foreground font-bold">
@@ -1076,14 +1080,14 @@ export default async function AccountPage({
     </Section>
   );
 
-  const savedView = (
+  const favesView = (
     <Section
       padding="md"
       maxWidth="3xl"
       innerClassName="view-enter"
     >
-      {col2Tabs.length > 0 ? (
-        <TabbedPanel tabs={col2Tabs} />
+      {favesTabs.length > 0 ? (
+        <TabbedPanel tabs={favesTabs} />
       ) : (
         // An empty shelf is a discovery moment, not a dead end (§3).
         <div className="max-w-prose">
@@ -1237,7 +1241,7 @@ export default async function AccountPage({
     view === "network"
       ? networkView
       : view === "saved"
-        ? savedView
+        ? favesView
         : view === "settings"
           ? settingsView
           : bunkerView;

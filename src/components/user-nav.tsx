@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
-  Bookmark,
   LayoutDashboard,
   MessagesSquare,
   SlidersHorizontal,
@@ -11,12 +10,14 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import { FlamingHeart } from "@/components/flaming-heart";
 import { cn } from "@/lib/utils";
 
+// Faves ("saved") uses the flaming-heart Fave mark, not a lucide glyph — handled
+// as a special case in icon() below.
 const ICONS: Record<string, LucideIcon> = {
   network: Users,
   forum: MessagesSquare,
-  saved: Bookmark,
   settings: SlidersHorizontal,
 };
 
@@ -84,6 +85,9 @@ export function UserNav({
         </span>
       );
     }
+    // Faves — the flaming-heart Fave mark. Color is inherited from the tab's
+    // span (below): white when idle, --primary when it's the active tab.
+    if (id === "saved") return <FlamingHeart className="size-5" />;
     const Icon = ICONS[id] ?? LayoutDashboard;
     return <Icon aria-hidden="true" className="size-5" />;
   };
@@ -175,7 +179,9 @@ export function UserNav({
             ? "grid-cols-6"
             : items.length === 5
               ? "grid-cols-5"
-              : "grid-cols-4",
+              : items.length === 4
+                ? "grid-cols-4"
+                : "grid-cols-3",
         )}
       >
         {items.map((item) => tab(item, "island"))}

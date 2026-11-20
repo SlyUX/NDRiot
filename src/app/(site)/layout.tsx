@@ -174,7 +174,17 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
           avatarUrl={avatar}
           items={[
             { id: "bunker", label: s.dashboardTabBunker },
-            { id: "network", label: s.dashboardTabNetwork, badge: pendingActions },
+            // Network — the communication inbox (messages + collaborations), so
+            // creators only; a plain reader has neither. (Follows moved to Faves.)
+            ...(isCreator
+              ? [
+                  {
+                    id: "network",
+                    label: s.dashboardTabNetwork,
+                    badge: pendingActions,
+                  },
+                ]
+              : []),
             // Forum — creators only (it's roster-gated); its own route, not a
             // /me view, so it carries an explicit href.
             ...(isCreator

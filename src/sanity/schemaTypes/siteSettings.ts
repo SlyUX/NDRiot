@@ -520,10 +520,10 @@ export default defineType({
         }),
         defineField({
           name: "emptyFollowsNudge",
-          title: "Nudge when following nothing",
+          title: "Nudge when nothing faved",
           type: "text",
           rows: 2,
-          description: "Replaces the follow sections for a subscriber with no follows yet.",
+          description: "Replaces the fave sections for a subscriber with no faves yet.",
         }),
         defineField({ name: "signoff", title: "Sign-off line", type: "string" }),
         defineField({ name: "footerLine", title: "Footer — why they got this", type: "text", rows: 2 }),
@@ -707,8 +707,8 @@ export default defineType({
         defineField({ name: "acceptLabel", title: "/me — accept button", type: "string" }),
         defineField({ name: "declineLabel", title: "/me — decline button", type: "string" }),
         defineField({ name: "requestedPrefix", title: "/me — prefix before a request's date", type: "string" }),
-        defineField({ name: "followsYouLabel", title: "/me — “follows you” signal (private to you)", type: "string" }),
-        defineField({ name: "mutualLabel", title: "/me — “you follow each other” signal", type: "string" }),
+        defineField({ name: "followsYouLabel", title: "/me — “faved you” signal (private to you)", type: "string" }),
+        defineField({ name: "mutualLabel", title: "/me — “you’ve faved each other” signal", type: "string" }),
         defineField({ name: "incomingEmpty", title: "/me — no requests", type: "string" }),
         defineField({ name: "threadsHeading", title: "/me — conversations heading", type: "string" }),
         defineField({ name: "threadsEmpty", title: "/me — no conversations", type: "string" }),
@@ -736,7 +736,7 @@ export default defineType({
         defineField({ name: "muteLabel", title: "Conversation — mute button", type: "string" }),
         defineField({ name: "unmuteLabel", title: "Conversation — unmute button", type: "string" }),
         defineField({ name: "mutedLabel", title: "Conversation — muted indicator", type: "string" }),
-        defineField({ name: "followNudge", title: "Follow-step nudge", type: "string", description: 'Shown right after you follow a creator — e.g. "You\'re following {name} — send them a message?" Token: {name}.' }),
+        defineField({ name: "followNudge", title: "Fave-step nudge", type: "string", description: 'Shown right after you fave a creator — e.g. "You faved {name} — send them a message?" Token: {name}.' }),
         defineField({ name: "prefsHeading", title: "/me notifications — heading", type: "string" }),
         defineField({ name: "prefMessagesLabel", title: "/me notifications — messages toggle", type: "string" }),
         defineField({ name: "prefCollabLabel", title: "/me notifications — collaboration toggle", type: "string" }),
@@ -1626,7 +1626,7 @@ export default defineType({
         }),
         defineField({
           name: "feedMineHeading",
-          title: "Hero rail — followed-updates heading",
+          title: "Hero rail — faved-updates heading",
           type: "string",
           description:
             'Heading over a signed-in reader’s followed-creator updates in the hero rail — e.g. "My Feed".',
@@ -1727,16 +1727,16 @@ export default defineType({
         }),
         defineField({
           name: "followLabel",
-          title: "Follow button label",
+          title: "Fave button label",
           type: "string",
           description:
-            'The reader\'s follow toggle, on comics and creators alike — e.g. "Follow".',
+            'The reader\'s Fave toggle, on comics, strips, and creators alike — e.g. "Fave".',
         }),
         defineField({
           name: "followingLabel",
-          title: "Following button label",
+          title: "Faved button label",
           type: "string",
-          description: 'The follow toggle once following — e.g. "Following".',
+          description: 'The Fave toggle once faved — e.g. "Faved".',
         }),
         defineField({
           name: "accountTitle",
@@ -1791,39 +1791,39 @@ export default defineType({
         }),
         defineField({
           name: "accountSavedComicsHeading",
-          title: "Dashboard — Saved Comics tab",
+          title: "Faves — Comics tab",
           type: "string",
-          description: 'The saved-comics tab in the dashboard\'s second column — e.g. "Saved Comics".',
+          description: 'The comics tab in the Faves section — e.g. "Comics".',
         }),
         defineField({
           name: "accountSavedStripsHeading",
-          title: "Dashboard — Saved Strips tab",
+          title: "Faves — Strips tab",
           type: "string",
-          description: 'The saved-strips tab beside Saved Comics — e.g. "Saved Strips".',
+          description: 'The strips tab beside Comics in Faves — e.g. "Strips".',
         }),
         defineField({
           name: "accountCosignsHeading",
-          title: "Dashboard — Cosigns tab",
+          title: "Faves — Cosigns heading",
           type: "string",
-          description: 'The tab showing your Cosigns — creators you and they both follow (a mutual follow) — e.g. "Cosigns".',
+          description: 'The heading over your Cosigns — creators you and they both fave (a mutual fave), inside the Creators tab — e.g. "Cosigns".',
         }),
         defineField({
           name: "accountFollowedCreatorsHeading",
-          title: "Dashboard — Followed Creators heading",
+          title: "Faves — Faved Creators heading",
           type: "string",
-          description: 'The heading over every creator you follow (inside the Follows tab, beneath Cosigns) — e.g. "Followed Creators".',
+          description: 'The heading over every creator you fave (inside the Creators tab, beneath Cosigns) — e.g. "Faved Creators".',
         }),
         defineField({
           name: "accountFollowsTabLabel",
-          title: "Dashboard — Follows tab label (combined Cosigns + Follows)",
+          title: "Faves — Creators tab label (Cosigns + Followed Creators)",
           type: "string",
-          description: 'The tab that holds both Cosigns and Followed Creators, each under its own heading — e.g. "Follows".',
+          description: 'The Faves tab that holds both Cosigns and Faved Creators, each under its own heading — e.g. "Creators".',
         }),
         defineField({
           name: "accountRemoveLabel",
-          title: "Reader home — remove-from-saved button",
+          title: "Reader home — remove-from-faves button",
           type: "string",
-          description: 'Destructive control on a saved item — e.g. "Remove".',
+          description: 'Destructive control on a faved item — e.g. "Remove".',
         }),
         defineField({
           name: "accountRemovedLabel",
@@ -2139,13 +2139,13 @@ export default defineType({
           name: "dashboardTabActivity",
           title: "Dashboard tab — Activity",
           type: "string",
-          description: "Your posted updates + the feed from who you follow.",
+          description: "Your posted updates + the feed from who you fave.",
         }),
         defineField({
           name: "dashboardTabNetwork",
           title: "Dashboard tab — Network",
           type: "string",
-          description: "Cosigns, followed creators, and collaboration requests.",
+          description: "Your conversations and collaboration requests.",
         }),
         defineField({
           name: "dashboardTabForum",
@@ -2155,9 +2155,9 @@ export default defineType({
         }),
         defineField({
           name: "dashboardTabSaved",
-          title: "Dashboard tab — Saved",
+          title: "Dashboard tab — Faves",
           type: "string",
-          description: "The reader's saved comics and strips.",
+          description: "The reader's faves — creators, comics, and strips.",
         }),
         defineField({
           name: "dashboardTabSettings",
@@ -2167,10 +2167,10 @@ export default defineType({
         }),
         defineField({
           name: "accountFollowersLabel",
-          title: "Dashboard — follower count label",
+          title: "Dashboard — “faved by” count label",
           type: "string",
           description:
-            'Rendered after the number on the creator\'s own dashboard — e.g. "followers" → "12 followers". Private to the creator, never public, never ranked (§3).',
+            'Rendered before the number on the creator\'s own dashboard — e.g. "faved by" → "faved by 12". Private to the creator, never public, never ranked (§3).',
         }),
         defineField({
           name: "accountSettingsHeading",
@@ -2192,21 +2192,21 @@ export default defineType({
         }),
         defineField({
           name: "accountFollowsLabel",
-          title: "Dashboard — follows stat label",
+          title: "Dashboard — faves stat label",
           type: "string",
-          description: 'The "follows" stat in the Bunker header — how many creators/comics you follow. Links to Network. e.g. "follows".',
+          description: 'The "faves" stat in the Bunker header — how many creators/comics you fave. Links to Faves. e.g. "faves".',
         }),
         defineField({
           name: "accountCosignsLabel",
           title: "Dashboard — cosigns stat label",
           type: "string",
-          description: 'The "cosigns" stat in the Bunker header — mutual follows. Links to Network. e.g. "cosigns".',
+          description: 'The "cosigns" stat in the Bunker header — mutual faves. Links to Faves. e.g. "cosigns".',
         }),
         defineField({
           name: "bunkerTabFeed",
           title: "Bunker sub-tab — Feed",
           type: "string",
-          description: "Icon-top tab inside the Bunker: updates from who you follow.",
+          description: "Icon-top tab inside the Bunker: updates from who you fave.",
         }),
         defineField({
           name: "bunkerTabEvents",
@@ -2455,7 +2455,7 @@ export default defineType({
         }),
         defineField({
           name: "followCosignHint",
-          title: "Creator page — follow-becomes-cosign hint",
+          title: "Creator page — fave-becomes-cosign hint",
           type: "text",
           rows: 2,
           description:
