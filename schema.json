@@ -10229,6 +10229,13 @@
               },
               "optional": true
             },
+            "accountCreateLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "accountAddBookLabel": {
               "type": "objectAttribute",
               "value": {
@@ -10244,6 +10251,13 @@
               "optional": true
             },
             "accountAddEventLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "accountAddStripLabel": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"
@@ -10881,6 +10895,13 @@
               "optional": true
             },
             "profileOwnerEditLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "mediaOwnerEditLabel": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

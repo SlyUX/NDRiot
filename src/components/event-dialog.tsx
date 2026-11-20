@@ -41,6 +41,9 @@ export function EventDialog({
   fullWidthTrigger = false,
   triggerSize,
   triggerIcon = true,
+  open: openProp,
+  onOpenChange,
+  hideTrigger = false,
 }: {
   creators: { id: string; name: string }[];
   conventions?: { id: string; name: string }[];
@@ -61,25 +64,34 @@ export function EventDialog({
   triggerSize?: "lg";
   /** Show the leading "+" icon. Default true; off for the attending button. */
   triggerIcon?: boolean;
+  /** Controlled open — when an external menu drives it (the Bunker + Create). */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  /** Render no built-in trigger (the external menu provides one). */
+  hideTrigger?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  const [openState, setOpenState] = useState(false);
+  const open = openProp ?? openState;
+  const setOpen = onOpenChange ?? setOpenState;
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger ?? (
-          <Button
-            variant="inverse"
-            size={triggerSize}
-            className={cn(
-              "font-black tracking-wide uppercase",
-              fullWidthTrigger && "w-full",
-            )}
-          >
-            {triggerIcon && <Plus aria-hidden="true" className="size-4" />}
-            {triggerLabel ?? labels.addHeading}
-          </Button>
-        )}
-      </DialogTrigger>
+      {!hideTrigger && (
+        <DialogTrigger asChild>
+          {trigger ?? (
+            <Button
+              variant="inverse"
+              size={triggerSize}
+              className={cn(
+                "font-black tracking-wide uppercase",
+                fullWidthTrigger && "w-full",
+              )}
+            >
+              {triggerIcon && <Plus aria-hidden="true" className="size-4" />}
+              {triggerLabel ?? labels.addHeading}
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-xl">
         <DialogTitle className="sr-only">{labels.addHeading}</DialogTitle>
         <EventAddForm

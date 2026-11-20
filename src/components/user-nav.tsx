@@ -115,7 +115,9 @@ export function UserNav({
         key={item.id}
         href={href}
         aria-current={active ? "page" : undefined}
-        aria-label={item.badge ? `${item.label}, ${item.badge} awaiting` : undefined}
+        aria-label={
+          item.badge ? `${item.label}, ${item.badge} awaiting` : undefined
+        }
         className={cn(
           "group focus-visible:ring-ring flex flex-col items-center justify-end gap-1 text-[10px] font-bold tracking-wide uppercase transition-colors focus-visible:ring-2 focus-visible:-outline-offset-2 focus-visible:outline-none",
           variant === "bar" ? "px-3 py-2.5" : "py-2.5 leading-none",
@@ -131,7 +133,9 @@ export function UserNav({
         <span
           className={cn(
             "relative flex items-center justify-center",
-            active ? "text-primary" : "text-foreground group-hover:text-primary",
+            active
+              ? "text-primary"
+              : "text-foreground group-hover:text-primary",
           )}
         >
           {lead}
@@ -181,7 +185,9 @@ export function UserNav({
               ? "grid-cols-5"
               : items.length === 4
                 ? "grid-cols-4"
-                : "grid-cols-3",
+                : items.length === 3
+                  ? "grid-cols-3"
+                  : "grid-cols-2",
         )}
       >
         {items.map((item) => tab(item, "island"))}

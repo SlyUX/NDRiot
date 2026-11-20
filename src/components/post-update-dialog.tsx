@@ -32,6 +32,9 @@ export function PostUpdateDialog({
   labels,
   triggerLabel,
   fullWidthTrigger = false,
+  open: openProp,
+  onOpenChange,
+  hideTrigger = false,
 }: {
   targets: ComposerTarget[]
   kinds: readonly string[]
@@ -41,22 +44,31 @@ export function PostUpdateDialog({
   triggerLabel?: string
   /** Stretch the trigger full-width (the dashboard Activity tab). */
   fullWidthTrigger?: boolean
+  /** Controlled open — when an external menu drives it (the Bunker + Create). */
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  /** Render no built-in trigger (the external menu provides one). */
+  hideTrigger?: boolean
 }) {
-  const [open, setOpen] = useState(false)
+  const [openState, setOpenState] = useState(false)
+  const open = openProp ?? openState
+  const setOpen = onOpenChange ?? setOpenState
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
-          variant="inverse"
-          className={cn(
-            'font-black tracking-wide uppercase',
-            fullWidthTrigger && 'w-full',
-          )}
-        >
-          <Plus aria-hidden="true" className="size-4" />
-          {triggerLabel ?? labels.heading}
-        </Button>
-      </DialogTrigger>
+      {!hideTrigger && (
+        <DialogTrigger asChild>
+          <Button
+            variant="inverse"
+            className={cn(
+              'font-black tracking-wide uppercase',
+              fullWidthTrigger && 'w-full',
+            )}
+          >
+            <Plus aria-hidden="true" className="size-4" />
+            {triggerLabel ?? labels.heading}
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-xl">
         <DialogTitle className="sr-only">{labels.heading}</DialogTitle>
         {/* Composer holds the "posted" confirmation for 2s, then onSuccess closes. */}

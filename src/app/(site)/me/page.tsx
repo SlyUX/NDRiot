@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
+import { BunkerCreateMenu } from "@/components/bunker-create-menu";
 import { BunkerTabs, type BunkerTab } from "@/components/bunker-tabs";
 import { SignInButton, SignOutButton } from "@/components/auth-controls";
 import {
@@ -17,20 +18,18 @@ import {
   type AwaitingRow,
 } from "@/components/message-threads";
 import { NotificationPrefs } from "@/components/notification-prefs";
-import { EventDialog } from "@/components/event-dialog";
 import { EventsManager } from "@/components/events-manager";
 import { InitialsAvatar } from "@/components/initials-avatar";
 import { NewsletterOptIn } from "@/components/newsletter-opt-in";
 import { SavedItemRow } from "@/components/saved-item-row";
 import { SectionHeading } from "@/components/section-heading";
 import { TabbedPanel, type PanelTab } from "@/components/tabbed-panel";
-import { Plus, Handshake } from "lucide-react";
+import { Handshake, SlidersHorizontal } from "lucide-react";
 import { StripComposer } from "@/components/strip-composer";
 import {
   type ComposerTarget,
   type MentionOption,
 } from "@/components/update-composer";
-import { PostUpdateDialog } from "@/components/post-update-dialog";
 import { UpdateFeed } from "@/components/update-feed";
 import {
   YourComics,
@@ -40,7 +39,6 @@ import {
 import { composerLabelsFrom, updateOwnerConfig } from "@/lib/composer-labels";
 import { isSubscribedToNewsletter } from "@/lib/mailerlite";
 import { formatPlace } from "@/lib/place";
-import { Button } from "@/components/ui/button";
 import { Section } from "@/components/ui/section";
 import { auth } from "@/auth";
 import { UPDATE_KINDS } from "@/lib/taxonomy";
@@ -56,7 +54,6 @@ import {
   INTAKE_OWNED_SERIES_QUERY,
   OWNED_BOOKS_QUERY,
   OWNED_DOCS_QUERY,
-  OWNED_MEDIA_QUERY,
   SAVED_BOOKS_QUERY,
   SAVED_CREATORS_QUERY,
   SAVED_STRIPS_QUERY,
@@ -69,7 +66,11 @@ import { getSiteSettings } from "@/lib/site-settings";
 import { daysAgoISO } from "@/lib/utils";
 import { ownedDocIds } from "@/sanity/ownership-client";
 import { followSignal, mutualCosignIds } from "@/sanity/cosign-client";
-import { mutedThreadIds, readStamps, threadsFor } from "@/sanity/message-client";
+import {
+  mutedThreadIds,
+  readStamps,
+  threadsFor,
+} from "@/sanity/message-client";
 import { getReaderPrefs } from "@/sanity/reader-prefs-client";
 import { incomingRequests, sentRequests } from "@/sanity/collab-client";
 import { followerCount, savedItems } from "@/sanity/reader-client";
@@ -105,9 +106,6 @@ type OwnedDoc = {
   name: string | null;
   slug: string | null;
 };
-
-/** Every feed-style list here: three on desktop, two on portrait tablet, one on mobile. */
-const FEED_GRID = "grid grid-cols-1 gap-x-8 md:grid-cols-2 lg:grid-cols-3";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
@@ -177,9 +175,6 @@ export default async function AccountPage({
   const ownedCreatorIds = ownedDocs
     .filter((d) => d._type === "creator")
     .map((d) => d._id);
-  const ownedMediaIds = ownedDocs
-    .filter((d) => d._type === "media")
-    .map((d) => d._id);
   // Owning a creator doc is enough to know they're a creator — no extra fetch
   // (the full ownedCreators objects are pulled only for views that render them).
   const isCreator = ownedCreatorIds.length > 0;
@@ -195,7 +190,6 @@ export default async function AccountPage({
     savedStrips,
     ownedCreators,
     ownedBooks,
-    ownedMedia,
     feedPosts,
     feedAppearances,
     cosignIds,
@@ -211,29 +205,45 @@ export default async function AccountPage({
       : Promise.resolve<BookSummary[]>([]),
     // Faves view: creators the reader follows ("Followed Creators").
     v === "saved" && creatorIds.length
-      ? safeFetch<CreatorSummary[]>(SAVED_CREATORS_QUERY, { ids: creatorIds }, [])
+      ? safeFetch<CreatorSummary[]>(
+          SAVED_CREATORS_QUERY,
+          { ids: creatorIds },
+          [],
+        )
       : Promise.resolve<CreatorSummary[]>([]),
     v === "saved" && stripIds.length
       ? safeFetch<StripSummary[]>(SAVED_STRIPS_QUERY, { ids: stripIds }, [])
       : Promise.resolve<StripSummary[]>([]),
     // The reader's own creator profiles — the Bunker header + Settings edit link.
     (v === "bunker" || v === "settings") && ownedCreatorIds.length
-      ? safeFetch<CreatorSummary[]>(SAVED_CREATORS_QUERY, { ids: ownedCreatorIds }, [])
+      ? safeFetch<CreatorSummary[]>(
+          SAVED_CREATORS_QUERY,
+          { ids: ownedCreatorIds },
+          [],
+        )
       : Promise.resolve<CreatorSummary[]>([]),
     // Bunker Comics tab: the creator's own comics.
     v === "bunker" && ownedCreatorIds.length
-      ? safeFetch<BookSummary[]>(OWNED_BOOKS_QUERY, { ids: ownedCreatorIds }, [])
+      ? safeFetch<BookSummary[]>(
+          OWNED_BOOKS_QUERY,
+          { ids: ownedCreatorIds },
+          [],
+        )
       : Promise.resolve<BookSummary[]>([]),
-    // Settings "Your Media".
-    v === "settings" && ownedMediaIds.length
-      ? safeFetch<MediaSummary[]>(OWNED_MEDIA_QUERY, { ids: ownedMediaIds }, [])
-      : Promise.resolve<MediaSummary[]>([]),
     // Bunker Feed tab: followed creators' updates + their appearances.
     v === "bunker" && followIds.length
-      ? safeFetch<UpdateFeedItem[]>(UPDATES_FEED_QUERY, { ids: followIds, limit: 30 }, [])
+      ? safeFetch<UpdateFeedItem[]>(
+          UPDATES_FEED_QUERY,
+          { ids: followIds, limit: 30 },
+          [],
+        )
       : Promise.resolve<UpdateFeedItem[]>([]),
     v === "bunker" && followIds.length
-      ? safeFetch<AppearanceFeedRow[]>(APPEARANCE_FEED_QUERY, { ids: followIds, limit: 30 }, [])
+      ? safeFetch<AppearanceFeedRow[]>(
+          APPEARANCE_FEED_QUERY,
+          { ids: followIds, limit: 30 },
+          [],
+        )
       : Promise.resolve<AppearanceFeedRow[]>([]),
     // Cosigns (mutual follows): the Bunker stat count + the Faves cosign cards.
     (v === "bunker" || v === "saved") && isCreator
@@ -280,7 +290,11 @@ export default async function AccountPage({
     v === "settings" && isCreator ? await getReaderPrefs(email ?? "") : null;
   const cosigns =
     v === "saved" && cosignIds.length
-      ? await safeFetch<CreatorSummary[]>(SAVED_CREATORS_QUERY, { ids: cosignIds }, [])
+      ? await safeFetch<CreatorSummary[]>(
+          SAVED_CREATORS_QUERY,
+          { ids: cosignIds },
+          [],
+        )
       : [];
   const followers =
     v === "bunker" && isCreator ? await followerCount(ownedCreatorIds) : 0;
@@ -297,9 +311,11 @@ export default async function AccountPage({
     ]),
   ];
   const collabOthers = collabOtherIds.length
-    ? await safeFetch<
-        CollabCreator[]
-      >(COLLAB_CREATORS_QUERY, { ids: collabOtherIds }, [])
+    ? await safeFetch<CollabCreator[]>(
+        COLLAB_CREATORS_QUERY,
+        { ids: collabOtherIds },
+        [],
+      )
     : [];
   const collabById = new Map(collabOthers.map((c) => [c._id, c]));
   const incomingCollab: IncomingCollab[] = collabIncoming.map((r) => ({
@@ -325,7 +341,9 @@ export default async function AccountPage({
   // conversations. The private follow signal is computed per incoming request.
   const otherOf = (t: (typeof messageThreadsRaw)[number]) =>
     (t.participantIds ?? []).find((id) => id !== myCreatorId) ?? "";
-  const messageOtherIds = [...new Set(messageThreadsRaw.map(otherOf).filter(Boolean))];
+  const messageOtherIds = [
+    ...new Set(messageThreadsRaw.map(otherOf).filter(Boolean)),
+  ];
   const messageOthers = messageOtherIds.length
     ? await safeFetch<CollabCreator[]>(
         COLLAB_CREATORS_QUERY,
@@ -340,7 +358,9 @@ export default async function AccountPage({
   };
   // General chats vs. accepted-collaboration chats — separate id lanes / tabs.
   const generalThreads = messageThreadsRaw.filter((t) => t.origin !== "collab");
-  const collabThreadsRaw = messageThreadsRaw.filter((t) => t.origin === "collab");
+  const collabThreadsRaw = messageThreadsRaw.filter(
+    (t) => t.origin === "collab",
+  );
 
   const incomingMessages: IncomingMessageRequest[] = await Promise.all(
     generalThreads
@@ -729,40 +749,43 @@ export default async function AccountPage({
                 {s.accountCosignsHeading}
               </SectionHeading>
               <ul className={`${tileGrid} mt-3`}>
-          {cosigns.map((c) => (
-            <li key={c._id}>
-              <Link
-                href={c.slug ? `/creators/${c.slug}` : "#"}
-                className="group focus-visible:ring-ring block focus-visible:ring-2 focus-visible:outline-none"
-              >
-                <div className="bg-muted relative aspect-square w-full overflow-hidden">
-                  {c.photo ? (
-                    <Image
-                      src={urlFor(c.photo).width(200).url()}
-                      alt=""
-                      fill
-                      sizes="6rem"
-                      className="object-cover"
-                    />
-                  ) : (
-                    <InitialsAvatar name={c.name ?? ""} className="text-xl" />
-                  )}
-                  {/* Handshake badge — marks the mutual (cosigned) tie. Pink on a
+                {cosigns.map((c) => (
+                  <li key={c._id}>
+                    <Link
+                      href={c.slug ? `/creators/${c.slug}` : "#"}
+                      className="group focus-visible:ring-ring block focus-visible:ring-2 focus-visible:outline-none"
+                    >
+                      <div className="bg-muted relative aspect-square w-full overflow-hidden">
+                        {c.photo ? (
+                          <Image
+                            src={urlFor(c.photo).width(200).url()}
+                            alt=""
+                            fill
+                            sizes="6rem"
+                            className="object-cover"
+                          />
+                        ) : (
+                          <InitialsAvatar
+                            name={c.name ?? ""}
+                            className="text-xl"
+                          />
+                        )}
+                        {/* Handshake badge — marks the mutual (cosigned) tie. Pink on a
                       black circle (5.69:1); rounded per request, the one round in
                       an otherwise square UI. */}
-                  <span
-                    aria-hidden="true"
-                    className="absolute bottom-1 left-1 flex size-5 items-center justify-center rounded-full bg-black"
-                  >
-                    <Handshake className="text-primary size-3" />
-                  </span>
-                </div>
-                <p className="group-hover:text-primary mt-1 truncate text-xs">
-                  {c.name}
-                </p>
-              </Link>
-            </li>
-          ))}
+                        <span
+                          aria-hidden="true"
+                          className="absolute bottom-1 left-1 flex size-5 items-center justify-center rounded-full bg-black"
+                        >
+                          <Handshake className="text-primary size-3" />
+                        </span>
+                      </div>
+                      <p className="group-hover:text-primary mt-1 truncate text-xs">
+                        {c.name}
+                      </p>
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
           )}
@@ -772,34 +795,37 @@ export default async function AccountPage({
                 {s.accountFollowedCreatorsHeading}
               </SectionHeading>
               <ul className={`${tileGrid} mt-3`}>
-          {savedCreators.map((c) => (
-            <SavedItemRow
-              key={c._id}
-              layout="tile"
-              itemId={c._id}
-              itemType="creator"
-              title={c.name ?? "Creator"}
-              href={c.slug ? `/creators/${c.slug}` : null}
-              removeLabel={s.accountRemoveLabel}
-              removedLabel={s.accountRemovedLabel}
-              undoLabel={s.accountUndoLabel}
-              thumb={
-                <div className="bg-muted relative aspect-square w-full overflow-hidden">
-                  {c.photo ? (
-                    <Image
-                      src={urlFor(c.photo).width(200).url()}
-                      alt=""
-                      fill
-                      sizes="6rem"
-                      className="object-cover"
-                    />
-                  ) : (
-                    <InitialsAvatar name={c.name ?? ""} className="text-xl" />
-                  )}
-                </div>
-              }
-            />
-          ))}
+                {savedCreators.map((c) => (
+                  <SavedItemRow
+                    key={c._id}
+                    layout="tile"
+                    itemId={c._id}
+                    itemType="creator"
+                    title={c.name ?? "Creator"}
+                    href={c.slug ? `/creators/${c.slug}` : null}
+                    removeLabel={s.accountRemoveLabel}
+                    removedLabel={s.accountRemovedLabel}
+                    undoLabel={s.accountUndoLabel}
+                    thumb={
+                      <div className="bg-muted relative aspect-square w-full overflow-hidden">
+                        {c.photo ? (
+                          <Image
+                            src={urlFor(c.photo).width(200).url()}
+                            alt=""
+                            fill
+                            sizes="6rem"
+                            className="object-cover"
+                          />
+                        ) : (
+                          <InitialsAvatar
+                            name={c.name ?? ""}
+                            className="text-xl"
+                          />
+                        )}
+                      </div>
+                    }
+                  />
+                ))}
               </ul>
             </div>
           )}
@@ -813,50 +839,59 @@ export default async function AccountPage({
   // default — identity header + icon-top sub-tabs; the col2/col3 TabbedPanels are
   // reused for Saved and Network.
 
-  // Bunker sub-tabs: Feed · Events · Comics · Activity · Profile. Feed shows for
-  // everyone (updates from who you follow); the rest are creator surfaces, and
-  // the +Update/+Event/+Comic/+Strip actions live inside their own tab now.
+  // Bunker sub-tabs: Feed · Activity · Comics. Feed shows for everyone (updates
+  // from who you fave); Activity (your updates + events) and Comics (your comics
+  // + strips) are creator surfaces. The public profile is reached from the
+  // identity header — the former Profile sub-tab is gone.
   const bunkerTabs: BunkerTab[] = [
     {
       id: "feed",
       label: s.bunkerTabFeed,
       content: (
-        <UpdateFeed emptyLabel={s.accountFeedEmpty} updates={updates} scrollCap />
+        <UpdateFeed
+          emptyLabel={s.accountFeedEmpty}
+          updates={updates}
+          scrollCap
+        />
       ),
     },
   ];
   if (isCreator) {
     bunkerTabs.push(
       {
-        id: "events",
-        label: s.bunkerTabEvents,
+        id: "activity",
+        label: s.bunkerTabActivity,
         content: (
-          <div className="space-y-5">
-            {composerTargets.length > 0 && (
-              <EventDialog
-                creators={eventFormCreators}
-                conventions={eventConventions}
-                labels={eventFormLabels}
-                triggerLabel={s.accountAddEventLabel}
-                fullWidthTrigger
+          <div className="space-y-10">
+            {/* Your updates — posts about a profile or comic you own. */}
+            <div className="space-y-5">
+              <UpdateFeed
+                emptyLabel={s.accountMyUpdatesEmpty}
+                updates={myUpdates}
+                owner={updateOwnerConfig(s, mentionOptions)}
+                scrollCap
               />
-            )}
-            <EventsManager
-              current={ownedAppearances}
-              labels={{
-                heading: s.accountEventsHeading,
-                empty: s.accountEventsEmpty,
-                tablePrefix: s.tableLabel,
-                tbaLabel: s.eventDateTba,
-                removeLabel: s.accountRemoveLabel,
-                editLabel: s.accountEventEditHeading,
-              }}
-              editForm={
-                composerTargets.length > 0
-                  ? { creators: eventFormCreators, labels: eventFormLabels }
-                  : undefined
-              }
-            />
+            </div>
+            {/* Your events — convention appearances. An event is a kind of update
+                ("I'll be at X"), so it shares the Activity timeline. */}
+            <div className="space-y-5">
+              <EventsManager
+                current={ownedAppearances}
+                labels={{
+                  heading: s.accountEventsHeading,
+                  empty: s.accountEventsEmpty,
+                  tablePrefix: s.tableLabel,
+                  tbaLabel: s.eventDateTba,
+                  removeLabel: s.accountRemoveLabel,
+                  editLabel: s.accountEventEditHeading,
+                }}
+                editForm={
+                  composerTargets.length > 0
+                    ? { creators: eventFormCreators, labels: eventFormLabels }
+                    : undefined
+                }
+              />
+            </div>
           </div>
         ),
       },
@@ -869,16 +904,6 @@ export default async function AccountPage({
               <SectionHeading as="h3" size="sm">
                 {settings.sections.booksHeading}
               </SectionHeading>
-              <Button
-                asChild
-                variant="inverse"
-                className="w-full font-black tracking-wide uppercase"
-              >
-                <Link href="/join/comics">
-                  <Plus aria-hidden="true" className="size-4" />
-                  {s.accountAddBookLabel}
-                </Link>
-              </Button>
               <YourComics
                 books={yourComicsBooks}
                 strips={[]}
@@ -890,13 +915,6 @@ export default async function AccountPage({
               <SectionHeading as="h3" size="sm">
                 {settings.sections.stripsHeading}
               </SectionHeading>
-              <StripComposer
-                copy={settings.stripIntake}
-                common={settings.creatorIntake}
-                reviewNotice={settings.reviewNotice}
-                creator={stripComposerCreator}
-                series={stripComposerSeries}
-              />
               <YourComics
                 books={[]}
                 strips={yourStrips}
@@ -904,53 +922,6 @@ export default async function AccountPage({
                 editLabel={s.accountEditLabel}
               />
             </div>
-          </div>
-        ),
-      },
-      {
-        id: "activity",
-        label: s.bunkerTabActivity,
-        content: (
-          <div className="space-y-5">
-            {composerTargets.length > 0 && (
-              <PostUpdateDialog
-                targets={composerTargets}
-                kinds={UPDATE_KINDS}
-                mentions={mentionOptions}
-                labels={composerLabelsFrom(s)}
-                triggerLabel={s.accountAddUpdateLabel}
-                fullWidthTrigger
-              />
-            )}
-            <UpdateFeed
-              emptyLabel={s.accountMyUpdatesEmpty}
-              updates={myUpdates}
-              owner={updateOwnerConfig(s, mentionOptions)}
-              scrollCap
-            />
-          </div>
-        ),
-      },
-      {
-        id: "profile",
-        label: s.bunkerTabProfile,
-        content: (
-          <div className="max-w-prose space-y-3">
-            {ownedCreators[0]?.slug && (
-              <Button
-                asChild
-                variant="inverse"
-                className="font-black tracking-wide uppercase"
-              >
-                <Link href={`/creators/${ownedCreators[0].slug}`}>
-                  {s.accountViewProfileLabel}
-                </Link>
-              </Button>
-            )}
-            {/* A full in-Bunker preview is a follow-up; editing lives in Settings. */}
-            <p className="text-muted-foreground text-sm">
-              {s.accountEditProfileLabel} → {s.dashboardTabSettings}.
-            </p>
           </div>
         ),
       },
@@ -964,106 +935,173 @@ export default async function AccountPage({
   const followsCount = creatorIds.length;
   const cosignsCount = cosignIds.length;
 
-  const bunkerView = (
-    <Section
-      padding="md"
-      maxWidth="3xl"
-      innerClassName="view-enter"
-    >
-      {/* The identity header is the creator's visible header, so the page h1
-          stays for a11y (§10) but is hidden for them; a plain reader sees it. */}
-      <h1
-        className={
-          isCreator
-            ? "sr-only"
-            : "text-2xl font-black tracking-tighter uppercase sm:text-4xl"
-        }
-      >
-        {isCreator ? s.accountUserCreatorHeading : s.accountUserHeading}
-      </h1>
+  // The identity header doubles as the link to the creator's public profile —
+  // the former Bunker "Profile" sub-tab is gone, so the header is the way there.
+  const creatorProfileHref = ownedCreators[0]?.slug
+    ? `/creators/${ownedCreators[0].slug}`
+    : null;
+  const creatorIdentity = ownedCreators[0] ? (
+    <>
+      {/* Round avatar — the app layer's visual voice (§9). */}
+      <div className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-full bg-white/10">
+        {ownedCreators[0].photo ? (
+          <Image
+            src={urlFor(ownedCreators[0].photo).width(288).url()}
+            alt=""
+            fill
+            sizes="96px"
+            className="object-cover"
+          />
+        ) : (
+          <InitialsAvatar
+            name={ownedCreators[0].name ?? ""}
+            className="text-3xl"
+          />
+        )}
+      </div>
+      <div className="min-w-0">
+        <p className="text-foreground group-hover:text-primary text-2xl font-black tracking-tight transition-colors">
+          {ownedCreators[0].name}
+        </p>
+        {(ownedCreators[0].studio?.name ??
+          formatPlace(ownedCreators[0].place)) && (
+          <p className="text-muted-foreground">
+            {ownedCreators[0].studio?.name ??
+              formatPlace(ownedCreators[0].place)}
+          </p>
+        )}
+      </div>
+    </>
+  ) : null;
 
-      {!isCreator ? (
-        <div>
-          {session.user?.name && (
-            <p className="text-foreground mt-2 font-bold">{session.user.name}</p>
-          )}
-          <p className="text-muted-foreground text-sm">{email}</p>
-        </div>
-      ) : (
-        ownedCreators[0] && (
-          <div>
-            <div className="flex items-center gap-4">
-              {/* Round avatar — the app layer's visual voice (§9). */}
-              <div className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-full bg-white/10">
-                {ownedCreators[0].photo ? (
-                  <Image
-                    src={urlFor(ownedCreators[0].photo).width(288).url()}
-                    alt=""
-                    fill
-                    sizes="96px"
-                    className="object-cover"
-                  />
-                ) : (
-                  <InitialsAvatar
-                    name={ownedCreators[0].name ?? ""}
-                    className="text-3xl"
-                  />
-                )}
-              </div>
-              <div className="min-w-0">
-                <p className="text-foreground text-2xl font-black tracking-tight">
-                  {ownedCreators[0].name}
+  const bunkerView = (
+    <Section padding="md" maxWidth="3xl" innerClassName="view-enter">
+      {/* Identity header on the left, Preferences gear on the right. The page h1
+          stays for a11y (§10) but is hidden for creators, who see their own name
+          header; a plain reader sees it. */}
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h1
+            className={
+              isCreator
+                ? "sr-only"
+                : "text-2xl font-black tracking-tighter uppercase sm:text-4xl"
+            }
+          >
+            {isCreator ? s.accountUserCreatorHeading : s.accountUserHeading}
+          </h1>
+
+          {!isCreator ? (
+            <div>
+              {session.user?.name && (
+                <p className="text-foreground mt-2 font-bold">
+                  {session.user.name}
                 </p>
-                {(ownedCreators[0].studio?.name ??
-                  formatPlace(ownedCreators[0].place)) && (
-                  <p className="text-muted-foreground">
-                    {ownedCreators[0].studio?.name ??
-                      formatPlace(ownedCreators[0].place)}
-                  </p>
-                )}
-              </div>
+              )}
+              <p className="text-muted-foreground text-sm">{email}</p>
             </div>
-            {/* Your own numbers — self-knowledge, never a scoreboard (§3).
+          ) : (
+            ownedCreators[0] && (
+              <div>
+                {creatorProfileHref ? (
+                  <Link
+                    href={creatorProfileHref}
+                    className="group focus-visible:ring-ring inline-flex items-center gap-4 focus-visible:ring-2 focus-visible:outline-none"
+                  >
+                    {creatorIdentity}
+                  </Link>
+                ) : (
+                  <div className="flex items-center gap-4">
+                    {creatorIdentity}
+                  </div>
+                )}
+                {/* Your own numbers — self-knowledge, never a scoreboard (§3).
                 Followers is a count only (follows are stored hashed, so there's
                 no who-follows-you list to open); follows + cosigns → Network. */}
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-sm">
-              {/* "faved by" reads before the count — "faved by 12" — unlike the
+                <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-sm">
+                  {/* "faved by" reads before the count — "faved by 12" — unlike the
                   follows/cosigns stats, which read "12 faves" / "12 cosigns". */}
-              <span>
-                <span className="text-muted-foreground">
-                  {s.accountFollowersLabel}
-                </span>{" "}
-                <span className="text-foreground font-bold">
-                  {followers.toLocaleString("en-US")}
-                </span>
-              </span>
-              <Link
-                href="/me?view=saved"
-                className="hover:text-primary underline underline-offset-2"
-              >
-                <span className="text-foreground font-bold">
-                  {followsCount.toLocaleString("en-US")}
-                </span>{" "}
-                <span className="text-muted-foreground">
-                  {s.accountFollowsLabel}
-                </span>
-              </Link>
-              <Link
-                href="/me?view=saved"
-                className="hover:text-primary underline underline-offset-2"
-              >
-                <span className="text-foreground font-bold">
-                  {cosignsCount.toLocaleString("en-US")}
-                </span>{" "}
-                <span className="text-muted-foreground">
-                  {s.accountCosignsLabel}
-                </span>
-              </Link>
-            </div>
-          </div>
-        )
-      )}
+                  <span>
+                    <span className="text-muted-foreground">
+                      {s.accountFollowersLabel}
+                    </span>{" "}
+                    <span className="text-foreground font-bold">
+                      {followers.toLocaleString("en-US")}
+                    </span>
+                  </span>
+                  <Link
+                    href="/me?view=saved"
+                    className="hover:text-primary underline underline-offset-2"
+                  >
+                    <span className="text-foreground font-bold">
+                      {followsCount.toLocaleString("en-US")}
+                    </span>{" "}
+                    <span className="text-muted-foreground">
+                      {s.accountFollowsLabel}
+                    </span>
+                  </Link>
+                  <Link
+                    href="/me?view=saved"
+                    className="hover:text-primary underline underline-offset-2"
+                  >
+                    <span className="text-foreground font-bold">
+                      {cosignsCount.toLocaleString("en-US")}
+                    </span>{" "}
+                    <span className="text-muted-foreground">
+                      {s.accountCosignsLabel}
+                    </span>
+                  </Link>
+                </div>
+              </div>
+            )
+          )}
+        </div>
+        {/* Preferences gear — the account settings surface (sign-out, newsletter,
+            and for creators notifications). Replaced the Settings nav tab; shown
+            to every signed-in user. */}
+        <Link
+          href="/me?view=settings"
+          aria-label={s.dashboardTabSettings}
+          className="text-muted-foreground hover:text-primary focus-visible:ring-ring shrink-0 focus-visible:ring-2 focus-visible:outline-none"
+        >
+          <SlidersHorizontal aria-hidden="true" className="size-5" />
+        </Link>
+      </div>
 
+      {/* One entry point for all creation — replaces the four add-buttons that
+          used to live scattered across the sub-tabs. */}
+      {composerTargets.length > 0 && (
+        <div className="mt-6 flex justify-start">
+          <BunkerCreateMenu
+            createLabel={s.accountCreateLabel}
+            itemLabels={{
+              update: s.accountAddUpdateLabel,
+              event: s.accountAddEventLabel,
+              comic: s.accountAddBookLabel,
+              strip: s.accountAddStripLabel,
+            }}
+            comicHref="/join/comics"
+            update={{
+              targets: composerTargets,
+              kinds: UPDATE_KINDS,
+              mentions: mentionOptions,
+              labels: composerLabelsFrom(s),
+            }}
+            event={{
+              creators: eventFormCreators,
+              conventions: eventConventions,
+              labels: eventFormLabels,
+            }}
+            strip={{
+              copy: settings.stripIntake,
+              common: settings.creatorIntake,
+              reviewNotice: settings.reviewNotice,
+              creator: stripComposerCreator,
+              series: stripComposerSeries,
+            }}
+          />
+        </div>
+      )}
       <div className="mt-6">
         <BunkerTabs tabs={bunkerTabs} />
       </div>
@@ -1071,27 +1109,21 @@ export default async function AccountPage({
   );
 
   const networkView = (
-    <Section
-      padding="md"
-      maxWidth="3xl"
-      innerClassName="view-enter"
-    >
+    <Section padding="md" maxWidth="3xl" innerClassName="view-enter">
       {col3Tabs.length > 0 && <TabbedPanel tabs={col3Tabs} />}
     </Section>
   );
 
   const favesView = (
-    <Section
-      padding="md"
-      maxWidth="3xl"
-      innerClassName="view-enter"
-    >
+    <Section padding="md" maxWidth="3xl" innerClassName="view-enter">
       {favesTabs.length > 0 ? (
         <TabbedPanel tabs={favesTabs} />
       ) : (
         // An empty shelf is a discovery moment, not a dead end (§3).
         <div className="max-w-prose">
-          <p className="text-muted-foreground text-sm">{settings.empty.saved}</p>
+          <p className="text-muted-foreground text-sm">
+            {settings.empty.saved}
+          </p>
           <Link
             href="/comics"
             className="text-primary hover:text-primary focus-visible:ring-ring mt-4 inline-block text-sm font-black tracking-widest uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none"
@@ -1104,11 +1136,7 @@ export default async function AccountPage({
   );
 
   const settingsView = (
-    <Section
-      padding="md"
-      maxWidth="3xl"
-      innerClassName="view-enter"
-    >
+    <Section padding="md" maxWidth="3xl" innerClassName="view-enter">
       <div className="space-y-3">
         <SectionHeading as="h2" size="sm">
           {s.accountSettingsHeading}
@@ -1117,21 +1145,9 @@ export default async function AccountPage({
           <p className="text-foreground font-bold">{session.user.name}</p>
         )}
         <p className="text-muted-foreground text-sm">{email}</p>
+        {/* Edit Profile now lives on the creator's public profile (owner gear);
+            this surface is account preferences only. */}
         <div className="flex flex-wrap gap-2 pt-1">
-          {isCreator && ownedCreators[0] && (
-            <Button
-              asChild
-              variant="inverse"
-              size="sm"
-              className="font-black tracking-wide uppercase"
-            >
-              <Link
-                href={`/join/creators?editing=${encodeURIComponent(ownedCreators[0]._id)}`}
-              >
-                {s.accountEditProfileLabel}
-              </Link>
-            </Button>
-          )}
           <SignOutButton
             label={settings.creatorIntake.signOutLabel}
             redirectTo="/"
@@ -1160,64 +1176,6 @@ export default async function AccountPage({
               },
             ]}
           />
-        </div>
-      )}
-
-      {/* Your Media — owners of an outlet manage it here. */}
-      {ownedMedia.length > 0 && (
-        <div className="mt-10">
-          <SectionHeading as="h2" size="sm">
-            {s.accountMediaHeading}
-          </SectionHeading>
-          <ul className={FEED_GRID}>
-            {ownedMedia.map((outlet) => {
-              const mediaHref = outlet.slug ? `/media/${outlet.slug}` : null;
-              return (
-                <li
-                  key={outlet._id}
-                  className="border-border flex items-center gap-3 border-b py-3"
-                >
-                  <div className="bg-background relative aspect-square w-9 shrink-0 overflow-hidden">
-                    {outlet.logo && (
-                      <Image
-                        src={urlFor(outlet.logo).width(72).url()}
-                        alt=""
-                        fill
-                        sizes="36px"
-                        className="object-contain"
-                      />
-                    )}
-                  </div>
-                  {mediaHref ? (
-                    <Link
-                      href={mediaHref}
-                      className="hover:text-primary min-w-0 flex-1 truncate text-sm font-bold transition-colors"
-                    >
-                      {outlet.name}
-                    </Link>
-                  ) : (
-                    <span className="min-w-0 flex-1 truncate text-sm font-bold">
-                      {outlet.name}
-                    </span>
-                  )}
-                  <div className="flex shrink-0 gap-2">
-                    <Button asChild variant="outline" size="sm">
-                      <Link
-                        href={`/join/media?editing=${encodeURIComponent(outlet._id)}`}
-                      >
-                        {s.accountEditLabel}
-                      </Link>
-                    </Button>
-                    {mediaHref && (
-                      <Button asChild variant="outline" size="sm">
-                        <Link href={mediaHref}>{s.accountViewMediaLabel}</Link>
-                      </Button>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
         </div>
       )}
 

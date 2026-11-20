@@ -1,40 +1,43 @@
-import type { Metadata } from 'next'
-import Image from 'next/image'
-import { notFound } from 'next/navigation'
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 
-import { FeedPreview } from '@/components/feed-preview'
-import { GenreBadge } from '@/components/genre-badge'
-import { ShareBar } from '@/components/share-bar'
-import { Badge } from '@/components/ui/badge'
-import { Section } from '@/components/ui/section'
-import { fetchFeed } from '@/lib/feed-parse'
-import { pageMetadata } from '@/lib/page-metadata'
-import { safeFetch, MEDIA_DETAIL_QUERY } from '@/lib/queries'
-import { getSiteSettings } from '@/lib/site-settings'
-import { absoluteUrl } from '@/lib/site-url'
-import type { Genre, MediaDetail } from '@/lib/types'
-import { externalHref, hostLabel } from '@/lib/utils'
-import { urlFor } from '@/sanity/image'
+import { FeedPreview } from "@/components/feed-preview";
+import { GenreBadge } from "@/components/genre-badge";
+import { ShareBar } from "@/components/share-bar";
+import { Badge } from "@/components/ui/badge";
+import { Section } from "@/components/ui/section";
+import { fetchFeed } from "@/lib/feed-parse";
+import { pageMetadata } from "@/lib/page-metadata";
+import { safeFetch, MEDIA_DETAIL_QUERY } from "@/lib/queries";
+import { getSiteSettings } from "@/lib/site-settings";
+import { absoluteUrl } from "@/lib/site-url";
+import type { Genre, MediaDetail } from "@/lib/types";
+import { externalHref, hostLabel } from "@/lib/utils";
+import { urlFor } from "@/sanity/image";
+import { ownsDoc } from "@/sanity/ownership-client";
+import { auth } from "@/auth";
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params
+  const { slug } = await params;
   const [settings, media] = await Promise.all([
     getSiteSettings(),
     safeFetch<MediaDetail | null>(MEDIA_DETAIL_QUERY, { slug }, null),
-  ])
-  if (!media) return {}
+  ]);
+  if (!media) return {};
   return pageMetadata({
     title: media.name,
     description: media.about,
     path: `/media/${slug}`,
     siteTitle: settings.siteTitle,
-  })
+  });
 }
 
 /**
@@ -42,31 +45,51 @@ export async function generateMetadata({
  * to get covered. Carries the same independence disclaimer as the listing: not
  * an ND Riot endorsement.
  */
-export default async function MediaDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
-  const [settings, media] = await Promise.all([
+export default async function MediaDetailPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const [settings, media, session] = await Promise.all([
     getSiteSettings(),
     safeFetch<MediaDetail | null>(MEDIA_DETAIL_QUERY, { slug }, null),
-  ])
-  if (!media) notFound()
+    auth(),
+  ]);
+  if (!media) notFound();
 
-  const sections = settings.sections
+  const sections = settings.sections;
+
+  // Owner-only edit shortcut — outlet management moved off the /me dashboard onto
+  // the outlet's own page (same rule as a creator editing from their profile).
+  const email = session?.user?.email;
+  const isOwner = email ? await ownsDoc(email, media._id) : false;
 
   // Their own feed — shown only by invitation (consent flag) and only when a
   // feed is actually there. Cached for half an hour; a dead feed returns null.
   const feed =
     media.feedConsent && media.feedUrl
       ? await fetchFeed(media.feedUrl, { revalidate: 1800 })
-      : null
+      : null;
 
   return (
     <Section padding="md" maxWidth="3xl">
+      {isOwner && (
+        <div className="border-primary/40 mb-6 flex justify-end border-b pb-3">
+          <Link
+            href={`/join/media?editing=${encodeURIComponent(media._id)}`}
+            className="focus-visible:ring-ring text-primary text-xs font-bold tracking-widest uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none"
+          >
+            {sections.mediaOwnerEditLabel}
+          </Link>
+        </div>
+      )}
       <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
         {media.logo && (
           <div className="relative h-32 w-32 shrink-0">
             <Image
               src={urlFor(media.logo).width(256).url()}
-              alt={media.logo.alt ?? ''}
+              alt={media.logo.alt ?? ""}
               fill
               sizes="128px"
               className="object-contain"
@@ -74,17 +97,25 @@ export default async function MediaDetailPage({ params }: { params: Promise<{ sl
           </div>
         )}
         <div>
-          <h1 className="text-4xl font-black tracking-tighter uppercase">{media.name}</h1>
+          <h1 className="text-4xl font-black tracking-tighter uppercase">
+            {media.name}
+          </h1>
           {media.kinds && media.kinds.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1.5">
               {media.kinds.map((k) => (
-                <Badge key={k} variant="outline" className="tracking-wider uppercase">
+                <Badge
+                  key={k}
+                  variant="outline"
+                  className="tracking-wider uppercase"
+                >
                   {k}
                 </Badge>
               ))}
             </div>
           )}
-          {media.about && <p className="mt-4 max-w-prose text-sm">{media.about}</p>}
+          {media.about && (
+            <p className="mt-4 max-w-prose text-sm">{media.about}</p>
+          )}
           {media.genresCovered && media.genresCovered.length > 0 && (
             <div className="mt-6">
               <h2 className="text-muted-foreground text-lg font-black tracking-widest uppercase">
@@ -102,18 +133,28 @@ export default async function MediaDetailPage({ params }: { params: Promise<{ sl
 
       {media.pitchInfo && (
         <div className="mt-10">
-          <h2 className="text-lg font-black tracking-widest uppercase">{sections.mediaPitchHeading}</h2>
-          <p className="mt-2 max-w-prose text-sm whitespace-pre-line">{media.pitchInfo}</p>
+          <h2 className="text-lg font-black tracking-widest uppercase">
+            {sections.mediaPitchHeading}
+          </h2>
+          <p className="mt-2 max-w-prose text-sm whitespace-pre-line">
+            {media.pitchInfo}
+          </p>
         </div>
       )}
 
       {media.links && media.links.length > 0 && (
         <div className="mt-10">
-          <h2 className="text-lg font-black tracking-widest uppercase">{sections.mediaLinksHeading}</h2>
+          <h2 className="text-lg font-black tracking-widest uppercase">
+            {sections.mediaLinksHeading}
+          </h2>
           <div className="mt-3 flex flex-wrap gap-2">
             {media.links.map((link) => (
               <Badge key={link.url} variant="outline" asChild>
-                <a href={externalHref(link.url)} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={externalHref(link.url)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   {link.label || link.url}
                 </a>
               </Badge>
@@ -126,8 +167,8 @@ export default async function MediaDetailPage({ params }: { params: Promise<{ sl
         <div className="mt-10">
           <FeedPreview
             heading={sections.feedHeading
-              .replace('{name}', media.name)
-              .replace('{baseURL}', hostLabel(media.feedUrl))}
+              .replace("{name}", media.name)
+              .replace("{baseURL}", hostLabel(media.feedUrl))}
             entries={feed.entries}
           />
         </div>
@@ -145,5 +186,5 @@ export default async function MediaDetailPage({ params }: { params: Promise<{ sl
         {sections.mediaDisclaimer}
       </p>
     </Section>
-  )
+  );
 }

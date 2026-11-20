@@ -1618,9 +1618,11 @@ export type SiteSettings = {
     accountComicsHeading?: string;
     accountMediaHeading?: string;
     accountEditLabel?: string;
+    accountCreateLabel?: string;
     accountAddBookLabel?: string;
     accountAddUpdateLabel?: string;
     accountAddEventLabel?: string;
+    accountAddStripLabel?: string;
     accountRiotingSince?: string;
     accountViewMediaLabel?: string;
     accountSavedComicsHeading?: string;
@@ -1712,6 +1714,7 @@ export type SiteSettings = {
     profileTabLabel?: string;
     dashboardTabLabel?: string;
     profileOwnerEditLabel?: string;
+    mediaOwnerEditLabel?: string;
     profileManageUpdatesLabel?: string;
     creatorWorksHeading?: string;
     creatorOrganizationsHeading?: string;

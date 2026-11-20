@@ -1,35 +1,38 @@
-import Link from 'next/link'
-import { Rss } from 'lucide-react'
+import Link from "next/link";
+import { Rss } from "lucide-react";
 
-import { FooterGate } from '@/components/footer-gate'
-import { Logo } from '@/components/logo'
-import { MainNav } from '@/components/main-nav'
-import { SiteHeader } from '@/components/site-header'
-import { SocialIcon } from '@/components/social-icon'
-import { UserNav } from '@/components/user-nav'
-import { auth, signIn } from '@/auth'
-import { cn } from '@/lib/utils'
-import { genreOptions } from '@/lib/filters'
+import { FooterGate } from "@/components/footer-gate";
+import { Logo } from "@/components/logo";
+import { MainNav } from "@/components/main-nav";
+import { SiteHeader } from "@/components/site-header";
+import { SocialIcon } from "@/components/social-icon";
+import { UserNav } from "@/components/user-nav";
+import { auth, signIn } from "@/auth";
+import { cn } from "@/lib/utils";
+import { genreOptions } from "@/lib/filters";
 import {
   safeFetch,
   GENRES_WITH_BOOKS_QUERY,
   RESOURCE_CATEGORIES_WITH_CONTENT_QUERY,
   CREATOR_HERO_QUERY,
   RAG_OPEN_SUBMISSIONS_QUERY,
-} from '@/lib/queries'
-import type { RagOpenSubmission } from '@/lib/types'
-import { creatorsOwnedBy } from '@/sanity/ownership-client'
-import { pendingCollabCount } from '@/sanity/collab-client'
-import { pendingRequestCount, unreadThreadCount } from '@/sanity/message-client'
-import { totalUnread as forumUnreadCount } from '@/sanity/forum-client'
-import { urlFor } from '@/sanity/image'
-import { getSiteSettings } from '@/lib/site-settings'
-import { RESOURCE_CATEGORIES } from '@/lib/taxonomy'
+} from "@/lib/queries";
+import type { RagOpenSubmission } from "@/lib/types";
+import { creatorsOwnedBy } from "@/sanity/ownership-client";
+import { pendingCollabCount } from "@/sanity/collab-client";
+import {
+  pendingRequestCount,
+  unreadThreadCount,
+} from "@/sanity/message-client";
+import { totalUnread as forumUnreadCount } from "@/sanity/forum-client";
+import { urlFor } from "@/sanity/image";
+import { getSiteSettings } from "@/lib/site-settings";
+import { RESOURCE_CATEGORIES } from "@/lib/taxonomy";
 
 const FOOTER_LINK =
-  'hover:text-primary focus-visible:ring-ring transition-colors focus-visible:ring-2 focus-visible:outline-none'
+  "hover:text-primary focus-visible:ring-ring transition-colors focus-visible:ring-2 focus-visible:outline-none";
 const SOCIAL_LINK =
-  'hover:text-primary focus-visible:ring-ring flex size-9 items-center justify-center transition-colors focus-visible:ring-2 focus-visible:outline-none'
+  "hover:text-primary focus-visible:ring-ring flex size-9 items-center justify-center transition-colors focus-visible:ring-2 focus-visible:outline-none";
 
 /**
  * Site chrome.
@@ -44,57 +47,68 @@ const SOCIAL_LINK =
  * container to draw a full-bleed background, which is what they were doing
  * with negative margins before.
  */
-export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const [settings, genresWithBooks, resourceCategories, session, openRagIssues] =
-    await Promise.all([
-      getSiteSettings(),
-      safeFetch<string[]>(GENRES_WITH_BOOKS_QUERY, {}, []),
-      safeFetch<string[]>(RESOURCE_CATEGORIES_WITH_CONTENT_QUERY, {}, []),
-      auth(),
-      safeFetch<RagOpenSubmission[]>(RAG_OPEN_SUBMISSIONS_QUERY, {}, []),
-    ])
-  const navGenres = genreOptions(genresWithBooks)
+export default async function SiteLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [
+    settings,
+    genresWithBooks,
+    resourceCategories,
+    session,
+    openRagIssues,
+  ] = await Promise.all([
+    getSiteSettings(),
+    safeFetch<string[]>(GENRES_WITH_BOOKS_QUERY, {}, []),
+    safeFetch<string[]>(RESOURCE_CATEGORIES_WITH_CONTENT_QUERY, {}, []),
+    auth(),
+    safeFetch<RagOpenSubmission[]>(RAG_OPEN_SUBMISSIONS_QUERY, {}, []),
+  ]);
+  const navGenres = genreOptions(genresWithBooks);
   // Only categories that have content, in taxonomy order — so nav links never
   // point at an empty category.
-  const navCategories = RESOURCE_CATEGORIES.filter((category) => resourceCategories.includes(category))
+  const navCategories = RESOURCE_CATEGORIES.filter((category) =>
+    resourceCategories.includes(category),
+  );
 
   // The nav avatar: prefer the creator's own ND Riot profile photo (the one they
   // uploaded), so the masthead reflects their identity here rather than Google's.
   // Plain readers (no profile) keep their Google account image.
-  let avatar = session?.user?.image ?? null
-  let isCreator = false
+  let avatar = session?.user?.image ?? null;
+  let isCreator = false;
   // Pending actions awaiting a signed-in creator — incoming message requests +
   // pending collab requests — shown as a Network badge on every page.
-  let pendingActions = 0
+  let pendingActions = 0;
   // Unread forum threads — the Forum tab's badge (creators only).
-  let forumUnread = 0
-  const email = session?.user?.email
+  let forumUnread = 0;
+  const email = session?.user?.email;
   if (email) {
-    const owned = await creatorsOwnedBy(email)
-    isCreator = owned.length > 0
+    const owned = await creatorsOwnedBy(email);
+    isCreator = owned.length > 0;
     if (owned.length) {
       const profile = await safeFetch<{
-        photo: Parameters<typeof urlFor>[0] | null
-      } | null>(CREATOR_HERO_QUERY, { id: owned[0] }, null)
+        photo: Parameters<typeof urlFor>[0] | null;
+      } | null>(CREATOR_HERO_QUERY, { id: owned[0] }, null);
       if (profile?.photo) {
-        avatar = urlFor(profile.photo).width(96).height(96).fit('crop').url()
+        avatar = urlFor(profile.photo).width(96).height(96).fit("crop").url();
       }
       const [pendingMsgs, pendingCollabs, unread, forum] = await Promise.all([
         pendingRequestCount(owned[0]),
         pendingCollabCount(owned[0]),
         unreadThreadCount(owned[0]),
         forumUnreadCount(owned[0]),
-      ])
-      pendingActions = pendingMsgs + pendingCollabs + unread
-      forumUnread = forum
+      ]);
+      pendingActions = pendingMsgs + pendingCollabs + unread;
+      forumUnread = forum;
     }
   }
-  const s = settings.sections
+  const s = settings.sections;
 
   // The Rag submit shortcut (5th user-nav item) — only for signed-in creators,
   // only while an issue is accepting submissions, pointing at the OLDEST open
   // issue (the one the home banner also targets).
-  const submitIssue = isCreator ? (openRagIssues[0] ?? null) : null
+  const submitIssue = isCreator ? (openRagIssues[0] ?? null) : null;
 
   return (
     <>
@@ -126,8 +140,8 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
               <div className="text-foreground/80 flex items-center gap-2 text-sm font-bold tracking-wide uppercase">
                 <form
                   action={async () => {
-                    'use server'
-                    await signIn('google', { redirectTo: '/me' })
+                    "use server";
+                    await signIn("google", { redirectTo: "/me" });
                   }}
                 >
                   <button
@@ -150,7 +164,11 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
             )}
           </div>
           <div className="flex items-center gap-3 lg:gap-5">
-            <MainNav nav={settings.nav} genres={navGenres} resourceCategories={navCategories} />
+            <MainNav
+              nav={settings.nav}
+              genres={navGenres}
+              resourceCategories={navCategories}
+            />
             {settings.discordUrl && (
               <a
                 href={settings.discordUrl}
@@ -198,7 +216,6 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
                 ]
               : []),
             { id: "saved", label: s.dashboardTabSaved },
-            { id: "settings", label: s.dashboardTabSettings },
             ...(submitIssue
               ? [
                   {
@@ -223,106 +240,129 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
           for the content pages. On /me, the mobile-island clearance that this
           pb normally provides is carried by the page itself instead. */}
       <FooterGate>
-      {/* pb clears the fixed mobile island at the bottom of the page (signed in). */}
-      <footer
-        className={cn(
-          "border-primary/40 border-t px-6",
-          email && "pb-28 md:pb-0",
-        )}
-      >
-        <div className="text-muted-foreground mx-auto flex max-w-[90rem] flex-col items-center gap-8 py-8 text-center text-xs tracking-widest uppercase">
-          {/* Footer nav — Get Listed is the intake funnel, moved down here out of
+        {/* pb clears the fixed mobile island at the bottom of the page (signed in). */}
+        <footer
+          className={cn(
+            "border-primary/40 border-t px-6",
+            email && "pb-28 md:pb-0",
+          )}
+        >
+          <div className="text-muted-foreground mx-auto flex max-w-[90rem] flex-col items-center gap-8 py-8 text-center text-xs tracking-widest uppercase">
+            {/* Footer nav — Get Listed is the intake funnel, moved down here out of
               the header; The Riot gathers About + Contact. */}
-          <nav className="flex flex-wrap justify-center gap-x-12 gap-y-6">
-            <div>
-              <p className="text-foreground mb-2 font-bold">{s.footerGetListedHeading}</p>
-              <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1">
-                <li>
-                  <Link href="/join/creators" className={FOOTER_LINK}>{s.footerJoinCreatorsLabel}</Link>
-                </li>
-                <li>
-                  <Link href="/join/comics" className={FOOTER_LINK}>{s.footerJoinComicsLabel}</Link>
-                </li>
-                <li>
-                  <Link href="/join/media" className={FOOTER_LINK}>{s.footerJoinMediaLabel}</Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <p className="text-foreground mb-2 font-bold">{s.footerRiotHeading}</p>
-              <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1">
-                <li>
-                  <Link href="/about" className={FOOTER_LINK}>{s.footerAboutLabel}</Link>
-                </li>
-                <li>
-                  <Link href="/contact" className={FOOTER_LINK}>{settings.contact.linkLabel}</Link>
-                </li>
-                <li>
-                  <Link href="/privacy" className={FOOTER_LINK}>{s.footerPrivacyLabel}</Link>
-                </li>
-              </ul>
-            </div>
-            {/* RSS — the feeds we already publish, for anyone who reads by feed.
+            <nav className="flex flex-wrap justify-center gap-x-12 gap-y-6">
+              <div>
+                <p className="text-foreground mb-2 font-bold">
+                  {s.footerGetListedHeading}
+                </p>
+                <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1">
+                  <li>
+                    <Link href="/join/creators" className={FOOTER_LINK}>
+                      {s.footerJoinCreatorsLabel}
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/join/comics" className={FOOTER_LINK}>
+                      {s.footerJoinComicsLabel}
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/join/media" className={FOOTER_LINK}>
+                      {s.footerJoinMediaLabel}
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <p className="text-foreground mb-2 font-bold">
+                  {s.footerRiotHeading}
+                </p>
+                <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1">
+                  <li>
+                    <Link href="/about" className={FOOTER_LINK}>
+                      {s.footerAboutLabel}
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/contact" className={FOOTER_LINK}>
+                      {settings.contact.linkLabel}
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/privacy" className={FOOTER_LINK}>
+                      {s.footerPrivacyLabel}
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+              {/* RSS — the feeds we already publish, for anyone who reads by feed.
                 Plain <a>: these are .xml route handlers, not app routes. Editorial
                 stays out (its section is hidden). */}
-            <div>
-              <p className="text-foreground mb-2 flex items-center justify-center gap-1.5 font-bold">
-                <Rss aria-hidden="true" className="size-3.5" />
-                {s.footerFeedsHeading}
-              </p>
-              <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1">
-                <li>
-                  <a href="/feeds/comics.xml" className={FOOTER_LINK}>{s.footerJoinComicsLabel}</a>
-                </li>
-                <li>
-                  <a href="/feeds/media.xml" className={FOOTER_LINK}>{s.footerJoinMediaLabel}</a>
-                </li>
+              <div>
+                <p className="text-foreground mb-2 flex items-center justify-center gap-1.5 font-bold">
+                  <Rss aria-hidden="true" className="size-3.5" />
+                  {s.footerFeedsHeading}
+                </p>
+                <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1">
+                  <li>
+                    <a href="/feeds/comics.xml" className={FOOTER_LINK}>
+                      {s.footerJoinComicsLabel}
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/feeds/media.xml" className={FOOTER_LINK}>
+                      {s.footerJoinMediaLabel}
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </nav>
+
+            {/* Social — one row: Discord (the community hub) plus the follow accounts. */}
+            {(settings.discordUrl || settings.socialLinks.length > 0) && (
+              <ul className="flex flex-wrap items-center justify-center gap-1">
+                {settings.discordUrl && (
+                  <li>
+                    <a
+                      href={settings.discordUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="ND Riot Discord"
+                      className={SOCIAL_LINK}
+                    >
+                      <SocialIcon platform="Discord" className="size-4" />
+                    </a>
+                  </li>
+                )}
+                {settings.socialLinks.map((social) => (
+                  <li key={social.url}>
+                    <a
+                      href={social.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`ND Riot on ${social.platform}`}
+                      title={`ND Riot on ${social.platform}`}
+                      className={SOCIAL_LINK}
+                    >
+                      <SocialIcon
+                        platform={social.platform}
+                        className="size-4"
+                      />
+                    </a>
+                  </li>
+                ))}
               </ul>
-            </div>
-          </nav>
+            )}
 
-          {/* Social — one row: Discord (the community hub) plus the follow accounts. */}
-          {(settings.discordUrl || settings.socialLinks.length > 0) && (
-            <ul className="flex flex-wrap items-center justify-center gap-1">
-              {settings.discordUrl && (
-                <li>
-                  <a
-                    href={settings.discordUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="ND Riot Discord"
-                    className={SOCIAL_LINK}
-                  >
-                    <SocialIcon platform="Discord" className="size-4" />
-                  </a>
-                </li>
-              )}
-              {settings.socialLinks.map((social) => (
-                <li key={social.url}>
-                  <a
-                    href={social.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`ND Riot on ${social.platform}`}
-                    title={`ND Riot on ${social.platform}`}
-                    className={SOCIAL_LINK}
-                  >
-                    <SocialIcon platform={social.platform} className="size-4" />
-                  </a>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {/* Sign-off: the lockup rendered as a quiet gray mark (grayscale so the
+            {/* Sign-off: the lockup rendered as a quiet gray mark (grayscale so the
               pink recedes here, unlike the nav), above the tagline. */}
-          <div className="flex flex-col items-center gap-3 pt-2">
-            <Logo size="footer" alt="" className="opacity-75 grayscale" />
-            <span>{settings.footer}</span>
+            <div className="flex flex-col items-center gap-3 pt-2">
+              <Logo size="footer" alt="" className="opacity-75 grayscale" />
+              <span>{settings.footer}</span>
+            </div>
           </div>
-        </div>
-      </footer>
+        </footer>
       </FooterGate>
     </>
-  )
+  );
 }

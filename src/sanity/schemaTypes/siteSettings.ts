@@ -1773,9 +1773,11 @@ export default defineType({
           type: "string",
           description: 'On each owned item — e.g. "Edit".',
         }),
-        defineField({ name: "accountAddBookLabel", title: "Dashboard — + Book button", type: "string", description: 'Shown with a "+" icon, e.g. "Comic".' }),
-        defineField({ name: "accountAddUpdateLabel", title: "Dashboard — + Update button", type: "string" }),
-        defineField({ name: "accountAddEventLabel", title: "Dashboard — + Event button", type: "string" }),
+        defineField({ name: "accountCreateLabel", title: "Bunker — + Create menu button", type: "string", description: 'The dashboard\'s single create menu, shown with a "+" icon — e.g. "Create".' }),
+        defineField({ name: "accountAddBookLabel", title: "Bunker — Create menu: Comic", type: "string", description: 'The "Comic" item in the + Create menu (routes to the comic intake form).' }),
+        defineField({ name: "accountAddUpdateLabel", title: "Bunker — Create menu: Update", type: "string" }),
+        defineField({ name: "accountAddEventLabel", title: "Bunker — Create menu: Event", type: "string" }),
+        defineField({ name: "accountAddStripLabel", title: "Bunker — Create menu: Strip", type: "string" }),
         defineField({
           name: "accountRiotingSince",
           title: "Reader home — creator tenure line",
@@ -2161,9 +2163,10 @@ export default defineType({
         }),
         defineField({
           name: "dashboardTabSettings",
-          title: "Dashboard tab — Settings",
+          title: "Preferences — gear label (aria)",
           type: "string",
-          description: "Account details, sign out, and the newsletter opt-in.",
+          description:
+            "The Bunker/profile Preferences gear's accessible label — account details, notifications, newsletter, sign out. (Was the Settings nav tab.) e.g. \"Preferences\".",
         }),
         defineField({
           name: "accountFollowersLabel",
@@ -2365,6 +2368,13 @@ export default defineType({
           type: "string",
           description:
             'The edit shortcut beside the owner tab bar → the full edit form — e.g. "Edit your Profile".',
+        }),
+        defineField({
+          name: "mediaOwnerEditLabel",
+          title: "Media page — owner edit link",
+          type: "string",
+          description:
+            'Owner-only shortcut atop a media outlet\'s page → its edit form (outlet management lives here now, not the dashboard) — e.g. "Edit your Outlet".',
         }),
         defineField({
           name: "profileManageUpdatesLabel",

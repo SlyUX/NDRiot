@@ -858,6 +858,8 @@ export interface SiteSettings {
     accountAddBookLabel: string;
     accountAddUpdateLabel: string;
     accountAddEventLabel: string;
+    accountAddStripLabel: string;
+    accountCreateLabel: string;
     /** Creator tenure line under the name — "{date}" becomes the join month/year. */
     accountRiotingSince: string;
     accountViewMediaLabel: string;
@@ -961,6 +963,7 @@ export interface SiteSettings {
     profileTabLabel: string;
     dashboardTabLabel: string;
     profileOwnerEditLabel: string;
+    mediaOwnerEditLabel: string;
     /** Owner-only link beside their profile's updates → the editable "Your Updates" on the dashboard. */
     profileManageUpdatesLabel: string;
     creatorWorksHeading: string;
@@ -1973,6 +1976,8 @@ const DEFAULTS: SiteSettings = {
     accountAddBookLabel: "Comic",
     accountAddUpdateLabel: "Update",
     accountAddEventLabel: "Event",
+    accountAddStripLabel: "Strip",
+    accountCreateLabel: "Create",
     accountRiotingSince: "Rioting since {date}",
     accountViewMediaLabel: "Media Page",
     accountSavedComicsHeading: "Comics",
@@ -2036,7 +2041,7 @@ const DEFAULTS: SiteSettings = {
     dashboardTabNetwork: "Network",
     dashboardTabForum: "Forum",
     dashboardTabSaved: "Faves",
-    dashboardTabSettings: "Settings",
+    dashboardTabSettings: "Preferences",
     accountFollowersLabel: "faved by",
     accountFollowsLabel: "faves",
     accountCosignsLabel: "cosigns",
@@ -2069,6 +2074,7 @@ const DEFAULTS: SiteSettings = {
     profileTabLabel: "Profile",
     dashboardTabLabel: "Dashboard",
     profileOwnerEditLabel: "Edit your Profile",
+    mediaOwnerEditLabel: "Edit your Outlet",
     profileManageUpdatesLabel: "Manage on your dashboard",
     creatorWorksHeading: "Where to find {name}’s work",
     creatorOrganizationsHeading: "Member of",

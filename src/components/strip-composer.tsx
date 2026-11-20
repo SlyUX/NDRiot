@@ -40,6 +40,9 @@ export function StripComposer({
   className,
   initial,
   editTriggerLabel,
+  open: openProp,
+  onOpenChange,
+  hideTrigger = false,
 }: {
   copy: StripIntakeSettings
   common: CreatorIntakeSettings
@@ -58,31 +61,40 @@ export function StripComposer({
    * across the RSC boundary (radix-ui#4150).
    */
   editTriggerLabel?: string
+  /** Controlled open — when an external menu drives it (the Bunker + Create). */
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  /** Render no built-in trigger (the external menu provides one). */
+  hideTrigger?: boolean
 }) {
-  const [open, setOpen] = useState(false)
+  const [openState, setOpenState] = useState(false)
+  const open = openProp ?? openState
+  const setOpen = onOpenChange ?? setOpenState
   const editing = Boolean(initial)
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {editTriggerLabel ? (
-          <button
-            type="button"
-            aria-label={editTriggerLabel}
-            className="focus-visible:ring-ring inline-flex bg-black/70 p-1.5 text-white transition-colors hover:text-white/70 focus-visible:ring-2 focus-visible:-outline-offset-2 focus-visible:outline-none"
-          >
-            <Pencil aria-hidden="true" className="size-3.5" />
-          </button>
-        ) : (
-          <Button
-            variant="inverse"
-            size="sm"
-            className={cn("font-black tracking-wide uppercase", className)}
-          >
-            <Plus aria-hidden="true" className="size-4" />
-            {copy.composerButton}
-          </Button>
-        )}
-      </DialogTrigger>
+      {!hideTrigger && (
+        <DialogTrigger asChild>
+          {editTriggerLabel ? (
+            <button
+              type="button"
+              aria-label={editTriggerLabel}
+              className="focus-visible:ring-ring inline-flex bg-black/70 p-1.5 text-white transition-colors hover:text-white/70 focus-visible:ring-2 focus-visible:-outline-offset-2 focus-visible:outline-none"
+            >
+              <Pencil aria-hidden="true" className="size-3.5" />
+            </button>
+          ) : (
+            <Button
+              variant="inverse"
+              size="sm"
+              className={cn("font-black tracking-wide uppercase", className)}
+            >
+              <Plus aria-hidden="true" className="size-4" />
+              {copy.composerButton}
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
       <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogTitle>{editing ? copy.editHeading : copy.heading}</DialogTitle>
         {!editing && <p className="text-muted-foreground text-sm">{copy.intro}</p>}
