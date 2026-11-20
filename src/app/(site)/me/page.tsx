@@ -959,6 +959,15 @@ export default async function AccountPage({
         ),
       },
     );
+    // Profile — a link out to the creator's public profile (not an in-place
+    // panel), only when they have a published slug.
+    if (ownedCreators[0]?.slug) {
+      bunkerTabs.push({
+        id: "profile",
+        label: s.bunkerTabProfile,
+        href: `/creators/${ownedCreators[0].slug}`,
+      });
+    }
   }
 
   // The header "follows" stat counts followed CREATORS only — it links to Faves,
@@ -968,8 +977,8 @@ export default async function AccountPage({
   const followsCount = creatorIds.length;
   const cosignsCount = cosignIds.length;
 
-  // The identity header doubles as the link to the creator's public profile —
-  // the former Bunker "Profile" sub-tab is gone, so the header is the way there.
+  // The identity header also links to the creator's public profile (alongside
+  // the Profile sub-tab) — both route to /creators/<slug>.
   const creatorProfileHref = ownedCreators[0]?.slug
     ? `/creators/${ownedCreators[0].slug}`
     : null;

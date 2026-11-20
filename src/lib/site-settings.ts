@@ -1977,7 +1977,7 @@ const DEFAULTS: SiteSettings = {
     accountAddUpdateLabel: "Update",
     accountAddEventLabel: "Event",
     accountAddStripLabel: "Strip",
-    accountCreateLabel: "Create",
+    accountCreateLabel: "Add",
     accountRiotingSince: "Rioting since {date}",
     accountViewMediaLabel: "Media Page",
     accountSavedComicsHeading: "Comics",

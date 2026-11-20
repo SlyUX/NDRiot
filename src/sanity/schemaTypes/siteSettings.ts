@@ -1773,7 +1773,7 @@ export default defineType({
           type: "string",
           description: 'On each owned item — e.g. "Edit".',
         }),
-        defineField({ name: "accountCreateLabel", title: "Bunker — + Create menu button", type: "string", description: 'The dashboard\'s single create menu, shown with a "+" icon — e.g. "Create".' }),
+        defineField({ name: "accountCreateLabel", title: "Bunker — + Add menu button", type: "string", description: 'The dashboard\'s single add menu (Update / Event / Comic / Strip), shown with a "+" icon — e.g. "Add".' }),
         defineField({ name: "accountAddBookLabel", title: "Bunker — Create menu: Comic", type: "string", description: 'The "Comic" item in the + Create menu (routes to the comic intake form).' }),
         defineField({ name: "accountAddUpdateLabel", title: "Bunker — Create menu: Update", type: "string" }),
         defineField({ name: "accountAddEventLabel", title: "Bunker — Create menu: Event", type: "string" }),
