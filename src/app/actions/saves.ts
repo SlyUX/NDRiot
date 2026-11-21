@@ -2,6 +2,7 @@
 
 import { auth, signIn } from '@/auth'
 import { subscribeToNewsletter } from '@/lib/mailerlite'
+import { ownsCreator } from '@/sanity/ownership-client'
 import { toggleSave, unsaveItem, type SavedItemType } from '@/sanity/reader-client'
 
 /**
@@ -31,6 +32,13 @@ export async function toggleSaveAction(
   }
 
   try {
+    // No self-fave: a creator can't fave their own profile — that would let a
+    // circular Cosign (a mutual fave) form with yourself. If an accidental
+    // self-fave already exists, clear it; either way the result is "not faved".
+    if (itemType === 'creator' && (await ownsCreator(email, itemId))) {
+      await unsaveItem(email, itemId).catch(() => {})
+      return { saved: false }
+    }
     return { saved: await toggleSave(email, itemType, itemId) }
   } catch (cause) {
     console.error('[saves] toggle failed', cause)

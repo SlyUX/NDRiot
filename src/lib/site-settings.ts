@@ -959,9 +959,6 @@ export interface SiteSettings {
     updateUndoLabel: string;
     updateEditLabel: string;
     updateEditSubmit: string;
-    /** Owner-only Profile ↔ Dashboard tab bar (on both /creators/{slug} and /me). */
-    profileTabLabel: string;
-    dashboardTabLabel: string;
     profileOwnerEditLabel: string;
     mediaOwnerEditLabel: string;
     /** Owner-only link beside their profile's updates → the editable "Your Updates" on the dashboard. */
@@ -2071,8 +2068,6 @@ const DEFAULTS: SiteSettings = {
     updateUndoLabel: "Undo",
     updateEditLabel: "Edit update",
     updateEditSubmit: "Save changes",
-    profileTabLabel: "Profile",
-    dashboardTabLabel: "Dashboard",
     profileOwnerEditLabel: "Edit your Profile",
     mediaOwnerEditLabel: "Edit your Outlet",
     profileManageUpdatesLabel: "Manage on your dashboard",

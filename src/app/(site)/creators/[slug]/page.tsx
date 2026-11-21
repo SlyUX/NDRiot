@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { SquarePen } from "lucide-react";
 
 import { AlternatingSections } from "@/components/alternating-sections";
 import BookLinks from "@/components/book-links";
@@ -14,7 +15,6 @@ import { OrganizationLink } from "@/components/organization-link";
 import PortableTextBody from "@/components/PortableTextBody";
 import { ProfileActions } from "@/components/profile-actions";
 import { InitialsAvatar } from "@/components/initials-avatar";
-import { OwnerTabs } from "@/components/owner-tabs";
 import SocialLinks from "@/components/SocialLinks";
 import { SocialIcon } from "@/components/social-icon";
 import { SectionHeading } from "@/components/section-heading";
@@ -275,26 +275,9 @@ export default async function CreatorPage({
         )}
       />
 
-      {/* Owner-only tab bar — flip between this public Profile and the private
-          Dashboard, with an Edit shortcut. Identical bar sits atop /me. */}
-      {isOwner && (
-        <OwnerTabs
-          active="profile"
-          profileHref={`/creators/${slug}`}
-          profileLabel={settings.sections.profileTabLabel}
-          dashboardLabel={settings.sections.dashboardTabLabel}
-          action={
-            <Link
-              href={`/join/creators?editing=${encodeURIComponent(creator._id)}`}
-              className="focus-visible:ring-ring text-primary text-xs font-bold tracking-widest uppercase hover:underline focus-visible:ring-2 focus-visible:outline-none"
-            >
-              {settings.sections.profileOwnerEditLabel}
-            </Link>
-          }
-        />
-      )}
-
-      {/* Everything below the owner band shares the alternating rhythm (§9). */}
+      {/* The whole page shares the alternating rhythm (§9). The owner's Edit
+          affordance now lives in the identity header below (no separate bar) —
+          Dashboard is reached from the user-nav island. */}
       <AlternatingSections>
         {/* pb-4, not the full md bottom padding: the bio sits close beneath. */}
         <Section as="header" padding="md" className="pb-4">
@@ -436,6 +419,20 @@ export default async function CreatorPage({
                         }
                         dashboardHref="/me"
                       />
+                    )}
+                    {/* The owner's edit affordance — obvious, on-brand, natural
+                        width (w-fit, so the flex-col's stretch doesn't blow it
+                        full-width). Replaces the old owner tab bar's Edit link. */}
+                    {isOwner && (
+                      <Link
+                        href={`/join/creators?editing=${encodeURIComponent(
+                          creator._id,
+                        )}`}
+                        className="focus-visible:ring-ring border-primary/60 text-primary hover:bg-primary hover:text-primary-foreground inline-flex w-fit items-center gap-2 border px-4 py-2 text-xs font-bold tracking-widest uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                      >
+                        <SquarePen aria-hidden="true" className="size-4" />
+                        {settings.sections.profileOwnerEditLabel}
+                      </Link>
                     )}
                     <ShareBar
                       title={creator.name ?? ""}

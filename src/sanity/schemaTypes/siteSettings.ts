@@ -2351,25 +2351,11 @@ export default defineType({
             'Submit button in the edit-update dialog — e.g. "Save changes".',
         }),
         defineField({
-          name: "profileTabLabel",
-          title: "Owner tab — Profile",
-          type: "string",
-          description:
-            'The "Profile" tab in the owner-only tab bar (shown on both a creator\'s public page and their dashboard) → the public /creators/{slug} view. e.g. "Profile".',
-        }),
-        defineField({
-          name: "dashboardTabLabel",
-          title: "Owner tab — Dashboard",
-          type: "string",
-          description:
-            'The "Dashboard" tab in the owner-only tab bar → the private /me dashboard. e.g. "Dashboard".',
-        }),
-        defineField({
           name: "profileOwnerEditLabel",
-          title: "Creator page — owner edit link",
+          title: "Creator page — owner edit button",
           type: "string",
           description:
-            'The edit shortcut beside the owner tab bar → the full edit form — e.g. "Edit your Profile".',
+            'The owner-only Edit button in the creator\'s profile header → the full edit form — e.g. "Edit your Profile".',
         }),
         defineField({
           name: "mediaOwnerEditLabel",

@@ -10880,20 +10880,6 @@
               },
               "optional": true
             },
-            "profileTabLabel": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
-            "dashboardTabLabel": {
-              "type": "objectAttribute",
-              "value": {
-                "type": "string"
-              },
-              "optional": true
-            },
             "profileOwnerEditLabel": {
               "type": "objectAttribute",
               "value": {

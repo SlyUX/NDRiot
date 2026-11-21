@@ -1711,8 +1711,6 @@ export type SiteSettings = {
     updateUndoLabel?: string;
     updateEditLabel?: string;
     updateEditSubmit?: string;
-    profileTabLabel?: string;
-    dashboardTabLabel?: string;
     profileOwnerEditLabel?: string;
     mediaOwnerEditLabel?: string;
     profileManageUpdatesLabel?: string;
