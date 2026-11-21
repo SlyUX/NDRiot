@@ -33,7 +33,7 @@ export async function freshFetch<T>(
 }
 
 export const CREATORS_QUERY = defineQuery(
-  `*[_type=="creator"]|order(name asc){_id,name,"slug":slug.current,place,photo,genres,openToCollaboration,"joinedAt":_createdAt,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}`,
+  `*[_type=="creator"]|order(name asc){_id,name,"slug":slug.current,place,photo{...,"lqip":asset->metadata.lqip},genres,openToCollaboration,"joinedAt":_createdAt,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}`,
 );
 export const CREATOR_QUERY =
   defineQuery(`*[_type=="creator" && slug.current==$slug][0]{
@@ -41,7 +41,7 @@ export const CREATOR_QUERY =
   works[]{label,url},
   studio->{_id,name,"slug":slug.current,website,logo},
   organizations[]->{_id,name,"slug":slug.current,website,logo},
-  "books": *[_type=="book" && references(^._id)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturityRating,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}
+  "books": *[_type=="book" && references(^._id)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturityRating,cover{...,"lqip":asset->metadata.lqip},"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}
 }`);
 // A creator's convention appearances (separate docs), venue resolved — for the
 // profile Events row. The caller filters to upcoming by forDate/venue dates.
@@ -63,7 +63,7 @@ export const OWNED_APPEARANCES_QUERY =
 }`);
 
 export const BOOKS_QUERY = defineQuery(
-  `*[_type=="book"]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturityRating,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}`,
+  `*[_type=="book"]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturityRating,cover{...,"lqip":asset->metadata.lqip},"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}`,
 );
 
 /**
@@ -92,7 +92,7 @@ export const FILTERED_BOOKS_QUERY = defineQuery(`{
     && (!defined($funding) || count(links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))]) > 0)
     && (!defined($preview) || defined(previewUrl))
     && (!defined($q) || title match $q || creator->name match $q || shortDescription match $q || pt::text(description) match $q)
-  ]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturityRating,issueCount,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},
+  ]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturityRating,issueCount,cover{...,"lqip":asset->metadata.lqip},"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},
   "total": count(*[
     _type=="book"
     && (!defined($genres) || count(genres[@ in $genres]) > 0)
@@ -122,7 +122,7 @@ export const FILTERED_CREATORS_QUERY = defineQuery(`{
     && (!defined($collaborating) || openToCollaboration == true)
     && (!defined($q) || name match $q || studio->name match $q || pt::text(bio) match $q)
   ]|order(name asc)[0...$limit]{
-    _id,name,"slug":slug.current,place,photo,genres,openToCollaboration,
+    _id,name,"slug":slug.current,place,photo{...,"lqip":asset->metadata.lqip},genres,openToCollaboration,
     "bioText":pt::text(bio),
     studio->{_id,name,"slug":slug.current,website,logo}
   },
@@ -151,18 +151,18 @@ export const BOOK_QUERY =
   "creatorId": creator._ref,
   creator->{name,"slug":slug.current,place,photo,"bioText":pt::text(bio),studio->{name}},
   "otherBooks": *[_type=="book" && _id != ^._id && creator._ref == ^.creator._ref]|order(title asc){
-    _id,title,"slug":slug.current,status,genres,format,maturityRating,cover,
+    _id,title,"slug":slug.current,status,genres,format,maturityRating,cover{...,"lqip":asset->metadata.lqip},
     "descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name
   }
 }`);
 export const GENRE_BOOKS_QUERY = defineQuery(`{
-  "items": *[_type=="book" && $genre in genres]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturityRating,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},
+  "items": *[_type=="book" && $genre in genres]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturityRating,cover{...,"lqip":asset->metadata.lqip},"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},
   "total": count(*[_type=="book" && $genre in genres])
 }`);
 
 /** Comics of one format, for the /formats/[format] hub. Alphabetical, neutral. */
 export const FORMAT_BOOKS_QUERY = defineQuery(`{
-  "items": *[_type=="book" && format==$format]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturityRating,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},
+  "items": *[_type=="book" && format==$format]|order(title asc)[0...$limit]{_id,title,"slug":slug.current,status,genres,format,maturityRating,cover{...,"lqip":asset->metadata.lqip},"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name},
   "total": count(*[_type=="book" && format==$format])
 }`);
 
@@ -231,7 +231,7 @@ export const HOME_NEW_QUERY =
  * projections as BOOKS_QUERY / CREATORS_QUERY so the cards match everywhere.
  */
 export const SAVED_BOOKS_QUERY = defineQuery(
-  `*[_type=="book" && _id in $ids && defined(slug.current)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturityRating,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}`,
+  `*[_type=="book" && _id in $ids && defined(slug.current)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturityRating,cover{...,"lqip":asset->metadata.lqip},"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}`,
 );
 
 /** A creator's display name + public slug, by id — for the signed-in hero
@@ -241,7 +241,7 @@ export const CREATOR_HERO_QUERY = defineQuery(
 );
 
 export const SAVED_CREATORS_QUERY = defineQuery(
-  `*[_type=="creator" && _id in $ids && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,place,photo,genres,openToCollaboration,"joinedAt":_createdAt,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}`,
+  `*[_type=="creator" && _id in $ids && defined(slug.current)]|order(name asc){_id,name,"slug":slug.current,place,photo{...,"lqip":asset->metadata.lqip},genres,openToCollaboration,"joinedAt":_createdAt,"bioText":pt::text(bio),studio->{_id,name,"slug":slug.current,website,logo}}`,
 );
 
 /** The docs a signed-in owner can manage — creators and media they own. */
@@ -251,7 +251,7 @@ export const OWNED_DOCS_QUERY = defineQuery(
 
 /** An owner's comics — books whose creator is one they own ($ids = creator ids). */
 export const OWNED_BOOKS_QUERY = defineQuery(
-  `*[_type=="book" && creator._ref in $ids && defined(slug.current)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturityRating,cover,"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}`,
+  `*[_type=="book" && creator._ref in $ids && defined(slug.current)]|order(title asc){_id,title,"slug":slug.current,status,genres,format,maturityRating,cover{...,"lqip":asset->metadata.lqip},"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name}`,
 );
 
 /** An owner's media outlets, by id. */
@@ -812,7 +812,7 @@ export const INTAKE_MEDIA_EDIT_QUERY =
 /** Creators who list a genre, for the category pages. */
 export const GENRE_CREATORS_QUERY = defineQuery(`{
   "items": *[_type=="creator" && $genre in genres]|order(name asc)[0...$limit]{
-    _id,name,"slug":slug.current,place,photo,genres,openToCollaboration,
+    _id,name,"slug":slug.current,place,photo{...,"lqip":asset->metadata.lqip},genres,openToCollaboration,
     "bioText":pt::text(bio),
     studio->{_id,name,"slug":slug.current,website,logo}
   },

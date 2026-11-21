@@ -4,7 +4,7 @@ import { GenreBadge } from '@/components/genre-badge'
 import { InitialsAvatar } from '@/components/initials-avatar'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { urlFor } from '@/sanity/image'
+import { urlFor, blurProps } from '@/sanity/image'
 import { cn, externalHref } from '@/lib/utils'
 import { GATED_TIER, MATURITY_TIER_LABELS, type MaturityTier } from '@/lib/taxonomy'
 import type { BookFormat, Genre, SanityImage } from '@/lib/types'
@@ -22,6 +22,14 @@ import type { SavedItemType } from '@/sanity/reader-client'
  * `date` is a pre-formatted display string, never an ISO value — formatting
  * belongs in the fetch layer so this component stays presentational.
  */
+
+/**
+ * A card's image: the Sanity image plus the optional `lqip` blur string the
+ * card queries project (`asset->metadata.lqip`). Optional, so images from
+ * queries that don't select it (editorial/strips/etc. — not yet in the blur
+ * slice) still satisfy it and simply render without a blur-up.
+ */
+type CardImageSource = SanityImage & { lqip?: string | null }
 
 const ASPECT = {
   cover: 'aspect-[2/3]',
@@ -51,7 +59,7 @@ export interface ContentCardProps {
    */
   itemType?: SavedItemType
   itemId?: string
-  image?: SanityImage | null
+  image?: CardImageSource | null
   /**
    * Name to draw as an initials tag when `image` is absent — set by the creator
    * mappers, so a maker with no avatar gets a hand-lettered fallback instead of a
@@ -226,7 +234,7 @@ function CardImage({
   initialsTone,
   className,
 }: {
-  image?: SanityImage | null
+  image?: CardImageSource | null
   alt: string
   width: number
   /** `contain` shows the whole image (horizontal cards, square box) instead of
@@ -259,6 +267,9 @@ function CardImage({
       fill
       sizes={`(max-width: 768px) 100vw, ${width}px`}
       className={cn(fit === 'contain' ? 'object-contain' : 'object-cover', className)}
+      // Blur-up from the asset's lqip when the query projected it (card grids);
+      // a no-op empty placeholder otherwise.
+      {...blurProps(image)}
     />
   )
 }

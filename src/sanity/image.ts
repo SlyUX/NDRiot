@@ -31,3 +31,21 @@ const authBuilder = createImageUrlBuilder({
 })
 
 export const urlForAuth = (source: SanityImageSource) => authBuilder.image(source)
+
+/**
+ * next/image blur-up props from a Sanity image's `lqip` — the tiny base64
+ * data-URL Sanity generates per asset (`asset->metadata.lqip`), projected onto
+ * the image object in the card queries. Spread onto a next/image:
+ * `<Image {...blurProps(img)} … />`.
+ *
+ * Null-safe: no lqip (field not projected, or an asset predating metadata) → an
+ * empty object, so the image keeps the default empty placeholder exactly as
+ * before. The `lqip` param is declared here so a plain `SanityImage` — whose
+ * alias doesn't name lqip — still passes; the value flows through at runtime.
+ */
+export function blurProps(
+  image: { lqip?: string | null } | null | undefined,
+): { placeholder: 'blur'; blurDataURL: string } | Record<string, never> {
+  const lqip = image?.lqip
+  return lqip ? { placeholder: 'blur', blurDataURL: lqip } : {}
+}
