@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useLinkStatus } from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
   LayoutDashboard,
@@ -37,6 +38,99 @@ export interface UserNavItem {
   matchPrefixes?: string[];
 }
 
+function renderIcon(id: string, lit: boolean, avatarUrl?: string | null) {
+  if (id === "bunker" && avatarUrl) {
+    return (
+      <span
+        className={cn(
+          "relative block size-6 shrink-0 overflow-hidden rounded-full",
+          lit && "ring-primary ring-2",
+        )}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={avatarUrl}
+          alt=""
+          referrerPolicy="no-referrer"
+          className="size-full object-cover"
+        />
+      </span>
+    );
+  }
+  // Faves — the flaming-heart Fave mark. Color is inherited from the tab's
+  // span (below): white when idle, --primary when it's lit.
+  if (id === "saved") return <FlamingHeart className="size-5" />;
+  const Icon = ICONS[id] ?? LayoutDashboard;
+  return <Icon aria-hidden="true" className="size-5" />;
+}
+
+/**
+ * The inner content of a tab — rendered INSIDE its <Link> so useLinkStatus can
+ * read that link's pending state. The fix for the "dead tap": on a slow
+ * navigation (every /me?view= switch is a force-dynamic, no-CDN round-trip) the
+ * tapped tab lit pink the instant it's pressed, instead of only after the route
+ * commits. `lit = active || pending` — the committed-active tab stays pink, and
+ * the one being navigated to lights immediately with a motion-safe pulse while
+ * it loads. useLinkStatus skips the pending phase when a route is already
+ * prefetched/instant, so the pulse shows up exactly when there's a wait to cover
+ * and stays quiet otherwise (§10: pulse is motion-safe; reduced motion just gets
+ * the instant color). aria-current stays tied to the committed route, not `lit`.
+ */
+function TabInner({
+  item,
+  active,
+  avatarUrl,
+}: {
+  item: UserNavItem;
+  active: boolean;
+  avatarUrl?: string | null;
+}) {
+  const { pending } = useLinkStatus();
+  const lit = active || pending;
+  // Icon slot: a number (e.g. the Rag issue "003"), the avatar, or a glyph.
+  // Fixed height so every tab's text baseline lands at the same y when the row
+  // bottom-aligns, regardless of which lead it uses.
+  const lead = item.iconText ? (
+    <span className="flex h-6 items-center text-lg leading-none font-black tracking-[-0.06em] tabular-nums">
+      {item.iconText}
+    </span>
+  ) : (
+    renderIcon(item.id, lit, avatarUrl)
+  );
+  return (
+    <>
+      {/* Labels are always white; the only active cue is the icon — white when
+          idle, --primary when lit. At most one committed tab is active, and the
+          tapped tab also lights while its navigation is pending. Both surfaces
+          this nav sits on clear AA for white and the 3:1 glyph floor for pink:
+          --app-nav island (white 12.6:1 / pink 3.4:1), --surface-alt desktop
+          bar (white 14.7:1 / pink 3.99:1). Pink stays on the glyph, never the
+          small label. */}
+      <span
+        aria-busy={pending || undefined}
+        className={cn(
+          "relative flex items-center justify-center transition-colors",
+          lit ? "text-primary" : "text-foreground group-hover:text-primary",
+          pending && "motion-safe:animate-pulse",
+        )}
+      >
+        {lead}
+        {item.badge ? (
+          <span
+            aria-hidden="true"
+            className="bg-primary text-primary-foreground absolute -top-1.5 -right-2 flex min-w-3.5 items-center justify-center px-0.5 text-[9px] font-black leading-none tabular-nums"
+          >
+            {item.badge > 9 ? "9+" : item.badge}
+          </span>
+        ) : null}
+      </span>
+      <span className="text-foreground max-w-[7rem] text-center leading-tight">
+        {item.label}
+      </span>
+    </>
+  );
+}
+
 /**
  * The persistent "user nav" for signed-in readers — links into the dashboard
  * (/me?view=<id>), on every page: a hybrid of mobile app + informational site.
@@ -68,32 +162,6 @@ export function UserNav({
   // and currentView below treats it as Bunker so the tab still highlights there.
   const hrefFor = (id: string) => `/me?view=${id}`;
 
-  const icon = (id: string, active: boolean) => {
-    if (id === "bunker" && avatarUrl) {
-      return (
-        <span
-          className={cn(
-            "relative block size-6 shrink-0 overflow-hidden rounded-full",
-            active && "ring-primary ring-2",
-          )}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={avatarUrl}
-            alt=""
-            referrerPolicy="no-referrer"
-            className="size-full object-cover"
-          />
-        </span>
-      );
-    }
-    // Faves — the flaming-heart Fave mark. Color is inherited from the tab's
-    // span (below): white when idle, --primary when it's the active tab.
-    if (id === "saved") return <FlamingHeart className="size-5" />;
-    const Icon = ICONS[id] ?? LayoutDashboard;
-    return <Icon aria-hidden="true" className="size-5" />;
-  };
-
   const tab = (item: UserNavItem, variant: "bar" | "island") => {
     const href = item.href ?? hrefFor(item.id);
     // An href item (the Rag submit shortcut) is active on its path or any
@@ -108,16 +176,6 @@ export function UserNav({
         (p) => pathname === p || pathname.startsWith(`${p}/`),
       ) ??
         false);
-    // Icon slot: a number (e.g. the Rag issue "003"), the avatar, or a glyph.
-    // Fixed height so every tab's text baseline lands at the same y when the row
-    // bottom-aligns, regardless of which lead it uses.
-    const lead = item.iconText ? (
-      <span className="flex h-6 items-center text-lg leading-none font-black tracking-[-0.06em] tabular-nums">
-        {item.iconText}
-      </span>
-    ) : (
-      icon(item.id, active)
-    );
     return (
       <Link
         key={item.id}
@@ -131,34 +189,7 @@ export function UserNav({
           variant === "bar" ? "px-3 py-2.5" : "py-2.5 leading-none",
         )}
       >
-        {/* Labels are always white; the only active cue is the icon — white when
-            idle, --primary when active. Exactly one tab is active at a time, so
-            the single pink icon reads as the current section. Both surfaces this
-            nav sits on clear AA for white and the 3:1 glyph floor for pink:
-            --app-nav island (white 12.6:1 / pink 3.4:1), --surface-alt desktop
-            bar (white 14.7:1 / pink 3.99:1). Pink stays on the glyph, never the
-            small label. */}
-        <span
-          className={cn(
-            "relative flex items-center justify-center",
-            active
-              ? "text-primary"
-              : "text-foreground group-hover:text-primary",
-          )}
-        >
-          {lead}
-          {item.badge ? (
-            <span
-              aria-hidden="true"
-              className="bg-primary text-primary-foreground absolute -top-1.5 -right-2 flex min-w-3.5 items-center justify-center px-0.5 text-[9px] font-black leading-none tabular-nums"
-            >
-              {item.badge > 9 ? "9+" : item.badge}
-            </span>
-          ) : null}
-        </span>
-        <span className="text-foreground max-w-[7rem] text-center leading-tight">
-          {item.label}
-        </span>
+        <TabInner item={item} active={active} avatarUrl={avatarUrl} />
       </Link>
     );
   };
