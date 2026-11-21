@@ -2352,10 +2352,10 @@ export default defineType({
         }),
         defineField({
           name: "profileOwnerEditLabel",
-          title: "Creator page — owner edit button",
+          title: "Creator page — owner edit chip",
           type: "string",
           description:
-            'The owner-only Edit button in the creator\'s profile header → the full edit form — e.g. "Edit your Profile".',
+            'The owner-only Edit chip on the profile avatar\'s corner → the full edit form — e.g. "Edit Profile".',
         }),
         defineField({
           name: "mediaOwnerEditLabel",

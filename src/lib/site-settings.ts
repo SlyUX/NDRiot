@@ -2068,7 +2068,7 @@ const DEFAULTS: SiteSettings = {
     updateUndoLabel: "Undo",
     updateEditLabel: "Edit update",
     updateEditSubmit: "Save changes",
-    profileOwnerEditLabel: "Edit your Profile",
+    profileOwnerEditLabel: "Edit Profile",
     mediaOwnerEditLabel: "Edit your Outlet",
     profileManageUpdatesLabel: "Manage on your dashboard",
     creatorWorksHeading: "Where to find {name}’s work",

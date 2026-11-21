@@ -321,18 +321,18 @@ export default async function CreatorPage({
                         )}
                       </div>
                       {/* Owner-only: Edit profile, hugging the avatar's
-                          bottom-left corner. Pink chip, black icon (§9), square
-                          (content layer). Icon-only with an accessible label. */}
+                          bottom-left corner. Pink chip, black icon + label (§9),
+                          square (content layer). The visible label is the
+                          accessible name, so no aria-label. */}
                       {isOwner && (
                         <Link
                           href={`/join/creators?editing=${encodeURIComponent(
                             creator._id,
                           )}`}
-                          aria-label={settings.sections.profileOwnerEditLabel}
-                          title={settings.sections.profileOwnerEditLabel}
-                          className="focus-visible:ring-ring bg-primary text-primary-foreground hover:bg-primary/85 absolute bottom-0 left-0 inline-flex size-10 items-center justify-center shadow-lg ring-1 ring-black/25 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                          className="focus-visible:ring-ring bg-primary text-primary-foreground hover:bg-primary/85 absolute bottom-0 left-0 inline-flex items-center gap-1.5 px-2.5 py-2 text-xs font-normal shadow-lg ring-1 ring-black/25 transition-colors focus-visible:ring-2 focus-visible:outline-none"
                         >
                           <SquarePen aria-hidden="true" className="size-4" />
+                          {settings.sections.profileOwnerEditLabel}
                         </Link>
                       )}
                     </div>
