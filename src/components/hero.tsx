@@ -185,7 +185,7 @@ function FeedRail({
   return (
     <div>
       <div className="mb-4 flex items-center gap-3">
-        <h2 className="text-personalize text-xs leading-tight font-black tracking-[0.2em] uppercase">
+        <h2 className="text-primary text-xs leading-tight font-black tracking-[0.2em] uppercase">
           {heading}
         </h2>
         <span className="h-px flex-1 bg-white/20" aria-hidden="true" />

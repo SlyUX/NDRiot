@@ -289,29 +289,51 @@ export default async function CreatorPage({
               {/* items-start so the portrait's top aligns with the creator name,
                 rather than its bottom aligning with the last line of info. */}
               <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-                {hasSidebar && (
+                {/* Owners always get this column (even with an empty profile)
+                    so the Edit chip below has its avatar to anchor to. */}
+                {(hasSidebar || isOwner) && (
                   // Left-aligned on every size (no mobile centering), sized to the
                   // portrait so the contacts and chips stack neatly beneath it.
                   <div className="flex shrink-0 flex-col items-start gap-3 sm:w-40">
-                    <div className="relative h-40 w-40 overflow-hidden">
-                      {creator.photo ? (
-                        <Image
-                          src={urlFor(creator.photo)
-                            .width(320)
-                            .height(320)
-                            .url()}
-                          alt={
-                            creator.photo.alt ?? `Portrait of ${creator.name}`
-                          }
-                          fill
-                          sizes="160px"
-                          className="object-cover"
-                        />
-                      ) : (
-                        <InitialsAvatar
-                          name={creator.name ?? ""}
-                          className="text-6xl"
-                        />
+                    {/* relative wrapper holds the clipped image AND the Edit
+                        overlay; only the image sub-div clips, so the chip's
+                        focus ring isn't cut off at the avatar edge. */}
+                    <div className="relative h-40 w-40">
+                      <div className="h-full w-full overflow-hidden">
+                        {creator.photo ? (
+                          <Image
+                            src={urlFor(creator.photo)
+                              .width(320)
+                              .height(320)
+                              .url()}
+                            alt={
+                              creator.photo.alt ?? `Portrait of ${creator.name}`
+                            }
+                            fill
+                            sizes="160px"
+                            className="object-cover"
+                          />
+                        ) : (
+                          <InitialsAvatar
+                            name={creator.name ?? ""}
+                            className="text-6xl"
+                          />
+                        )}
+                      </div>
+                      {/* Owner-only: Edit profile, hugging the avatar's
+                          bottom-left corner. Pink chip, black icon (§9), square
+                          (content layer). Icon-only with an accessible label. */}
+                      {isOwner && (
+                        <Link
+                          href={`/join/creators?editing=${encodeURIComponent(
+                            creator._id,
+                          )}`}
+                          aria-label={settings.sections.profileOwnerEditLabel}
+                          title={settings.sections.profileOwnerEditLabel}
+                          className="focus-visible:ring-ring bg-primary text-primary-foreground hover:bg-primary/85 absolute bottom-0 left-0 inline-flex size-10 items-center justify-center shadow-lg ring-1 ring-black/25 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                        >
+                          <SquarePen aria-hidden="true" className="size-4" />
+                        </Link>
                       )}
                     </div>
                     {/* Socials + the website, as icons. */}
@@ -419,20 +441,6 @@ export default async function CreatorPage({
                         }
                         dashboardHref="/me"
                       />
-                    )}
-                    {/* The owner's edit affordance — obvious, on-brand, natural
-                        width (w-fit, so the flex-col's stretch doesn't blow it
-                        full-width). Replaces the old owner tab bar's Edit link. */}
-                    {isOwner && (
-                      <Link
-                        href={`/join/creators?editing=${encodeURIComponent(
-                          creator._id,
-                        )}`}
-                        className="focus-visible:ring-ring border-primary/60 text-primary hover:bg-primary hover:text-primary-foreground inline-flex w-fit items-center gap-2 border px-4 py-2 text-xs font-bold tracking-widest uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                      >
-                        <SquarePen aria-hidden="true" className="size-4" />
-                        {settings.sections.profileOwnerEditLabel}
-                      </Link>
                     )}
                     <ShareBar
                       title={creator.name ?? ""}
