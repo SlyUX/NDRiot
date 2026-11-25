@@ -5186,6 +5186,15 @@ export type CREATOR_NAME_QUERY_RESULT = {
 } | null;
 
 // Source: src/lib/queries.ts
+// Variable: ADMIN_CREATORS_QUERY
+// Query: *[_type=="creator"]|order(name asc){_id,name,"slug":slug.current}
+export type ADMIN_CREATORS_QUERY_RESULT = Array<{
+  _id: string;
+  name: string;
+  slug: string;
+}>;
+
+// Source: src/lib/queries.ts
 // Variable: MEDIA_QUERY
 // Query: *[_type=="media" && defined(slug.current)]|order(name asc){    _id,name,"slug":slug.current,kinds,logo,about,genresCovered  }
 export type MEDIA_QUERY_RESULT = Array<{
@@ -5624,6 +5633,7 @@ declare module "@sanity/client" {
     'count(*[_type=="book" && count(credits[creator._ref in $ids && confirmed != true]) > 0])': CREDIT_INBOX_COUNT_QUERY_RESULT;
     '{\n  "book": *[_id==$bookId][0]{title,"slug":slug.current},\n  "inviter": *[_id==$inviterId][0]{name}\n}': CLAIM_CONTEXT_QUERY_RESULT;
     '*[_type=="creator" && _id==$id][0]{name,"slug":slug.current}': CREATOR_NAME_QUERY_RESULT;
+    '*[_type=="creator"]|order(name asc){_id,name,"slug":slug.current}': ADMIN_CREATORS_QUERY_RESULT;
     '*[_type=="media" && defined(slug.current)]|order(name asc){\n    _id,name,"slug":slug.current,kinds,logo,about,genresCovered\n  }': MEDIA_QUERY_RESULT;
     '*[_type=="media" && slug.current==$slug][0]{\n  _id,name,kinds,logo,about,genresCovered,pitchInfo,feedUrl,feedConsent,\n  links[]{label,url}\n}': MEDIA_DETAIL_QUERY_RESULT;
     '*[_type=="media"]._id': INTAKE_MEDIA_IDS_QUERY_RESULT;

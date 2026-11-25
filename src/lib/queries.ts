@@ -822,6 +822,11 @@ export const CREATOR_NAME_QUERY = defineQuery(
   `*[_type=="creator" && _id==$id][0]{name,"slug":slug.current}`,
 );
 
+/** All creators (id, name, slug), alphabetical — the admin ownership tool. */
+export const ADMIN_CREATORS_QUERY = defineQuery(
+  `*[_type=="creator"]|order(name asc){_id,name,"slug":slug.current}`,
+);
+
 /* ----------------------------------------------------------------- media */
 
 /** Media outlets, for the /media card listing — alphabetical, unranked (§3). */

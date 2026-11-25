@@ -116,6 +116,26 @@ export async function ownerEmailOf(docId: string): Promise<string | null> {
   }
 }
 
+/**
+ * Current owner email for each of these creator ids — `{ [creatorId]: email }`,
+ * absent when unclaimed. Batch read for the admin ownership tool. Fail-soft.
+ */
+export async function ownersOf(creatorIds: string[]): Promise<Record<string, string>> {
+  if (creatorIds.length === 0) return {}
+  try {
+    const rows = await client().fetch<{ creatorId: string; email: string }[]>(
+      `*[_type=="ownership" && creatorId in $ids]{creatorId, email}`,
+      { ids: creatorIds },
+    )
+    const out: Record<string, string> = {}
+    for (const r of rows ?? []) if (r.creatorId && r.email) out[r.creatorId] = r.email
+    return out
+  } catch (cause) {
+    console.error('[ownership] ownersOf failed', cause)
+    return {}
+  }
+}
+
 // The ownership map is keyed by document id, so these generic aliases work for
 // any top-level owned type. Books inherit their creator's ownership; media owns
 // its own record.

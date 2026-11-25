@@ -32,6 +32,12 @@ export default async function AdminLayout({
           </Link>
           <nav className="ml-auto flex items-center gap-4 text-xs font-bold tracking-widest uppercase">
             <Link
+              href="/admin/ownership"
+              className="text-muted-foreground hover:text-primary"
+            >
+              Ownership
+            </Link>
+            <Link
               href="/studio/submissions"
               className="text-muted-foreground hover:text-primary"
             >
