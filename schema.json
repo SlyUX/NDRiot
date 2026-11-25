@@ -5947,52 +5947,59 @@
         },
         "optional": false
       },
-      "creatorRole": {
+      "creatorRoles": {
         "type": "objectAttribute",
         "value": {
-          "type": "union",
-          "of": [
-            {
-              "type": "string",
-              "value": "Writer"
-            },
-            {
-              "type": "string",
-              "value": "Artist"
-            },
-            {
-              "type": "string",
-              "value": "Penciller"
-            },
-            {
-              "type": "string",
-              "value": "Inker"
-            },
-            {
-              "type": "string",
-              "value": "Colorist"
-            },
-            {
-              "type": "string",
-              "value": "Letterer"
-            },
-            {
-              "type": "string",
-              "value": "Cover Artist"
-            },
-            {
-              "type": "string",
-              "value": "Editor"
-            },
-            {
-              "type": "string",
-              "value": "Designer"
-            },
-            {
-              "type": "string",
-              "value": "Translator"
-            }
-          ]
+          "type": "array",
+          "of": {
+            "type": "union",
+            "of": [
+              {
+                "type": "string",
+                "value": "Writer"
+              },
+              {
+                "type": "string",
+                "value": "Conceptual"
+              },
+              {
+                "type": "string",
+                "value": "Artist"
+              },
+              {
+                "type": "string",
+                "value": "Penciller"
+              },
+              {
+                "type": "string",
+                "value": "Inker"
+              },
+              {
+                "type": "string",
+                "value": "Colorist"
+              },
+              {
+                "type": "string",
+                "value": "Letterer"
+              },
+              {
+                "type": "string",
+                "value": "Cover Artist"
+              },
+              {
+                "type": "string",
+                "value": "Editor"
+              },
+              {
+                "type": "string",
+                "value": "Designer"
+              },
+              {
+                "type": "string",
+                "value": "Translator"
+              }
+            ]
+          }
         },
         "optional": true
       },
@@ -6003,52 +6010,59 @@
           "of": {
             "type": "object",
             "attributes": {
-              "role": {
+              "roles": {
                 "type": "objectAttribute",
                 "value": {
-                  "type": "union",
-                  "of": [
-                    {
-                      "type": "string",
-                      "value": "Writer"
-                    },
-                    {
-                      "type": "string",
-                      "value": "Artist"
-                    },
-                    {
-                      "type": "string",
-                      "value": "Penciller"
-                    },
-                    {
-                      "type": "string",
-                      "value": "Inker"
-                    },
-                    {
-                      "type": "string",
-                      "value": "Colorist"
-                    },
-                    {
-                      "type": "string",
-                      "value": "Letterer"
-                    },
-                    {
-                      "type": "string",
-                      "value": "Cover Artist"
-                    },
-                    {
-                      "type": "string",
-                      "value": "Editor"
-                    },
-                    {
-                      "type": "string",
-                      "value": "Designer"
-                    },
-                    {
-                      "type": "string",
-                      "value": "Translator"
-                    }
-                  ]
+                  "type": "array",
+                  "of": {
+                    "type": "union",
+                    "of": [
+                      {
+                        "type": "string",
+                        "value": "Writer"
+                      },
+                      {
+                        "type": "string",
+                        "value": "Conceptual"
+                      },
+                      {
+                        "type": "string",
+                        "value": "Artist"
+                      },
+                      {
+                        "type": "string",
+                        "value": "Penciller"
+                      },
+                      {
+                        "type": "string",
+                        "value": "Inker"
+                      },
+                      {
+                        "type": "string",
+                        "value": "Colorist"
+                      },
+                      {
+                        "type": "string",
+                        "value": "Letterer"
+                      },
+                      {
+                        "type": "string",
+                        "value": "Cover Artist"
+                      },
+                      {
+                        "type": "string",
+                        "value": "Editor"
+                      },
+                      {
+                        "type": "string",
+                        "value": "Designer"
+                      },
+                      {
+                        "type": "string",
+                        "value": "Translator"
+                      }
+                    ]
+                  }
                 },
                 "optional": false
               },

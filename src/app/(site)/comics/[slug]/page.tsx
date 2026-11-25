@@ -115,7 +115,7 @@ export default async function BookPage({
           imageAlt: `Portrait of ${creator.name ?? "comic creator"}`,
           eyebrow:
             [
-              book.creatorRole,
+              book.creatorRoles?.join(", "),
               creator.studio?.name ?? formatPlace(creator.place),
             ]
               .filter(Boolean)

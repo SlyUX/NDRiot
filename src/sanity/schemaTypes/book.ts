@@ -40,12 +40,19 @@ export default defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
-      name: 'creatorRole',
-      title: 'Owner’s role',
-      type: 'string',
-      options: { list: CREDIT_ROLES.map((value) => ({ title: value, value })) },
+      name: 'creatorRoles',
+      title: 'Owner’s role(s)',
+      type: 'array',
+      of: [
+        {
+          type: 'string',
+          options: { list: CREDIT_ROLES.map((value) => ({ title: value, value })) },
+        },
+      ],
+      options: { layout: 'grid' },
       description:
-        'What the owner did on this comic — e.g. Writer, or Writer & Artist (pick the primary one). Optional; shown beside their name in the credits.',
+        'What the owner did on this comic — tick all that apply (e.g. Writer and Artist). Optional; shown beside their name in the credits.',
+      validation: (rule) => rule.unique(),
     }),
     defineField({
       name: 'credits',
@@ -59,13 +66,20 @@ export default defineType({
           name: 'bookCredit',
           fields: [
             defineField({
-              name: 'role',
-              title: 'Role',
-              type: 'string',
-              options: {
-                list: CREDIT_ROLES.map((value) => ({ title: value, value })),
-              },
-              validation: (rule) => rule.required(),
+              name: 'roles',
+              title: 'Role(s)',
+              type: 'array',
+              of: [
+                {
+                  type: 'string',
+                  options: {
+                    list: CREDIT_ROLES.map((value) => ({ title: value, value })),
+                  },
+                },
+              ],
+              options: { layout: 'grid' },
+              description: 'Tick everything this person did — e.g. Inker and Letterer.',
+              validation: (rule) => rule.required().min(1).unique(),
             }),
             defineField({
               name: 'creator',
@@ -105,13 +119,13 @@ export default defineType({
             }),
           preview: {
             select: {
-              role: 'role',
+              roles: 'roles',
               name: 'name',
               creatorName: 'creator.name',
             },
-            prepare: ({ role, name, creatorName }) => ({
+            prepare: ({ roles, name, creatorName }) => ({
               title: creatorName || name || 'Unnamed',
-              subtitle: role,
+              subtitle: Array.isArray(roles) ? roles.join(', ') : undefined,
             }),
           },
         },

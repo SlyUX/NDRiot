@@ -507,6 +507,7 @@ export type TableCostLevel = (typeof TABLE_COST_LEVELS)[number]["value"];
  */
 export const CREDIT_ROLES = [
   "Writer",
+  "Conceptual",
   "Artist",
   "Penciller",
   "Inker",

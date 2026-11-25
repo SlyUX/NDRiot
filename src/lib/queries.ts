@@ -52,7 +52,7 @@ export const CREATOR_QUERY =
 export const CREATOR_COLLABORATIONS_QUERY =
   defineQuery(`*[_type=="book" && creator._ref != $creatorId && count(credits[creator._ref==$creatorId && confirmed==true]) > 0]|order(title asc){
   _id,title,"slug":slug.current,status,genres,format,maturityRating,cover{...,"lqip":asset->metadata.lqip},"descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name,
-  "roles": credits[creator._ref==$creatorId && confirmed==true].role
+  "roles": array::unique(credits[creator._ref==$creatorId && confirmed==true].roles[])
 }`);
 // A creator's convention appearances (separate docs), venue resolved — for the
 // profile Events row. The caller filters to upcoming by forDate/venue dates.
@@ -160,9 +160,9 @@ export const BOOK_QUERY =
   links[]{kind,label,url,endDate,"expired": defined(endDate) && dateTime(endDate + "T23:59:59Z") < dateTime(now())},
   "fundingUrl": links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,
   "creatorId": creator._ref,
-  creatorRole,
+  creatorRoles,
   creator->{name,"slug":slug.current,place,photo,"bioText":pt::text(bio),studio->{name}},
-  credits[]{role,name,confirmed,"creator":creator->{name,"slug":slug.current}},
+  credits[]{roles,name,confirmed,"creator":creator->{name,"slug":slug.current}},
   "otherBooks": *[_type=="book" && _id != ^._id && creator._ref == ^.creator._ref]|order(title asc){
     _id,title,"slug":slug.current,status,genres,format,maturityRating,cover{...,"lqip":asset->metadata.lqip},
     "descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name

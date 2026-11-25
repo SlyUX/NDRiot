@@ -19,11 +19,11 @@ export function BookCredits({ credits }: { credits: BookCredit[] }) {
         const slug = credit.creator?.slug;
         return (
           <li
-            key={`${credit.role}-${name}-${index}`}
+            key={`${name}-${index}`}
             className="flex items-baseline justify-between gap-4 py-2"
           >
             <span className="text-muted-foreground text-xs font-bold tracking-wide uppercase">
-              {credit.role}
+              {credit.roles?.join(", ")}
             </span>
             {slug ? (
               <Link
