@@ -223,6 +223,7 @@ export async function submitBook(
   )
   const credits = buildBookCredits(
     formData.getAll('creditRoles').map(String),
+    formData.getAll('creditNote').map(String),
     formData.getAll('creditCreatorId').map(String),
     formData.getAll('creditName').map(String),
     CREDIT_ROLES,

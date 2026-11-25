@@ -162,7 +162,7 @@ export const BOOK_QUERY =
   "creatorId": creator._ref,
   creatorRoles,
   creator->{name,"slug":slug.current,place,photo,"bioText":pt::text(bio),studio->{name}},
-  credits[]{_key,roles,name,confirmed,"creator":creator->{name,"slug":slug.current}},
+  credits[]{_key,roles,note,name,confirmed,"creator":creator->{name,"slug":slug.current}},
   "otherBooks": *[_type=="book" && _id != ^._id && creator._ref == ^.creator._ref]|order(title asc){
     _id,title,"slug":slug.current,status,genres,format,maturityRating,cover{...,"lqip":asset->metadata.lqip},
     "descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name
@@ -783,7 +783,7 @@ export const INTAKE_BOOK_EDIT_QUERY =
   cover,"coverAlt":cover.alt,
   previewUrl,
   creatorRoles,
-  credits[]{roles,confirmed,name,"creatorId":creator._ref,"creatorName":creator->name},
+  credits[]{roles,note,confirmed,name,"creatorId":creator._ref,"creatorName":creator->name},
   links[]{kind,label,url,endDate},
   videos[]{title,url}
 }`);

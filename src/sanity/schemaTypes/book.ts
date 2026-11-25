@@ -82,6 +82,14 @@ export default defineType({
               validation: (rule) => rule.required().min(1).unique(),
             }),
             defineField({
+              name: 'note',
+              title: 'Note',
+              type: 'string',
+              description:
+                'Optional detail shown after the role — e.g. “covers”, “issues 1–3”, “chapter 2”. Keep it short.',
+              validation: (rule) => rule.max(80),
+            }),
+            defineField({
               name: 'creator',
               title: 'ND Riot creator',
               type: 'reference',
@@ -120,13 +128,17 @@ export default defineType({
           preview: {
             select: {
               roles: 'roles',
+              note: 'note',
               name: 'name',
               creatorName: 'creator.name',
             },
-            prepare: ({ roles, name, creatorName }) => ({
-              title: creatorName || name || 'Unnamed',
-              subtitle: Array.isArray(roles) ? roles.join(', ') : undefined,
-            }),
+            prepare: ({ roles, note, name, creatorName }) => {
+              const roleText = Array.isArray(roles) ? roles.join(', ') : ''
+              return {
+                title: creatorName || name || 'Unnamed',
+                subtitle: [roleText, note].filter(Boolean).join(' · ') || undefined,
+              }
+            },
           },
         },
       ],

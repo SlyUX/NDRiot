@@ -56,6 +56,7 @@ type EditBook = {
   credits:
     | {
         roles: string[] | null
+        note: string | null
         confirmed: boolean | null
         name: string | null
         creatorId: string | null
@@ -86,6 +87,7 @@ function toInitial(b: EditBook): BookIntakeInitial {
     creatorRoles: b.creatorRoles ?? [],
     credits: (b.credits ?? []).map<CreditInitial>((c) => ({
       roles: c.roles ?? [],
+      note: c.note ?? '',
       creatorId: c.creatorId ?? '',
       creatorName: c.creatorName ?? '',
       name: c.name ?? '',

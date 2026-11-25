@@ -70,6 +70,7 @@ export interface CreatorPickerItem {
 /** One prefilled collaborator credit when editing an existing comic. */
 export interface CreditInitial {
   roles: string[]
+  note: string
   creatorId: string
   creatorName: string
   name: string
@@ -303,15 +304,22 @@ function CreditsField({
   allCreators: CreatorPickerItem[]
   initial?: CreditInitial[]
 }) {
-  type Row = { key: number; roles: string[]; creatorId: string; text: string }
+  type Row = {
+    key: number
+    roles: string[]
+    note: string
+    creatorId: string
+    text: string
+  }
   const [rows, setRows] = useState<Row[]>(() =>
     (initial && initial.length
       ? initial.map((c) => ({
           roles: c.roles,
+          note: c.note,
           creatorId: c.creatorId,
           text: c.creatorId ? c.creatorName : c.name,
         }))
-      : [{ roles: [], creatorId: '', text: '' }]
+      : [{ roles: [], note: '', creatorId: '', text: '' }]
     ).map((r, i) => ({ ...r, key: i })),
   )
   // Which row's suggestion list is open (only one at a time).
@@ -319,7 +327,10 @@ function CreditsField({
 
   const nextKey = (prev: Row[]) => prev.reduce((m, r) => Math.max(m, r.key), -1) + 1
   const addRow = () =>
-    setRows((prev) => [...prev, { key: nextKey(prev), roles: [], creatorId: '', text: '' }])
+    setRows((prev) => [
+      ...prev,
+      { key: nextKey(prev), roles: [], note: '', creatorId: '', text: '' },
+    ])
   const removeRow = (key: number) =>
     setRows((prev) => (prev.length > 1 ? prev.filter((r) => r.key !== key) : prev))
   const patch = (key: number, next: Partial<Row>) =>
@@ -369,6 +380,16 @@ function CreditsField({
                   )
                 })}
               </div>
+              {/* Optional detail shown after the role(s) — e.g. "covers". */}
+              <input
+                type="text"
+                value={row.note}
+                onChange={(e) => patch(row.key, { note: e.target.value })}
+                placeholder={copy.creditNotePlaceholder}
+                aria-label={copy.creditNotePlaceholder}
+                maxLength={80}
+                className={fieldClass}
+              />
               {/* Person: typeahead over creators, or a free-typed name. */}
               <div className="relative flex gap-2">
                 <div className="flex-1">
@@ -427,6 +448,7 @@ function CreditsField({
               </div>
               {/* Parallel arrays — always emitted so row indices line up. */}
               <input type="hidden" name="creditRoles" value={row.roles.join(',')} />
+              <input type="hidden" name="creditNote" value={row.note} />
               <input type="hidden" name="creditCreatorId" value={row.creatorId} />
               <input
                 type="hidden"

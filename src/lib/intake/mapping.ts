@@ -191,6 +191,7 @@ export type BookCredit = {
   _key: string
   roles: string[]
   confirmed: boolean
+  note?: string
   creator?: { _type: 'reference'; _ref: string }
   name?: string
 }
@@ -209,13 +210,14 @@ export type BookCredit = {
  */
 export function buildBookCredits(
   rolesRaw: string[],
+  notes: string[],
   creatorIds: string[],
   names: string[],
   roleVocab: readonly string[],
   alreadyConfirmed: ReadonlySet<string>,
 ): BookCredit[] {
   const out: BookCredit[] = []
-  const rows = Math.max(rolesRaw.length, creatorIds.length, names.length)
+  const rows = Math.max(rolesRaw.length, notes.length, creatorIds.length, names.length)
   for (let r = 0; r < rows; r += 1) {
     const roles = Array.from(
       new Set(
@@ -226,24 +228,19 @@ export function buildBookCredits(
       ),
     )
     if (roles.length === 0) continue
+    const note = (notes[r] ?? '').trim().slice(0, 80)
     const creatorId = (creatorIds[r] ?? '').trim()
     const name = (names[r] ?? '').trim()
+    const base = { _type: 'bookCredit' as const, _key: `credit${out.length}`, roles }
     if (creatorId) {
       out.push({
-        _type: 'bookCredit',
-        _key: `credit${out.length}`,
-        roles,
+        ...base,
         confirmed: alreadyConfirmed.has(creatorId),
         creator: { _type: 'reference', _ref: creatorId },
+        ...(note ? { note } : {}),
       })
     } else if (name) {
-      out.push({
-        _type: 'bookCredit',
-        _key: `credit${out.length}`,
-        roles,
-        confirmed: true,
-        name: name.slice(0, 120),
-      })
+      out.push({ ...base, confirmed: true, name: name.slice(0, 120), ...(note ? { note } : {}) })
     }
   }
   return out

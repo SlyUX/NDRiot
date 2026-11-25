@@ -40,6 +40,9 @@ export function BookCredits({
           >
             <span className="text-muted-foreground text-xs font-bold tracking-wide uppercase">
               {credit.roles?.join(", ")}
+              {credit.note && (
+                <span className="font-normal normal-case"> · {credit.note}</span>
+              )}
             </span>
             <span className="flex flex-col items-end gap-1 text-right">
               {slug ? (

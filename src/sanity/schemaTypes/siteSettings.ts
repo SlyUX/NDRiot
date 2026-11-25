@@ -3504,6 +3504,11 @@ export default defineType({
           type: "string",
         }),
         defineField({
+          name: "creditNotePlaceholder",
+          title: "Credits — per-person note placeholder",
+          type: "string",
+        }),
+        defineField({
           name: "creditPersonPlaceholder",
           title: "Credits — person search/name placeholder",
           type: "string",

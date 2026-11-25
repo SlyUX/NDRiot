@@ -6066,6 +6066,13 @@
                 },
                 "optional": false
               },
+              "note": {
+                "type": "objectAttribute",
+                "value": {
+                  "type": "string"
+                },
+                "optional": true
+              },
               "creator": {
                 "type": "objectAttribute",
                 "value": {
@@ -12619,6 +12626,13 @@
               "optional": true
             },
             "creditRolesLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "creditNotePlaceholder": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

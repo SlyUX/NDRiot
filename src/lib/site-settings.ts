@@ -247,6 +247,7 @@ export type BookIntakeSettings = {
   creditsLabel: string;
   creditsHint: string;
   creditRolesLabel: string;
+  creditNotePlaceholder: string;
   creditPersonPlaceholder: string;
   creditLinkedHint: string;
   creditAddLabel: string;
@@ -1559,6 +1560,7 @@ const DEFAULTS: SiteSettings = {
     creditsHint:
       "Everyone else who worked on it — writer, artist, letterer, and so on. Tick each person’s roles, then link their ND Riot creator or type a name.",
     creditRolesLabel: "Role(s)",
+    creditNotePlaceholder: "Note — e.g. covers (optional)",
     creditPersonPlaceholder: "Search creators, or type a name",
     creditLinkedHint:
       "Linked creators show on their own profile once they confirm the credit.",
