@@ -1752,6 +1752,7 @@ export type SiteSettings = {
     updateEditSubmit?: string;
     profileOwnerEditLabel?: string;
     mediaOwnerEditLabel?: string;
+    comicOwnerEditLabel?: string;
     profileManageUpdatesLabel?: string;
     creatorWorksHeading?: string;
     creatorOrganizationsHeading?: string;

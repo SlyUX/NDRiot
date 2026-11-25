@@ -11100,6 +11100,13 @@
               },
               "optional": true
             },
+            "comicOwnerEditLabel": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
             "profileManageUpdatesLabel": {
               "type": "objectAttribute",
               "value": {

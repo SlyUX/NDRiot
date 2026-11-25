@@ -2377,6 +2377,13 @@ export default defineType({
             'Owner-only shortcut atop a media outlet\'s page → its edit form (outlet management lives here now, not the dashboard) — e.g. "Edit your Outlet".',
         }),
         defineField({
+          name: "comicOwnerEditLabel",
+          title: "Comic page — owner edit chip",
+          type: "string",
+          description:
+            'The owner-only Edit chip over a comic\'s cover → its edit form — e.g. "Edit Comic".',
+        }),
+        defineField({
           name: "profileManageUpdatesLabel",
           title: "Creator page — owner “manage updates” link",
           type: "string",

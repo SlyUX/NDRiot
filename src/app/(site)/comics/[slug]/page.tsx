@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, SquarePen } from "lucide-react";
 
 import { AlternatingSections } from "@/components/alternating-sections";
 import BookLinks from "@/components/book-links";
@@ -188,6 +189,19 @@ export default async function BookPage({
                 )}
               </div>
               {book.fundingUrl && <FundingBadge url={book.fundingUrl} />}
+              {/* Owner-only edit chip over the cover — mirrors the creator
+                  avatar's chip (same pink SquarePen affordance, same
+                  destination pattern). Bottom-left clears the top funding
+                  badge. */}
+              {isOwner && (
+                <Link
+                  href={`/join/comics?editing=${encodeURIComponent(book._id)}`}
+                  className="focus-visible:ring-ring bg-primary text-primary-foreground hover:bg-primary/85 absolute bottom-0 left-0 inline-flex items-center gap-1.5 px-2.5 py-2 text-xs font-normal shadow-lg ring-1 ring-black/25 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                >
+                  <SquarePen aria-hidden="true" className="size-4" />
+                  {settings.sections.comicOwnerEditLabel}
+                </Link>
+              )}
             </div>
 
             {/* Preview is the primary call to action — pink, full width under the

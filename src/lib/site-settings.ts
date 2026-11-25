@@ -978,6 +978,8 @@ export interface SiteSettings {
     updateEditSubmit: string;
     profileOwnerEditLabel: string;
     mediaOwnerEditLabel: string;
+    /** Owner-only edit chip over a comic's cover. */
+    comicOwnerEditLabel: string;
     /** Owner-only link beside their profile's updates → the editable "Your Updates" on the dashboard. */
     profileManageUpdatesLabel: string;
     creatorWorksHeading: string;
@@ -2120,6 +2122,7 @@ const DEFAULTS: SiteSettings = {
     updateEditSubmit: "Save changes",
     profileOwnerEditLabel: "Edit Profile",
     mediaOwnerEditLabel: "Edit your Outlet",
+    comicOwnerEditLabel: "Edit Comic",
     profileManageUpdatesLabel: "Manage on your dashboard",
     creatorWorksHeading: "Where to find {name}’s work",
     creatorOrganizationsHeading: "Member of",
