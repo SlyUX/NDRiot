@@ -326,7 +326,13 @@ export default async function BookPage({
                     layout="horizontal"
                     summaryLines={4}
                   />
-                  <BookCredits credits={book.credits ?? []} />
+                  <BookCredits
+                    credits={book.credits ?? []}
+                    isOwner={isOwner}
+                    bookId={book._id}
+                    claimLinkLabel={settings.sections.creditClaimLinkLabel}
+                    claimCopiedLabel={settings.sections.creditClaimCopiedLabel}
+                  />
                 </div>
               </div>
             )}

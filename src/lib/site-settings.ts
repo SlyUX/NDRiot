@@ -991,6 +991,21 @@ export interface SiteSettings {
     followCosignHint: string;
     otherBooksHeading: string;
     bookCreatorsHeading: string;
+    /** Owner-only control beside a plain-name credit → generates its claim link. */
+    creditClaimLinkLabel: string;
+    creditClaimCopiedLabel: string;
+    /** The /claim/[token] page — a collaborator claiming a credit. */
+    claimHeading: string;
+    /** Tokens: {roles}, {title}. */
+    claimBody: string;
+    claimSignIn: string;
+    claimNeedProfile: string;
+    claimCreateProfile: string;
+    /** Token: {name}. */
+    claimButton: string;
+    claimInvalid: string;
+    claimAlready: string;
+    claimDone: string;
     bookVideosHeading: string;
     editorialAuthorHeading: string;
     openToCollaborationLabel: string;
@@ -2113,6 +2128,18 @@ const DEFAULTS: SiteSettings = {
     followCosignHint: "When two creators fave each other, it becomes a public Cosign — shown on both profiles.",
     otherBooksHeading: "Other comics by {name}",
     bookCreatorsHeading: "Comic Creators:",
+    creditClaimLinkLabel: "Invite to claim",
+    creditClaimCopiedLabel: "Link copied",
+    claimHeading: "Claim your credit",
+    claimBody: "You’ve been credited as {roles} on {title}. Claim it and it shows on your creator profile.",
+    claimSignIn: "Sign in to claim",
+    claimNeedProfile:
+      "You’ll need a creator profile first. Create one, then open this link again.",
+    claimCreateProfile: "Create your profile",
+    claimButton: "Claim as {name}",
+    claimInvalid: "This claim link is no longer valid.",
+    claimAlready: "This credit has already been claimed.",
+    claimDone: "Claimed — it’s on your profile now.",
     bookVideosHeading: "Videos",
     editorialAuthorHeading: "Author:",
     openToCollaborationLabel: "Open to collaboration",

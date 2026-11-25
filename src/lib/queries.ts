@@ -162,7 +162,7 @@ export const BOOK_QUERY =
   "creatorId": creator._ref,
   creatorRoles,
   creator->{name,"slug":slug.current,place,photo,"bioText":pt::text(bio),studio->{name}},
-  credits[]{roles,name,confirmed,"creator":creator->{name,"slug":slug.current}},
+  credits[]{_key,roles,name,confirmed,"creator":creator->{name,"slug":slug.current}},
   "otherBooks": *[_type=="book" && _id != ^._id && creator._ref == ^.creator._ref]|order(title asc){
     _id,title,"slug":slug.current,status,genres,format,maturityRating,cover{...,"lqip":asset->metadata.lqip},
     "descriptionText":pt::text(description),"fundingUrl":links[kind=="Back" && (!defined(endDate) || dateTime(endDate+"T23:59:59Z")>dateTime(now()))][0].url,"creatorName":creator->name
@@ -809,6 +809,17 @@ export const CREDIT_INBOX_QUERY =
 /** Count of comics awaiting a credit confirmation from these creators — nav badge. */
 export const CREDIT_INBOX_COUNT_QUERY = defineQuery(
   `count(*[_type=="book" && count(credits[creator._ref in $ids && confirmed != true]) > 0])`,
+);
+
+/** Public context for the /claim/[token] page: the comic + inviter names. */
+export const CLAIM_CONTEXT_QUERY = defineQuery(`{
+  "book": *[_id==$bookId][0]{title,"slug":slug.current},
+  "inviter": *[_id==$inviterId][0]{name}
+}`);
+
+/** A single creator's display name, by id — for the claim button label. */
+export const CREATOR_NAME_QUERY = defineQuery(
+  `*[_type=="creator" && _id==$id][0]{name,"slug":slug.current}`,
 );
 
 /* ----------------------------------------------------------------- media */

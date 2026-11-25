@@ -2486,6 +2486,47 @@ export default defineType({
             'Above the creator card on a book page, e.g. "Creators:".',
         }),
         defineField({
+          name: "creditClaimLinkLabel",
+          title: "Credit — owner “invite to claim” label",
+          type: "string",
+        }),
+        defineField({
+          name: "creditClaimCopiedLabel",
+          title: "Credit — claim link “copied” label",
+          type: "string",
+        }),
+        defineField({
+          name: "claimHeading",
+          title: "Claim page — heading",
+          type: "string",
+        }),
+        defineField({
+          name: "claimBody",
+          title: "Claim page — body (tokens {roles}, {title})",
+          type: "text",
+          rows: 2,
+        }),
+        defineField({ name: "claimSignIn", title: "Claim page — sign-in button", type: "string" }),
+        defineField({
+          name: "claimNeedProfile",
+          title: "Claim page — needs a profile first",
+          type: "text",
+          rows: 2,
+        }),
+        defineField({
+          name: "claimCreateProfile",
+          title: "Claim page — create-profile link",
+          type: "string",
+        }),
+        defineField({
+          name: "claimButton",
+          title: "Claim page — claim button (token {name})",
+          type: "string",
+        }),
+        defineField({ name: "claimInvalid", title: "Claim page — invalid link", type: "string" }),
+        defineField({ name: "claimAlready", title: "Claim page — already claimed", type: "string" }),
+        defineField({ name: "claimDone", title: "Claim page — success", type: "string" }),
+        defineField({
           name: "bookVideosHeading",
           title: "Book page — videos section heading",
           type: "string",
