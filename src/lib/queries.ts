@@ -794,6 +794,23 @@ export const ALL_CREATORS_PICKER_QUERY = defineQuery(
   `*[_type=="creator" && defined(slug.current)]|order(name asc){_id,name}`,
 );
 
+/** The credit-confirmation inbox: comics carrying an UNCONFIRMED credit that
+ *  links one of the viewer's creator ids. One entry per comic (confirm/decline
+ *  acts on all the viewer's unconfirmed credits on it). Reads the public book —
+ *  an unconfirmed credit already shows on the comic's own page, just not the
+ *  creator's profile, so there's no PII here. */
+export const CREDIT_INBOX_QUERY =
+  defineQuery(`*[_type=="book" && count(credits[creator._ref in $ids && confirmed != true]) > 0]|order(title asc){
+  _id,title,"slug":slug.current,cover{...,"lqip":asset->metadata.lqip},
+  "ownerName":creator->name,"ownerSlug":creator->slug.current,
+  "roles":array::unique(credits[creator._ref in $ids && confirmed != true].roles[])
+}`);
+
+/** Count of comics awaiting a credit confirmation from these creators — nav badge. */
+export const CREDIT_INBOX_COUNT_QUERY = defineQuery(
+  `count(*[_type=="book" && count(credits[creator._ref in $ids && confirmed != true]) > 0])`,
+);
+
 /* ----------------------------------------------------------------- media */
 
 /** Media outlets, for the /media card listing — alphabetical, unranked (§3). */

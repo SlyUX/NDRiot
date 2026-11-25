@@ -11,6 +11,10 @@ import {
   type IncomingCollab,
   type SentCollab,
 } from "@/components/collab-requests";
+import {
+  CreditInbox,
+  type CreditInboxItem,
+} from "@/components/credit-requests";
 import { CollabInfoTooltip } from "@/components/collab-info-tooltip";
 import { type IncomingMessageRequest } from "@/components/message-requests";
 import {
@@ -61,6 +65,7 @@ import {
   UPDATES_FEED_QUERY,
   APPEARANCE_FEED_QUERY,
   COLLAB_CREATORS_QUERY,
+  CREDIT_INBOX_QUERY,
 } from "@/lib/queries";
 import { appearanceToFeedItem, mergeFeed } from "@/lib/feed-mappers";
 import { getSiteSettings } from "@/lib/site-settings";
@@ -304,6 +309,18 @@ export default async function AccountPage({
       : [];
   const followers =
     v === "bunker" && isCreator ? await followerCount(ownedCreatorIds) : 0;
+
+  // Credit confirmations (Network/Comms view) — comics that credit one of your
+  // creators and await your OK. Public book reads (an unconfirmed credit already
+  // shows on the comic page), keyed by your owned creator ids.
+  const creditInbox =
+    v === "network" && isCreator
+      ? await safeFetch<CreditInboxItem[]>(
+          CREDIT_INBOX_QUERY,
+          { ids: ownedCreatorIds },
+          [],
+        )
+      : [];
 
   // Collaboration requests — incoming (respond) + sent (status). Creator-only;
   // the private request docs resolve to public identities via COLLAB_CREATORS_QUERY.
@@ -735,6 +752,7 @@ export default async function AccountPage({
       action: <CollabInfoTooltip text={settings.collab.incomingIntro} />,
       content: (
         <div className="space-y-8">
+          <CreditInbox items={creditInbox} copy={settings.collab} />
           {collabConversations.length > 0 && (
             <MessageThreads
               incoming={[]}

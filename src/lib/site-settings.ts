@@ -410,6 +410,12 @@ export type CollabSettings = {
   sentRespondedPrefix: string;
   sentEmpty: string;
   viewAllRequestsLabel: string;
+  /** Credit confirmations — comics someone credited you on, awaiting your OK. */
+  creditsHeading: string;
+  creditsIntro: string;
+  creditVerb: string;
+  creditConfirmLabel: string;
+  creditDeclineLabel: string;
 }
 
 /** Creator-to-creator messaging — the Chat Request button + dialog. Parallel to
@@ -1697,6 +1703,12 @@ const DEFAULTS: SiteSettings = {
     sentRespondedPrefix: "They responded:",
     sentEmpty: "You haven’t sent any collaboration requests yet.",
     viewAllRequestsLabel: "View all requests",
+    creditsHeading: "Credits awaiting you",
+    creditsIntro:
+      "Creators have credited you on their comics. Confirm to show it on your profile, or decline to remove it.",
+    creditVerb: "credited you as",
+    creditConfirmLabel: "Confirm",
+    creditDeclineLabel: "Decline",
   },
   messaging: {
     requestButtonLabel: "Chat Request",

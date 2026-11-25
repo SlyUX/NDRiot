@@ -1357,6 +1357,11 @@ export type SiteSettings = {
     sentRespondedPrefix?: string;
     sentEmpty?: string;
     viewAllRequestsLabel?: string;
+    creditsHeading?: string;
+    creditsIntro?: string;
+    creditVerb?: string;
+    creditConfirmLabel?: string;
+    creditDeclineLabel?: string;
   };
   messaging?: {
     requestButtonLabel?: string;
@@ -5087,6 +5092,44 @@ export type ALL_CREATORS_PICKER_QUERY_RESULT = Array<{
 }>;
 
 // Source: src/lib/queries.ts
+// Variable: CREDIT_INBOX_QUERY
+// Query: *[_type=="book" && count(credits[creator._ref in $ids && confirmed != true]) > 0]|order(title asc){  _id,title,"slug":slug.current,cover{...,"lqip":asset->metadata.lqip},  "ownerName":creator->name,"ownerSlug":creator->slug.current,  "roles":array::unique(credits[creator._ref in $ids && confirmed != true].roles[])}
+export type CREDIT_INBOX_QUERY_RESULT = Array<{
+  _id: string;
+  title: string;
+  slug: string;
+  cover: {
+    _type: "imageWithAlt";
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    lqip: string | null;
+  } | null;
+  ownerName: string;
+  ownerSlug: string;
+  roles: Array<
+    | "Artist"
+    | "Colorist"
+    | "Conceptual"
+    | "Cover Artist"
+    | "Designer"
+    | "Editor"
+    | "Inker"
+    | "Letterer"
+    | "Penciller"
+    | "Translator"
+    | "Writer"
+  > | null;
+}>;
+
+// Source: src/lib/queries.ts
+// Variable: CREDIT_INBOX_COUNT_QUERY
+// Query: count(*[_type=="book" && count(credits[creator._ref in $ids && confirmed != true]) > 0])
+export type CREDIT_INBOX_COUNT_QUERY_RESULT = number;
+
+// Source: src/lib/queries.ts
 // Variable: MEDIA_QUERY
 // Query: *[_type=="media" && defined(slug.current)]|order(name asc){    _id,name,"slug":slug.current,kinds,logo,about,genresCovered  }
 export type MEDIA_QUERY_RESULT = Array<{
@@ -5521,6 +5564,8 @@ declare module "@sanity/client" {
     '*[_type=="strip"]._id': INTAKE_STRIP_IDS_QUERY_RESULT;
     '*[_type=="book" && creator._ref in $ids && defined(slug.current)]|order(title asc){\n    _id,title,"creatorName":creator->name\n  }': INTAKE_OWNED_BOOKS_QUERY_RESULT;
     '*[_type=="book" && _id==$id][0]{\n  _id,title,"slug":slug.current,\n  "creatorId":creator._ref,\n  genres,format,maturityRating,coverIsMature,status,issueCount,\n  shortDescription,\n  "descriptionText":pt::text(description),\n  cover,"coverAlt":cover.alt,\n  previewUrl,\n  creatorRoles,\n  credits[]{roles,confirmed,name,"creatorId":creator._ref,"creatorName":creator->name},\n  links[]{kind,label,url,endDate},\n  videos[]{title,url}\n}': INTAKE_BOOK_EDIT_QUERY_RESULT;
+    '*[_type=="book" && count(credits[creator._ref in $ids && confirmed != true]) > 0]|order(title asc){\n  _id,title,"slug":slug.current,cover{...,"lqip":asset->metadata.lqip},\n  "ownerName":creator->name,"ownerSlug":creator->slug.current,\n  "roles":array::unique(credits[creator._ref in $ids && confirmed != true].roles[])\n}': CREDIT_INBOX_QUERY_RESULT;
+    'count(*[_type=="book" && count(credits[creator._ref in $ids && confirmed != true]) > 0])': CREDIT_INBOX_COUNT_QUERY_RESULT;
     '*[_type=="media" && defined(slug.current)]|order(name asc){\n    _id,name,"slug":slug.current,kinds,logo,about,genresCovered\n  }': MEDIA_QUERY_RESULT;
     '*[_type=="media" && slug.current==$slug][0]{\n  _id,name,kinds,logo,about,genresCovered,pitchInfo,feedUrl,feedConsent,\n  links[]{label,url}\n}': MEDIA_DETAIL_QUERY_RESULT;
     '*[_type=="media"]._id': INTAKE_MEDIA_IDS_QUERY_RESULT;

@@ -676,6 +676,11 @@ export default defineType({
         defineField({ name: "sentRespondedPrefix", title: "/me — sent, prefix before their reply", type: "string" }),
         defineField({ name: "sentEmpty", title: "/me — no sent requests", type: "string" }),
         defineField({ name: "viewAllRequestsLabel", title: "/me — view all (older) requests link", type: "string" }),
+        defineField({ name: "creditsHeading", title: "/me — credit confirmations heading", type: "string" }),
+        defineField({ name: "creditsIntro", title: "/me — credit confirmations intro", type: "text", rows: 2 }),
+        defineField({ name: "creditVerb", title: "/me — credit “credited you as” verb", type: "string" }),
+        defineField({ name: "creditConfirmLabel", title: "/me — credit confirm button", type: "string" }),
+        defineField({ name: "creditDeclineLabel", title: "/me — credit decline button", type: "string" }),
       ],
     }),
 

@@ -16,6 +16,7 @@ import {
   RESOURCE_CATEGORIES_WITH_CONTENT_QUERY,
   CREATOR_HERO_QUERY,
   RAG_OPEN_SUBMISSIONS_QUERY,
+  CREDIT_INBOX_COUNT_QUERY,
 } from "@/lib/queries";
 import type { RagOpenSubmission } from "@/lib/types";
 import { creatorsOwnedBy } from "@/sanity/ownership-client";
@@ -93,13 +94,15 @@ export default async function SiteLayout({
       if (profile?.photo) {
         avatar = urlFor(profile.photo).width(96).height(96).fit("crop").url();
       }
-      const [pendingMsgs, pendingCollabs, unread, forum] = await Promise.all([
-        pendingRequestCount(owned[0]),
-        pendingCollabCount(owned[0]),
-        unreadThreadCount(owned[0]),
-        forumUnreadCount(owned[0]),
-      ]);
-      pendingActions = pendingMsgs + pendingCollabs + unread;
+      const [pendingMsgs, pendingCollabs, unread, forum, pendingCredits] =
+        await Promise.all([
+          pendingRequestCount(owned[0]),
+          pendingCollabCount(owned[0]),
+          unreadThreadCount(owned[0]),
+          forumUnreadCount(owned[0]),
+          safeFetch<number>(CREDIT_INBOX_COUNT_QUERY, { ids: owned }, 0),
+        ]);
+      pendingActions = pendingMsgs + pendingCollabs + unread + pendingCredits;
       forumUnread = forum;
     }
   }
