@@ -782,9 +782,17 @@ export const INTAKE_BOOK_EDIT_QUERY =
   "descriptionText":pt::text(description),
   cover,"coverAlt":cover.alt,
   previewUrl,
+  creatorRoles,
+  credits[]{roles,confirmed,name,"creatorId":creator._ref,"creatorName":creator->name},
   links[]{kind,label,url,endDate},
   videos[]{title,url}
 }`);
+
+/** All creators for the credits typeahead — public names only, alphabetical.
+ *  No PII; the public directory already exposes these. */
+export const ALL_CREATORS_PICKER_QUERY = defineQuery(
+  `*[_type=="creator" && defined(slug.current)]|order(name asc){_id,name}`,
+);
 
 /* ----------------------------------------------------------------- media */
 

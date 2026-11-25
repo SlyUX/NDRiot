@@ -242,6 +242,14 @@ export type BookIntakeSettings = {
   videoTitlePlaceholder: string;
   videoUrlPlaceholder: string;
   videoAddLabel: string;
+  ownerRolesLabel: string;
+  ownerRolesHint: string;
+  creditsLabel: string;
+  creditsHint: string;
+  creditRolesLabel: string;
+  creditPersonPlaceholder: string;
+  creditLinkedHint: string;
+  creditAddLabel: string;
   permissionStatement: string;
   anythingElseLabel: string;
   submitLabel: string;
@@ -1521,6 +1529,17 @@ const DEFAULTS: SiteSettings = {
     videoTitlePlaceholder: "Label (e.g. Book trailer)",
     videoUrlPlaceholder: "YouTube URL",
     videoAddLabel: "Add another video",
+    ownerRolesLabel: "Your role(s)",
+    ownerRolesHint:
+      "What you did on this comic — tick all that apply. Shown beside your name.",
+    creditsLabel: "Credits",
+    creditsHint:
+      "Everyone else who worked on it — writer, artist, letterer, and so on. Tick each person’s roles, then link their ND Riot creator or type a name.",
+    creditRolesLabel: "Role(s)",
+    creditPersonPlaceholder: "Search creators, or type a name",
+    creditLinkedHint:
+      "Linked creators show on their own profile once they confirm the credit.",
+    creditAddLabel: "Add another credit",
     permissionStatement:
       "I own or have permission to share this cover and description, and ND Riot can use them to list this comic.",
     anythingElseLabel: "Anything else?",

@@ -3424,6 +3424,49 @@ export default defineType({
           type: "string",
         }),
         defineField({
+          name: "ownerRolesLabel",
+          title: "Credits — owner’s-role label",
+          type: "string",
+        }),
+        defineField({
+          name: "ownerRolesHint",
+          title: "Credits — owner’s-role hint",
+          type: "text",
+          rows: 2,
+        }),
+        defineField({
+          name: "creditsLabel",
+          title: "Credits — section label",
+          type: "string",
+        }),
+        defineField({
+          name: "creditsHint",
+          title: "Credits — section hint",
+          type: "text",
+          rows: 2,
+        }),
+        defineField({
+          name: "creditRolesLabel",
+          title: "Credits — per-person role label",
+          type: "string",
+        }),
+        defineField({
+          name: "creditPersonPlaceholder",
+          title: "Credits — person search/name placeholder",
+          type: "string",
+        }),
+        defineField({
+          name: "creditLinkedHint",
+          title: "Credits — linked-creator confirmation note",
+          type: "text",
+          rows: 2,
+        }),
+        defineField({
+          name: "creditAddLabel",
+          title: "Credits — add-row label",
+          type: "string",
+        }),
+        defineField({
           name: "permissionStatement",
           title: "Permission checkbox statement",
           type: "text",

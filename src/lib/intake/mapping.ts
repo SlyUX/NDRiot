@@ -186,6 +186,69 @@ export type BookVideo = {
   url: string
 }
 
+export type BookCredit = {
+  _type: 'bookCredit'
+  _key: string
+  roles: string[]
+  confirmed: boolean
+  creator?: { _type: 'reference'; _ref: string }
+  name?: string
+}
+
+/**
+ * Zip the parallel credit rows from the intake form into `bookCredit` items.
+ * Each row carries a comma-joined role list plus EITHER a linked creator id OR a
+ * plain name (a linked creator wins). Roles are validated against the vocab and
+ * de-duped; a row with no valid role, or with neither creator nor name, drops.
+ *
+ * `confirmed` is server-authoritative, never taken from the client: a linked
+ * credit is confirmed only if that creator was ALREADY confirmed on this book
+ * (`alreadyConfirmed`) — a new owner-added link starts unconfirmed, so it can't
+ * reach the collaborator's profile until they say so. A plain-name credit has no
+ * profile to appear on, so nothing is gated and it's stored confirmed.
+ */
+export function buildBookCredits(
+  rolesRaw: string[],
+  creatorIds: string[],
+  names: string[],
+  roleVocab: readonly string[],
+  alreadyConfirmed: ReadonlySet<string>,
+): BookCredit[] {
+  const out: BookCredit[] = []
+  const rows = Math.max(rolesRaw.length, creatorIds.length, names.length)
+  for (let r = 0; r < rows; r += 1) {
+    const roles = Array.from(
+      new Set(
+        (rolesRaw[r] ?? '')
+          .split(',')
+          .map((s) => s.trim())
+          .filter((s) => roleVocab.includes(s)),
+      ),
+    )
+    if (roles.length === 0) continue
+    const creatorId = (creatorIds[r] ?? '').trim()
+    const name = (names[r] ?? '').trim()
+    if (creatorId) {
+      out.push({
+        _type: 'bookCredit',
+        _key: `credit${out.length}`,
+        roles,
+        confirmed: alreadyConfirmed.has(creatorId),
+        creator: { _type: 'reference', _ref: creatorId },
+      })
+    } else if (name) {
+      out.push({
+        _type: 'bookCredit',
+        _key: `credit${out.length}`,
+        roles,
+        confirmed: true,
+        name: name.slice(0, 120),
+      })
+    }
+  }
+  return out
+}
+
 /**
  * Zip the parallel title/URL arrays from the intake form's Videos rows into
  * `bookVideo` items. Keeps only YouTube-recognizable URLs (nothing else embeds)

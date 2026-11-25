@@ -7,6 +7,8 @@ import {
   BookIntakeForm,
   type BookIntakeInitial,
   type BookPickerItem,
+  type CreatorPickerItem,
+  type CreditInitial,
   type OwnedCreator,
 } from '@/components/book-intake-form'
 import { TheDeal } from '@/components/the-deal'
@@ -16,6 +18,7 @@ import {
   INTAKE_OWNED_CREATORS_QUERY,
   INTAKE_OWNED_BOOKS_QUERY,
   INTAKE_BOOK_EDIT_QUERY,
+  ALL_CREATORS_PICKER_QUERY,
 } from '@/lib/queries'
 import { getSiteSettings } from '@/lib/site-settings'
 import type { SanityImage } from '@/lib/types'
@@ -49,6 +52,16 @@ type EditBook = {
   cover: SanityImage | null
   coverAlt: string | null
   previewUrl: string | null
+  creatorRoles: string[] | null
+  credits:
+    | {
+        roles: string[] | null
+        confirmed: boolean | null
+        name: string | null
+        creatorId: string | null
+        creatorName: string | null
+      }[]
+    | null
   links: { kind: string | null; label: string | null; url: string | null; endDate: string | null }[] | null
   videos: { title: string | null; url: string | null }[] | null
 }
@@ -70,6 +83,13 @@ function toInitial(b: EditBook): BookIntakeInitial {
     cover: b.cover ?? null,
     coverAlt: b.coverAlt ?? '',
     previewUrl: b.previewUrl ?? '',
+    creatorRoles: b.creatorRoles ?? [],
+    credits: (b.credits ?? []).map<CreditInitial>((c) => ({
+      roles: c.roles ?? [],
+      creatorId: c.creatorId ?? '',
+      creatorName: c.creatorName ?? '',
+      name: c.name ?? '',
+    })),
     links: (b.links ?? []).map((l) => ({
       kind: l.kind ?? '',
       label: l.label ?? '',
@@ -139,9 +159,10 @@ export default async function BooksIntakePage({
     )
   }
 
-  const [creators, books] = await Promise.all([
+  const [creators, books, allCreators] = await Promise.all([
     safeFetch<OwnedCreator[]>(INTAKE_OWNED_CREATORS_QUERY, { ids: ownedIds }, []),
     safeFetch<BookPickerItem[]>(INTAKE_OWNED_BOOKS_QUERY, { ids: ownedIds }, []),
+    safeFetch<CreatorPickerItem[]>(ALL_CREATORS_PICKER_QUERY, {}, []),
   ])
 
   // Editing is allowed only for a book among your own (INTAKE_OWNED_BOOKS_QUERY
@@ -178,6 +199,7 @@ export default async function BooksIntakePage({
           common={common}
           reviewNotice={settings.reviewNotice}
           creators={creators}
+          allCreators={allCreators}
           books={books}
           initial={initial}
         />

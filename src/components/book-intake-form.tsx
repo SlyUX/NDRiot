@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { ALLOWED_IMAGE_TYPES, MAX_PICK_BYTES, downscaleImage } from '@/lib/intake/downscale'
 import { slugify } from '@/lib/intake/mapping'
 import {
+  CREDIT_ROLES,
   GENRES,
   FORMATS,
   LINK_KINDS,
@@ -60,6 +61,20 @@ export interface OwnedCreator {
   name: string
 }
 
+/** Any creator, for the collaborator typeahead (public name only). */
+export interface CreatorPickerItem {
+  _id: string
+  name: string
+}
+
+/** One prefilled collaborator credit when editing an existing comic. */
+export interface CreditInitial {
+  roles: string[]
+  creatorId: string
+  creatorName: string
+  name: string
+}
+
 export interface BookIntakeInitial {
   updateId: string
   title: string
@@ -76,6 +91,8 @@ export interface BookIntakeInitial {
   cover: SanityImage | null
   coverAlt: string
   previewUrl: string
+  creatorRoles: string[]
+  credits: CreditInitial[]
   links: { kind: string; label: string; url: string; endDate: string }[]
   videos: { left: string; right: string }[]
 }
@@ -268,11 +285,175 @@ function BookLinksField({
   )
 }
 
+/**
+ * Collaborator credits. Each row is a set of role checkboxes plus one person —
+ * picked from the creator typeahead (a linked ND Riot creator) or typed free
+ * (a plain name for someone not on ND Riot). Submits parallel creditRoles /
+ * creditCreatorId / creditName arrays (always one of each per row, so they
+ * align) that the action zips; a linked pick wins over typed text.
+ */
+function CreditsField({
+  copy,
+  common,
+  allCreators,
+  initial,
+}: {
+  copy: BookIntakeSettings
+  common: CreatorIntakeSettings
+  allCreators: CreatorPickerItem[]
+  initial?: CreditInitial[]
+}) {
+  type Row = { key: number; roles: string[]; creatorId: string; text: string }
+  const [rows, setRows] = useState<Row[]>(() =>
+    (initial && initial.length
+      ? initial.map((c) => ({
+          roles: c.roles,
+          creatorId: c.creatorId,
+          text: c.creatorId ? c.creatorName : c.name,
+        }))
+      : [{ roles: [], creatorId: '', text: '' }]
+    ).map((r, i) => ({ ...r, key: i })),
+  )
+  // Which row's suggestion list is open (only one at a time).
+  const [openKey, setOpenKey] = useState<number | null>(null)
+
+  const nextKey = (prev: Row[]) => prev.reduce((m, r) => Math.max(m, r.key), -1) + 1
+  const addRow = () =>
+    setRows((prev) => [...prev, { key: nextKey(prev), roles: [], creatorId: '', text: '' }])
+  const removeRow = (key: number) =>
+    setRows((prev) => (prev.length > 1 ? prev.filter((r) => r.key !== key) : prev))
+  const patch = (key: number, next: Partial<Row>) =>
+    setRows((prev) => prev.map((r) => (r.key === key ? { ...r, ...next } : r)))
+  const toggleRole = (key: number, role: string, on: boolean) =>
+    setRows((prev) =>
+      prev.map((r) =>
+        r.key === key
+          ? { ...r, roles: on ? [...r.roles, role] : r.roles.filter((x) => x !== role) }
+          : r,
+      ),
+    )
+
+  return (
+    <fieldset className="space-y-3">
+      <legend className={labelClass}>
+        {copy.creditsLabel}
+        <Optional label={common.optionalLabel} />
+      </legend>
+      <p className={hintClass}>{copy.creditsHint}</p>
+      <div className="space-y-4">
+        {rows.map((row) => {
+          const q = row.text.trim().toLowerCase()
+          const matches =
+            openKey === row.key && !row.creatorId && q.length > 0
+              ? allCreators.filter((c) => c.name.toLowerCase().includes(q)).slice(0, 8)
+              : []
+          return (
+            <div key={row.key} className="space-y-2 border-l border-white/10 pl-3">
+              {/* Role checkboxes — multi-select, no cap. */}
+              <span className="text-muted-foreground text-xs tracking-widest uppercase">
+                {copy.creditRolesLabel}
+              </span>
+              <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+                {CREDIT_ROLES.map((role) => {
+                  const checked = row.roles.includes(role)
+                  return (
+                    <label key={role} className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={(e) => toggleRole(row.key, role, e.target.checked)}
+                        className="size-4 accent-[var(--primary)]"
+                      />
+                      {role}
+                    </label>
+                  )
+                })}
+              </div>
+              {/* Person: typeahead over creators, or a free-typed name. */}
+              <div className="relative flex gap-2">
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    value={row.text}
+                    onChange={(e) =>
+                      patch(row.key, { text: e.target.value, creatorId: '' })
+                    }
+                    onFocus={() => setOpenKey(row.key)}
+                    onBlur={() =>
+                      setOpenKey((k) => {
+                        // Delay so a suggestion click (onMouseDown) lands first.
+                        setTimeout(() => setOpenKey((cur) => (cur === row.key ? null : cur)), 150)
+                        return k
+                      })
+                    }
+                    placeholder={copy.creditPersonPlaceholder}
+                    aria-label={copy.creditPersonPlaceholder}
+                    autoComplete="off"
+                    className={fieldClass}
+                  />
+                  {row.creatorId && (
+                    <p className="text-primary mt-1 text-xs">✓ {copy.creditLinkedHint}</p>
+                  )}
+                  {matches.length > 0 && (
+                    <ul className="border-primary/30 bg-background absolute z-10 mt-1 max-h-48 w-full divide-y divide-white/10 overflow-y-auto border">
+                      {matches.map((c) => (
+                        <li key={c._id}>
+                          <button
+                            type="button"
+                            onMouseDown={(e) => {
+                              e.preventDefault()
+                              patch(row.key, { creatorId: c._id, text: c.name })
+                              setOpenKey(null)
+                            }}
+                            className="hover:bg-primary/10 hover:text-primary focus-visible:bg-primary/10 block w-full px-3 py-2 text-left text-sm focus-visible:outline-none"
+                          >
+                            {c.name}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                {rows.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeRow(row.key)}
+                    aria-label={common.workRemoveLabel}
+                    className="text-muted-foreground hover:text-primary focus-visible:ring-ring h-9 shrink-0 px-2 focus-visible:ring-2 focus-visible:outline-none"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+              {/* Parallel arrays — always emitted so row indices line up. */}
+              <input type="hidden" name="creditRoles" value={row.roles.join(',')} />
+              <input type="hidden" name="creditCreatorId" value={row.creatorId} />
+              <input
+                type="hidden"
+                name="creditName"
+                value={row.creatorId ? '' : row.text.trim()}
+              />
+            </div>
+          )
+        })}
+      </div>
+      <button
+        type="button"
+        onClick={addRow}
+        className="text-primary focus-visible:ring-ring text-xs font-semibold tracking-widest uppercase focus-visible:ring-2 focus-visible:outline-none"
+      >
+        + {copy.creditAddLabel}
+      </button>
+    </fieldset>
+  )
+}
+
 export function BookIntakeForm({
   copy,
   common,
   reviewNotice,
   creators,
+  allCreators,
   books,
   initial,
 }: {
@@ -280,6 +461,7 @@ export function BookIntakeForm({
   common: CreatorIntakeSettings
   reviewNotice: ReviewNoticeSettings
   creators: OwnedCreator[]
+  allCreators: CreatorPickerItem[]
   books: BookPickerItem[]
   initial?: BookIntakeInitial
 }) {
@@ -464,7 +646,52 @@ export function BookIntakeForm({
               {errors.creator && <p className="text-destructive text-xs">{errors.creator}</p>}
             </div>
           )}
+
+          {/* Owner's own role(s) — always visible; it's about the person
+              posting. Uncontrolled checkboxes (no cap), prefilled on edit. */}
+          <fieldset className="space-y-2">
+            <legend className={labelClass}>
+              {copy.ownerRolesLabel}
+              <Optional label={common.optionalLabel} />
+            </legend>
+            <p className={hintClass}>{copy.ownerRolesHint}</p>
+            <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+              {CREDIT_ROLES.map((role) => (
+                <label key={role} className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    name="creatorRoles"
+                    value={role}
+                    defaultChecked={initial?.creatorRoles?.includes(role) ?? false}
+                    className="size-4 accent-[var(--primary)]"
+                  />
+                  {role}
+                </label>
+              ))}
+            </div>
+          </fieldset>
         </fieldset>
+
+        {/* Collaborators — optional, collapsed unless the comic already has
+            some. The whole credits editor; a linked creator shows on their own
+            profile only after they confirm (noted in-row). */}
+        <details className="group border-border border" open={(initial?.credits?.length ?? 0) > 0}>
+          <summary className="text-primary flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-black tracking-widest uppercase">
+            {copy.creditsLabel}
+            <ChevronDown
+              aria-hidden="true"
+              className="size-4 transition-transform group-open:rotate-180 motion-reduce:transition-none"
+            />
+          </summary>
+          <div className="border-border border-t p-4">
+            <CreditsField
+              copy={copy}
+              common={common}
+              allCreators={allCreators}
+              initial={initial?.credits}
+            />
+          </div>
+        </details>
 
         {/* — Classification — */}
         <fieldset className="space-y-5">

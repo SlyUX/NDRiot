@@ -1,6 +1,7 @@
 'use server'
 
 import {
+  CREDIT_ROLES,
   GENRES,
   FORMATS,
   LINK_KINDS,
@@ -10,6 +11,7 @@ import {
 } from '@/lib/taxonomy'
 import { honeypotTripped, rateLimited, submittedTooFast } from '@/lib/intake/anti-spam'
 import {
+  buildBookCredits,
   buildLinks,
   buildVideos,
   isYes,
@@ -41,6 +43,13 @@ import { getWriteClient } from '@/sanity/write-client'
  */
 
 type FieldName = 'title' | 'creator' | 'permission' | 'maturityRating'
+
+type BookTarget = {
+  _id: string
+  slug?: string
+  creatorId?: string
+  existingCredits?: { creatorRef?: string; confirmed?: boolean }[]
+}
 
 export type BookIntakeState = {
   status: 'idle' | 'success' | 'error'
@@ -131,11 +140,11 @@ export async function submitBook(
 
   // Update target: the book must exist and belong to a creator this email owns.
   const submittedUpdateId = String(formData.get('updateId') ?? '').trim()
-  let target: { _id: string; slug?: string; creatorId?: string } | null = null
+  let target: BookTarget | null = null
   if (submittedUpdateId) {
     try {
-      target = await client.fetch<typeof target>(
-        `*[_type=="book" && _id==$id][0]{_id,"slug":slug.current,"creatorId":creator._ref}`,
+      target = await client.fetch<BookTarget | null>(
+        `*[_type=="book" && _id==$id][0]{_id,"slug":slug.current,"creatorId":creator._ref,"existingCredits":credits[]{"creatorRef":creator._ref,confirmed}}`,
         { id: submittedUpdateId },
       )
     } catch (cause) {
@@ -198,6 +207,28 @@ export async function submitBook(
     formData.getAll('videoUrl').map(String),
   )
 
+  // The owner's own role(s) on this comic (multi-select).
+  const creatorRoles = matchTaxonomy(
+    formData.getAll('creatorRoles').map(String),
+    CREDIT_ROLES,
+  ).matched
+
+  // Collaborator credits. Linked credits start unconfirmed unless this book
+  // already confirmed that creator — the owner can't self-confirm a credit onto
+  // someone else's profile (see buildBookCredits).
+  const alreadyConfirmed = new Set(
+    (target?.existingCredits ?? [])
+      .filter((c) => c.confirmed === true && c.creatorRef)
+      .map((c) => c.creatorRef as string),
+  )
+  const credits = buildBookCredits(
+    formData.getAll('creditRoles').map(String),
+    formData.getAll('creditCreatorId').map(String),
+    formData.getAll('creditName').map(String),
+    CREDIT_ROLES,
+    alreadyConfirmed,
+  )
+
   const previewUrl = normalizeUrl(values.previewUrl)
 
   const slug = isUpdate
@@ -235,6 +266,11 @@ export async function submitBook(
   if (values.description) fields.description = toPortableText(values.description)
   if (links.length) fields.links = links
   if (videos.length) fields.videos = videos
+  // Credits/roles come from controls the form always renders, so they're set
+  // unconditionally (not the "blank never wipes" rule the free-text fields use)
+  // — otherwise removing a collaborator or clearing a role couldn't take effect.
+  fields.creatorRoles = creatorRoles
+  if (formData.has('creditCreatorId')) fields.credits = credits
   if (previewUrl) fields.previewUrl = previewUrl
   if (coverAssetId) {
     fields.cover = {

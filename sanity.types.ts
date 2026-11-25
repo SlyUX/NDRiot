@@ -1948,6 +1948,14 @@ export type SiteSettings = {
     videoTitlePlaceholder?: string;
     videoUrlPlaceholder?: string;
     videoAddLabel?: string;
+    ownerRolesLabel?: string;
+    ownerRolesHint?: string;
+    creditsLabel?: string;
+    creditsHint?: string;
+    creditRolesLabel?: string;
+    creditPersonPlaceholder?: string;
+    creditLinkedHint?: string;
+    creditAddLabel?: string;
     permissionStatement?: string;
     anythingElseLabel?: string;
     submitLabel?: string;
@@ -4984,7 +4992,7 @@ export type INTAKE_OWNED_BOOKS_QUERY_RESULT = Array<{
 
 // Source: src/lib/queries.ts
 // Variable: INTAKE_BOOK_EDIT_QUERY
-// Query: *[_type=="book" && _id==$id][0]{  _id,title,"slug":slug.current,  "creatorId":creator._ref,  genres,format,maturityRating,coverIsMature,status,issueCount,  shortDescription,  "descriptionText":pt::text(description),  cover,"coverAlt":cover.alt,  previewUrl,  links[]{kind,label,url,endDate},  videos[]{title,url}}
+// Query: *[_type=="book" && _id==$id][0]{  _id,title,"slug":slug.current,  "creatorId":creator._ref,  genres,format,maturityRating,coverIsMature,status,issueCount,  shortDescription,  "descriptionText":pt::text(description),  cover,"coverAlt":cover.alt,  previewUrl,  creatorRoles,  credits[]{roles,confirmed,name,"creatorId":creator._ref,"creatorName":creator->name},  links[]{kind,label,url,endDate},  videos[]{title,url}}
 export type INTAKE_BOOK_EDIT_QUERY_RESULT = {
   _id: string;
   title: string;
@@ -5026,6 +5034,38 @@ export type INTAKE_BOOK_EDIT_QUERY_RESULT = {
   cover: ImageWithAlt | null;
   coverAlt: string | null;
   previewUrl: string | null;
+  creatorRoles: Array<
+    | "Artist"
+    | "Colorist"
+    | "Conceptual"
+    | "Cover Artist"
+    | "Designer"
+    | "Editor"
+    | "Inker"
+    | "Letterer"
+    | "Penciller"
+    | "Translator"
+    | "Writer"
+  > | null;
+  credits: Array<{
+    roles: Array<
+      | "Artist"
+      | "Colorist"
+      | "Conceptual"
+      | "Cover Artist"
+      | "Designer"
+      | "Editor"
+      | "Inker"
+      | "Letterer"
+      | "Penciller"
+      | "Translator"
+      | "Writer"
+    >;
+    confirmed: boolean | null;
+    name: string | null;
+    creatorId: string | null;
+    creatorName: string | null;
+  }> | null;
   links: Array<{
     kind: "Back" | "Buy" | "Read free" | "Support";
     label: string | null;
@@ -5037,6 +5077,14 @@ export type INTAKE_BOOK_EDIT_QUERY_RESULT = {
     url: string;
   }> | null;
 } | null;
+
+// Source: src/lib/queries.ts
+// Variable: ALL_CREATORS_PICKER_QUERY
+// Query: *[_type=="creator" && defined(slug.current)]|order(name asc){_id,name}
+export type ALL_CREATORS_PICKER_QUERY_RESULT = Array<{
+  _id: string;
+  name: string;
+}>;
 
 // Source: src/lib/queries.ts
 // Variable: MEDIA_QUERY
@@ -5465,13 +5513,14 @@ declare module "@sanity/client" {
     '*[_type=="organization" && defined(name)]|order(name asc){_id,name}': INTAKE_ORGANIZATIONS_QUERY_RESULT;
     '*[_type=="creator" && defined(studio)].studio._ref': INTAKE_STUDIO_ORG_IDS_QUERY_RESULT;
     '*[_type=="creator"]._id': INTAKE_CREATOR_IDS_QUERY_RESULT;
-    '*[_type=="creator" && defined(slug.current)]|order(name asc){_id,name}': INTAKE_CREATORS_QUERY_RESULT;
+    '*[_type=="creator" && defined(slug.current)]|order(name asc){_id,name}':
+      INTAKE_CREATORS_QUERY_RESULT | ALL_CREATORS_PICKER_QUERY_RESULT;
     '*[_type=="creator" && _id in $ids && defined(slug.current)]|order(name asc){_id,name}': INTAKE_OWNED_CREATORS_QUERY_RESULT;
     '*[_type=="creator" && _id==$id][0]{\n  _id,name,"slug":slug.current,place,website,feedUrl,\n  "bioText":pt::text(bio),\n  socials[]{platform,url},\n  works[]{label,url},\n  genres,formats,openToCollaboration,\n  photo,"photoAlt":photo.alt,\n  "studioId":studio._ref,\n  "studioName":studio->name,\n  "studioWebsite":studio->website,\n  "studioLogo":studio->logo,\n  "orgIds":organizations[]._ref\n}': INTAKE_CREATOR_EDIT_QUERY_RESULT;
     '*[_type=="book"]._id': INTAKE_BOOK_IDS_QUERY_RESULT;
     '*[_type=="strip"]._id': INTAKE_STRIP_IDS_QUERY_RESULT;
     '*[_type=="book" && creator._ref in $ids && defined(slug.current)]|order(title asc){\n    _id,title,"creatorName":creator->name\n  }': INTAKE_OWNED_BOOKS_QUERY_RESULT;
-    '*[_type=="book" && _id==$id][0]{\n  _id,title,"slug":slug.current,\n  "creatorId":creator._ref,\n  genres,format,maturityRating,coverIsMature,status,issueCount,\n  shortDescription,\n  "descriptionText":pt::text(description),\n  cover,"coverAlt":cover.alt,\n  previewUrl,\n  links[]{kind,label,url,endDate},\n  videos[]{title,url}\n}': INTAKE_BOOK_EDIT_QUERY_RESULT;
+    '*[_type=="book" && _id==$id][0]{\n  _id,title,"slug":slug.current,\n  "creatorId":creator._ref,\n  genres,format,maturityRating,coverIsMature,status,issueCount,\n  shortDescription,\n  "descriptionText":pt::text(description),\n  cover,"coverAlt":cover.alt,\n  previewUrl,\n  creatorRoles,\n  credits[]{roles,confirmed,name,"creatorId":creator._ref,"creatorName":creator->name},\n  links[]{kind,label,url,endDate},\n  videos[]{title,url}\n}': INTAKE_BOOK_EDIT_QUERY_RESULT;
     '*[_type=="media" && defined(slug.current)]|order(name asc){\n    _id,name,"slug":slug.current,kinds,logo,about,genresCovered\n  }': MEDIA_QUERY_RESULT;
     '*[_type=="media" && slug.current==$slug][0]{\n  _id,name,kinds,logo,about,genresCovered,pitchInfo,feedUrl,feedConsent,\n  links[]{label,url}\n}': MEDIA_DETAIL_QUERY_RESULT;
     '*[_type=="media"]._id': INTAKE_MEDIA_IDS_QUERY_RESULT;
