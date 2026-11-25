@@ -42,6 +42,7 @@ import {
   CREATOR_UPDATES_QUERY,
   CREATOR_APPEARANCES_QUERY,
   CREATOR_STRIPS_QUERY,
+  CREATOR_COLLABORATIONS_QUERY,
   SAVED_CREATORS_QUERY,
 } from "@/lib/queries";
 import { getSiteSettings } from "@/lib/site-settings";
@@ -53,6 +54,7 @@ import {
 } from "@/lib/structured-data";
 import type {
   CreatorAppearance,
+  CreatorCollaboration,
   CreatorDetail,
   CreatorSummary,
   StripSummary,
@@ -229,6 +231,14 @@ export default async function CreatorPage({
   const strips = await safeFetch<StripSummary[]>(
     CREATOR_STRIPS_QUERY,
     { id: creator._id },
+    [],
+  );
+
+  // Comics they're credited on but don't own (confirmed collaborator credits) —
+  // the reciprocal of a comic's Credits. Alphabetical, never ranked (§3).
+  const collaborations = await safeFetch<CreatorCollaboration[]>(
+    CREATOR_COLLABORATIONS_QUERY,
+    { creatorId: creator._id },
     [],
   );
 
@@ -496,6 +506,22 @@ export default async function CreatorPage({
             columns={5}
             padding="md"
             emptyMessage={settings.empty.books}
+          />
+        )}
+
+        {collaborations.length > 0 && (
+          <ContentCardGrid
+            heading={settings.sections.creatorCollaborationsHeading}
+            headingSize="sm"
+            cards={collaborations.map((collab) => ({
+              ...bookToCard(collab),
+              // Credit the role(s) they played, not the owner's name (§3: a
+              // factual credit, never a ranking signal).
+              eyebrow: collab.roles?.filter(Boolean).join(", ") || undefined,
+            }))}
+            columns={5}
+            padding="md"
+            emptyMessage=""
           />
         )}
 

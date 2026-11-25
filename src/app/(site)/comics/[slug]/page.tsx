@@ -5,6 +5,7 @@ import { ExternalLink } from "lucide-react";
 
 import { AlternatingSections } from "@/components/alternating-sections";
 import BookLinks from "@/components/book-links";
+import { BookCredits } from "@/components/book-credits";
 import { BookVideos } from "@/components/book-videos";
 import { youtubeId } from "@/components/video-embed";
 import {
@@ -112,7 +113,13 @@ export default async function BookPage({
           href: `/creators/${creator.slug}`,
           image: creator.photo,
           imageAlt: `Portrait of ${creator.name ?? "comic creator"}`,
-          eyebrow: creator.studio?.name ?? formatPlace(creator.place),
+          eyebrow:
+            [
+              book.creatorRole,
+              creator.studio?.name ?? formatPlace(creator.place),
+            ]
+              .filter(Boolean)
+              .join(" · ") || undefined,
           summary: truncate(creator.bioText, 160),
           aspectRatio: "square" as const,
         }
@@ -313,12 +320,13 @@ export default async function BookPage({
                 {/* A subtle keyline (the site's --border) with a 15px inset,
                   framing the creator apart from the book's own detail above it.
                   Square corners are the house style. */}
-                <div className="border-border border p-[15px]">
+                <div className="border-border space-y-4 border p-[15px]">
                   <ContentCard
                     {...creatorCard}
                     layout="horizontal"
                     summaryLines={4}
                   />
+                  <BookCredits credits={book.credits ?? []} />
                 </div>
               </div>
             )}

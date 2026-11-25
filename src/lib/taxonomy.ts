@@ -490,3 +490,32 @@ export const TABLE_COST_LEVELS = [
 ] as const;
 
 export type TableCostLevel = (typeof TABLE_COST_LEVELS)[number]["value"];
+
+/* ------------------------------------------------------------ credit roles */
+
+/**
+ * Who did what on a comic. Comics are collaborative by default — the single
+ * `creator` on a book is its OWNER/primary credit; these roles credit everyone
+ * else (writer, artist, letterer…) on the `credits` array, each either an ND
+ * Riot creator (linked) or a plain name.
+ *
+ * A fixed list, like genres/formats: the same role spelled two ways ("Colorist"
+ * vs "Colourist" — note the American spelling is the only one here) would split
+ * a person's credits across two labels. Ordered roughly by production pipeline,
+ * not importance — the schema never ranks collaborators. Add one when a real
+ * comic needs it, not in anticipation.
+ */
+export const CREDIT_ROLES = [
+  "Writer",
+  "Artist",
+  "Penciller",
+  "Inker",
+  "Colorist",
+  "Letterer",
+  "Cover Artist",
+  "Editor",
+  "Designer",
+  "Translator",
+] as const;
+
+export type CreditRole = (typeof CREDIT_ROLES)[number];

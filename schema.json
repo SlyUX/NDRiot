@@ -5947,6 +5947,156 @@
         },
         "optional": false
       },
+      "creatorRole": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "union",
+          "of": [
+            {
+              "type": "string",
+              "value": "Writer"
+            },
+            {
+              "type": "string",
+              "value": "Artist"
+            },
+            {
+              "type": "string",
+              "value": "Penciller"
+            },
+            {
+              "type": "string",
+              "value": "Inker"
+            },
+            {
+              "type": "string",
+              "value": "Colorist"
+            },
+            {
+              "type": "string",
+              "value": "Letterer"
+            },
+            {
+              "type": "string",
+              "value": "Cover Artist"
+            },
+            {
+              "type": "string",
+              "value": "Editor"
+            },
+            {
+              "type": "string",
+              "value": "Designer"
+            },
+            {
+              "type": "string",
+              "value": "Translator"
+            }
+          ]
+        },
+        "optional": true
+      },
+      "credits": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "array",
+          "of": {
+            "type": "object",
+            "attributes": {
+              "role": {
+                "type": "objectAttribute",
+                "value": {
+                  "type": "union",
+                  "of": [
+                    {
+                      "type": "string",
+                      "value": "Writer"
+                    },
+                    {
+                      "type": "string",
+                      "value": "Artist"
+                    },
+                    {
+                      "type": "string",
+                      "value": "Penciller"
+                    },
+                    {
+                      "type": "string",
+                      "value": "Inker"
+                    },
+                    {
+                      "type": "string",
+                      "value": "Colorist"
+                    },
+                    {
+                      "type": "string",
+                      "value": "Letterer"
+                    },
+                    {
+                      "type": "string",
+                      "value": "Cover Artist"
+                    },
+                    {
+                      "type": "string",
+                      "value": "Editor"
+                    },
+                    {
+                      "type": "string",
+                      "value": "Designer"
+                    },
+                    {
+                      "type": "string",
+                      "value": "Translator"
+                    }
+                  ]
+                },
+                "optional": false
+              },
+              "creator": {
+                "type": "objectAttribute",
+                "value": {
+                  "type": "inline",
+                  "name": "creator.reference"
+                },
+                "optional": true
+              },
+              "name": {
+                "type": "objectAttribute",
+                "value": {
+                  "type": "string"
+                },
+                "optional": true
+              },
+              "confirmed": {
+                "type": "objectAttribute",
+                "value": {
+                  "type": "boolean"
+                },
+                "optional": true
+              },
+              "_type": {
+                "type": "objectAttribute",
+                "value": {
+                  "type": "string",
+                  "value": "bookCredit"
+                }
+              }
+            },
+            "rest": {
+              "type": "object",
+              "attributes": {
+                "_key": {
+                  "type": "objectAttribute",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "optional": true
+      },
       "cover": {
         "type": "objectAttribute",
         "value": {
@@ -10825,6 +10975,13 @@
               "optional": true
             },
             "creatorBooksHeading": {
+              "type": "objectAttribute",
+              "value": {
+                "type": "string"
+              },
+              "optional": true
+            },
+            "creatorCollaborationsHeading": {
               "type": "objectAttribute",
               "value": {
                 "type": "string"

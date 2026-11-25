@@ -10,6 +10,7 @@ import type {
   CREATOR_APPEARANCES_QUERY_RESULT,
   OWNED_APPEARANCES_QUERY_RESULT,
   CREATOR_QUERY_RESULT,
+  CREATOR_COLLABORATIONS_QUERY_RESULT,
   COLLAB_CREATORS_QUERY_RESULT,
   DOWNLOADS_QUERY_RESULT,
   DOWNLOAD_QUERY_RESULT,
@@ -124,6 +125,10 @@ export type HomeNewItem = HOME_NEW_QUERY_RESULT[number];
 
 export type CreatorDetail = NonNullable<CREATOR_QUERY_RESULT>;
 export type BookDetail = NonNullable<BOOK_QUERY_RESULT>;
+/** One collaborator credit on a comic's detail page (role + linked creator or plain name). */
+export type BookCredit = NonNullable<BookDetail["credits"]>[number];
+/** A comic a creator is credited on but does not own — their profile's "also credited on" grid. */
+export type CreatorCollaboration = CREATOR_COLLABORATIONS_QUERY_RESULT[number];
 export type ColumnDetail = NonNullable<COLUMN_QUERY_RESULT>;
 export type InterviewDetail = NonNullable<INTERVIEW_QUERY_RESULT>;
 export type DownloadDetail = NonNullable<DOWNLOAD_QUERY_RESULT>;

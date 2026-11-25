@@ -2302,6 +2302,13 @@ export default defineType({
             'Use {name} for the creator’s first name — e.g. "{name}’s Books".',
         }),
         defineField({
+          name: "creatorCollaborationsHeading",
+          title: "Creator page — “also credited on” heading",
+          type: "string",
+          description:
+            "Heads the grid of comics this creator worked on but doesn’t own (confirmed collaborator credits). No {name} — it sits on their own profile.",
+        }),
+        defineField({
           name: "creatorStoresHeading",
           title: "Creator page — stores-that-carry heading",
           type: "string",

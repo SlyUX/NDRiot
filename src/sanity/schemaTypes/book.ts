@@ -1,6 +1,7 @@
 import { defineType, defineField } from 'sanity'
 
 import {
+  CREDIT_ROLES,
   FORMATS,
   FORMAT_DESCRIPTIONS,
   GENRES,
@@ -31,11 +32,90 @@ export default defineType({
     slugField('title', '/comics/your-slug'),
     defineField({
       name: 'creator',
-      title: 'Creator',
+      title: 'Owner (primary creator)',
       type: 'reference',
       to: [{ type: 'creator' }],
-      description: 'Who made it. They need a Creator profile first.',
+      description:
+        'Who owns this listing — the account that can edit it. They need a Creator profile first. Everyone ELSE who worked on the comic goes in “Credits” below.',
       validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: 'creatorRole',
+      title: 'Owner’s role',
+      type: 'string',
+      options: { list: CREDIT_ROLES.map((value) => ({ title: value, value })) },
+      description:
+        'What the owner did on this comic — e.g. Writer, or Writer & Artist (pick the primary one). Optional; shown beside their name in the credits.',
+    }),
+    defineField({
+      name: 'credits',
+      title: 'Credits (collaborators)',
+      type: 'array',
+      description:
+        'Everyone else who worked on the comic — writer, artist, letterer, colorist, and so on. Each is either an ND Riot creator (linked to their profile) or a plain name for someone not on ND Riot yet. The owner above is not repeated here.',
+      of: [
+        {
+          type: 'object',
+          name: 'bookCredit',
+          fields: [
+            defineField({
+              name: 'role',
+              title: 'Role',
+              type: 'string',
+              options: {
+                list: CREDIT_ROLES.map((value) => ({ title: value, value })),
+              },
+              validation: (rule) => rule.required(),
+            }),
+            defineField({
+              name: 'creator',
+              title: 'ND Riot creator',
+              type: 'reference',
+              to: [{ type: 'creator' }],
+              description:
+                'If this collaborator has an ND Riot profile, link it — the credit links to their page, and (once confirmed) the comic appears on their profile. Leave blank and use “Name” for someone not on ND Riot.',
+            }),
+            defineField({
+              name: 'name',
+              title: 'Name',
+              type: 'string',
+              description:
+                'For a collaborator with no ND Riot profile. Ignored when an ND Riot creator is linked above.',
+            }),
+            defineField({
+              name: 'confirmed',
+              title: 'Confirmed by the collaborator',
+              type: 'boolean',
+              initialValue: true,
+              description:
+                'A credit linking an ND Riot creator shows on THAT creator’s profile only when this is on. Admin-entered credits are trusted — leave on. The future owner-facing “add collaborator” flow will set this off until the collaborator confirms, so a credit can’t be put on someone’s profile without their say-so.',
+            }),
+          ],
+          validation: (rule) =>
+            rule.custom((credit) => {
+              const value = credit as
+                | { creator?: unknown; name?: string }
+                | undefined
+              if (!value) return true
+              const hasCreator = Boolean(value.creator)
+              const hasName = Boolean(value.name && value.name.trim())
+              return hasCreator || hasName
+                ? true
+                : 'Link an ND Riot creator or enter a name.'
+            }),
+          preview: {
+            select: {
+              role: 'role',
+              name: 'name',
+              creatorName: 'creator.name',
+            },
+            prepare: ({ role, name, creatorName }) => ({
+              title: creatorName || name || 'Unnamed',
+              subtitle: role,
+            }),
+          },
+        },
+      ],
     }),
     defineField({
       name: 'cover',

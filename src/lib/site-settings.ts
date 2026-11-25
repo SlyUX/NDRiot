@@ -950,6 +950,9 @@ export interface SiteSettings {
     navLoginLabel: string;
     navJoinLabel: string;
     creatorBooksHeading: string;
+    /** Heading on the profile's "comics this creator is credited on but doesn't
+     *  own" grid (the reciprocal of a comic's collaborator credits). */
+    creatorCollaborationsHeading: string;
     /** Heading on the profile's "stores that carry this creator's books" box.
      *  `{name}` → the creator's first name. */
     creatorStoresHeading: string;
@@ -2061,6 +2064,7 @@ const DEFAULTS: SiteSettings = {
     navLoginLabel: "Login",
     navJoinLabel: "Join",
     creatorBooksHeading: "{name}’s Comics",
+    creatorCollaborationsHeading: "Also credited on",
     creatorStoresHeading: "Spinner Racks",
     creatorUpdatesHeading: "{name}’s Updates",
     updateDeleteLabel: "Delete update",
