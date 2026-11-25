@@ -432,11 +432,6 @@ export type MessagingSettings = {
   /** Button states when a thread already exists. */
   sentLabel: string;
   activeLabel: string;
-  /** The hr-separated collaboration option, shown last when the target is open to it. */
-  collabPromptHeading: string;
-  collabPromptBody: string;
-  collabPromptCta: string;
-  backLabel: string;
   /** /me — incoming requests. */
   incomingHeading: string;
   incomingIntro: string;
@@ -1690,7 +1685,7 @@ const DEFAULTS: SiteSettings = {
     errorMessage: "That didn’t send. Try again in a moment.",
   },
   collab: {
-    requestButtonLabel: "Request to collaborate",
+    requestButtonLabel: "Suggest Collaboration",
     requestPendingLabel: "Request sent — awaiting a reply",
     requestRespondedPrefix: "They responded:",
     dialogTitle: "Request to collaborate with {name}",
@@ -1740,11 +1735,6 @@ const DEFAULTS: SiteSettings = {
     cancelLabel: "Cancel",
     sentLabel: "Request sent",
     activeLabel: "Open conversation",
-    collabPromptHeading: "Looking to collaborate?",
-    collabPromptBody:
-      "A collaboration request is different: a one-time, structured ask about working together — quick preset replies, and an email intro if they say yes. Not an ongoing chat.",
-    collabPromptCta: "Send a collaboration request instead",
-    backLabel: "← Back to message",
     incomingHeading: "Message requests",
     incomingIntro:
       "Creators who’d like to talk. Accept to open a conversation, or decline — no obligation, no wrong answer.",

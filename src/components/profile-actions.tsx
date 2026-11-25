@@ -3,8 +3,10 @@
 import { useState } from 'react'
 
 import { ChatRequestButton } from '@/components/chat-request-button'
+import { CollabRequestButton } from '@/components/collab-request-button'
 import { SaveButton } from '@/components/save-button'
 import type { CollabSettings, MessagingSettings } from '@/lib/site-settings'
+import type { CollabStatus } from '@/sanity/collab-client'
 
 type ThreadStatus = 'pending' | 'active' | 'declined' | 'closed' | 'blocked'
 
@@ -27,7 +29,9 @@ export function ProfileActions({
   collab,
   genres,
   threadStatus,
-  collabEligible,
+  collabOpen,
+  collabStatus,
+  collabResponse,
   dashboardHref,
 }: {
   creatorId: string
@@ -42,7 +46,11 @@ export function ProfileActions({
   collab: CollabSettings
   genres: readonly string[]
   threadStatus: ThreadStatus | null
-  collabEligible: boolean
+  /** The target is open to collaboration (drives the Suggest Collaboration button). */
+  collabOpen: boolean
+  /** An existing collab request's status/reply, or null — so the button becomes a status line. */
+  collabStatus: CollabStatus | null
+  collabResponse: string | null
   dashboardHref: string
 }) {
   const [chatOpen, setChatOpen] = useState(false)
@@ -70,13 +78,20 @@ export function ProfileActions({
             toId={creatorId}
             toName={creatorName}
             copy={messaging}
-            collabCopy={collab}
-            genres={genres}
             threadStatus={threadStatus}
-            collabEligible={collabEligible}
             dashboardHref={dashboardHref}
             open={chatOpen}
             onOpenChange={setChatOpen}
+          />
+        )}
+        {viewerIsCreator && collabOpen && (
+          <CollabRequestButton
+            toId={creatorId}
+            toName={creatorName}
+            genres={genres}
+            copy={collab}
+            status={collabStatus}
+            response={collabResponse}
           />
         )}
       </div>

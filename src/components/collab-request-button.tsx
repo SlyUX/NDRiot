@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Handshake } from 'lucide-react'
+import { Lightbulb } from 'lucide-react'
 
 import { requestCollab } from '@/app/actions/collab'
 import {
@@ -89,11 +89,14 @@ export function CollabRequestButton({
           type="button"
           className="border-primary/60 text-primary hover:bg-primary/10 focus-visible:ring-ring inline-flex items-center gap-1.5 border px-3 py-2 text-xs font-bold tracking-widest uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none"
         >
-          <Handshake aria-hidden="true" className="size-4" />
+          <Lightbulb aria-hidden="true" className="size-4" />
           {copy.requestButtonLabel}
         </button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg">
+      <DialogContent
+        className="max-w-lg"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <DialogTitle className="text-lg font-black tracking-tight uppercase">
           {copy.dialogTitle.replace(/\{name\}/g, toName)}
         </DialogTitle>

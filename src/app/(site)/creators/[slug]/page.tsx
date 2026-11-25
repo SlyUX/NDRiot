@@ -406,7 +406,12 @@ export default async function CreatorPage({
                 icon needed. Only for an explicit yes: `false` and "never
                 answered" both mean no badge, since claiming availability nobody
                 offered is worse than staying quiet. */}
-                  {creator.openToCollaboration && (
+                  {/* Open-to-collaboration signal. A signed-in creator who can act
+                      (viewerCreatorId) gets the Suggest Collaboration BUTTON in the
+                      actions row below instead — so the passive badge is shown to
+                      everyone else (the owner, readers, signed-out) to keep the
+                      public signal without doubling up (§2: say it once). */}
+                  {creator.openToCollaboration && !viewerCreatorId && (
                     <div className="mt-3">
                       <Badge
                         variant="outline"
@@ -446,9 +451,9 @@ export default async function CreatorPage({
                         collab={settings.collab}
                         genres={GENRES}
                         threadStatus={messageThread?.status ?? null}
-                        collabEligible={
-                          Boolean(creator.openToCollaboration) && !collab?.status
-                        }
+                        collabOpen={Boolean(creator.openToCollaboration)}
+                        collabStatus={collab?.status ?? null}
+                        collabResponse={collab?.response ?? null}
                         dashboardHref="/me"
                       />
                     )}

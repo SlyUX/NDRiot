@@ -1374,10 +1374,6 @@ export type SiteSettings = {
     cancelLabel?: string;
     sentLabel?: string;
     activeLabel?: string;
-    collabPromptHeading?: string;
-    collabPromptBody?: string;
-    collabPromptCta?: string;
-    backLabel?: string;
     incomingHeading?: string;
     incomingIntro?: string;
     incomingVerb?: string;
